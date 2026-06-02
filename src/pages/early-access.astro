@@ -213,6 +213,16 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
       </div>
 
       <form class="rh-card" name="early-access" method="POST" action="/api/early-access">
+        <div class="honeypot" aria-hidden="true">
+          <label for="website">Website</label>
+            <input
+              id="website"
+              name="website"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+            />
+        </div>
         <label class="rh-label" for="name">Name</label>
         <input class="rh-input" id="name" name="name" type="text" autocomplete="name" required />
 

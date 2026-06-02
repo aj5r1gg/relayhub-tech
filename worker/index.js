@@ -36,6 +36,12 @@ export default {
 async function handleEarlyAccessPost(request, env, url) {
   try {
     const form = await request.formData();
+    const website = cleanField(form.get("website"), 500);
+
+    if (website) {
+      console.warn("Early access honeypot triggered.");
+      return redirect(url, "/early-access?submitted=true");
+    }
 
     const name = cleanField(form.get("name"), 200);
     const email = cleanField(form.get("email"), 320);
