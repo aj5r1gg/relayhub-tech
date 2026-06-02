@@ -1,48 +1,52 @@
 ---
+const year = new Date().getFullYear();
 ---
 
 <footer class="rh-footer">
   <div class="rh-container rh-footer-grid">
     <div class="rh-footer-main">
       <a href="/" class="rh-footer-brand">RELAYHUB</a>
-      <p class="rh-footer-text">Local-first infrastructure for resilient communities.</p>
+
+      <p class="rh-footer-text">
+        Local-first infrastructure for resilient communities.
+      </p>
+
       <p class="rh-footer-small">
         RelayHub helps homes, groups, and communities communicate, coordinate,
-        recover, and remain connected without depending entirely on centralised systems.
+        recover, share knowledge, and remain connected without depending entirely
+        on centralised systems.
       </p>
     </div>
 
     <nav class="rh-footer-column" aria-label="Products">
       <h2 class="rh-footer-heading">Products</h2>
-      <a href="/products">Relay Home</a>
-      <a href="/products">Relay Radio</a>
-      <a href="/products">Relay Infrastructure</a>
+      <a href="/products">Products</a>
       <a href="/hardware">Hardware</a>
+      <a href="/relayos">RelayOS</a>
       <a href="/early-access">Early access</a>
     </nav>
 
-    <nav class="rh-footer-column" aria-label="Learn">
-      <h2 class="rh-footer-heading">Learn</h2>
+    <nav class="rh-footer-column" aria-label="Explore">
+      <h2 class="rh-footer-heading">Explore</h2>
       <a href="/how-it-works">How it works</a>
-      <a href="/docs">Documentation</a>
-      <a href="/support">Support</a>
-      <a href="/privacy">Privacy</a>
-    </nav>
-
-    <nav class="rh-footer-column" aria-label="Ecosystem">
-      <h2 class="rh-footer-heading">Ecosystem</h2>
-      <a href="/governance">Governance</a>
-      <a href="/relayos">RelayOS</a>
       <a href="/communities">Communities</a>
       <a href="/developers">Developers</a>
+      <a href="/docs">Documentation</a>
+    </nav>
+
+    <nav class="rh-footer-column" aria-label="Trust">
+      <h2 class="rh-footer-heading">Trust</h2>
+      <a href="/governance">Governance</a>
+      <a href="/support">Support</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/accessibility">Accessibility</a>
     </nav>
 
     <nav class="rh-footer-column" aria-label="Contact">
       <h2 class="rh-footer-heading">Contact</h2>
       <a href="mailto:hello@relayhub.tech">hello@relayhub.tech</a>
       <a href="/early-access">Register interest</a>
-      <a href="/support">Support coming soon</a>
-      <a href="#">Etsy store coming soon</a>
+      <a href="/terms">Terms</a>
     </nav>
   </div>
 
@@ -50,18 +54,20 @@
     <hr class="rh-footer-divider" />
 
     <div class="rh-footer-bottom">
-      <p>© {new Date().getFullYear()} RelayHub. All rights reserved.</p>
+      <p>© {year} RelayHub. All rights reserved.</p>
 
       <div class="rh-footer-legal">
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/accessibility">Accessibility</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
 
     <p class="rh-footer-disclaimer">
-      RelayHub is designed for local-first, resilient communication. It does not provide
-      perfect anonymity, guaranteed delivery, or universal emergency coverage.
+      RelayHub is designed for local-first, resilient communication. It does not
+      provide perfect anonymity, guaranteed delivery, universal emergency coverage,
+      or automatic protection from physical, network, radio, or trust-based risks.
     </p>
   </div>
 </footer>
