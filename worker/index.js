@@ -36,6 +36,22 @@ export default {
       return methodNotAllowed("GET, POST");
     }
 
+    if (url.pathname === "/api/admin/newsletter") {
+      if (request.method === "GET") {
+        return handleNewsletterAdminJson(request, env, url);
+      }
+
+      return methodNotAllowed("GET");
+    }
+
+    if (url.pathname === "/api/admin/newsletter.csv") {
+      if (request.method === "GET") {
+        return handleNewsletterAdminCsv(request, env, url);
+      }
+
+      return methodNotAllowed("GET");
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
@@ -164,6 +180,148 @@ async function handleContactPost(request, env, url) {
     console.error("Contact submission failed:", error);
     return redirect(url, "/contact?error=submission-failed");
   }
+}
+
+async function handleNewsletterAdminJson(request, env, url) {
+  if (!isAdminAuthorized(request, env, url)) {
+    return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
+  const q = cleanField(url.searchParams.get("q"), 200);
+  const query = buildNewsletterQuery(q, 50);
+
+  const total = await countNewsletterSignups(env, q);
+  const result = await env.RELAYHUB_DB.prepare(query.sql)
+    .bind(...query.bindings)
+    .all();
+
+  return jsonResponse({
+    total,
+    signups: result.results || [],
+  });
+}
+
+async function handleNewsletterAdminCsv(request, env, url) {
+  if (!isAdminAuthorized(request, env, url)) {
+    return textResponse("Unauthorized", 401);
+  }
+
+  const q = cleanField(url.searchParams.get("q"), 200);
+  const query = buildNewsletterQuery(q, 1000);
+
+  const result = await env.RELAYHUB_DB.prepare(query.sql)
+    .bind(...query.bindings)
+    .all();
+
+  const rows = result.results || [];
+  const csv = buildNewsletterCsv(rows);
+
+  return new Response(csv, {
+    status: 200,
+    headers: {
+      "content-type": "text/csv; charset=UTF-8",
+      "content-disposition": 'attachment; filename="relayhub-newsletter-signups.csv"',
+      "cache-control": "no-store",
+    },
+  });
+}
+
+function isAdminAuthorized(request, env, url) {
+  const expectedToken = env.RELAYHUB_ADMIN_TOKEN;
+
+  if (!expectedToken) {
+    console.error("RELAYHUB_ADMIN_TOKEN is not configured.");
+    return false;
+  }
+
+  const authHeader = request.headers.get("Authorization") || "";
+  const bearerPrefix = "Bearer ";
+
+  if (authHeader.startsWith(bearerPrefix)) {
+    const suppliedToken = authHeader.slice(bearerPrefix.length).trim();
+    return suppliedToken === expectedToken;
+  }
+
+  const queryToken = url.searchParams.get("token");
+
+  if (queryToken) {
+    return queryToken === expectedToken;
+  }
+
+  return false;
+}
+
+function buildNewsletterQuery(q, limit) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 1000);
+
+  if (!q) {
+    return {
+      sql: `SELECT id, created_at, name, email, community, message
+            FROM early_access_signups
+            ORDER BY id DESC
+            LIMIT ?`,
+      bindings: [safeLimit],
+    };
+  }
+
+  const pattern = `%${q}%`;
+
+  return {
+    sql: `SELECT id, created_at, name, email, community, message
+          FROM early_access_signups
+          WHERE name LIKE ?
+             OR email LIKE ?
+             OR community LIKE ?
+             OR message LIKE ?
+          ORDER BY id DESC
+          LIMIT ?`,
+    bindings: [pattern, pattern, pattern, pattern, safeLimit],
+  };
+}
+
+async function countNewsletterSignups(env, q) {
+  if (!q) {
+    const result = await env.RELAYHUB_DB.prepare(
+      `SELECT COUNT(*) AS total FROM early_access_signups`
+    ).first();
+
+    return result?.total || 0;
+  }
+
+  const pattern = `%${q}%`;
+
+  const result = await env.RELAYHUB_DB.prepare(
+    `SELECT COUNT(*) AS total
+     FROM early_access_signups
+     WHERE name LIKE ?
+        OR email LIKE ?
+        OR community LIKE ?
+        OR message LIKE ?`
+  )
+    .bind(pattern, pattern, pattern, pattern)
+    .first();
+
+  return result?.total || 0;
+}
+
+function buildNewsletterCsv(rows) {
+  const headers = ["id", "created_at", "name", "email", "community", "message"];
+
+  const lines = [
+    headers.join(","),
+    ...rows.map((row) =>
+      headers.map((header) => csvEscape(row[header] ?? "")).join(",")
+    ),
+  ];
+
+  return `${lines.join("\r\n")}\r\n`;
+}
+
+function csvEscape(value) {
+  const text = String(value);
+  const escaped = text.replace(/"/g, '""');
+
+  return `"${escaped}"`;
 }
 
 async function storeSignup(env, signup) {
@@ -300,11 +458,22 @@ function getClientIp(request) {
   );
 }
 
-function textResponse(message) {
+function textResponse(message, status = 200) {
   return new Response(message, {
-    status: 200,
+    status,
     headers: {
       "content-type": "text/plain; charset=UTF-8",
+      "cache-control": "no-store",
+    },
+  });
+}
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "content-type": "application/json; charset=UTF-8",
+      "cache-control": "no-store",
     },
   });
 }

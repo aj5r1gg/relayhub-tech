@@ -1,0 +1,253 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const nowItems = [
+  "Public website foundation",
+  "Early access registration",
+  "Contact form",
+  "D1 signup storage",
+  "Cloudflare Email Routing",
+  "Privacy-preserving analytics",
+  "FAQ and concept pages",
+  "Core RelayHub positioning",
+];
+
+const nextItems = [
+  "Roadmap and public documentation expansion",
+  "Community directory concept refinement",
+  "Marketplace concept refinement",
+  "Product page deepening",
+  "Hardware class pages",
+  "RelayOS interface concept pages",
+  "Developer documentation outline",
+  "Validation and recovery explanations",
+];
+
+const futureItems = [
+  "Relay Home product pathway",
+  "Relay Infrastructure product pathway",
+  "Relay Radio product pathway",
+  "RelayOS local web UI",
+  "Community directory service",
+  "Marketplace coordination service",
+  "Knowledge and bulletin-board services",
+  "Voluntary federation tools",
+];
+
+const researchItems = [
+  "Reticulum appliance usability",
+  "NixOS-based reproducible node builds",
+  "Offline-first onboarding",
+  "Trust and reachability workflows",
+  "DTN and store-and-forward behaviour",
+  "Radio legality and regional policy",
+  "Recovery-first product design",
+  "Community governance and federation models",
+];
+---
+
+<BaseLayout
+  title="Roadmap | RelayHub"
+  description="Explore the public RelayHub roadmap across current work, next priorities, future capabilities, and research areas for local-first resilient community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Roadmap</p>
+
+      <h1 class="rh-title">
+        Where RelayHub is heading.
+      </h1>
+
+      <p class="rh-subtitle">
+        A public view of current work, near-term priorities, future capabilities,
+        and research areas. This roadmap shows direction, not guaranteed release
+        dates or supported product claims.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/developers">
+          Developer information
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Public roadmap</p>
+
+      <h2 class="rh-section-title">
+        Direction without false certainty.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is being developed around local-first operation, practical
+        resilience, simple onboarding, recovery-first architecture, capability
+        awareness, and community usefulness. Items below may change as validation,
+        hardware testing, policy work, and real user feedback shape the product.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">Now</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Foundation
+          </h3>
+          <p class="rh-card-text">
+            Public website, forms, storage, messaging, analytics, and core
+            product positioning.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Next</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Public clarity
+          </h3>
+          <p class="rh-card-text">
+            Better explanations, stronger pages, clearer product boundaries,
+            and deeper documentation.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Future</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Ecosystem services
+          </h3>
+          <p class="rh-card-text">
+            Product pathways, community services, marketplace coordination,
+            and RelayOS capabilities.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-degraded">Research</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Validation areas
+          </h3>
+          <p class="rh-card-text">
+            Hard problems that must be tested before being treated as supported
+            product behaviour.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Now</p>
+        <h2 class="rh-section-title">What is being established now.</h2>
+        <p class="rh-section-lead">
+          This phase is about making RelayHub publicly understandable, measurable,
+          contactable, and ready for deeper documentation and product explanation.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-roadmap-list">
+          {nowItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Next</p>
+        <h2 class="rh-section-title">The next public-facing priorities.</h2>
+        <p class="rh-section-lead">
+          The next layer should help visitors, communities, and developers
+          understand what RelayHub is, what it is not, and how the ecosystem
+          could operate in practice.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-roadmap-list">
+          {nextItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Future</p>
+        <h2 class="rh-section-title">Where the ecosystem can grow.</h2>
+        <p class="rh-section-lead">
+          Future capabilities should only become product-supported after
+          architecture, recovery, validation, support, and documentation have
+          caught up with the promise.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-roadmap-list">
+          {futureItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Research</p>
+        <h2 class="rh-section-title">The hard problems are named openly.</h2>
+        <p class="rh-section-lead">
+          RelayHub must not treat experimental ideas as finished capability.
+          Research items identify areas that need testing, evidence, governance,
+          and careful explanation.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-roadmap-list">
+          {researchItems.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Roadmap principle</p>
+
+        <h2 class="rh-section-title">
+          Product support comes after validation.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub will grow carefully. A feature should not be marketed as
+          supported merely because it is technically imaginable, prototyped, or
+          attractive. It must be testable, observable, reproducible, recoverable,
+          and documented.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Help shape the roadmap</h3>
+        <p class="rh-card-text">
+          Practical questions from households, developers, operators, and
+          communities will help decide what should be built, validated, explained,
+          simplified, or deferred.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Share feedback
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
