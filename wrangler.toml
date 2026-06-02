@@ -1,0 +1,6 @@
+name = "relayhub-tech"
+compatibility_date = "2026-06-02"
+
+[[send_email]]
+name = "RELAYHUB_EMAIL"
+destination_address = "hello@relayhub.tech"
