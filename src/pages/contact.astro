@@ -1,0 +1,138 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const submitted = Astro.url.searchParams.get("submitted") === "true";
+const error = Astro.url.searchParams.get("error");
+
+const errorMessages = {
+  "invalid-email": "Please enter a valid email address and try again.",
+  "rate-limited": "Too many requests have been sent from your connection. Please try again later.",
+  "submission-failed": "Something went wrong while sending your message. Please try again shortly.",
+};
+
+const errorMessage =
+  error && Object.prototype.hasOwnProperty.call(errorMessages, error)
+    ? errorMessages[error as keyof typeof errorMessages]
+    : null;
+---
+
+<BaseLayout
+  title="Contact | RelayHub"
+  description="Contact RelayHub about early access, community pilots, development, support, partnerships, and local-first infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Contact</p>
+
+      <h1 class="rh-title">Talk to RelayHub.</h1>
+
+      <p class="rh-subtitle">
+        Send a message about early access, community pilots, development,
+        partnerships, documentation, support, or local-first infrastructure.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Get in touch</p>
+
+        <h2 class="rh-section-title">
+          Tell us what you’re building, testing, or exploring.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is being developed carefully around reliability, usability,
+          recovery, and real community value. Use this form for general contact,
+          not emergency communication.
+        </p>
+
+        <div class="rh-card" style="margin-top: var(--space-8);">
+          <h3 class="rh-card-title">Best uses for this form</h3>
+          <p class="rh-card-text">
+            Community interest, pilot enquiries, developer participation,
+            product questions, documentation feedback, partnership ideas, and
+            practical deployment questions.
+          </p>
+        </div>
+      </div>
+
+      <form class="rh-card" name="contact" method="POST" action="/api/contact">
+        {
+          submitted && (
+            <div class="rh-form-message rh-form-message-success">
+              <strong>Message received.</strong>
+              <span>Thank you. We’ll review your message and reply where appropriate.</span>
+            </div>
+          )
+        }
+
+        {
+          errorMessage && (
+            <div class="rh-form-message rh-form-message-error">
+              <strong>Something needs attention.</strong>
+              <span>{errorMessage}</span>
+            </div>
+          )
+        }
+
+        <div class="honeypot" aria-hidden="true">
+          <label for="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
+        <label class="rh-label" for="name">Name</label>
+        <input class="rh-input" id="name" name="name" type="text" autocomplete="name" required />
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="email">Email</label>
+        <input class="rh-input" id="email" name="email" type="email" autocomplete="email" required />
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="topic">Topic</label>
+        <select class="rh-select" id="topic" name="topic">
+          <option value="General enquiry">General enquiry</option>
+          <option value="Early access">Early access</option>
+          <option value="Community pilot">Community pilot</option>
+          <option value="Developer participation">Developer participation</option>
+          <option value="Support">Support</option>
+          <option value="Partnership">Partnership</option>
+          <option value="Documentation feedback">Documentation feedback</option>
+        </select>
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="message">Message</label>
+        <textarea
+          class="rh-textarea"
+          id="message"
+          name="message"
+          rows="7"
+          placeholder="Tell us what you’d like to discuss."
+          required
+        ></textarea>
+
+        <div style="height: var(--space-6);"></div>
+
+        <button class="rh-button rh-button-accent" type="submit">
+          Send message
+        </button>
+
+        <p class="rh-help">
+          This form is for general contact only. It is not monitored as an
+          emergency channel. Personal information is handled according to the
+          <a href="/privacy">Privacy Policy</a>.
+        </p>
+      </form>
+    </div>
+  </section>
+</BaseLayout>

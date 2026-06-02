@@ -12,14 +12,8 @@ export default {
 
     if (url.pathname === "/api/early-access") {
       if (request.method === "GET") {
-        return new Response(
-          "Early access endpoint is live. Submit the form with POST.",
-          {
-            status: 200,
-            headers: {
-              "content-type": "text/plain; charset=UTF-8",
-            },
-          }
+        return textResponse(
+          "Early access endpoint is live. Submit the form with POST."
         );
       }
 
@@ -27,12 +21,19 @@ export default {
         return handleEarlyAccessPost(request, env, url);
       }
 
-      return new Response("Method not allowed", {
-        status: 405,
-        headers: {
-          allow: "GET, POST",
-        },
-      });
+      return methodNotAllowed("GET, POST");
+    }
+
+    if (url.pathname === "/api/contact") {
+      if (request.method === "GET") {
+        return textResponse("Contact endpoint is live. Submit the form with POST.");
+      }
+
+      if (request.method === "POST") {
+        return handleContactPost(request, env, url);
+      }
+
+      return methodNotAllowed("GET, POST");
     }
 
     return env.ASSETS.fetch(request);
@@ -50,12 +51,8 @@ async function handleEarlyAccessPost(request, env, url) {
       return redirect(url, "/early-access?submitted=true");
     }
 
-    const ip =
-      request.headers.get("CF-Connecting-IP") ||
-      request.headers.get("x-forwarded-for") ||
-      "unknown";
-
-    const rateLimit = await checkRateLimit(env, ip);
+    const ip = getClientIp(request);
+    const rateLimit = await checkRateLimit(env, "early-access", ip);
 
     if (!rateLimit.allowed) {
       console.warn("Early access rate limit triggered.");
@@ -84,7 +81,7 @@ async function handleEarlyAccessPost(request, env, url) {
       userAgent,
     });
 
-    const rawEmail = buildRawEmail({
+    const rawEmail = buildEarlyAccessEmail({
       name,
       email,
       community,
@@ -95,13 +92,77 @@ async function handleEarlyAccessPost(request, env, url) {
     });
 
     const emailMessage = new EmailMessage(EMAIL_FROM, EMAIL_TO, rawEmail);
-
     await env.RELAYHUB_EMAIL.send(emailMessage);
 
     return redirect(url, "/early-access?submitted=true");
   } catch (error) {
     console.error("Early access submission failed:", error);
     return redirect(url, "/early-access?error=submission-failed");
+  }
+}
+
+async function handleContactPost(request, env, url) {
+  try {
+    const form = await request.formData();
+
+    const website = cleanField(form.get("website"), 500);
+
+    if (website) {
+      console.warn("Contact honeypot triggered.");
+      return redirect(url, "/contact?submitted=true");
+    }
+
+    const ip = getClientIp(request);
+    const rateLimit = await checkRateLimit(env, "contact", ip);
+
+    if (!rateLimit.allowed) {
+      console.warn("Contact rate limit triggered.");
+      return redirect(url, "/contact?error=rate-limited");
+    }
+
+    const name = cleanField(form.get("name"), 200);
+    const email = cleanField(form.get("email"), 320);
+    const topic = cleanField(form.get("topic"), 200);
+    const message = cleanField(form.get("message"), 5000);
+    const userAgent = cleanField(request.headers.get("User-Agent"), 500);
+    const ipHash = await hashText(ip);
+    const submittedAt = new Date().toISOString();
+    const sourceUrl = url.toString();
+
+    if (!isValidEmail(email)) {
+      return redirect(url, "/contact?error=invalid-email");
+    }
+
+    if (!message) {
+      return redirect(url, "/contact?error=submission-failed");
+    }
+
+    await storeContactMessage(env, {
+      name,
+      email,
+      topic,
+      message,
+      ipHash,
+      userAgent,
+    });
+
+    const rawEmail = buildContactEmail({
+      name,
+      email,
+      topic,
+      message,
+      submittedAt,
+      sourceUrl,
+      userAgent,
+    });
+
+    const emailMessage = new EmailMessage(EMAIL_FROM, EMAIL_TO, rawEmail);
+    await env.RELAYHUB_EMAIL.send(emailMessage);
+
+    return redirect(url, "/contact?submitted=true");
+  } catch (error) {
+    console.error("Contact submission failed:", error);
+    return redirect(url, "/contact?error=submission-failed");
   }
 }
 
@@ -122,9 +183,26 @@ async function storeSignup(env, signup) {
     .run();
 }
 
-async function checkRateLimit(env, ip) {
+async function storeContactMessage(env, contact) {
+  await env.RELAYHUB_DB.prepare(
+    `INSERT INTO contact_messages
+      (name, email, topic, message, ip_hash, user_agent)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  )
+    .bind(
+      contact.name,
+      contact.email,
+      contact.topic,
+      contact.message,
+      contact.ipHash,
+      contact.userAgent
+    )
+    .run();
+}
+
+async function checkRateLimit(env, scope, ip) {
   const ipHash = await hashText(ip);
-  const key = `early-access:${ipHash}`;
+  const key = `${scope}:${ipHash}`;
 
   const current = Number((await env.RELAYHUB_RATE_LIMIT.get(key)) || "0");
 
@@ -139,7 +217,7 @@ async function checkRateLimit(env, ip) {
   return { allowed: true };
 }
 
-function buildRawEmail({
+function buildEarlyAccessEmail({
   name,
   email,
   community,
@@ -174,6 +252,70 @@ function buildRawEmail({
     `User agent: ${userAgent || "Not provided"}`,
     "",
   ].join("\r\n");
+}
+
+function buildContactEmail({
+  name,
+  email,
+  topic,
+  message,
+  submittedAt,
+  sourceUrl,
+  userAgent,
+}) {
+  const safeReplyTo = sanitizeHeader(email);
+  const safeTopic = sanitizeHeader(topic || "General enquiry");
+
+  return [
+    `From: ${EMAIL_FROM}`,
+    `To: ${EMAIL_TO}`,
+    `Reply-To: ${safeReplyTo}`,
+    `Subject: RelayHub contact form: ${safeTopic}`,
+    "Content-Type: text/plain; charset=UTF-8",
+    "",
+    "New RelayHub contact message",
+    "",
+    `Submitted at: ${submittedAt}`,
+    `Source URL: ${sourceUrl}`,
+    "",
+    `Name: ${name || "Not provided"}`,
+    `Email: ${email}`,
+    `Topic: ${topic || "General enquiry"}`,
+    "",
+    "Message:",
+    message || "Not provided",
+    "",
+    "Technical context:",
+    "Stored in D1: yes",
+    `User agent: ${userAgent || "Not provided"}`,
+    "",
+  ].join("\r\n");
+}
+
+function getClientIp(request) {
+  return (
+    request.headers.get("CF-Connecting-IP") ||
+    request.headers.get("x-forwarded-for") ||
+    "unknown"
+  );
+}
+
+function textResponse(message) {
+  return new Response(message, {
+    status: 200,
+    headers: {
+      "content-type": "text/plain; charset=UTF-8",
+    },
+  });
+}
+
+function methodNotAllowed(allow) {
+  return new Response("Method not allowed", {
+    status: 405,
+    headers: {
+      allow,
+    },
+  });
 }
 
 function cleanField(value, maxLength) {
