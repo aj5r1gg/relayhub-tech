@@ -1,0 +1,666 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="How It Works | RelayHub"
+  description="How RelayHub works: local-first setup, RelayOS, Reticulum, QR onboarding, hardware-aware roles, policy gates, recovery, and community operation."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">How it works</p>
+
+      <h1 class="rh-title">
+        Plug in. Scan. Connect.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is designed to make advanced local-first communication infrastructure
+        feel like an appliance: power the node, open the local setup flow, scan the
+        QR code, pair safely, and communicate where supported.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/relayos">
+          Learn about RelayOS
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The simple version</p>
+
+      <h2 class="rh-section-title">
+        The user should not need to understand the infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub hides technical complexity behind a local web interface, plain-language
+        status, QR onboarding, role-aware pairing, and guided recovery. Internally,
+        the system remains policy-governed, hardware-aware, and validation-gated.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">1. Plug in</h3>
+          <p class="rh-card-text">
+            The node starts, checks itself, and shows a simple status such as
+            setup, ready, local-only, degraded, updating, or recovery.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">2. Open setup</h3>
+          <p class="rh-card-text">
+            The user opens a local browser-based setup flow from a phone, tablet,
+            laptop, or desktop where supported.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">3. Scan QR</h3>
+          <p class="rh-card-text">
+            QR codes are used for setup, pairing, invites, recovery, transfer,
+            and support flows where appropriate.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">4. Connect</h3>
+          <p class="rh-card-text">
+            Users communicate through validated communication paths where hardware,
+            software, trust, policy, and runtime conditions allow.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">What is inside the appliance?</p>
+
+      <h2 class="rh-section-title">
+        RelayOS brings the layers together.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub nodes are powered by RelayOS: the appliance platform that combines
+        reproducible system configuration, Reticulum communication, local APIs,
+        policy decisions, capability awareness, observability, updates, and recovery.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">NixOS foundation</h3>
+          <p class="rh-card-text">
+            Provides declarative configuration, reproducible builds, rollback-safe
+            upgrades, and hardware-specific system behaviour.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Reticulum substrate</h3>
+          <p class="rh-card-text">
+            Provides the local-first communication substrate for supported
+            transports, intermittent connectivity, and store-and-forward behaviour.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayOS appliance layer</h3>
+          <p class="rh-card-text">
+            Provides setup, pairing, trust, roles, policy gates, dashboard,
+            updates, recovery, support export, and user-facing state.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/relayos">
+          RelayOS
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">First boot</p>
+
+      <h2 class="rh-section-title">
+        The first ten minutes matter.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub node should be understandable from the first time it powers on.
+        The first experience should establish ownership, explain privacy limits,
+        create or acknowledge recovery, and show current status.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Setup state</h3>
+          <p class="rh-card-text">
+            An unclaimed node presents a setup-safe state. Management actions remain
+            unavailable until ownership is established.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Owner claim</h3>
+          <p class="rh-card-text">
+            The owner confirms the physical node, claims it, names it, and becomes
+            responsible for users, recovery, updates, reset, and transfer.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Recovery prompt</h3>
+          <p class="rh-card-text">
+            Recovery is introduced during setup because recovery should exist before
+            something goes wrong.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">QR onboarding</p>
+
+      <h2 class="rh-section-title">
+        QR codes are product flows, not just links.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub uses QR codes to make setup and trust flows understandable. Each
+        QR should have a purpose, scope, expiry or revocation where appropriate,
+        and safe failure behaviour.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Setup QR</h3>
+          <p class="rh-card-text">
+            Starts first owner claim or setup flow without exposing long-term keys,
+            recovery secrets, or unrestricted admin credentials.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Invite QR</h3>
+          <p class="rh-card-text">
+            Lets an owner or permitted admin invite a trusted user, guest, or
+            household member with role and expiry clearly shown.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Recovery QR</h3>
+          <p class="rh-card-text">
+            Helps enter recovery or validate a recovery flow without bypassing
+            recovery authority checks.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Transfer QR</h3>
+          <p class="rh-card-text">
+            Supports ownership transfer while ensuring the previous owner is revoked
+            or the transfer fails safely.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Support QR</h3>
+          <p class="rh-card-text">
+            May identify a support context or help path, but should not grant node
+            access by itself.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Safe failure</h3>
+          <p class="rh-card-text">
+            Expired, invalid, already-used, wrong-node, or incompatible QR codes
+            should fail with a plain-language explanation.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Local-first operation</p>
+
+      <h2 class="rh-section-title">
+        Local does not mean limited. It means less dependent.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should remain useful when internet access, DNS, cloud services,
+        overlays, peers, or wider routes are unavailable. Local-first operation
+        reduces dependency without pretending every condition can be overcome.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Works locally where supported</h3>
+          <p class="rh-card-text">
+            Setup, dashboard, recovery, support export, event history, and local
+            help should remain available from the local network wherever practical.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Explains wider failure</h3>
+          <p class="rh-card-text">
+            If wider network paths fail, the node should explain that local
+            functions may still work instead of presenting total failure.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Status model</p>
+
+      <h2 class="rh-section-title">
+        The node should say what is happening.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub status language should be plain enough for a stressed household
+        user and precise enough for an operator to know what changed.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-ready">Ready</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Core function available
+          </h3>
+          <p class="rh-card-text">
+            The node is running and core services for its current role are available.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-local">Local-only</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Wider paths unavailable
+          </h3>
+          <p class="rh-card-text">
+            Local operation may still work even though wider connectivity does not.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-degraded">Degraded</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Reduced capability
+          </h3>
+          <p class="rh-card-text">
+            Some services are reduced, paused, blocked, unavailable, or awaiting action.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-error">Recovery</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Needs attention
+          </h3>
+          <p class="rh-card-text">
+            The node should guide the user toward recovery, rollback, reset, or support.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/docs">
+          Read status docs
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Capability gates</p>
+
+      <h2 class="rh-section-title">
+        Every feature must pass the gates.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub node should not expose impossible, unsafe, illegal, unsupported,
+        or currently unavailable capabilities merely because a component exists.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Hardware capability</h3>
+          <p class="rh-card-text">
+            The physical limits of compute, memory, storage, radio, power, thermal
+            profile, and network interfaces.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Software capability</h3>
+          <p class="rh-card-text">
+            What RelayOS, firmware, Reticulum configuration, and service modules
+            actually support.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Policy permission</h3>
+          <p class="rh-card-text">
+            What safety, recovery, privacy, security, legal, trust, role, and
+            community policies allow.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Runtime availability</h3>
+          <p class="rh-card-text">
+            What is actually available right now under current power, storage,
+            transport, peer, and network conditions.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/hardware">
+          Hardware classes
+        </a>
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Products in practice</p>
+
+      <h2 class="rh-section-title">
+        Different products serve different jobs.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub separates household appliances, radio nodes, and infrastructure
+        nodes so users are not misled about what a device can do.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">MVP Target</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Home
+          </h3>
+          <p class="rh-card-text">
+            Household node for local dashboard, setup, pairing, status, support
+            export, updates, rollback, and guided recovery.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Concept</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Radio
+          </h3>
+          <p class="rh-card-text">
+            Field relay and radio-assisted transport where hardware, firmware,
+            region, law, policy, and validation allow.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Future</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Infrastructure
+          </h3>
+          <p class="rh-card-text">
+            Community infrastructure node for validated DTN, bridge, gateway,
+            observability, federation, and operator functions.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/products">
+          View products
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Communication paths</p>
+
+      <h2 class="rh-section-title">
+        Communication depends on validated paths.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should never claim communication is available unless at least one
+        supported communication path exists for the node, user, client, and current
+        runtime conditions.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Local path</h3>
+          <p class="rh-card-text">
+            Communication or management may work within the local network where
+            supported, even without wider connectivity.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Reticulum path</h3>
+          <p class="rh-card-text">
+            Reticulum provides the communication substrate, but reachability,
+            peers, queues, and routes still matter.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Client path</h3>
+          <p class="rh-card-text">
+            Messaging may require a compatible client or future RelayHub application.
+            The node should explain the supported path clearly.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Recovery-first design</p>
+
+      <h2 class="rh-section-title">
+        Failure should lead to guidance, not panic.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub treats recovery as a primary product behaviour. A failed update,
+        interrupted setup, lost network path, or degraded service should produce a
+        clear state and a safe next action.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Rollback</h3>
+          <p class="rh-card-text">
+            Failed updates should return to a previous working version or enter a
+            guided recovery path.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Reset and transfer</h3>
+          <p class="rh-card-text">
+            Destructive actions should explain consequences and require deliberate
+            confirmation.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Support export</h3>
+          <p class="rh-card-text">
+            Support information should be explicit, reviewable, redacted by default,
+            and locally downloadable where practical.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/support">
+          Support model
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Radio reality</p>
+
+      <h2 class="rh-section-title">
+        Radio transmit is never automatic.
+      </h2>
+
+      <p class="rh-section-lead">
+        If a RelayHub product uses radio, radio operation must respect hardware,
+        firmware, region, legal rules, power limits, duty cycle, policy, user
+        enablement, and runtime state.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Legal region</h3>
+          <p class="rh-card-text">
+            Frequency, transmit power, duty cycle, encryption, and licensing rules
+            vary by region.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">RF observability</h3>
+          <p class="rh-card-text">
+            Radio signals may be observable. RelayHub should never claim radio use
+            makes users invisible.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Receive-only fallback</h3>
+          <p class="rh-card-text">
+            Some environments may require transmit to remain disabled or receive-only
+            until rules and policies are satisfied.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Community layer</p>
+
+      <h2 class="rh-section-title">
+        The system exists to serve communities.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub begins with communication infrastructure, but the longer-term goal
+        is to support resilient communities through trust, knowledge, trade,
+        coordination, governance, and cultural continuity.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Households</h3>
+          <p class="rh-card-text">
+            Local infrastructure for families, homes, rural properties, and trusted
+            small groups.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Communities</h3>
+          <p class="rh-card-text">
+            Local networks for communication, knowledge sharing, events, trade,
+            directories, and practical coordination.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Federations</h3>
+          <p class="rh-card-text">
+            Voluntary cooperation between communities without requiring central
+            control or surrendering local autonomy.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/communities">
+          Communities
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Current status</p>
+
+        <h2 class="rh-section-title">
+          RelayHub is being built carefully.
+        </h2>
+
+        <p class="rh-section-lead">
+          The operating model, product family, hardware classes, documentation,
+          recovery model, support model, and validation pathway are being designed
+          before product-supported claims are made.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Follow the build</h3>
+        <p class="rh-card-text">
+          Register interest for updates on RelayHub nodes, RelayOS, hardware
+          validation, documentation, support, developer resources, and community
+          pilot programs.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/docs">
+            Read docs
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

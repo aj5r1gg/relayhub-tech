@@ -1,0 +1,449 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Hardware | RelayHub"
+  description="RelayHub hardware classes, capability limits, compatibility status, recovery expectations, and radio reality."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Hardware</p>
+
+      <h1 class="rh-title">
+        Hardware matters.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is capability-aware. A small field relay, household node, and
+        infrastructure node should not pretend to do the same job.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/products">View products</a>
+        <a class="rh-button rh-button-secondary" href="/relayos">RelayOS</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Hardware doctrine</p>
+
+      <h2 class="rh-section-title">
+        Capability before claims.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub separates hardware capability, software capability, policy permission,
+        runtime availability, trust permission, legal permission, and user enablement.
+        A feature is not available merely because a device has the parts for it.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Detected is not supported</h3>
+          <p class="rh-card-text">
+            A radio chip, Ethernet port, Wi-Fi adapter, or storage device being detected
+            does not mean the feature is product-supported.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Supported is not active</h3>
+          <p class="rh-card-text">
+            A supported capability may still be disabled by policy, trust rules,
+            legal requirements, user settings, or current runtime conditions.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Active is not guaranteed</h3>
+          <p class="rh-card-text">
+            Network paths, peers, radio conditions, power, storage, heat, and
+            transport availability can change. RelayHub must explain current state.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Hardware classes</p>
+
+      <h2 class="rh-section-title">
+        Different devices have different ceilings.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub hardware classes describe what a device is realistically suitable for.
+        They prevent small nodes from being marketed as infrastructure and prevent
+        infrastructure nodes from being treated like simple household appliances.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-local">Smallest</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Radio Micro Node
+          </h3>
+          <p class="rh-card-text">
+            Small radio transport and field relay class, such as LilyGo-style radio
+            boards. Useful for radio movement, not a full local server.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-degraded">Lightweight</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Nano Linux Node
+          </h3>
+          <p class="rh-card-text">
+            Lightweight Linux relay class for constrained compute and storage.
+            Suitable for limited relay roles, not full household UX unless validated.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-ready">MVP Target</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Home Node
+          </h3>
+          <p class="rh-card-text">
+            Household appliance class focused on setup, pairing, local dashboard,
+            status, updates, support export, and guided recovery.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-ready">Enhanced</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Strong Home Node
+          </h3>
+          <p class="rh-card-text">
+            Enhanced household class with more comfortable performance, larger
+            queues where validated, and stronger local service capacity.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-updating">Community</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Infrastructure Node
+          </h3>
+          <p class="rh-card-text">
+            Community infrastructure class for validated DTN, bridge, gateway,
+            observability, operator dashboard, and larger storage roles.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-updating">Full</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Mini PC Node
+          </h3>
+          <p class="rh-card-text">
+            Full infrastructure class for advanced community or regional deployments,
+            larger storage, stronger compute, and operator-heavy workloads.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Product mapping</p>
+
+      <h2 class="rh-section-title">
+        Product names and hardware classes are related, but not identical.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Home, Relay Radio, and Relay Infrastructure are product families.
+        Each may map to one or more hardware classes only after validation.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">MVP Target</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Home
+          </h3>
+          <p class="rh-card-text">
+            Expected to target Home Node and Strong Home Node classes. It should
+            prioritise household usability over infrastructure features.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Concept</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Radio
+          </h3>
+          <p class="rh-card-text">
+            Expected to target Radio Micro Node and field relay classes. It must
+            clearly explain radio limits, legal constraints, and validation status.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Future</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Infrastructure
+          </h3>
+          <p class="rh-card-text">
+            Expected to target Infrastructure Node and Mini PC Node classes for
+            operator-led community infrastructure where policy allows.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Compatibility status</p>
+
+      <h2 class="rh-section-title">
+        “Works on my desk” is not product support.
+      </h2>
+
+      <p class="rh-section-lead">
+        Hardware must move through explicit compatibility states before it is
+        presented as supported. This protects users from misleading expectations.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Candidate</h3>
+          <p class="rh-card-text">
+            Hardware is being considered but has not yet proven reliable operation.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Boots</h3>
+          <p class="rh-card-text">
+            The system starts, but core services, recovery, and support may not work.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Reticulum works</h3>
+          <p class="rh-card-text">
+            Reticulum can operate, but the product appliance flow may still be incomplete.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Stable</h3>
+          <p class="rh-card-text">
+            Repeated operation is promising, but product support still requires
+            recovery, documentation, and validation gates.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Product-supported</h3>
+          <p class="rh-card-text">
+            The device has passed required validation, recovery, documentation,
+            support, and release gates for a defined role.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Deprecated</h3>
+          <p class="rh-card-text">
+            Previously supported but no longer recommended for new deployments.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Unsupported</h3>
+          <p class="rh-card-text">
+            Not supported for RelayHub product use, even if experimental builds boot.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Unknown</h3>
+          <p class="rh-card-text">
+            Not yet tested. No capability, support, recovery, or safety claim should be made.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Radio reality</p>
+
+      <h2 class="rh-section-title">
+        Radio transmit is never assumed.
+      </h2>
+
+      <p class="rh-section-lead">
+        Radio hardware does not automatically mean radio operation is enabled,
+        lawful, private, reliable, or supported. Radio features must pass hardware,
+        firmware, regional, legal, policy, user, and runtime gates.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Legal region</h3>
+          <p class="rh-card-text">
+            Frequency, power, duty cycle, encryption, and licensing rules vary by
+            region. RelayHub must not assume global legality.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">RF visibility</h3>
+          <p class="rh-card-text">
+            Radio use can be observed. RelayHub must not claim that radio operation
+            is invisible or automatically anonymous.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Receive-only fallback</h3>
+          <p class="rh-card-text">
+            Some environments may require receive-only or disabled transmit modes
+            until legal and policy requirements are satisfied.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Recovery expectations</p>
+
+      <h2 class="rh-section-title">
+        Hardware must be recoverable to be supportable.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub hardware should not be considered product-supported unless users
+        have a realistic way to restore safe operation when something goes wrong.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Identity preservation</h3>
+          <p class="rh-card-text">
+            Recovery should preserve node identity and owner authority where possible,
+            and explain consequences where preservation is not possible.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Rollback safety</h3>
+          <p class="rh-card-text">
+            Updates should roll back to a previous working state or enter guided
+            recovery rather than leaving a silent broken node.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Offline recovery</h3>
+          <p class="rh-card-text">
+            Critical recovery instructions should remain available locally or offline,
+            not only through an internet service.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Current hardware direction</p>
+
+      <h2 class="rh-section-title">
+        Start with the smallest supportable product.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should begin with the smallest useful, recoverable, validated
+        household node before expanding into radio, infrastructure, marketplace,
+        federation, and advanced community services.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">First focus</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Home Node class
+          </h3>
+          <p class="rh-card-text">
+            Focus on household usability, QR setup, local dashboard, recovery,
+            updates, support export, and no-terminal operation.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Next</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Radio validation
+          </h3>
+          <p class="rh-card-text">
+            Validate radio transport carefully, with lawful operation, receive-only
+            fallback, duty-cycle awareness, and realistic RF privacy language.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Later</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Infrastructure expansion
+          </h3>
+          <p class="rh-card-text">
+            Expand into stronger nodes only after recovery, observability, operator
+            documentation, and support processes are ready.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Hardware interest</p>
+
+        <h2 class="rh-section-title">
+          Help validate real-world hardware.
+        </h2>
+
+        <p class="rh-section-lead">
+          Register interest if you want updates about RelayHub hardware classes,
+          home nodes, radio nodes, infrastructure nodes, field testing, or future
+          compatibility registries.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Current status</h3>
+        <p class="rh-card-text">
+          Hardware support is in design and validation planning. Product-supported
+          hardware claims will be published only after testing, documentation,
+          recovery, and release gates are complete.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/products">
+            Product family
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

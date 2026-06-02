@@ -1,0 +1,616 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="RelayOS | RelayHub"
+  description="RelayOS is the local-first appliance operating system and service platform that powers RelayHub nodes."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayOS Platform</p>
+
+      <h1 class="rh-title">
+        The appliance operating system for RelayHub nodes.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayOS is the local-first platform layer that turns NixOS, Reticulum,
+        hardware profiles, policy governance, recovery, and local web management
+        into a simple communications appliance for ordinary people.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/products">View nodes</a>
+        <a class="rh-button rh-button-secondary" href="/developers">Developers</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Platform purpose</p>
+
+      <h2 class="rh-section-title">
+        RelayOS hides complexity without hiding reality.
+      </h2>
+
+      <p class="rh-section-lead">
+        The goal is not to make users become system administrators. The goal is to
+        give homes, groups, and communities infrastructure they can plug in, pair,
+        understand, update, recover, and safely operate.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Appliance experience</h3>
+          <p class="rh-card-text">
+            Users should see clear states, simple actions, QR flows, guided setup,
+            and plain-language recovery instead of Linux internals.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Local-first control</h3>
+          <p class="rh-card-text">
+            Setup, status, recovery, support export, and ordinary management should
+            remain useful without a cloud account.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Honest capability</h3>
+          <p class="rh-card-text">
+            RelayOS should show what works, what does not, what is degraded, and
+            what is not supported on that node.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Technology stack</p>
+
+      <h2 class="rh-section-title">
+        NixOS is the foundation. Reticulum is the substrate. RelayOS is the product.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayOS does not replace NixOS or Reticulum. It packages them into a
+        governed appliance platform with onboarding, policy, observability,
+        recovery, and support built around real users.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">NixOS foundation</h3>
+          <p class="rh-card-text">
+            Declarative configuration, reproducible builds, rollback-safe updates,
+            hardware profiles, and predictable system behaviour.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Reticulum substrate</h3>
+          <p class="rh-card-text">
+            Local-first communication across supported transports, intermittent
+            connectivity, store-and-forward behaviour, and heterogeneous nodes.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayOS appliance layer</h3>
+          <p class="rh-card-text">
+            Local dashboard, QR onboarding, pairing, trust, role management,
+            policy gates, updates, recovery, and support export.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">User flow</p>
+
+      <h2 class="rh-section-title">
+        Designed around the first ten minutes.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub node must be understandable from the moment it powers on.
+        The first experience should be guided, visible, and recoverable.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">1. Start</h3>
+          <p class="rh-card-text">
+            The node boots and presents a visible state: starting, setup, ready,
+            local-only, degraded, updating, recovering, or error.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">2. Claim</h3>
+          <p class="rh-card-text">
+            The owner scans a QR code, opens the local setup flow, confirms the
+            node identity, and claims ownership.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">3. Recover</h3>
+          <p class="rh-card-text">
+            Recovery is introduced during setup so the user knows how to repair,
+            roll back, reset, or transfer the node safely.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">4. Operate</h3>
+          <p class="rh-card-text">
+            The dashboard explains current state, available communication paths,
+            paired users, updates, events, and next actions.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Core capabilities</p>
+
+      <h2 class="rh-section-title">
+        RelayOS is more than a Reticulum install.
+      </h2>
+
+      <p class="rh-section-lead">
+        A technically working node is not enough. RelayOS must make the node
+        understandable, governable, recoverable, supportable, and safe to use.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Onboarding</h3>
+          <p class="rh-card-text">
+            First boot, setup QR, local browser flow, owner claim, node naming,
+            privacy reality screen, and recovery prompt.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Identity</h3>
+          <p class="rh-card-text">
+            Node identity, owner identity, user identity, paired device identity,
+            peer identity, and recovery authority.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Trust</h3>
+          <p class="rh-card-text">
+            Unknown, discovered, paired, trusted, limited, quarantined, and revoked
+            relationships.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Policy</h3>
+          <p class="rh-card-text">
+            Runtime behaviour governed by hardware limits, recovery rules, legal
+            constraints, trust, roles, and user permission.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Observability</h3>
+          <p class="rh-card-text">
+            Plain-language state, event history, Reticulum summary, peer summary,
+            storage pressure, update state, and recovery status.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Recovery</h3>
+          <p class="rh-card-text">
+            Rollback, guided recovery, local recovery portal, support export,
+            reset, transfer, and last-resort reflash guidance.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Capability-aware</p>
+
+      <h2 class="rh-section-title">
+        Every feature passes through gates before it appears.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayOS should never imply that a node can do something merely because
+        hardware exists. Features become visible only when they are supported,
+        permitted, trusted, lawful, enabled, and actually available.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Hardware</h3>
+          <p class="rh-card-text">
+            What the device can physically support: CPU, RAM, storage, power,
+            thermal profile, network, and radio.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Software</h3>
+          <p class="rh-card-text">
+            What the installed RelayOS version, Reticulum configuration, firmware,
+            and service graph can support.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Policy</h3>
+          <p class="rh-card-text">
+            What safety, recovery, legal, privacy, trust, role, and system rules
+            allow.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Runtime</h3>
+          <p class="rh-card-text">
+            What is actually working right now under current network, power,
+            storage, thermal, and peer conditions.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Operational modes</p>
+
+      <h2 class="rh-section-title">
+        The node should explain the mode it is in.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayOS uses operational modes to change behaviour safely under different
+        conditions. A home node, field node, recovery node, and infrastructure node
+        should not expose the same controls.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Home Mode</h3>
+          <p class="rh-card-text">
+            Household operation with simple dashboard, local setup, paired users,
+            status, update, recovery, and safe defaults.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Local-Only Mode</h3>
+          <p class="rh-card-text">
+            Internet or wider network paths are unavailable, but local functions
+            may still work. This is not automatically an error.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Recovery Mode</h3>
+          <p class="rh-card-text">
+            Guided repair, rollback, reset, transfer, support export, or safe
+            fallback when normal operation cannot continue.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Field Mode</h3>
+          <p class="rh-card-text">
+            Low-power and transport-conscious operation for field deployments
+            where radio or intermittent links may matter.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Infrastructure Mode</h3>
+          <p class="rh-card-text">
+            Advanced operation for validated bridge, gateway, DTN, observability,
+            and community infrastructure roles.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Quiet Mode</h3>
+          <p class="rh-card-text">
+            Reduced discovery visibility where privacy, safety, or community policy
+            requires lower exposure.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Node classes</p>
+
+      <h2 class="rh-section-title">
+        RelayOS adapts to the device class.
+      </h2>
+
+      <p class="rh-section-lead">
+        A Radio Micro Node, Home Node, Infrastructure Node, and Mini PC Node have
+        different ceilings. RelayOS should reflect those limits instead of hiding
+        them.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Smallest</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Radio Micro Node
+          </h3>
+          <p class="rh-card-text">
+            Field relay and radio transport class. Not a full household appliance
+            unless paired with a suitable companion system.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">MVP Target</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Home Node
+          </h3>
+          <p class="rh-card-text">
+            Household appliance class focused on setup, local dashboard, pairing,
+            recovery, updates, and ordinary use.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Advanced</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Infrastructure Node
+          </h3>
+          <p class="rh-card-text">
+            Community infrastructure class for validated gateway, bridge, DTN,
+            observability, and operator roles.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Status language</p>
+
+      <h2 class="rh-section-title">
+        RelayOS should speak in states people understand.
+      </h2>
+
+      <p class="rh-section-lead">
+        Technical logs may exist behind advanced views, but the ordinary dashboard
+        should explain the node like an appliance.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">Ready</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Working</h3>
+          <p class="rh-card-text">
+            The node is running and core services for its current role are available.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Local-only</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Still useful</h3>
+          <p class="rh-card-text">
+            Local operation works, but wider network access is unavailable.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-degraded">Degraded</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Reduced</h3>
+          <p class="rh-card-text">
+            Some capability is reduced, paused, blocked, or waiting for recovery.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-error">Recovery</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Guided repair</h3>
+          <p class="rh-card-text">
+            The node needs attention and should guide the user toward safe recovery.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Security and privacy posture</p>
+
+      <h2 class="rh-section-title">
+        Minimum exposure. Explicit trust. Realistic privacy.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayOS should avoid hidden remote control, automatic cloud telemetry,
+        internet-exposed administration, and exaggerated privacy promises.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Local API boundary</h3>
+          <p class="rh-card-text">
+            The appliance control plane should be local-only, role-aware,
+            rate-limited, and paired-client controlled by default.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Support export</h3>
+          <p class="rh-card-text">
+            Support data should be user-controlled, redacted by default, and should
+            not include secrets or message content unless explicitly designed.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Privacy reality</h3>
+          <p class="rh-card-text">
+            RelayOS can reduce dependence on central services, but it does not make
+            users invisible or erase metadata risk.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Validation path</p>
+
+      <h2 class="rh-section-title">
+        RelayOS becomes supported through evidence.
+      </h2>
+
+      <p class="rh-section-lead">
+        A build should not be called product-supported merely because it boots.
+        It must prove setup, recovery, rollback, documentation, degraded operation,
+        and user comprehension.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">1. Development</h3>
+          <p class="rh-card-text">
+            Internal builds may be incomplete, manual, unstable, or terminal-based.
+            They must be labelled as development.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">2. Lab validation</h3>
+          <p class="rh-card-text">
+            Boot, setup, QR flow, owner claim, dashboard, recovery entry, and
+            default-safe exclusions are tested.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">3. Field trial</h3>
+          <p class="rh-card-text">
+            Non-technical users attempt setup, pairing, local-only interpretation,
+            recovery, support export, and reset understanding.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">4. Supported release</h3>
+          <p class="rh-card-text">
+            Only after recovery, rollback, documentation, privacy claims, support,
+            and hardware compatibility are validated.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">For developers</p>
+
+      <h2 class="rh-section-title">
+        Build modules that strengthen the appliance model.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayOS development should create better defaults, clearer states, stronger
+        recovery, safer policy enforcement, and better local-first operation.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Local services</h3>
+          <p class="rh-card-text">
+            Build setup, discovery, dashboard, event history, support, update,
+            recovery, and capability-reporting services.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Hardware profiles</h3>
+          <p class="rh-card-text">
+            Define what each device class can safely support and prevent impossible
+            or misleading feature activation.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Validation tools</h3>
+          <p class="rh-card-text">
+            Build repeatable tests, evidence artefacts, release gates, and field
+            trial feedback loops.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/developers">Developer page</a>
+        <a class="rh-button rh-button-secondary" href="/docs">Read docs</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Current status</p>
+
+        <h2 class="rh-section-title">
+          RelayOS is a platform direction, not yet a supported release.
+        </h2>
+
+        <p class="rh-section-lead">
+          Public language should remain honest: RelayOS is being designed and
+          validated. Product-supported claims should wait until builds, recovery,
+          documentation, field testing, and release gates are complete.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Follow development</h3>
+        <p class="rh-card-text">
+          Register interest if you want updates on RelayOS design, node builds,
+          hardware validation, developer resources, documentation, and early
+          community testing.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Join early access
+          </a>
+          <a class="rh-button rh-button-secondary" href="/products">
+            View node family
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

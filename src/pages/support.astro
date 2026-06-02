@@ -1,0 +1,482 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Support | RelayHub"
+  description="RelayHub support is recovery-first, privacy-preserving, local-first, and designed around honest capability boundaries."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Support</p>
+
+      <h1 class="rh-title">
+        Support should protect the user.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub support is designed around local help, clear recovery,
+        honest product status, hardware-aware guidance, and explicit diagnostic
+        export — not hidden remote control or automatic cloud telemetry.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/docs">
+          Read docs
+        </a>
+        <a class="rh-button rh-button-secondary" href="/early-access">
+          Register interest
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Support doctrine</p>
+
+      <h2 class="rh-section-title">
+        Recovery comes before escalation.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub node should help the user understand what happened, what still
+        works, what does not work, and what safe recovery path is available before
+        support becomes complicated.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Local-first help</h3>
+          <p class="rh-card-text">
+            Setup, status, documentation, recovery guidance, and support export
+            should remain useful without requiring a cloud account.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Explicit export</h3>
+          <p class="rh-card-text">
+            Support information should be shared only when the user chooses to
+            export it. Automatic support upload is not part of the current posture.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Redacted by default</h3>
+          <p class="rh-card-text">
+            Support exports should exclude message content, private keys,
+            recovery secrets, and unnecessary identities by default.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Support levels</p>
+
+      <h2 class="rh-section-title">
+        Support should be clear about what is shared.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub support levels separate ordinary help, basic status, redacted
+        diagnostics, operator diagnostics, and recovery-sensitive material.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-ready">Level 0</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Local help
+          </h3>
+          <p class="rh-card-text">
+            Offline help, setup guidance, LED or status meanings, local-only
+            explanations, and recovery instructions. No diagnostic export required.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-local">Level 1</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Basic status
+          </h3>
+          <p class="rh-card-text">
+            Product class, hardware class, software version, current state,
+            update state, recovery availability, and simple warnings.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-degraded">Level 2</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Redacted diagnostics
+          </h3>
+          <p class="rh-card-text">
+            Redacted logs, service health, update history, rollback status,
+            hardware summary, and Reticulum service summary.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-updating">Level 3</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Operator diagnostics
+          </h3>
+          <p class="rh-card-text">
+            Advanced diagnostics for infrastructure-class nodes and operators.
+            Not expected for ordinary Home Node support by default.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-error">Level 4</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Recovery-sensitive export
+          </h3>
+          <p class="rh-card-text">
+            Recovery-related material only where explicitly designed, authorised,
+            protected, and necessary.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-ready">User-controlled</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Review before sharing
+          </h3>
+          <p class="rh-card-text">
+            Users should be able to see what categories are included and excluded
+            before sending a support bundle.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What support should explain</p>
+
+      <h2 class="rh-section-title">
+        The user should never be left guessing.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub support should explain the node state in plain language and guide
+        the user toward the safest next action.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">Ready</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Working
+          </h3>
+          <p class="rh-card-text">
+            The node is running and the core services for its current role are
+            available.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Local-only</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Still useful
+          </h3>
+          <p class="rh-card-text">
+            Local functions may still work even when internet, peers, or wider
+            network paths are unavailable.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-degraded">Degraded</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Reduced capability
+          </h3>
+          <p class="rh-card-text">
+            Something is limited, unavailable, paused, or blocked, but the node
+            may still be useful.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-error">Recovery</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Needs attention
+          </h3>
+          <p class="rh-card-text">
+            The node should guide the user toward repair, rollback, reset,
+            transfer, support export, or last-resort recovery.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Hardware-aware support</p>
+
+      <h2 class="rh-section-title">
+        Support depends on the node class.
+      </h2>
+
+      <p class="rh-section-lead">
+        A Radio Micro Node, Home Node, Infrastructure Node, and Mini PC Node do
+        not have the same support expectations. RelayHub support must respect
+        hardware capability and validation status.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Home Node support</h3>
+          <p class="rh-card-text">
+            Focused on appliance operation: setup, pairing, status, local dashboard,
+            update, rollback, recovery, support export, reset, and transfer.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Radio support</h3>
+          <p class="rh-card-text">
+            Must distinguish hardware capability, firmware status, legal region,
+            transmit permission, antenna setup, and RF observability.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Infrastructure support</h3>
+          <p class="rh-card-text">
+            May include operator diagnostics, DTN queues, bridge/gateway roles,
+            observability, storage, power, and federation-related issues.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/hardware">
+          Hardware classes
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Recovery paths</p>
+
+      <h2 class="rh-section-title">
+        A recoverable node is a supportable node.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub support should preserve identity, bootability, recovery access,
+        Reticulum core operation where possible, and safe user control before
+        convenience features.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Restart</h3>
+          <p class="rh-card-text">
+            The safest first step for simple runtime faults, where appropriate.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Rollback</h3>
+          <p class="rh-card-text">
+            A failed update should return to the previous working version or enter
+            guided recovery.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Repair settings</h3>
+          <p class="rh-card-text">
+            Restore safe configuration without destroying ownership or identity
+            where possible.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Restore access</h3>
+          <p class="rh-card-text">
+            Recovery authority should help regain control without enabling
+            unauthorised takeover.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Factory reset</h3>
+          <p class="rh-card-text">
+            Destructive reset should be deliberate, explained, and never accidental.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Reflash</h3>
+          <p class="rh-card-text">
+            Reflash or rebuild guidance should be treated as a last resort, not
+            ordinary user support.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Privacy and security</p>
+
+      <h2 class="rh-section-title">
+        Support must not become hidden surveillance.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub support should minimise exposure, avoid automatic cloud telemetry,
+        and make support export explicit, reviewable, and limited.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Included by default</h3>
+          <ul class="rh-card-text">
+            <li>Product class</li>
+            <li>Hardware class</li>
+            <li>Software version</li>
+            <li>Current node state</li>
+            <li>Update and rollback status</li>
+            <li>Recovery availability</li>
+            <li>Redacted service health</li>
+          </ul>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Excluded by default</h3>
+          <ul class="rh-card-text">
+            <li>Message content</li>
+            <li>Private keys</li>
+            <li>Recovery secrets</li>
+            <li>Authentication credentials</li>
+            <li>Unnecessary identities</li>
+            <li>Unredacted private logs</li>
+            <li>Hidden remote access</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/privacy">
+          Privacy policy
+        </a>
+        <a class="rh-button rh-button-secondary" href="/terms">
+          Terms of use
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Current support status</p>
+
+      <h2 class="rh-section-title">
+        RelayHub is not yet in product-supported release.
+      </h2>
+
+      <p class="rh-section-lead">
+        Public support will expand as the product moves through design,
+        development, lab validation, field testing, limited deployment, and
+        supported release.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Now</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Design support
+          </h3>
+          <p class="rh-card-text">
+            Website, documentation, support model, recovery language, and product
+            boundaries are being developed.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-degraded">Next</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Lab support
+          </h3>
+          <p class="rh-card-text">
+            Internal builds and hardware profiles will need repeatable support
+            and recovery evidence.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Later</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Field support
+          </h3>
+          <p class="rh-card-text">
+            Early testers will need clear instructions, feedback channels,
+            recovery guides, and support boundaries.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">Future</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Product support
+          </h3>
+          <p class="rh-card-text">
+            Supported products require validated recovery, documentation,
+            redaction, update safety, and hardware compatibility.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Need help?</p>
+
+        <h2 class="rh-section-title">
+          Support channels are coming as the product matures.
+        </h2>
+
+        <p class="rh-section-lead">
+          For now, register interest if you want updates about RelayHub products,
+          documentation, early testing, hardware validation, or developer participation.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Contact</h3>
+        <p class="rh-card-text">
+          General enquiries can be directed to:
+        </p>
+
+        <p class="rh-card-text" style="margin-top: var(--space-4);">
+          hello@relayhub.tech
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/docs">
+            Read docs
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

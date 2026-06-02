@@ -1,0 +1,541 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Products | RelayHub"
+  description="RelayHub product families for local-first communication, household nodes, radio nodes, infrastructure nodes, and future community services."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Products</p>
+
+      <h1 class="rh-title">
+        A family of nodes for resilient communities.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is not one universal box. It is a capability-aware product family
+        designed for homes, field use, community infrastructure, development,
+        validation, recovery, and future local-first applications.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/relayos">
+          Learn about RelayOS
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Product doctrine</p>
+
+      <h2 class="rh-section-title">
+        Every product has a role, a ceiling, and a recovery path.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub products should never pretend that every node can do everything.
+        Each product must clearly state what it is for, what it can support,
+        what is still experimental, and what it cannot promise.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Capability-aware</h3>
+          <p class="rh-card-text">
+            Hardware capability, software capability, policy permission, runtime
+            availability, trust permission, legal permission, and user enablement
+            must remain separate.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Appliance-first</h3>
+          <p class="rh-card-text">
+            Products should be understandable through status, QR setup, local web
+            UI, clear documentation, and guided recovery.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Validation-gated</h3>
+          <p class="rh-card-text">
+            A product becomes supported through evidence: boot, setup, recovery,
+            rollback, degraded operation, usability, and documentation.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Core node family</p>
+
+      <h2 class="rh-section-title">
+        From household appliance to community infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub products are designed to scale from simple home use to larger
+        community infrastructure without collapsing every role into one device.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-ready">MVP Target</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Home
+          </h3>
+          <p class="rh-card-text">
+            A household communication appliance focused on local-first setup,
+            QR onboarding, owner claim, paired users, node status, updates,
+            recovery, support export, and supported communication paths.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-local">Concept</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Radio
+          </h3>
+          <p class="rh-card-text">
+            A radio-assisted field relay class for validated radio transport,
+            low-power operation, local relay use, and field deployment where lawful,
+            supported, and policy-enabled.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <span class="rh-status rh-status-updating">Future</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Relay Infrastructure
+          </h3>
+          <p class="rh-card-text">
+            A stronger community node for validated bridge, gateway, DTN,
+            observability, federation support, operator controls, and local
+            community services.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Relay Home</p>
+
+      <h2 class="rh-section-title">
+        The household appliance target.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Home is the first product target: a simple local-first node for
+        households and small groups. It should behave like an appliance, not a
+        Linux server.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Designed for</h3>
+          <ul class="rh-card-text">
+            <li>Homes and families</li>
+            <li>Rural properties</li>
+            <li>Small local groups</li>
+            <li>Preparedness circles</li>
+            <li>People who want simple local-first infrastructure</li>
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Expected core functions</h3>
+          <ul class="rh-card-text">
+            <li>Local web dashboard</li>
+            <li>QR setup and pairing</li>
+            <li>Owner claim</li>
+            <li>Paired users and guests</li>
+            <li>Status meanings</li>
+            <li>Updates and rollback</li>
+            <li>Guided recovery</li>
+            <li>Support export</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-8);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">What it should do</h3>
+          <p class="rh-card-text">
+            Help ordinary users understand whether their node is Ready, Local-Only,
+            No Peers, Degraded, Updating, Recovering, or in Error.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">What it should not imply</h3>
+          <p class="rh-card-text">
+            Relay Home should not imply gateway, bridge, infrastructure, or radio
+            transmit capability unless separately validated and enabled.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Support status</h3>
+          <p class="rh-card-text">
+            Relay Home should only be offered as product-supported after setup,
+            recovery, updates, documentation, and field usability are validated.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Relay Radio</p>
+
+      <h2 class="rh-section-title">
+        Field relay and radio transport, where validated and lawful.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Radio is a radio-assisted product direction. It should never imply
+        that radio transmit is automatically lawful, enabled, private, or supported
+        everywhere.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Designed for</h3>
+          <p class="rh-card-text">
+            Field relay, local mesh experiments, portable deployments, low-power
+            use, events, and radio-assisted community communication.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Radio reality</h3>
+          <p class="rh-card-text">
+            Radio operation must respect regional rules, frequency limits, power
+            limits, duty cycle, encryption restrictions, and equipment constraints.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Capability limit</h3>
+          <p class="rh-card-text">
+            A small radio node is not automatically a household appliance,
+            infrastructure node, gateway, or full community server.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Relay Infrastructure</p>
+
+      <h2 class="rh-section-title">
+        Stronger nodes for community-level operation.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Infrastructure is for larger validated deployments where bridge,
+        gateway, DTN, observability, federation, and operator functions may be
+        needed.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Possible roles</h3>
+          <ul class="rh-card-text">
+            <li>Community infrastructure node</li>
+            <li>DTN/store-and-forward node</li>
+            <li>Bridge node</li>
+            <li>Gateway node</li>
+            <li>Local services host</li>
+            <li>Operator dashboard host</li>
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Required boundaries</h3>
+          <ul class="rh-card-text">
+            <li>Bridge disabled unless policy allows</li>
+            <li>Gateway disabled unless policy allows</li>
+            <li>Radio not assumed lawful</li>
+            <li>Support export redacted by default</li>
+            <li>Recovery and rollback preserved</li>
+            <li>Operator controls separated from household UX</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Hardware classes</p>
+
+      <h2 class="rh-section-title">
+        Product names are not hardware classes.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub products may map onto different validated hardware classes over
+        time. Hardware support must be declared, tested, and labelled honestly.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Radio Micro Node</h3>
+          <p class="rh-card-text">
+            Small radio transport and field relay class. Useful for radio movement,
+            not a full platform by itself.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Nano Linux Node</h3>
+          <p class="rh-card-text">
+            Lightweight Linux relay class with constrained compute, storage,
+            queue, and service capacity.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Home Node</h3>
+          <p class="rh-card-text">
+            Household appliance class. The first major product target for simple
+            local-first operation.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Strong Home Node</h3>
+          <p class="rh-card-text">
+            Enhanced household node with more comfortable performance and expanded
+            validated capacity.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Infrastructure Node</h3>
+          <p class="rh-card-text">
+            Community infrastructure class for stronger storage, queues, gateway,
+            bridge, DTN, and operator roles.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Mini PC Node</h3>
+          <p class="rh-card-text">
+            Full infrastructure class for advanced community or regional
+            deployments where validated.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Future applications</p>
+
+      <h2 class="rh-section-title">
+        The product ecosystem can grow beyond nodes.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub begins with communication infrastructure, but the wider ecosystem
+        can support applications for community coordination when product, policy,
+        hardware, and validation are ready.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Relay Chat</h3>
+          <p class="rh-card-text">
+            Future user-facing communication application for local-first messaging
+            and trusted community interaction.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Relay Boards</h3>
+          <p class="rh-card-text">
+            Bulletin boards for announcements, requests, notices, updates,
+            meetings, and local coordination.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Relay Market</h3>
+          <p class="rh-card-text">
+            Marketplace coordination for goods, services, skills, offers, requests,
+            and settlement-neutral exchange.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Relay Library</h3>
+          <p class="rh-card-text">
+            Local-first knowledge base for guides, maps, procedures, community
+            memory, and cultural continuity.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Relay Events</h3>
+          <p class="rh-card-text">
+            Community events, rosters, working bees, meetings, training,
+            field activities, and coordination calendars.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Relay Governance</h3>
+          <p class="rh-card-text">
+            Future tools for proposals, notices, decisions, roles, records,
+            delegation, and community governance.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What supported means</p>
+
+      <h2 class="rh-section-title">
+        Supported is not the same as experimental.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should distinguish between concept, prototype, validation,
+        release candidate, supported, legacy, deprecated, and retired products.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Concept</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Idea defined</h3>
+          <p class="rh-card-text">
+            The product direction exists but is not ready for users.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-degraded">Prototype</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Build tested</h3>
+          <p class="rh-card-text">
+            Some functions work, but recovery, usability, or support may be incomplete.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-updating">Validation</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Evidence gathered</h3>
+          <p class="rh-card-text">
+            Lab, recovery, security, privacy, accessibility, and field testing occur.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">Supported</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">Product ready</h3>
+          <p class="rh-card-text">
+            Documentation, recovery, support, compatibility, and validation gates are complete.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Etsy and direct sales</p>
+
+      <h2 class="rh-section-title">
+        Sales should wait until support is real.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub products may eventually be offered through Etsy, direct order,
+        local builders, certified vendors, or community supply channels. The website
+        should explain products first and only route to purchase when each product
+        is ready.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Etsy listings</h3>
+          <p class="rh-card-text">
+            Useful for early professionally home-built nodes once product status,
+            support terms, documentation, and warranty boundaries are ready.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Direct orders</h3>
+          <p class="rh-card-text">
+            Possible later for controlled batches, pre-orders, community pilots,
+            or certified product-supported releases.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Certified builders</h3>
+          <p class="rh-card-text">
+            Future builders may seek compatibility or certification, but compatibility
+            must not imply official certification.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Early product interest</p>
+
+        <h2 class="rh-section-title">
+          Follow the product family as it develops.
+        </h2>
+
+        <p class="rh-section-lead">
+          Register interest if you want updates on Relay Home, Relay Radio,
+          Relay Infrastructure, RelayOS, future applications, Etsy availability,
+          developer resources, or community pilot programs.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Current status</h3>
+        <p class="rh-card-text">
+          RelayHub products are in design and validation planning. Supported product
+          claims, final prices, hardware support, fulfilment details, and availability
+          will be published only when they are ready.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/relayos">
+            Learn about RelayOS
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

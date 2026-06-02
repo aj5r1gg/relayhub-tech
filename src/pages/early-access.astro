@@ -1,0 +1,328 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Early Access | RelayHub"
+  description="Register interest in RelayHub early access, field testing, developer participation, community pilots, and product updates."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Early access</p>
+
+      <h1 class="rh-title">
+        Help shape the first RelayHub nodes.
+      </h1>
+
+      <p class="rh-subtitle">
+        Register interest in RelayHub updates, field testing, community pilots,
+        developer participation, product availability, and future documentation releases.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#register">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/products">
+          View products
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Current status</p>
+
+      <h2 class="rh-section-title">
+        RelayHub is being designed, validated, and prepared carefully.
+      </h2>
+
+      <p class="rh-section-lead">
+        Early access does not mean the product is already finished. It means you
+        can follow development, express interest, help test carefully, and shape
+        what becomes useful before supported release.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <span class="rh-status rh-status-local">Design</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Product design
+          </h3>
+          <p class="rh-card-text">
+            Website, product language, documentation, onboarding flows, and
+            appliance behaviour are being defined.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-degraded">Validation</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Testing pathway
+          </h3>
+          <p class="rh-card-text">
+            Hardware classes, recovery paths, update safety, local-first operation,
+            and support boundaries must be proven.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <span class="rh-status rh-status-ready">Future</span>
+          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+            Product release
+          </h3>
+          <p class="rh-card-text">
+            Product-supported nodes will only be offered when capability, recovery,
+            documentation, and validation are ready.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Who should register?</p>
+
+      <h2 class="rh-section-title">
+        Early access is for serious users, builders, and communities.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is especially interested in people who care about practical
+        communication, local-first infrastructure, recovery, usability, and real
+        community operation.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Households</h3>
+          <p class="rh-card-text">
+            People who want a simple local communication appliance for home,
+            family, rural property, or preparedness use.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Communities</h3>
+          <p class="rh-card-text">
+            Groups, clubs, local networks, field teams, events, towns, and
+            regional communities exploring local coordination.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Developers</h3>
+          <p class="rh-card-text">
+            Builders interested in NixOS, Reticulum, local web interfaces,
+            hardware validation, documentation, or community applications.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What you may receive</p>
+
+      <h2 class="rh-section-title">
+        Updates first. Testing later. Supported products only when ready.
+      </h2>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Build updates</h3>
+          <p class="rh-card-text">
+            Progress notes on RelayHub, RelayOS, product pages, hardware testing,
+            documentation, and release planning.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Documentation</h3>
+          <p class="rh-card-text">
+            Early guides, setup explanations, recovery notes, privacy reality
+            pages, and product status information.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Pilot invitations</h3>
+          <p class="rh-card-text">
+            Possible invitations to small testing programs when hardware, support,
+            and safety boundaries are ready.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Availability notices</h3>
+          <p class="rh-card-text">
+            Notifications when products, Etsy listings, support material, or
+            developer resources become available.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="register" class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Register</p>
+
+        <h2 class="rh-section-title">
+          Tell us how RelayHub could be useful to you.
+        </h2>
+
+        <p class="rh-section-lead">
+          This form is currently a front-end placeholder. Connect it later to
+          Cloudflare Forms, Tally, Formspree, Buttondown, ConvertKit, or your own
+          local backend.
+        </p>
+
+        <div class="rh-card" style="margin-top: var(--space-8);">
+          <h3 class="rh-card-title">No hype. No false promises.</h3>
+          <p class="rh-card-text">
+            Registering interest does not guarantee acceptance into a test program,
+            product availability, pricing, delivery dates, or support status.
+            RelayHub will only claim supported capability after validation.
+          </p>
+        </div>
+      </div>
+
+      <form class="rh-card" name="early-access" method="POST" action="#">
+        <label class="rh-label" for="name">Name</label>
+        <input
+          class="rh-input"
+          id="name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          required
+        />
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="email">Email</label>
+        <input
+          class="rh-input"
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+        />
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="interest">Primary interest</label>
+        <select class="rh-select" id="interest" name="interest" required>
+          <option value="">Select one</option>
+          <option value="home">Home / household use</option>
+          <option value="rural">Rural property</option>
+          <option value="community">Community group</option>
+          <option value="event">Event / field team</option>
+          <option value="developer">Developer / builder</option>
+          <option value="operator">Infrastructure operator</option>
+          <option value="vendor">Vendor / partner</option>
+        </select>
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="product">Product interest</label>
+        <select class="rh-select" id="product" name="product">
+          <option value="">Select one</option>
+          <option value="relay-home">Relay Home</option>
+          <option value="relay-radio">Relay Radio</option>
+          <option value="relay-infrastructure">Relay Infrastructure</option>
+          <option value="relayos">RelayOS</option>
+          <option value="community-apps">Community applications</option>
+          <option value="not-sure">Not sure yet</option>
+        </select>
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="message">What would you use RelayHub for?</label>
+        <textarea
+          class="rh-textarea"
+          id="message"
+          name="message"
+          rows="6"
+          placeholder="Tell us about your household, group, community, field use, developer interest, or infrastructure idea."
+        ></textarea>
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="location">Location / region</label>
+        <input
+          class="rh-input"
+          id="location"
+          name="location"
+          type="text"
+          placeholder="Example: Wollongong NSW, Canberra ACT, regional NSW"
+        />
+
+        <div style="height: var(--space-5);"></div>
+
+        <label class="rh-label" for="testing">
+          Are you interested in future testing?
+        </label>
+        <select class="rh-select" id="testing" name="testing">
+          <option value="">Select one</option>
+          <option value="yes">Yes, I may be interested</option>
+          <option value="maybe">Maybe, depending on requirements</option>
+          <option value="updates-only">No, updates only</option>
+        </select>
+
+        <div style="height: var(--space-6);"></div>
+
+        <button class="rh-button rh-button-accent" type="submit">
+          Register interest
+        </button>
+
+        <p class="rh-help">
+          By submitting this form, you agree to be contacted about RelayHub updates.
+          Personal information is handled according to the Privacy Policy.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Participation expectations</p>
+
+      <h2 class="rh-section-title">
+        Early access should improve the product, not create false confidence.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Be realistic</h3>
+          <p class="rh-card-text">
+            Early builds may be incomplete, limited, unstable, or unsuitable for
+            critical use.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Give useful feedback</h3>
+          <p class="rh-card-text">
+            The most valuable feedback explains what worked, what failed, what
+            confused people, and what recovery steps were unclear.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Respect boundaries</h3>
+          <p class="rh-card-text">
+            Do not present early builds as certified, supported, emergency-ready,
+            legally universal, or suitable for every user.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
