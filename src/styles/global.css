@@ -882,3 +882,33 @@ a {
   opacity: 0;
   pointer-events: none;
 }
+
+/* FAQ */
+
+.rh-faq-list {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-10);
+}
+
+.rh-faq-item {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: rgb(255 255 255 / 0.88);
+  box-shadow: var(--shadow-sm);
+}
+
+.rh-faq-item h3 {
+  margin: 0;
+  color: var(--rh-navy-950);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+}
+
+.rh-faq-item p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}

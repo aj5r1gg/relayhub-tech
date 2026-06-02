@@ -1,0 +1,178 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const faqs = [
+  {
+    question: "What is RelayHub?",
+    answer:
+      "RelayHub is a local-first ecosystem for helping communities communicate, coordinate, share knowledge, trade, govern, recover, and remain connected. It is not just a messaging app or a single hardware product.",
+  },
+  {
+    question: "What is RelayOS?",
+    answer:
+      "RelayOS is the appliance platform planned to power RelayHub nodes. It is designed to provide onboarding, recovery, updates, observability, policy enforcement, Reticulum integration, and local web-based management.",
+  },
+  {
+    question: "Is RelayHub the same as Reticulum?",
+    answer:
+      "No. Reticulum is the communications substrate. RelayHub uses Reticulum as core infrastructure, while RelayOS and RelayHub add appliance-like usability, onboarding, recovery, policy governance, documentation, and community services.",
+  },
+  {
+    question: "Does RelayHub require the internet?",
+    answer:
+      "Basic local-first operation should not depend on continuous internet access. Some features may be internet-assisted, but the goal is for useful local operation, setup, recovery, and community coordination to continue during disruption where supported.",
+  },
+  {
+    question: "Is RelayHub anonymous?",
+    answer:
+      "No. RelayHub must not be described as perfectly anonymous. It can reduce dependence on central services and support resilient communication, but metadata, trusted peers, radio visibility, device seizure, and local configuration still matter.",
+  },
+  {
+    question: "Who is RelayHub for?",
+    answer:
+      "RelayHub is for households, local groups, rural communities, field teams, developers, infrastructure operators, and communities that want practical local-first infrastructure with simple onboarding and realistic recovery paths.",
+  },
+  {
+    question: "Will ordinary people be able to use it?",
+    answer:
+      "That is the product goal. The target experience is: plug in node, open app or local web UI, scan QR code, communicate where supported. The system must behave like an appliance, not a Linux server.",
+  },
+  {
+    question: "What hardware will RelayHub use?",
+    answer:
+      "RelayHub is designed around hardware classes, not one universal device. Planned classes include Home Nodes, Strong Home Nodes, Infrastructure Nodes, Mini PC Nodes, Nano Linux Nodes, and Radio Micro Nodes.",
+  },
+  {
+    question: "Can every node do everything?",
+    answer:
+      "No. RelayHub is capability-aware. Hardware capability, software capability, policy permission, legal permission, trust permission, runtime state, and user enablement are all separate. A feature is not active just because hardware exists.",
+  },
+  {
+    question: "Will there be radio support?",
+    answer:
+      "Radio support is part of the broader architecture, but radio transmit must be validated, region-aware, policy-controlled, and legally configured. RelayHub will not assume that radio operation is lawful everywhere.",
+  },
+  {
+    question: "Can I use RelayHub for emergencies?",
+    answer:
+      "RelayHub is being designed for resilience and degraded operation, but it should not be treated as a guaranteed emergency service. It cannot promise universal coverage, guaranteed delivery, or replacement of official emergency systems.",
+  },
+  {
+    question: "What happens if something breaks?",
+    answer:
+      "Recovery is a core design requirement. RelayHub systems should provide rollback, guided recovery, safe reset, identity preservation where possible, support export, and clear degraded-state explanations.",
+  },
+  {
+    question: "Is RelayHub available now?",
+    answer:
+      "RelayHub is currently being designed, built, tested, and validated. Early access registration is available, but product-supported hardware should only be offered once capability, recovery, documentation, and validation are ready.",
+  },
+  {
+    question: "Can developers build for RelayHub?",
+    answer:
+      "Yes. RelayHub is expected to support developers through documentation, local APIs, Reticulum integration, application concepts, validation requirements, and future ecosystem services.",
+  },
+  {
+    question: "Can communities run their own RelayHub network?",
+    answer:
+      "That is one of the goals. Communities should be able to operate locally, form trust relationships, coordinate services, and federate voluntarily with other communities where policy and capability allow.",
+  },
+  {
+    question: "Will RelayHub include a marketplace?",
+    answer:
+      "A marketplace is part of the broader ecosystem vision. It should support local trade, services, requests, offers, reputation, and settlement-neutral coordination. It must not imply payment custody or settlement guarantees unless separately implemented and validated.",
+  },
+  {
+    question: "How do I get involved?",
+    answer:
+      "You can register interest through the Early Access page or send a message through the Contact page. Developers, communities, field testers, and practical operators are especially useful at this stage.",
+  },
+];
+---
+
+<BaseLayout
+  title="FAQ | RelayHub"
+  description="Frequently asked questions about RelayHub, RelayOS, Reticulum, local-first operation, hardware nodes, recovery, privacy, radio support, communities, and early access."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">FAQ</p>
+
+      <h1 class="rh-title">
+        Frequently asked questions.
+      </h1>
+
+      <p class="rh-subtitle">
+        Clear answers about RelayHub, RelayOS, Reticulum, hardware nodes,
+        local-first operation, privacy, recovery, radio support, and early access.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/contact">
+          Contact RelayHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Plain answers</p>
+
+      <h2 class="rh-section-title">
+        RelayHub should be understandable before it is technical.
+      </h2>
+
+      <p class="rh-section-lead">
+        These answers avoid hype and false guarantees. RelayHub is being built
+        around practical usefulness, local-first operation, capability awareness,
+        recovery, and realistic trust.
+      </p>
+
+      <div class="rh-faq-list">
+        {faqs.map((item) => (
+          <article class="rh-faq-item">
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Still curious?</p>
+
+        <h2 class="rh-section-title">
+          The best questions will shape the product.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is still being formed. Questions from households, developers,
+          communities, field operators, and practical users help reveal what must
+          be explained, simplified, validated, or redesigned.
+        </p>
+      </div>
+
+      <div class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Ask something specific</h3>
+        <p class="rh-card-text">
+          Use the Contact page for detailed questions, pilot ideas, developer
+          interest, documentation feedback, community use cases, or practical
+          deployment concerns.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Contact RelayHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
