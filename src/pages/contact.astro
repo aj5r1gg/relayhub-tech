@@ -77,6 +77,8 @@ const errorMessage =
           )
         }
 
+        <input id="started-at" name="startedAt" type="hidden" value="" />
+
         <div class="honeypot" aria-hidden="true">
           <label for="website">Website</label>
           <input
@@ -135,4 +137,12 @@ const errorMessage =
       </form>
     </div>
   </section>
+
+  <script>
+    const startedAtInput = document.querySelector<HTMLInputElement>("#started-at");
+
+    if (startedAtInput) {
+      startedAtInput.value = String(Date.now());
+    }
+  </script>
 </BaseLayout>

@@ -5,6 +5,7 @@ const EMAIL_TO = "moneywise69@proton.me";
 
 const RATE_LIMIT_MAX_REQUESTS = 5;
 const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
+const MIN_FORM_FILL_TIME_MS = 3000;
 
 export default {
   async fetch(request, env) {
@@ -67,6 +68,11 @@ async function handleEarlyAccessPost(request, env, url) {
       return redirect(url, "/early-access?submitted=true");
     }
 
+    if (isSubmittedTooQuickly(form)) {
+      console.warn("Early access form submitted too quickly.");
+      return redirect(url, "/early-access?submitted=true");
+    }
+
     const ip = getClientIp(request);
     const rateLimit = await checkRateLimit(env, "early-access", ip);
 
@@ -125,6 +131,11 @@ async function handleContactPost(request, env, url) {
 
     if (website) {
       console.warn("Contact honeypot triggered.");
+      return redirect(url, "/contact?submitted=true");
+    }
+
+    if (isSubmittedTooQuickly(form)) {
+      console.warn("Contact form submitted too quickly.");
       return redirect(url, "/contact?submitted=true");
     }
 
@@ -224,6 +235,17 @@ async function handleNewsletterAdminCsv(request, env, url) {
       "cache-control": "no-store",
     },
   });
+}
+
+function isSubmittedTooQuickly(form) {
+  const startedAt = Number(cleanField(form.get("startedAt"), 32));
+  const submittedAt = Date.now();
+
+  if (!startedAt) {
+    return true;
+  }
+
+  return submittedAt - startedAt < MIN_FORM_FILL_TIME_MS;
 }
 
 function isAdminAuthorized(request, env, url) {
