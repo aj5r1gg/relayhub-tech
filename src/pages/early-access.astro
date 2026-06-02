@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const submitted = Astro.url.searchParams.get("submitted") === "true";
 ---
 
 <BaseLayout
@@ -29,6 +31,25 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
     </div>
   </section>
+
+  {
+    submitted && (
+      <section class="rh-section rh-bg-soft">
+        <div class="rh-container">
+          <article class="rh-card">
+            <span class="rh-status rh-status-ready">Received</span>
+            <h2 class="rh-card-title" style="margin-top: var(--space-5);">
+              Registration received
+            </h2>
+            <p class="rh-card-text">
+              Thanks for registering your interest in RelayHub. Your details have
+              been submitted successfully.
+            </p>
+          </article>
+        </div>
+      </section>
+    )
+  }
 
   <section class="rh-section">
     <div class="rh-container">
@@ -177,9 +198,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </h2>
 
         <p class="rh-section-lead">
-          This form is currently a front-end placeholder. Connect it later to
-          Cloudflare Forms, Tally, Formspree, Buttondown, ConvertKit, or your own
-          local backend.
+          This form now submits through the RelayHub Cloudflare Worker endpoint.
+          Email delivery will be added after the form workflow is fully validated.
         </p>
 
         <div class="rh-card" style="margin-top: var(--space-8);">
@@ -194,26 +214,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <form class="rh-card" name="early-access" method="POST" action="/api/early-access">
         <label class="rh-label" for="name">Name</label>
-        <input
-          class="rh-input"
-          id="name"
-          name="name"
-          type="text"
-          autocomplete="name"
-          required
-        />
+        <input class="rh-input" id="name" name="name" type="text" autocomplete="name" required />
 
         <div style="height: var(--space-5);"></div>
 
         <label class="rh-label" for="email">Email</label>
-        <input
-          class="rh-input"
-          id="email"
-          name="email"
-          type="email"
-          autocomplete="email"
-          required
-        />
+        <input class="rh-input" id="email" name="email" type="email" autocomplete="email" required />
 
         <div style="height: var(--space-5);"></div>
 
@@ -266,9 +272,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         <div style="height: var(--space-5);"></div>
 
-        <label class="rh-label" for="testing">
-          Are you interested in future testing?
-        </label>
+        <label class="rh-label" for="testing">Are you interested in future testing?</label>
         <select class="rh-select" id="testing" name="testing">
           <option value="">Select one</option>
           <option value="yes">Yes, I may be interested</option>
@@ -284,7 +288,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
         <p class="rh-help">
           By submitting this form, you agree to be contacted about RelayHub updates.
-          Personal information is handled according to the Privacy Policy.
+          Personal information is handled according to the <a href="/privacy">Privacy Policy</a>.
         </p>
       </form>
     </div>
