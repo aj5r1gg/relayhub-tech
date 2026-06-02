@@ -1,0 +1,183 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const examples = [
+  {
+    title: "Local goods",
+    text: "List useful items, tools, surplus produce, equipment, supplies, and community resources.",
+  },
+  {
+    title: "Local services",
+    text: "Offer repair work, transport help, tutoring, technical support, gardening, building, and practical skills.",
+  },
+  {
+    title: "Requests",
+    text: "Ask for help, materials, labour, advice, transport, introductions, or community support.",
+  },
+  {
+    title: "Skills exchange",
+    text: "Coordinate learning, mentoring, apprenticeships, volunteer help, workshops, and mutual assistance.",
+  },
+];
+
+const principles = [
+  "Trade coordination is separate from payment settlement.",
+  "Marketplace visibility does not equal trust or endorsement.",
+  "Communities should control their own marketplace rules.",
+  "Listings should work locally where practical.",
+  "Reputation should be transparent, challengeable, and never absolute.",
+  "Illegal, unsafe, or exploitative listings must be policy-governed.",
+];
+---
+
+<BaseLayout
+  title="Marketplace | RelayHub"
+  description="Explore the RelayHub marketplace concept for local trade, services, requests, skills exchange, community notices, and settlement-neutral economic coordination."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Marketplace concept</p>
+
+      <h1 class="rh-title">
+        Local trade without making messaging the whole story.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is not just about communication. A future marketplace could help
+        communities coordinate goods, services, skills, requests, notices, and
+        local economic activity through local-first infrastructure.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/communities-directory">
+          View community directory
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Future capability</p>
+
+      <h2 class="rh-section-title">
+        A community marketplace should coordinate activity, not control it.
+      </h2>
+
+      <p class="rh-section-lead">
+        This page is a concept preview. It shows how RelayHub could support
+        local trade and mutual assistance while keeping settlement, trust,
+        legality, and community rules explicit.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {examples.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">What it could include</p>
+
+        <h2 class="rh-section-title">
+          Notices, offers, requests, services, and skills.
+        </h2>
+
+        <p class="rh-section-lead">
+          A RelayHub marketplace should help communities see what people need,
+          what people can offer, what skills exist locally, and what coordination
+          is possible.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Community noticeboard</h3>
+          <p class="rh-card-text">
+            Announcements, local needs, working bees, workshops, lost-and-found,
+            transport requests, tool sharing, and community updates.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Offers and requests</h3>
+          <p class="rh-card-text">
+            People could post what they have, what they need, what they can do,
+            and what they are willing to exchange.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Local-first access</h3>
+          <p class="rh-card-text">
+            Marketplace data should remain useful inside a local community even
+            when wider internet or federation links are unavailable.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Marketplace principles</p>
+
+      <h2 class="rh-section-title">
+        Coordination must not pretend to be custody, endorsement, or trust.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {principles.map((principle) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{principle}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Settlement-neutral</p>
+
+        <h2 class="rh-section-title">
+          RelayHub should help people coordinate trade without forcing one payment model.
+        </h2>
+
+        <p class="rh-section-lead">
+          A future marketplace may support cash, barter, mutual credit, local
+          credit, bank transfer, TNE, or other lawful settlement methods. Unless
+          separately implemented and validated, RelayHub should not claim to
+          custody funds or confirm external payment.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Important boundary</h3>
+        <p class="rh-card-text">
+          Marketplace listings would not automatically mean endorsement,
+          certification, payment confirmation, delivery guarantee, or trust.
+          Communities must be able to define their own rules while still obeying
+          safety, recovery, legal, and policy boundaries.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Discuss marketplace use
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
