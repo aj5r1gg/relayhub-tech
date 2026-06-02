@@ -13,9 +13,7 @@ export default {
 
     if (url.pathname === "/api/early-access") {
       if (request.method === "GET") {
-        return textResponse(
-          "Early access endpoint is live. Submit the form with POST."
-        );
+        return textResponse("Early access endpoint is live. Submit the form with POST.");
       }
 
       if (request.method === "POST") {
@@ -74,6 +72,14 @@ async function handleEarlyAccessPost(request, env, url) {
     }
 
     const ip = getClientIp(request);
+
+    const turnstileValid = await verifyTurnstile(form, env, ip);
+
+    if (!turnstileValid) {
+      console.warn("Early access Turnstile validation failed.");
+      return redirect(url, "/early-access?submitted=true");
+    }
+
     const rateLimit = await checkRateLimit(env, "early-access", ip);
 
     if (!rateLimit.allowed) {
@@ -140,6 +146,14 @@ async function handleContactPost(request, env, url) {
     }
 
     const ip = getClientIp(request);
+
+    const turnstileValid = await verifyTurnstile(form, env, ip);
+
+    if (!turnstileValid) {
+      console.warn("Contact Turnstile validation failed.");
+      return redirect(url, "/contact?submitted=true");
+    }
+
     const rateLimit = await checkRateLimit(env, "contact", ip);
 
     if (!rateLimit.allowed) {
@@ -193,6 +207,51 @@ async function handleContactPost(request, env, url) {
   }
 }
 
+async function verifyTurnstile(form, env, ip) {
+  const token = cleanField(form.get("cf-turnstile-response"), 4096);
+
+  if (!env.TURNSTILE_SECRET_KEY) {
+    console.error("TURNSTILE_SECRET_KEY is not configured.");
+    return false;
+  }
+
+  if (!token) {
+    return false;
+  }
+
+  const body = new FormData();
+  body.append("secret", env.TURNSTILE_SECRET_KEY);
+  body.append("response", token);
+  body.append("remoteip", ip);
+
+  const response = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      body,
+    }
+  );
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const result = await response.json();
+
+  return result.success === true;
+}
+
+function isSubmittedTooQuickly(form) {
+  const startedAt = Number(cleanField(form.get("startedAt"), 32));
+  const submittedAt = Date.now();
+
+  if (!startedAt) {
+    return true;
+  }
+
+  return submittedAt - startedAt < MIN_FORM_FILL_TIME_MS;
+}
+
 async function handleNewsletterAdminJson(request, env, url) {
   if (!isAdminAuthorized(request, env, url)) {
     return jsonResponse({ error: "Unauthorized" }, 401);
@@ -235,17 +294,6 @@ async function handleNewsletterAdminCsv(request, env, url) {
       "cache-control": "no-store",
     },
   });
-}
-
-function isSubmittedTooQuickly(form) {
-  const startedAt = Number(cleanField(form.get("startedAt"), 32));
-  const submittedAt = Date.now();
-
-  if (!startedAt) {
-    return true;
-  }
-
-  return submittedAt - startedAt < MIN_FORM_FILL_TIME_MS;
 }
 
 function isAdminAuthorized(request, env, url) {
