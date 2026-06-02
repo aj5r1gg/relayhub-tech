@@ -51,6 +51,22 @@ export default {
       return methodNotAllowed("GET");
     }
 
+    if (url.pathname === "/api/admin/contact") {
+      if (request.method === "GET") {
+        return handleContactAdminJson(request, env, url);
+      }
+
+      return methodNotAllowed("GET");
+    }
+
+    if (url.pathname === "/api/admin/contact.csv") {
+      if (request.method === "GET") {
+        return handleContactAdminCsv(request, env, url);
+      }
+
+      return methodNotAllowed("GET");
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
@@ -296,6 +312,50 @@ async function handleNewsletterAdminCsv(request, env, url) {
   });
 }
 
+async function handleContactAdminJson(request, env, url) {
+  if (!isAdminAuthorized(request, env, url)) {
+    return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
+  const q = cleanField(url.searchParams.get("q"), 200);
+  const query = buildContactQuery(q, 50);
+
+  const total = await countContactMessages(env, q);
+  const result = await env.RELAYHUB_DB.prepare(query.sql)
+    .bind(...query.bindings)
+    .all();
+
+  return jsonResponse({
+    total,
+    messages: result.results || [],
+  });
+}
+
+async function handleContactAdminCsv(request, env, url) {
+  if (!isAdminAuthorized(request, env, url)) {
+    return textResponse("Unauthorized", 401);
+  }
+
+  const q = cleanField(url.searchParams.get("q"), 200);
+  const query = buildContactQuery(q, 1000);
+
+  const result = await env.RELAYHUB_DB.prepare(query.sql)
+    .bind(...query.bindings)
+    .all();
+
+  const rows = result.results || [];
+  const csv = buildContactCsv(rows);
+
+  return new Response(csv, {
+    status: 200,
+    headers: {
+      "content-type": "text/csv; charset=UTF-8",
+      "content-disposition": 'attachment; filename="relayhub-contact-messages.csv"',
+      "cache-control": "no-store",
+    },
+  });
+}
+
 function isAdminAuthorized(request, env, url) {
   const expectedToken = env.RELAYHUB_ADMIN_TOKEN;
 
@@ -349,6 +409,34 @@ function buildNewsletterQuery(q, limit) {
   };
 }
 
+function buildContactQuery(q, limit) {
+  const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 1000);
+
+  if (!q) {
+    return {
+      sql: `SELECT id, created_at, name, email, topic, message
+            FROM contact_messages
+            ORDER BY id DESC
+            LIMIT ?`,
+      bindings: [safeLimit],
+    };
+  }
+
+  const pattern = `%${q}%`;
+
+  return {
+    sql: `SELECT id, created_at, name, email, topic, message
+          FROM contact_messages
+          WHERE name LIKE ?
+             OR email LIKE ?
+             OR topic LIKE ?
+             OR message LIKE ?
+          ORDER BY id DESC
+          LIMIT ?`,
+    bindings: [pattern, pattern, pattern, pattern, safeLimit],
+  };
+}
+
 async function countNewsletterSignups(env, q) {
   if (!q) {
     const result = await env.RELAYHUB_DB.prepare(
@@ -374,8 +462,46 @@ async function countNewsletterSignups(env, q) {
   return result?.total || 0;
 }
 
+async function countContactMessages(env, q) {
+  if (!q) {
+    const result = await env.RELAYHUB_DB.prepare(
+      `SELECT COUNT(*) AS total FROM contact_messages`
+    ).first();
+
+    return result?.total || 0;
+  }
+
+  const pattern = `%${q}%`;
+
+  const result = await env.RELAYHUB_DB.prepare(
+    `SELECT COUNT(*) AS total
+     FROM contact_messages
+     WHERE name LIKE ?
+        OR email LIKE ?
+        OR topic LIKE ?
+        OR message LIKE ?`
+  )
+    .bind(pattern, pattern, pattern, pattern)
+    .first();
+
+  return result?.total || 0;
+}
+
 function buildNewsletterCsv(rows) {
   const headers = ["id", "created_at", "name", "email", "community", "message"];
+
+  const lines = [
+    headers.join(","),
+    ...rows.map((row) =>
+      headers.map((header) => csvEscape(row[header] ?? "")).join(",")
+    ),
+  ];
+
+  return `${lines.join("\r\n")}\r\n`;
+}
+
+function buildContactCsv(rows) {
+  const headers = ["id", "created_at", "name", "email", "topic", "message"];
 
   const lines = [
     headers.join(","),
