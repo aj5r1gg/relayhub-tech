@@ -1,0 +1,213 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const gates = [
+  "Build works reproducibly.",
+  "Core operation is validated.",
+  "Recovery path is validated.",
+  "Rollback behaviour is validated.",
+  "Degraded operation is tested.",
+  "Documentation is complete enough for users.",
+  "Known limits are clearly stated.",
+  "Support boundary is defined.",
+];
+
+const validationAreas = [
+  {
+    title: "Hardware class validation",
+    text: "Each node class must be tested against its real capability ceiling. A small radio node, home node, and infrastructure node should not be treated as equivalent.",
+  },
+  {
+    title: "Recovery validation",
+    text: "Rollback, safe reset, degraded boot, identity preservation, and support export must be tested before being promoted as supported behaviour.",
+  },
+  {
+    title: "Operational mode validation",
+    text: "Local-only, internet-assisted, offline, degraded, and recovery modes should be tested as distinct states, not assumed from normal operation.",
+  },
+  {
+    title: "Privacy claim validation",
+    text: "Privacy claims must be realistic. RelayHub must not imply perfect anonymity, invisible metadata, or immunity from physical or radio observation.",
+  },
+];
+
+const experimentalRules = [
+  "Experimental features may be shown as concepts or prototypes.",
+  "Experimental features must not be described as product-supported.",
+  "Experimental features must have visible limits.",
+  "Users should know when something is unvalidated.",
+  "Recovery and safety risks should be named before field trials.",
+  "A feature is not supported merely because it works once.",
+];
+---
+
+<BaseLayout
+  title="Validation | RelayHub"
+  description="RelayHub validation discipline covering release gates, hardware class testing, recovery drills, degraded operation, supported status, and experimental features."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Validation</p>
+
+      <h1 class="rh-title">
+        Claims must be proven before they become promises.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub should only treat a capability as supported when it has been
+        tested, observed, reproduced, documented, and given a realistic recovery
+        path.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/roadmap">
+          View roadmap
+        </a>
+        <a class="rh-button rh-button-secondary" href="/recovery">
+          Recovery model
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Release discipline</p>
+
+      <h2 class="rh-section-title">
+        Supported means more than technically possible.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should distinguish between ideas, prototypes, experimental
+        features, release candidates, and supported product behaviour. This keeps
+        users safe and prevents marketing from outrunning reality.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {validationAreas.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Release gates</p>
+
+        <h2 class="rh-section-title">
+          A feature should pass gates before broad release.
+        </h2>
+
+        <p class="rh-section-lead">
+          Release gates help ensure that capability, recovery, documentation,
+          support, and limitations are ready before users rely on a feature.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-validation-list">
+          {gates.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Supported status</p>
+
+        <h2 class="rh-section-title">
+          “Supported” should be earned.
+        </h2>
+
+        <p class="rh-section-lead">
+          A supported RelayHub capability should have known requirements, tested
+          behaviour, clear documentation, visible status, defined recovery paths,
+          and a realistic support boundary.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Concept</h3>
+          <p class="rh-card-text">
+            The idea is being explored. It should not be relied upon.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Experimental</h3>
+          <p class="rh-card-text">
+            The feature may work in limited conditions, but behaviour, recovery,
+            and support are not yet complete.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Supported</h3>
+          <p class="rh-card-text">
+            The feature has been validated, documented, bounded, and given a
+            recovery and support path.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Experimental boundaries</p>
+
+      <h2 class="rh-section-title">
+        Experiments should be visible as experiments.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {experimentalRules.map((rule) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{rule}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Validation principle</p>
+
+        <h2 class="rh-section-title">
+          Test normal operation, recovery, and failure.
+        </h2>
+
+        <p class="rh-section-lead">
+          A system is not validated merely because it works on a good day.
+          RelayHub must test degraded operation, failed updates, lost transport,
+          limited hardware, recovery paths, and user comprehension.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Credibility rule</h3>
+        <p class="rh-card-text">
+          No major claim is complete unless it is testable, observable,
+          reproducible, recoverable, and backed by evidence.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Discuss validation
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

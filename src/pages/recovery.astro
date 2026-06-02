@@ -1,0 +1,218 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const recoveryPaths = [
+  {
+    title: "Rollback",
+    text: "Failed updates should not leave a node unusable. RelayHub should support rollback-safe upgrades wherever practical.",
+  },
+  {
+    title: "Safe reset",
+    text: "Factory reset must be understandable and should avoid destroying identity or recovery material unless the user clearly chooses that path.",
+  },
+  {
+    title: "Identity preservation",
+    text: "Node, owner, user, and community identities should survive recovery where possible, with clear limits and documented procedures.",
+  },
+  {
+    title: "Degraded boot",
+    text: "A damaged or partially failed node should still expose recovery access where practical instead of failing silently.",
+  },
+];
+
+const userActions = [
+  "Open the local web UI.",
+  "Check the visible system status.",
+  "Read the degraded-state message.",
+  "Export a support bundle if available.",
+  "Try guided recovery before factory reset.",
+  "Preserve identity material before replacing hardware.",
+  "Avoid enabling new exposure during recovery.",
+  "Ask for support with logs, status, and context.",
+];
+
+const boundaries = [
+  "Recovery cannot undo every physical device failure.",
+  "Recovery cannot guarantee restoration of data that was never backed up.",
+  "Recovery cannot bypass lawful or regional constraints.",
+  "Recovery should not silently transfer identity to a new owner.",
+  "Recovery must not expose secrets in support exports.",
+  "Recovery claims must be validated before being treated as product-supported.",
+];
+---
+
+<BaseLayout
+  title="Recovery | RelayHub"
+  description="RelayHub recovery-first design covering rollback, safe reset, identity preservation, degraded boot, support exports, and realistic recovery boundaries."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Recovery</p>
+
+      <h1 class="rh-title">
+        Recovery is not an afterthought.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub treats recovery as core architecture. A resilient community
+        system must be understandable, repairable, observable, and recoverable
+        when something goes wrong.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/support">
+          Support
+        </a>
+        <a class="rh-button rh-button-secondary" href="/security">
+          Security
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Recovery-first design</p>
+
+      <h2 class="rh-section-title">
+        A system that cannot be recovered should not be called resilient.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is intended to behave like an appliance, not a fragile server.
+        Recovery paths should be visible, documented, tested, and safe for
+        ordinary people under stress.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {recoveryPaths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">When something breaks</p>
+
+        <h2 class="rh-section-title">
+          Users need a clear path, not a terminal panic.
+        </h2>
+
+        <p class="rh-section-lead">
+          The recovery experience should explain what still works, what is
+          degraded, what changed, what can be attempted safely, and what should
+          not be done without understanding the consequences.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-recovery-list">
+          {userActions.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Identity continuity</p>
+
+        <h2 class="rh-section-title">
+          Recovery must respect identity and ownership.
+        </h2>
+
+        <p class="rh-section-lead">
+          Recovery is not just reinstalling software. RelayHub must distinguish
+          node identity, owner identity, user identity, community identity, trust
+          records, and recovery authority.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Preserve where possible</h3>
+          <p class="rh-card-text">
+            Safe recovery should preserve identities, trust records, local
+            configuration, and important community data where technically and
+            policy-wise possible.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Reset only with clarity</h3>
+          <p class="rh-card-text">
+            Destructive reset paths should clearly explain what will be erased,
+            what can be exported, what cannot be recovered, and what ownership
+            consequences follow.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Transfer is not automatic</h3>
+          <p class="rh-card-text">
+            Recovery must not silently transfer identity, administrative control,
+            or community authority to another person or device.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Boundaries</p>
+
+      <h2 class="rh-section-title">
+        Recovery has limits, and those limits must be visible.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {boundaries.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Support exports</p>
+
+        <h2 class="rh-section-title">
+          Support should help without exposing secrets.
+        </h2>
+
+        <p class="rh-section-lead">
+          A future RelayHub support bundle should help diagnose problems while
+          excluding private keys, message contents, sensitive identity material,
+          and unnecessary personal data by default.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Recovery principle</h3>
+        <p class="rh-card-text">
+          The best recovery system is not merely powerful. It is understandable,
+          observable, reversible where possible, privacy-preserving, and safe for
+          non-technical users.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Ask about recovery
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

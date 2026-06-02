@@ -951,3 +951,50 @@ a {
 .rh-admin-table td {
   color: var(--color-text-muted);
 }
+
+/* Security */
+
+.rh-security-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-security-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Trust */
+
+.rh-trust-state-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Recovery */
+
+.rh-recovery-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-recovery-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Validation */
+
+.rh-validation-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-validation-list li + li {
+  margin-top: var(--space-2);
+}

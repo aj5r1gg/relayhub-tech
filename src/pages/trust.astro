@@ -1,0 +1,224 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const distinctions = [
+  {
+    title: "Discovery is not trust",
+    text: "Finding a node, person, community, or service does not mean it is trusted, approved, safe, reachable, or permitted.",
+  },
+  {
+    title: "Reachability is not permission",
+    text: "A route existing through Reticulum or another transport does not mean communication, federation, marketplace access, or gateway use is allowed.",
+  },
+  {
+    title: "Identity is not reputation",
+    text: "An identity says who or what something claims to be. Reputation develops through behaviour, history, verification, and community experience.",
+  },
+  {
+    title: "Capability is not activation",
+    text: "A node may have hardware or software capability, but the feature still requires policy permission, trust permission, legal permission, runtime availability, and user enablement.",
+  },
+];
+
+const states = [
+  "Unknown",
+  "Discovered",
+  "Introduced",
+  "Paired",
+  "Trusted",
+  "Limited",
+  "Federated",
+  "Quarantined",
+  "Revoked",
+  "Restored",
+];
+
+const principles = [
+  "Trust should be explicit.",
+  "Trust should be understandable.",
+  "Trust should be revocable.",
+  "Trust should degrade safely.",
+  "Trust should be observable.",
+  "Trust should never be assumed from network proximity.",
+  "Trust should support human relationships rather than replace them.",
+  "Trust should remain subordinate to safety, recovery, legality, and policy.",
+];
+---
+
+<BaseLayout
+  title="Trust | RelayHub"
+  description="RelayHub trust model explaining discovery, identity, reachability, permission, policy, reputation, federation, revocation, and safe community relationships."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Trust model</p>
+
+      <h1 class="rh-title">
+        Trust is earned, limited, and revocable.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub separates discovery, identity, capability, reachability,
+        permission, policy, reputation, and trust so communities can connect
+        without blindly trusting everything they can see.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/communities">
+          Community model
+        </a>
+        <a class="rh-button rh-button-secondary" href="/security">
+          Security posture
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Core rule</p>
+
+      <h2 class="rh-section-title">
+        Nothing becomes trusted merely because it is visible.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should help people and communities discover each other, but
+        discovery must never automatically grant access, authority, endorsement,
+        federation, marketplace visibility, gateway use, or administrative power.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {distinctions.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Trust states</p>
+
+        <h2 class="rh-section-title">
+          Trust should have visible states.
+        </h2>
+
+        <p class="rh-section-lead">
+          People should be able to understand whether a peer, node, community,
+          service, or federation is unknown, discovered, trusted, limited,
+          quarantined, revoked, or restored.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <div class="rh-trust-state-list">
+          {states.map((state) => (
+            <span class="rh-status rh-status-local">{state}</span>
+          ))}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Community relationships</p>
+
+        <h2 class="rh-section-title">
+          Trust is social before it is technical.
+        </h2>
+
+        <p class="rh-section-lead">
+          Technical identity can support trust, but it cannot replace judgement,
+          relationships, accountability, demonstrated reliability, local
+          knowledge, or community governance.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Household trust</h3>
+          <p class="rh-card-text">
+            A household may trust family members, devices, local users, and
+            recovery contacts differently. These roles should not collapse into
+            one universal permission.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Community trust</h3>
+          <p class="rh-card-text">
+            Communities may recognise members, stewards, operators, guests,
+            vendors, developers, and neighbouring communities under different
+            rules.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Federation trust</h3>
+          <p class="rh-card-text">
+            Federation should be voluntary, limited, reversible, and based on
+            explicit agreements rather than accidental connectivity.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust principles</p>
+
+      <h2 class="rh-section-title">
+        Trust should be practical, not mystical.
+      </h2>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {principles.map((principle) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{principle}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Safe failure</p>
+
+        <h2 class="rh-section-title">
+          Trust must degrade safely.
+        </h2>
+
+        <p class="rh-section-lead">
+          When trust is uncertain, expired, revoked, conflicting, or degraded,
+          RelayHub should limit exposure, explain what changed, preserve recovery
+          options, and avoid silently continuing risky behaviour.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Important boundary</h3>
+        <p class="rh-card-text">
+          RelayHub should not assume that LAN presence, Reticulum reachability,
+          marketplace participation, federation membership, hardware ownership,
+          or previous interaction creates unlimited trust.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Ask about trust workflows
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

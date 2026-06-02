@@ -1,0 +1,212 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const postureItems = [
+  {
+    title: "Local-first by default",
+    text: "RelayHub is designed to keep essential operation local where practical and avoid hidden dependency on centralised services.",
+  },
+  {
+    title: "Least privilege",
+    text: "Services should run with only the access they need, and administrative control should not be exposed unnecessarily.",
+  },
+  {
+    title: "Policy-governed capability",
+    text: "Features should only activate when hardware, software, policy, trust, legal, runtime, and user gates allow them.",
+  },
+  {
+    title: "Recovery-first design",
+    text: "Recovery, rollback, safe reset, support export, and identity preservation are treated as core architecture rather than optional extras.",
+  },
+];
+
+const limits = [
+  "RelayHub does not provide perfect anonymity.",
+  "Reticulum reachability does not automatically imply trust.",
+  "Radio communication may be observable and regionally regulated.",
+  "Physical device access can change the threat model.",
+  "No system can guarantee message delivery in all conditions.",
+  "Experimental features must not be treated as product-supported.",
+];
+
+const reportItems = [
+  "Security vulnerability",
+  "Privacy exposure",
+  "Unsafe default",
+  "Misleading capability claim",
+  "Recovery failure",
+  "Authentication or access-control issue",
+  "Support export redaction issue",
+];
+---
+
+<BaseLayout
+  title="Security | RelayHub"
+  description="RelayHub security information covering responsible disclosure, privacy limits, recovery-first design, threat boundaries, and safe reporting."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Security</p>
+
+      <h1 class="rh-title">
+        Security requires honesty, recovery, and evidence.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is being designed as local-first infrastructure for resilient
+        communities. Security claims must remain realistic, testable, and clear.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/contact">
+          Report a concern
+        </a>
+        <a class="rh-button rh-button-secondary" href="/privacy">
+          Read privacy policy
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Security posture</p>
+
+      <h2 class="rh-section-title">
+        Practical security, not magical guarantees.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should reduce unnecessary exposure, support local operation,
+        preserve recovery paths, and make capability boundaries visible. It must
+        not overstate privacy, anonymity, censorship resistance, or operational
+        safety.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {postureItems.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Threat boundaries</p>
+
+        <h2 class="rh-section-title">
+          What RelayHub does not promise.
+        </h2>
+
+        <p class="rh-section-lead">
+          Honest security starts by naming limits. RelayHub is intended to support
+          resilient communication and community coordination, but it must never be
+          described as invulnerable, perfectly anonymous, or guaranteed under all
+          conditions.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-security-list">
+          {limits.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Responsible disclosure</p>
+
+        <h2 class="rh-section-title">
+          Report security issues clearly and safely.
+        </h2>
+
+        <p class="rh-section-lead">
+          If you discover a vulnerability, privacy issue, unsafe behaviour, or
+          misleading security claim, please report it responsibly. Do not exploit
+          systems, access other people’s data, disrupt services, or publish active
+          vulnerabilities before there has been time to assess and respond.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Reportable concerns</h3>
+
+        <ul class="rh-security-list">
+          {reportItems.map((item) => <li>{item}</li>)}
+        </ul>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Send a report
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Recovery-first</p>
+
+        <h2 class="rh-section-title">
+          A secure system must still be recoverable.
+        </h2>
+
+        <p class="rh-section-lead">
+          Security controls that make ordinary recovery impossible can create
+          fragility. RelayHub designs should preserve safe rollback, guided
+          recovery, identity continuity where possible, and privacy-preserving
+          support export.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Security principle</h3>
+        <p class="rh-card-text">
+          No convenience feature should silently increase exposure. No update
+          should silently enable new sharing, new federation, new gateway
+          behaviour, or new radio transmission without clear policy permission
+          and validation.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Contact</p>
+
+      <h2 class="rh-section-title">
+        Security contact
+      </h2>
+
+      <div class="rh-card">
+        <p class="rh-card-text">
+          Use the contact form for security reports and include as much detail as
+          possible: affected page, endpoint, expected behaviour, observed
+          behaviour, reproduction steps, browser or device context, and whether
+          any data may have been exposed.
+        </p>
+
+        <p>
+          <strong>Email:</strong>
+          <a href="mailto:hello@relayhub.tech">hello@relayhub.tech</a>
+        </p>
+
+        <p>
+          <strong>Contact form:</strong>
+          <a href="/contact">relayhub.tech/contact</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
