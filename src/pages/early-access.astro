@@ -2,7 +2,19 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const submitted = Astro.url.searchParams.get("submitted") === "true";
----
+const error = Astro.url.searchParams.get("error");
+
+const errorMessages = {
+  "invalid-email": "Please enter a valid email address and try again.",
+  "rate-limited": "Too many requests have been sent from your connection. Please try again later.",
+  "submission-failed": "Something went wrong while sending your request. Please try again shortly.",
+  "email-failed": "Your request could not be emailed. Please try again shortly.",
+};
+
+const errorMessage =
+  error && Object.prototype.hasOwnProperty.call(errorMessages, error)
+    ? errorMessages[error as keyof typeof errorMessages]
+    : null;---
 
 <BaseLayout
   title="Early Access | RelayHub"
@@ -31,25 +43,6 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
       </div>
     </div>
   </section>
-
-  {
-    submitted && (
-      <section class="rh-section rh-bg-soft">
-        <div class="rh-container">
-          <article class="rh-card">
-            <span class="rh-status rh-status-ready">Received</span>
-            <h2 class="rh-card-title" style="margin-top: var(--space-5);">
-              Registration received
-            </h2>
-            <p class="rh-card-text">
-              Thanks for registering your interest in RelayHub. Your details have
-              been submitted successfully.
-            </p>
-          </article>
-        </div>
-      </section>
-    )
-  }
 
   <section class="rh-section">
     <div class="rh-container">
@@ -198,8 +191,8 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
         </h2>
 
         <p class="rh-section-lead">
-          This form now submits through the RelayHub Cloudflare Worker endpoint.
-          Email delivery will be added after the form workflow is fully validated.
+          This form submits through the RelayHub Cloudflare Worker endpoint.
+          Submissions are emailed and stored securely for early access follow-up.
         </p>
 
         <div class="rh-card" style="margin-top: var(--space-8);">
@@ -213,16 +206,35 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
       </div>
 
       <form class="rh-card" name="early-access" method="POST" action="/api/early-access">
+        {
+          submitted && (
+            <div class="rh-form-message rh-form-message-success">
+              <strong>Request received.</strong>
+              <span>Thank you. We’ll be in touch as RelayHub early access opens.</span>
+            </div>
+          )
+        }
+
+        {
+          errorMessage && (
+            <div class="rh-form-message rh-form-message-error">
+              <strong>Something needs attention.</strong>
+              <span>{errorMessage}</span>
+            </div>
+          )
+        }
+
         <div class="honeypot" aria-hidden="true">
           <label for="website">Website</label>
-            <input
-              id="website"
-              name="website"
-              type="text"
-              tabindex="-1"
-              autocomplete="off"
-            />
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+          />
         </div>
+
         <label class="rh-label" for="name">Name</label>
         <input class="rh-input" id="name" name="name" type="text" autocomplete="name" required />
 
@@ -233,30 +245,14 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
 
         <div style="height: var(--space-5);"></div>
 
-        <label class="rh-label" for="interest">Primary interest</label>
-        <select class="rh-select" id="interest" name="interest" required>
-          <option value="">Select one</option>
-          <option value="home">Home / household use</option>
-          <option value="rural">Rural property</option>
-          <option value="community">Community group</option>
-          <option value="event">Event / field team</option>
-          <option value="developer">Developer / builder</option>
-          <option value="operator">Infrastructure operator</option>
-          <option value="vendor">Vendor / partner</option>
-        </select>
-
-        <div style="height: var(--space-5);"></div>
-
-        <label class="rh-label" for="product">Product interest</label>
-        <select class="rh-select" id="product" name="product">
-          <option value="">Select one</option>
-          <option value="relay-home">Relay Home</option>
-          <option value="relay-radio">Relay Radio</option>
-          <option value="relay-infrastructure">Relay Infrastructure</option>
-          <option value="relayos">RelayOS</option>
-          <option value="community-apps">Community applications</option>
-          <option value="not-sure">Not sure yet</option>
-        </select>
+        <label class="rh-label" for="community">Community / organisation</label>
+        <input
+          class="rh-input"
+          id="community"
+          name="community"
+          type="text"
+          placeholder="Example: household, community group, club, field team, organisation"
+        />
 
         <div style="height: var(--space-5);"></div>
 
@@ -268,27 +264,6 @@ const submitted = Astro.url.searchParams.get("submitted") === "true";
           rows="6"
           placeholder="Tell us about your household, group, community, field use, developer interest, or infrastructure idea."
         ></textarea>
-
-        <div style="height: var(--space-5);"></div>
-
-        <label class="rh-label" for="location">Location / region</label>
-        <input
-          class="rh-input"
-          id="location"
-          name="location"
-          type="text"
-          placeholder="Example: Wollongong NSW, Canberra ACT, regional NSW"
-        />
-
-        <div style="height: var(--space-5);"></div>
-
-        <label class="rh-label" for="testing">Are you interested in future testing?</label>
-        <select class="rh-select" id="testing" name="testing">
-          <option value="">Select one</option>
-          <option value="yes">Yes, I may be interested</option>
-          <option value="maybe">Maybe, depending on requirements</option>
-          <option value="updates-only">No, updates only</option>
-        </select>
 
         <div style="height: var(--space-6);"></div>
 

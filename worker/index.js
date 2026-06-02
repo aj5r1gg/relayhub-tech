@@ -68,6 +68,8 @@ async function handleEarlyAccessPost(request, env, url) {
     const message = cleanField(form.get("message"), 3000);
     const userAgent = cleanField(request.headers.get("User-Agent"), 500);
     const ipHash = await hashText(ip);
+    const submittedAt = new Date().toISOString();
+    const sourceUrl = url.toString();
 
     if (!isValidEmail(email)) {
       return redirect(url, "/early-access?error=invalid-email");
@@ -87,6 +89,9 @@ async function handleEarlyAccessPost(request, env, url) {
       email,
       community,
       message,
+      submittedAt,
+      sourceUrl,
+      userAgent,
     });
 
     const emailMessage = new EmailMessage(EMAIL_FROM, EMAIL_TO, rawEmail);
@@ -134,7 +139,15 @@ async function checkRateLimit(env, ip) {
   return { allowed: true };
 }
 
-function buildRawEmail({ name, email, community, message }) {
+function buildRawEmail({
+  name,
+  email,
+  community,
+  message,
+  submittedAt,
+  sourceUrl,
+  userAgent,
+}) {
   const safeReplyTo = sanitizeHeader(email);
 
   return [
@@ -146,12 +159,19 @@ function buildRawEmail({ name, email, community, message }) {
     "",
     "New RelayHub early access request",
     "",
+    `Submitted at: ${submittedAt}`,
+    `Source URL: ${sourceUrl}`,
+    "",
     `Name: ${name || "Not provided"}`,
     `Email: ${email}`,
     `Community / organisation: ${community || "Not provided"}`,
     "",
     "Message:",
     message || "Not provided",
+    "",
+    "Technical context:",
+    "Stored in D1: yes",
+    `User agent: ${userAgent || "Not provided"}`,
     "",
   ].join("\r\n");
 }

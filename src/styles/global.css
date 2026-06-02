@@ -848,6 +848,34 @@ a {
   }
 }
 
+.rh-form-message {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid;
+  line-height: 1.5;
+}
+
+.rh-form-message strong {
+  color: var(--rh-navy-950);
+}
+
+.rh-form-message span {
+  color: var(--color-text-muted);
+}
+
+.rh-form-message-success {
+  background: rgb(22 163 74 / 0.08);
+  border-color: rgb(22 163 74 / 0.24);
+}
+
+.rh-form-message-error {
+  background: rgb(220 38 38 / 0.08);
+  border-color: rgb(220 38 38 / 0.24);
+}
+
 .honeypot {
   position: absolute;
   left: -9999px;

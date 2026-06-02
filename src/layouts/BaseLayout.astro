@@ -5,16 +5,110 @@ import Footer from "../components/Footer.astro";
 
 const {
   title = "RelayHub",
-  description = "Local-first infrastructure for resilient communities."
+  description = "Local-first infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity.",
+  image = "https://www.relayhub.tech/og-image.png",
+  noindex = false,
 } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, "https://www.relayhub.tech").toString();
+const pageTitle = title.includes("RelayHub")
+  ? title
+  : `${title} | RelayHub`;
 ---
 
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <title>{pageTitle}</title>
+
+    <meta
+      name="description"
+      content={description}
+    />
+
+    <link
+      rel="canonical"
+      href={canonical}
+    />
+
+    {
+      noindex && (
+        <meta
+          name="robots"
+          content="noindex,nofollow"
+        />
+      )
+    }
+
+    <!-- OpenGraph -->
+
+    <meta property="og:type" content="website" />
+
+    <meta
+      property="og:site_name"
+      content="RelayHub"
+    />
+
+    <meta
+      property="og:title"
+      content={pageTitle}
+    />
+
+    <meta
+      property="og:description"
+      content={description}
+    />
+
+    <meta
+      property="og:url"
+      content={canonical}
+    />
+
+    <meta
+      property="og:image"
+      content={image}
+    />
+
+    <!-- Twitter -->
+
+    <meta
+      name="twitter:card"
+      content="summary_large_image"
+    />
+
+    <meta
+      name="twitter:title"
+      content={pageTitle}
+    />
+
+    <meta
+      name="twitter:description"
+      content={description}
+    />
+
+    <meta
+      name="twitter:image"
+      content={image}
+    />
+
+    <!-- Theme -->
+
+    <meta
+      name="theme-color"
+      content="#0f172a"
+    />
+
+    <meta
+      name="color-scheme"
+      content="light"
+    />
   </head>
 
   <body>
