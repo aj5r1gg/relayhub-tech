@@ -14,5 +14,8 @@
   "dependencies": {
     "astro": "^6.4.2",
     "mimetext": "^3.0.28"
+  },
+  "devDependencies": {
+    "wrangler": "^4.96.0"
   }
 }

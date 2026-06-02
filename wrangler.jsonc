@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "relayhub-tech",
+  "compatibility_date": "2026-06-02",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./dist"
+  },
+  "send_email": [
+    {
+      "name": "RELAYHUB_EMAIL",
+      "destination_address": "hello@relayhub.tech"
+    }
+  ]
+}
