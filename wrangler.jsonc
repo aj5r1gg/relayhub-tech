@@ -3,17 +3,35 @@
   "name": "relayhub-tech",
   "main": "worker/index.js",
   "compatibility_date": "2026-06-02",
+
   "observability": {
     "enabled": true
   },
+
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
   },
+
   "send_email": [
     {
       "name": "RELAYHUB_EMAIL",
       "destination_address": "moneywise69@proton.me"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "RELAYHUB_RATE_LIMIT",
+      "id": "579b2b6fd1da4e2e92535418d4f9178d"
+    }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "RELAYHUB_DB",
+      "database_name": "relayhub_early_access",
+      "database_id": "3d056ea7-e390-42d2-874e-38a797655484"
     }
   ]
 }
