@@ -11,9 +11,49 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, "https://www.relayhub.tech").toString();
+
 const pageTitle = title.includes("RelayHub")
   ? title
   : `${title} | RelayHub`;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.relayhub.tech/#organization",
+      name: "RelayHub",
+      url: "https://www.relayhub.tech/",
+      logo: image,
+      description:
+        "RelayHub provides local-first infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity.",
+      email: "hello@relayhub.tech",
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.relayhub.tech/#website",
+      url: "https://www.relayhub.tech/",
+      name: "RelayHub",
+      description: "Local-first infrastructure for resilient communities.",
+      publisher: {
+        "@id": "https://www.relayhub.tech/#organization",
+      },
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${canonical}#webpage`,
+      url: canonical,
+      name: pageTitle,
+      description,
+      isPartOf: {
+        "@id": "https://www.relayhub.tech/#website",
+      },
+      about: {
+        "@id": "https://www.relayhub.tech/#organization",
+      },
+    },
+  ],
+};
 ---
 
 <!DOCTYPE html>
@@ -98,6 +138,13 @@ const pageTitle = title.includes("RelayHub")
       content={image}
     />
 
+    <!-- Structured data -->
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+    />
+
     <!-- Theme -->
 
     <meta
@@ -109,6 +156,7 @@ const pageTitle = title.includes("RelayHub")
       name="color-scheme"
       content="light"
     />
+
     <!-- Cloudflare Web Analytics -->
     <script
       defer
