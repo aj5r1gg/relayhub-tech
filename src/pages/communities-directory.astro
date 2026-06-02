@@ -1,0 +1,172 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const communities = [
+  {
+    name: "Canberra Community",
+    region: "ACT",
+    status: "Concept",
+    focus: "Household nodes, local coordination, community pilots.",
+  },
+  {
+    name: "Lightning Ridge Community",
+    region: "Western NSW",
+    status: "Concept",
+    focus: "Remote resilience, local-first communication, field operation.",
+  },
+  {
+    name: "Regional NSW Community",
+    region: "NSW",
+    status: "Concept",
+    focus: "Inter-town coordination, knowledge sharing, practical recovery.",
+  },
+  {
+    name: "Perth Community",
+    region: "WA",
+    status: "Concept",
+    focus: "Urban and regional participation, developers, early adopters.",
+  },
+];
+---
+
+<BaseLayout
+  title="Community Directory | RelayHub"
+  description="Explore the future RelayHub community directory concept for local communities, regional coordination, voluntary federation, and local-first infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Community directory</p>
+
+      <h1 class="rh-title">
+        A future map of connected communities.
+      </h1>
+
+      <p class="rh-subtitle">
+        The RelayHub community directory concept shows how local communities
+        could become visible, discoverable, trusted, and connected without
+        becoming centrally controlled.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/communities">
+          Community vision
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Concept directory</p>
+
+      <h2 class="rh-section-title">
+        Communities first. Federation second. Centralisation never required.
+      </h2>
+
+      <p class="rh-section-lead">
+        This page is a concept preview, not a live public directory. The goal is
+        to show how RelayHub could help households, towns, groups, field teams,
+        and regional communities discover each other, build trust, and cooperate.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {communities.map((community) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-local">{community.status}</span>
+
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {community.name}
+            </h3>
+
+            <p class="rh-card-text">
+              <strong>Region:</strong> {community.region}
+            </p>
+
+            <p class="rh-card-text" style="margin-top: var(--space-3);">
+              {community.focus}
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">What a community entry could include</p>
+
+        <h2 class="rh-section-title">
+          Discovery without pretending discovery equals trust.
+        </h2>
+
+        <p class="rh-section-lead">
+          A future RelayHub directory should help people find communities while
+          making trust, status, policy, and federation boundaries clear.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Basic identity</h3>
+          <p class="rh-card-text">
+            Community name, region, public description, contact pathway, and
+            directory visibility status.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Capability signals</h3>
+          <p class="rh-card-text">
+            Supported communication paths, local services, relay availability,
+            community notices, and validated infrastructure status.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Trust and federation status</h3>
+          <p class="rh-card-text">
+            Whether a community is discovered, known, introduced, federated,
+            regional, dormant, archived, or retired.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Network effect</p>
+
+        <h2 class="rh-section-title">
+          The value grows when communities can find each other safely.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is not merely about resilient messages. The wider purpose is
+          resilient community coordination: communication, knowledge, trade,
+          governance, recovery, and cultural continuity.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Directory principle</h3>
+        <p class="rh-card-text">
+          A community being listed should never automatically mean it is trusted,
+          certified, endorsed, reachable, or federated. Directory visibility,
+          trust, capability, and federation must remain separate.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Discuss a community pilot
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
