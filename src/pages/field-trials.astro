@@ -1,0 +1,467 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const trialTypes = [
+  {
+    title: "Household field trial",
+    text: "Tests setup, local dashboard, status comprehension, recovery, support export, and ordinary use in a real home.",
+  },
+  {
+    title: "Local-only trial",
+    text: "Tests operation when internet, DNS, WAN routing, or wider connectivity is unavailable.",
+  },
+  {
+    title: "Community trial",
+    text: "Tests multiple people, roles, documentation, trust, local coordination, and community support expectations.",
+  },
+  {
+    title: "Hardware trial",
+    text: "Tests specific hardware classes under real power, storage, thermal, and network conditions.",
+  },
+  {
+    title: "Recovery trial",
+    text: "Tests rollback, guided recovery, support export, reset, transfer, and documentation-only recovery.",
+  },
+  {
+    title: "Field/radio trial",
+    text: "Tests field deployment and radio-assisted operation only where lawful, validated, and explicitly scoped.",
+  },
+];
+
+const trialPhases = [
+  {
+    title: "Define",
+    text: "Set scope, location, participants, hardware, success criteria, risks, support boundaries, and stop conditions.",
+  },
+  {
+    title: "Prepare",
+    text: "Prepare hardware, documentation, recovery cards, test scripts, evidence templates, and support process.",
+  },
+  {
+    title: "Deploy",
+    text: "Install or place the node, record conditions, confirm baseline status, and begin the field trial.",
+  },
+  {
+    title: "Observe",
+    text: "Capture behaviour, issues, participant feedback, degraded states, recovery results, and support needs.",
+  },
+  {
+    title: "Recover",
+    text: "Run recovery drills, rollback checks, reset/transfer tests, support export tests, and documentation checks.",
+  },
+  {
+    title: "Report",
+    text: "Produce field notes, evidence artefacts, issue list, lessons learned, and a clear next-step decision.",
+  },
+];
+
+const evidence = [
+  "Trial ID",
+  "Date and location type",
+  "Hardware class",
+  "Software version",
+  "Network conditions",
+  "Power conditions",
+  "Setup result",
+  "User feedback",
+  "Status comprehension",
+  "Recovery result",
+  "Support export result",
+  "Issues found",
+  "Photos where appropriate",
+  "Screenshots",
+  "Validation decision",
+];
+
+const conditions = [
+  {
+    title: "Connectivity",
+    text: "Internet available, internet unavailable, local-only, intermittent, no peers, degraded, or federation unavailable.",
+  },
+  {
+    title: "Power",
+    text: "Stable mains, UPS, battery, brownout risk, unplug event, restart behaviour, or field power limits.",
+  },
+  {
+    title: "Hardware",
+    text: "Board model, storage type, power supply, enclosure, cooling, radio hardware, peripherals, and known limits.",
+  },
+  {
+    title: "Users",
+    text: "Non-technical users, operators, household members, organisers, volunteers, builders, or developers.",
+  },
+  {
+    title: "Environment",
+    text: "Household, shed, rural property, event site, workshop, community hall, vehicle, or field location.",
+  },
+  {
+    title: "Support",
+    text: "No support, documentation-only support, remote guidance, operator-assisted support, or controlled lab support.",
+  },
+];
+
+const passFail = [
+  {
+    title: "Pass",
+    text: "The trial goal was met, evidence was captured, recovery was available, and risks remained acceptable.",
+  },
+  {
+    title: "Partial pass",
+    text: "The core function worked, but usability, recovery, documentation, hardware, or support needs revision.",
+  },
+  {
+    title: "Fail",
+    text: "The trial exposed serious issues that must be fixed before further field use.",
+  },
+  {
+    title: "Stop",
+    text: "The trial must stop if safety, legal, privacy, recovery, or user-dependence risks become unacceptable.",
+  },
+  {
+    title: "Repeat",
+    text: "The trial should be repeated if evidence is incomplete, conditions were unclear, or results were inconsistent.",
+  },
+  {
+    title: "Promote",
+    text: "The trial may support promotion only when repeated evidence, recovery, documentation, and validation gates agree.",
+  },
+];
+
+const safetyLimits = [
+  "A field trial is not a supported release.",
+  "A field trial must not be the only communication path for participants.",
+  "Emergency use must not be implied unless separately validated and approved.",
+  "Radio transmit must not occur unless lawful, configured, validated, and explicitly authorised.",
+  "Privacy, anonymity, and censorship-resistance claims must remain realistic.",
+  "Participants must understand what is experimental, limited, degraded, or unsupported.",
+  "Recovery must be available before expanding the trial.",
+  "Support exports must avoid secrets and message content by default.",
+  "A field trial may be paused or stopped at any time if evidence shows unacceptable risk.",
+];
+
+const reportSections = [
+  "Summary",
+  "Trial scope",
+  "Hardware used",
+  "Software version",
+  "Environment",
+  "Participants",
+  "What was tested",
+  "What worked",
+  "What failed",
+  "Recovery outcome",
+  "User comprehension",
+  "Open issues",
+  "Risk notes",
+  "Decision",
+  "Next steps",
+];
+
+const futureTrials = [
+  {
+    title: "First household setup",
+    text: "Can a non-technical household set up a node, understand its state, and find recovery without terminal help?",
+  },
+  {
+    title: "No-internet operation",
+    text: "Can local setup, dashboard, recovery, documentation, and basic operation continue without internet access?",
+  },
+  {
+    title: "Recovery drill",
+    text: "Can the system recover from failed update, power loss, configuration error, or owner access problem?",
+  },
+  {
+    title: "Community onboarding",
+    text: "Can a small group understand roles, invitations, trust, local-only state, and support boundaries?",
+  },
+  {
+    title: "Hardware stability",
+    text: "Can a target hardware class run repeatedly under realistic power, thermal, storage, and network conditions?",
+  },
+  {
+    title: "Field deployment",
+    text: "Can a node operate usefully outside a normal home environment while remaining understandable and recoverable?",
+  },
+];
+---
+
+<BaseLayout
+  title="Field Trials | RelayHub"
+  description="RelayHub field trials capture real-world evidence for local-first operation, recovery, usability, hardware stability, degraded operation, and community readiness."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Field Trials</p>
+
+      <h1 class="rh-title">
+        Real-world evidence, not optimistic assumptions.
+      </h1>
+
+      <p class="rh-subtitle">
+        Field trials test RelayHub under real conditions: homes, communities,
+        workshops, rural properties, local-only networks, unstable power,
+        non-technical users, degraded operation, recovery events, and practical
+        support limits.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/pilot-program">
+          Pilot program
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Purpose</p>
+
+      <h2 class="rh-section-title">
+        A field trial proves what a lab cannot.
+      </h2>
+
+      <p class="rh-section-lead">
+        Lab validation is essential, but it is not enough. Field trials reveal
+        confusion, support burden, power issues, recovery gaps, documentation
+        failures, environmental limits, and real community behaviour.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Trial types</p>
+
+      <h2 class="rh-section-title">
+        Different trials answer different questions.
+      </h2>
+
+      <p class="rh-section-lead">
+        Each field trial should have a bounded purpose. A household setup trial
+        is not the same as a radio trial, recovery trial, or community pilot.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trialTypes.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Trial phases</p>
+
+      <h2 class="rh-section-title">
+        Every field trial needs structure.
+      </h2>
+
+      <p class="rh-section-lead">
+        A useful field trial starts with scope and ends with a decision. Without
+        evidence, it is only a story.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trialPhases.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Evidence artefacts</p>
+
+      <h2 class="rh-section-title">
+        Trials should leave a trail.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should be able to look back at a field trial and know what was
+        tested, what happened, what failed, what was recovered, and what decision
+        was made.
+      </p>
+
+      <div class="rh-category-grid" style="margin-top: var(--space-10);">
+        {evidence.map((item) => (
+          <div class="rh-category-item">{item}</div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Conditions captured</p>
+
+      <h2 class="rh-section-title">
+        Context matters.
+      </h2>
+
+      <p class="rh-section-lead">
+        A successful test in perfect conditions does not automatically prove
+        readiness in a rural property, workshop, community hall, field site, or
+        no-internet environment.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {conditions.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Pass, fail, or stop</p>
+
+      <h2 class="rh-section-title">
+        A trial needs a decision, not just impressions.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should treat failure as useful evidence. A failed field trial
+        is better than a false product claim.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {passFail.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Safety limits</p>
+
+      <h2 class="rh-section-title">
+        Field trials must not create false confidence.
+      </h2>
+
+      <p class="rh-section-lead">
+        A field trial is controlled evidence gathering. It is not a guarantee,
+        emergency service, certified release, or substitute for ordinary safety
+        planning.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {safetyLimits.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Trial reports</p>
+
+        <h2 class="rh-section-title">
+          Field trials should produce readable reports.
+        </h2>
+
+        <p class="rh-section-lead">
+          Trial reports may be public, private, redacted, or internal. The goal
+          is to make decisions evidence-based while respecting participant
+          privacy, safety, and operational limits.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Report sections</h3>
+
+        <div class="rh-category-grid" aria-label="Field trial report sections">
+          {reportSections.map((item) => (
+            <div class="rh-category-item">{item}</div>
+          ))}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Future field trials</p>
+
+      <h2 class="rh-section-title">
+        The first trials should test the basics.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should validate the smallest useful system before expanding
+        into more complex hardware, federation, marketplace, library, radio, or
+        infrastructure trials.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {futureTrials.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Get involved</p>
+
+        <h2 class="rh-section-title">
+          Help test RelayHub in real conditions.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub field trials will need households, community organisers,
+          hardware builders, rural participants, educators, accessibility
+          testers, Reticulum users, and patient early testers willing to capture
+          evidence.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Interested in field trials?</h3>
+
+        <p class="rh-card-text">
+          Register interest if you want to participate in future field testing
+          for setup, recovery, local-only operation, hardware stability,
+          community workflows, documentation, or degraded operation.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/status">
+            Project status
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
