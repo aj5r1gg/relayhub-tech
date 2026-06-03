@@ -1,3 +1,23 @@
+---
+const mainLinks = [
+  { href: "/explore", label: "Explore" },
+  { href: "/vision", label: "Vision" },
+  { href: "/products", label: "Products" },
+  { href: "/ecosystem", label: "Ecosystem" },
+  { href: "/docs", label: "Docs" },
+  { href: "/status", label: "Status" },
+];
+
+const mobileSecondaryLinks = [
+  { href: "/use-cases", label: "Use cases" },
+  { href: "/communities", label: "Communities" },
+  { href: "/developers", label: "Developers" },
+  { href: "/trust", label: "Trust" },
+  { href: "/support", label: "Support" },
+  { href: "/contact", label: "Contact" },
+];
+---
+
 <header class="rh-header">
   <div class="rh-container rh-nav">
     <a href="/" class="rh-logo">RELAYHUB</a>
@@ -19,13 +39,17 @@
       aria-label="Main navigation"
       data-nav-links
     >
-      <a href="/how-it-works">How it works</a>
-      <a href="/products">Products</a>
-      <a href="/docs">Docs</a>
-      <a href="/faq">FAQ</a>
-      <a href="/support">Support</a>
-      <a href="/contact">Contact</a>
-      <a href="/early-access">Early access</a>
+      {mainLinks.map((link) => (
+        <a href={link.href}>{link.label}</a>
+      ))}
+
+      <div class="rh-nav-mobile-extra">
+        {mobileSecondaryLinks.map((link) => (
+          <a href={link.href}>{link.label}</a>
+        ))}
+      </div>
+
+      <a class="rh-nav-cta" href="/early-access">Early access</a>
     </nav>
   </div>
 </header>

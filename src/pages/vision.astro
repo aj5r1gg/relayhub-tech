@@ -1,0 +1,324 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const problemPoints = [
+  "Centralised communication",
+  "Centralised identity",
+  "Centralised coordination",
+  "Centralised knowledge storage",
+  "Platform-dependent community organising",
+  "Fragile recovery paths",
+  "Poor local continuity",
+  "Technology that ordinary people cannot operate under stress",
+];
+
+const goals = [
+  "Communicate locally and across distance",
+  "Coordinate practical action",
+  "Preserve knowledge and memory",
+  "Exchange value and services",
+  "Govern locally",
+  "Recover from disruption",
+  "Maintain cultural continuity",
+  "Cooperate with neighbouring communities",
+];
+
+const longTermVision = [
+  {
+    title: "Households",
+    text: "A household can run a simple Relay Home node for local communication, recovery information, trusted pairing, and participation in nearby communities.",
+  },
+  {
+    title: "Communities",
+    text: "A community can operate shared infrastructure for notices, knowledge, directories, marketplace coordination, events, and local governance.",
+  },
+  {
+    title: "Regions",
+    text: "Neighbouring communities can voluntarily federate, share selected resources, coordinate across distance, and remain locally autonomous.",
+  },
+  {
+    title: "Developers",
+    text: "Developers can build applications, integrations, documentation, validation tools, and hardware profiles without breaking the appliance experience.",
+  },
+];
+
+const notRelayHub = [
+  "Not a cryptocurrency project",
+  "Not a social media platform",
+  "Not a surveillance platform",
+  "Not a cloud-first service",
+  "Not an anti-government product",
+  "Not a promise of anonymity",
+  "Not a universal emergency system",
+  "Not a single device that does everything",
+];
+
+const capabilities = [
+  {
+    title: "Strong communication",
+    text: "Communities need reliable ways to speak, announce, ask, coordinate, and stay informed.",
+  },
+  {
+    title: "Strong memory",
+    text: "Communities need to preserve guides, history, decisions, procedures, culture, and lessons learned.",
+  },
+  {
+    title: "Strong trust",
+    text: "Communities need identity, reputation, roles, revocation, recovery authority, and clear boundaries.",
+  },
+  {
+    title: "Strong coordination",
+    text: "Communities need practical tools for events, services, resources, marketplaces, governance, and work.",
+  },
+  {
+    title: "Strong recovery",
+    text: "Communities need rollback, safe reset, identity continuity, support exports, and degraded operation.",
+  },
+  {
+    title: "Strong continuity",
+    text: "Communities need systems that can outlast individual devices, platforms, outages, and leadership changes.",
+  },
+];
+---
+
+<BaseLayout
+  title="Vision | RelayHub"
+  description="RelayHub vision for local-first infrastructure that helps communities communicate, coordinate, preserve knowledge, exchange value, govern locally, recover, and maintain cultural continuity."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Vision</p>
+
+      <h1 class="rh-title">
+        Technology is the tool. Community is the purpose.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub exists to help people build, sustain, and interconnect resilient
+        communities through local-first infrastructure for communication, trust,
+        knowledge, trade, coordination, governance, recovery, and cultural
+        continuity.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/ecosystem">
+          Ecosystem
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The problem</p>
+
+      <h2 class="rh-section-title">
+        Communities are becoming dependent on systems they do not control.
+      </h2>
+
+      <p class="rh-section-lead">
+        Many communities now rely on centralised platforms for communication,
+        identity, coordination, knowledge, memory, trade, events, and governance.
+        When those systems fail, change rules, remove access, lose trust, or
+        become unavailable, communities lose capability.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {problemPoints.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The goal</p>
+
+      <h2 class="rh-section-title">
+        RelayHub exists to increase community capability.
+      </h2>
+
+      <p class="rh-section-lead">
+        The goal is not merely to send messages. The goal is to help communities
+        keep functioning, learning, organising, trading, remembering, governing,
+        and recovering under ordinary and adverse conditions.
+      </p>
+
+      <div class="rh-vision-tags" style="margin-top: var(--space-10);">
+        {goals.map((item) => (
+          <span class="rh-status rh-status-local">{item}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Long-term vision</p>
+
+      <h2 class="rh-section-title">
+        Local-first communities, voluntarily interconnected.
+      </h2>
+
+      <p class="rh-section-lead">
+        Imagine households, groups, towns, regions, developers, and partners all
+        participating in a coherent ecosystem where local capability comes first
+        and wider interconnection remains voluntary.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {longTermVision.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/use-cases">
+          Use cases
+        </a>
+        <a class="rh-button rh-button-secondary" href="/communities">
+          Communities
+        </a>
+        <a class="rh-button rh-button-secondary" href="/partners">
+          Partners
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Community layer</p>
+
+        <h2 class="rh-section-title">
+          The community is the centre.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is not built so people can admire infrastructure. It is built
+          so people can communicate, coordinate, preserve knowledge, exchange
+          value, govern locally, recover from disruption, and hand something
+          useful forward.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Core sentence</h3>
+        <p class="rh-card-text">
+          Technology is the tool. Community is the purpose.
+        </p>
+
+        <p class="rh-card-text">
+          Every product, application, policy, hardware class, support path, and
+          future integration should serve that principle.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub is not</p>
+
+      <h2 class="rh-section-title">
+        Clear boundaries protect the mission.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should remain useful without exaggerating what it is, what it
+        does, or what it guarantees.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {notRelayHub.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/security">
+          Security
+        </a>
+        <a class="rh-button rh-button-secondary" href="/privacy">
+          Privacy
+        </a>
+        <a class="rh-button rh-button-secondary" href="/status">
+          Status
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">The RelayHub principle</p>
+
+      <h2 class="rh-section-title">
+        Strong communities need more than strong networks.
+      </h2>
+
+      <p class="rh-section-lead">
+        Strong communities require communication, memory, trust, coordination,
+        recovery, and continuity. RelayHub exists to help communities build
+        those capabilities in practical, local-first ways.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {capabilities.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Join the vision</p>
+
+        <h2 class="rh-section-title">
+          RelayHub is being built from principles into practice.
+        </h2>
+
+        <p class="rh-section-lead">
+          The next step is to turn architecture, validation, documentation,
+          hardware, RelayOS, and community pilots into working local-first
+          infrastructure people can actually use.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Follow the build</h3>
+        <p class="rh-card-text">
+          Register interest if you want updates about RelayOS, products,
+          community pilots, developer resources, partner opportunities,
+          downloads, or future availability.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/roadmap">
+            Roadmap
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

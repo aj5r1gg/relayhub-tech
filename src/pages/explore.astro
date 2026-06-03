@@ -1,0 +1,299 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const startHere = [
+  {
+    title: "Vision",
+    text: "Why RelayHub exists and what future it is trying to help communities build.",
+    href: "/vision",
+  },
+  {
+    title: "Use cases",
+    text: "See how RelayHub could help households, communities, events, rural areas, education, and local economies.",
+    href: "/use-cases",
+  },
+  {
+    title: "Status",
+    text: "Understand what is live now, what is planned, what is research, and what is not yet product-supported.",
+    href: "/status",
+  },
+];
+
+const productLinks = [
+  { title: "Products", text: "Relay Home, Relay Radio, Relay Infrastructure, and future product families.", href: "/products" },
+  { title: "Hardware", text: "Hardware classes, support boundaries, compatibility status, and radio reality.", href: "/hardware" },
+  { title: "RelayOS", text: "The appliance platform behind RelayHub nodes.", href: "/relayos" },
+  { title: "Compatibility", text: "What may work with RelayHub, what is planned, and what needs validation.", href: "/compatibility" },
+];
+
+const ecosystemLinks = [
+  { title: "Ecosystem", text: "The full RelayHub ecosystem: platform, products, applications, communities, and federations.", href: "/ecosystem" },
+  { title: "Communities", text: "How households, groups, regions, and federations fit into RelayHub.", href: "/communities" },
+  { title: "Community guides", text: "Practical guidance for starting, piloting, and operating community workflows.", href: "/community-guides" },
+  { title: "Community directory", text: "Future concept for discovering communities and network effects.", href: "/communities-directory" },
+  { title: "Marketplace", text: "Future concept for local offers, requests, services, skills, and trade coordination.", href: "/marketplace" },
+  { title: "Pilot program", text: "How future pilots may test real community use before supported release.", href: "/pilot-program" },
+];
+
+const developerLinks = [
+  { title: "Developers", text: "Platform foundations, future APIs, contribution areas, and developer boundaries.", href: "/developers" },
+  { title: "Downloads", text: "Future home for documents, guides, assets, software, and hardware resources.", href: "/downloads" },
+  { title: "Certification", text: "Compatible, verified, certified, official, and evidence-backed recognition.", href: "/certification" },
+  { title: "Partners", text: "Future partner pathways for communities, builders, educators, integrators, and validators.", href: "/partners" },
+];
+
+const trustLinks = [
+  { title: "Trust", text: "Discovery, identity, reachability, permission, reputation, revocation, and federation boundaries.", href: "/trust" },
+  { title: "Security", text: "Security posture, responsible disclosure, realistic limits, and threat boundaries.", href: "/security" },
+  { title: "Privacy", text: "What RelayHub collects now, what it does not collect, analytics, support exports, and privacy reality.", href: "/privacy" },
+  { title: "Recovery", text: "Rollback, safe reset, identity preservation, degraded boot, and support exports.", href: "/recovery" },
+  { title: "Validation", text: "Release gates, recovery drills, hardware class testing, and supported status.", href: "/validation" },
+  { title: "Accessibility", text: "Plain language, mobile usability, non-colour-only status, and recovery under stress.", href: "/accessibility" },
+];
+
+const resourceLinks = [
+  { title: "Docs", text: "Documentation hub for users, operators, communities, developers, and support.", href: "/docs" },
+  { title: "FAQ", text: "Common questions about RelayHub, RelayOS, Reticulum, products, privacy, and status.", href: "/faq" },
+  { title: "Roadmap", text: "Now, next, future, and research directions.", href: "/roadmap" },
+  { title: "Media kit", text: "Logos, colours, product descriptions, screenshots, founder bio, and media contact details.", href: "/media" },
+  { title: "Support", text: "Setup help, recovery help, support boundaries, redaction, and contact paths.", href: "/support" },
+  { title: "Contact", text: "Ask questions, report issues, share use cases, or discuss pilots and partnerships.", href: "/contact" },
+];
+
+const paths = [
+  {
+    title: "I’m a household",
+    text: "Start with use cases, products, hardware, recovery, and early access.",
+    href: "/use-cases",
+  },
+  {
+    title: "I’m a community organiser",
+    text: "Start with communities, community guides, pilot program, trust, and marketplace concepts.",
+    href: "/community-guides",
+  },
+  {
+    title: "I’m a developer",
+    text: "Start with developers, RelayOS, compatibility, certification, downloads, and status.",
+    href: "/developers",
+  },
+  {
+    title: "I’m a hardware builder",
+    text: "Start with hardware, compatibility, validation, certification, and partners.",
+    href: "/hardware",
+  },
+  {
+    title: "I’m a partner",
+    text: "Start with partners, certification, status, community pilots, and contact.",
+    href: "/partners",
+  },
+  {
+    title: "I’m just curious",
+    text: "Start with vision, ecosystem, use cases, and status.",
+    href: "/vision",
+  },
+];
+---
+
+<BaseLayout
+  title="Explore | RelayHub"
+  description="Explore RelayHub pages by purpose: vision, products, ecosystem, communities, developers, trust, governance, resources, pilots, downloads, status, and support."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Explore RelayHub</p>
+
+      <h1 class="rh-title">
+        Find the right starting point.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub has grown from a landing page into a public ecosystem portal.
+        Use this page to find the right path through products, communities,
+        developers, trust, resources, pilots, downloads, and status.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/status">
+          Current status
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Choose your path</p>
+
+      <h2 class="rh-section-title">
+        Start with who you are.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub means different things to different people. A household,
+        community organiser, developer, hardware builder, partner, and curious
+        visitor should not have to follow the same path.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {paths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                Start here
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Start here</p>
+
+      <h2 class="rh-section-title">
+        The three best entry points.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {startHere.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                Open
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Products and platform</p>
+
+      <h2 class="rh-section-title">
+        Understand what RelayHub is built from.
+      </h2>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {productLinks.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                Open
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Ecosystem and communities</p>
+
+      <h2 class="rh-section-title">
+        Understand who RelayHub serves.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {ecosystemLinks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-accent" href={item.href}>
+                Open
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Developers and partners</p>
+
+      <h2 class="rh-section-title">
+        Understand how the ecosystem can grow.
+      </h2>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {developerLinks.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                Open
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust and safety</p>
+
+      <h2 class="rh-section-title">
+        Understand the boundaries before relying on anything.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trustLinks.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                Open
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Resources</p>
+
+      <h2 class="rh-section-title">
+        Find documentation, media, support, and contact paths.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {resourceLinks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-accent" href={item.href}>
+                Open
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
