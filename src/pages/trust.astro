@@ -1,74 +1,252 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const distinctions = [
+const trustFoundations = [
   {
-    title: "Discovery is not trust",
-    text: "Finding a node, person, community, or service does not mean it is trusted, approved, safe, reachable, or permitted.",
+    title: "Trust begins with people",
+    text: "RelayHub supports human trust; it does not replace relationship, judgement, responsibility, or accountability.",
   },
   {
-    title: "Reachability is not permission",
-    text: "A route existing through Reticulum or another transport does not mean communication, federation, marketplace access, or gateway use is allowed.",
+    title: "Communities remain sovereign",
+    text: "Each community keeps authority over its own members, rules, culture, governance, moderation, and participation.",
   },
   {
-    title: "Identity is not reputation",
-    text: "An identity says who or what something claims to be. Reputation develops through behaviour, history, verification, and community experience.",
+    title: "Federation is voluntary",
+    text: "Communities may connect with others by consent, and they must be able to limit, pause, revoke, or leave federation.",
   },
   {
-    title: "Capability is not activation",
-    text: "A node may have hardware or software capability, but the feature still requires policy permission, trust permission, legal permission, runtime availability, and user enablement.",
+    title: "Technology makes trust visible",
+    text: "Identity, pairing, roles, reputation, permissions, and policy help communities see and manage trust relationships.",
+  },
+  {
+    title: "Trust must be revocable",
+    text: "A trusted relationship must be able to become limited, quarantined, revoked, repaired, or restored.",
+  },
+  {
+    title: "Trust is not automatic",
+    text: "Reachability, discovery, federation, marketplace participation, or LAN access must never automatically mean trust.",
   },
 ];
 
-const states = [
-  "Unknown",
-  "Discovered",
-  "Introduced",
-  "Paired",
-  "Trusted",
-  "Limited",
-  "Federated",
-  "Quarantined",
-  "Revoked",
-  "Restored",
+const trustStates = [
+  {
+    title: "Unknown",
+    text: "The person, node, group, or community has not yet been recognised.",
+  },
+  {
+    title: "Discovered",
+    text: "The entity is visible or reachable, but no trust relationship has been established.",
+  },
+  {
+    title: "Paired",
+    text: "A basic relationship has been created through an explicit pairing, invite, or introduction process.",
+  },
+  {
+    title: "Trusted",
+    text: "The relationship is permitted for defined actions under policy, role, and community rules.",
+  },
+  {
+    title: "Limited",
+    text: "The relationship is allowed only in a restricted way, often because of role, risk, policy, or uncertainty.",
+  },
+  {
+    title: "Quarantined",
+    text: "The relationship is contained while a concern, conflict, failure, or investigation is handled.",
+  },
+  {
+    title: "Revoked",
+    text: "Trust has been removed. Access, visibility, or participation should cease where policy requires.",
+  },
+  {
+    title: "Restored",
+    text: "Trust may be rebuilt through explicit repair, review, recovery, or community process.",
+  },
 ];
 
-const principles = [
-  "Trust should be explicit.",
-  "Trust should be understandable.",
-  "Trust should be revocable.",
-  "Trust should degrade safely.",
-  "Trust should be observable.",
-  "Trust should never be assumed from network proximity.",
-  "Trust should support human relationships rather than replace them.",
-  "Trust should remain subordinate to safety, recovery, legality, and policy.",
+const trustRelationships = [
+  {
+    title: "People",
+    text: "Members, guests, stewards, operators, vendors, builders, moderators, and recovery contacts.",
+  },
+  {
+    title: "Devices",
+    text: "Phones, browsers, Home Nodes, Infrastructure Nodes, Radio Nodes, and paired client devices.",
+  },
+  {
+    title: "Communities",
+    text: "Households, groups, towns, regions, clubs, associations, events, and local organising networks.",
+  },
+  {
+    title: "Services",
+    text: "Boards, markets, libraries, directories, events, governance tools, support exports, and future applications.",
+  },
+  {
+    title: "Operators",
+    text: "People or teams responsible for infrastructure, gateways, updates, recovery, validation, and support.",
+  },
+  {
+    title: "Federations",
+    text: "Voluntary structures connecting multiple communities under explicit agreements and limited shared trust.",
+  },
+];
+
+const federationScopes = [
+  {
+    title: "Directory sharing",
+    text: "Communities may choose to make basic community or service discovery visible to trusted neighbours.",
+  },
+  {
+    title: "Knowledge sharing",
+    text: "Selected guides, maps, training material, public procedures, or library collections may be shared.",
+  },
+  {
+    title: "Marketplace sharing",
+    text: "Selected offers, requests, services, skills, or resources may be visible across trusted communities.",
+  },
+  {
+    title: "Event sharing",
+    text: "Meetings, workshops, working bees, local events, training sessions, or public notices may be shared.",
+  },
+  {
+    title: "Emergency coordination",
+    text: "Urgent notices, resource needs, shelter information, transport coordination, or local status may be shared.",
+  },
+  {
+    title: "Full cooperation",
+    text: "Broader federation may exist, but only under explicit agreement, defined limits, and revocable trust.",
+  },
+];
+
+const federationLifecycle = [
+  {
+    title: "Discover",
+    text: "A community becomes aware of another community, operator, service, or federation.",
+  },
+  {
+    title: "Introduce",
+    text: "A relationship begins through a known participant, invitation, direct contact, or public listing.",
+  },
+  {
+    title: "Evaluate",
+    text: "Communities assess purpose, rules, compatibility, risks, benefits, and governance expectations.",
+  },
+  {
+    title: "Agree",
+    text: "A federation relationship is defined by scope, roles, visibility, moderation, retention, and responsibilities.",
+  },
+  {
+    title: "Operate",
+    text: "The federation runs under policy, trust, observability, recovery, and community governance.",
+  },
+  {
+    title: "Review",
+    text: "Communities periodically review whether federation is still useful, safe, fair, and aligned.",
+  },
+  {
+    title: "Limit",
+    text: "Federation can be narrowed to fewer services, smaller visibility, reduced trust, or temporary read-only operation.",
+  },
+  {
+    title: "Revoke",
+    text: "A community can leave, pause, revoke, quarantine, or dissolve federation without destroying local operation.",
+  },
+];
+
+const agreementItems = [
+  "Who is participating?",
+  "What is being shared?",
+  "Which services are included?",
+  "Which services are excluded?",
+  "Who may see shared information?",
+  "Who may moderate shared spaces?",
+  "How are disputes handled?",
+  "How long are records retained?",
+  "How is trust revoked?",
+  "How is recovery handled?",
+  "What happens during degraded operation?",
+  "How does a community leave?",
+];
+
+const boundaries = [
+  "Federation does not mean every member trusts every other member.",
+  "Discovery does not mean permission.",
+  "Reachability does not mean trust.",
+  "Marketplace participation does not mean endorsement.",
+  "A shared directory does not mean shared governance.",
+  "A trusted node does not automatically make every service trusted.",
+  "A community may federate narrowly without joining everything.",
+  "A community must be able to leave without losing local identity.",
+  "Trust should be visible, limited, reviewable, and revocable.",
+];
+
+const examples = [
+  {
+    title: "Neighbouring towns",
+    text: "Two towns may share emergency notices, selected marketplace listings, and public events while keeping their own governance separate.",
+  },
+  {
+    title: "Rural properties",
+    text: "Nearby households may share practical notices, tool requests, transport needs, and local knowledge without exposing private records.",
+  },
+  {
+    title: "Event networks",
+    text: "A festival, market, or field event may create temporary federation between organisers, vendors, volunteers, and local support teams.",
+  },
+  {
+    title: "Skill communities",
+    text: "A maker group, radio group, preparedness circle, or repair collective may share guides, workshops, and trusted contacts.",
+  },
+];
+
+const roadmap = [
+  {
+    title: "Trust language",
+    text: "Define the plain-language trust model for users, communities, services, and operators.",
+  },
+  {
+    title: "Pairing and roles",
+    text: "Validate explicit pairing, invitation, role limits, revocation, recovery, and visibility.",
+  },
+  {
+    title: "Community trust",
+    text: "Support membership, stewards, operators, moderation, reputation, and local governance boundaries.",
+  },
+  {
+    title: "Federation agreements",
+    text: "Define explicit federation scope, shared services, retention, moderation, recovery, and exit rules.",
+  },
+  {
+    title: "Federated services",
+    text: "Enable selective sharing for directory, marketplace, library, events, emergency notices, and governance where validated.",
+  },
 ];
 ---
 
 <BaseLayout
-  title="Trust | RelayHub"
-  description="RelayHub trust model explaining discovery, identity, reachability, permission, policy, reputation, federation, revocation, and safe community relationships."
+  title="Trust & Federation | RelayHub"
+  description="RelayHub trust and federation explains how people and communities can connect, cooperate, revoke access, preserve autonomy, and federate without centralised control."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
-      <p class="rh-eyebrow">Trust model</p>
+      <p class="rh-eyebrow">Trust & Federation</p>
 
       <h1 class="rh-title">
-        Trust is earned, limited, and revocable.
+        Communities should connect without surrendering themselves.
       </h1>
 
       <p class="rh-subtitle">
-        RelayHub separates discovery, identity, capability, reachability,
-        permission, policy, reputation, and trust so communities can connect
-        without blindly trusting everything they can see.
+        RelayHub treats trust as a human and community responsibility supported
+        by technology. Federation should help communities cooperate, share,
+        trade, learn, and coordinate without forcing central control, hidden
+        dependency, or automatic trust.
       </p>
 
       <div class="rh-actions">
         <a class="rh-button rh-button-primary" href="/communities">
-          Community model
+          Learn about communities
         </a>
-        <a class="rh-button rh-button-secondary" href="/security">
-          Security posture
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
         </a>
       </div>
     </div>
@@ -76,20 +254,477 @@ const principles = [
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Core rule</p>
+      <p class="rh-kicker">Why trust matters</p>
 
       <h2 class="rh-section-title">
-        Nothing becomes trusted merely because it is visible.
+        Resilient communities need more than connection.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub should help people and communities discover each other, but
-        discovery must never automatically grant access, authority, endorsement,
-        federation, marketplace visibility, gateway use, or administrative power.
+        Being connected is not the same as being trusted. A community must know
+        who it is dealing with, what relationship exists, what permissions apply,
+        what can be shared, what can be revoked, and what happens when something
+        goes wrong.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trustFoundations.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Human trust first</p>
+
+      <h2 class="rh-section-title">
+        Technology can support trust, but it cannot manufacture it.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub can help make trust visible through identity, pairing, roles,
+        permissions, reputation, policy, and records. But trust still emerges
+        from relationship, demonstrated behaviour, accountability, shared
+        expectations, and community judgement.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relationship</h3>
+          <p class="rh-card-text">
+            Trust grows through repeated interaction, reliability, reputation,
+            accountability, repair, and shared work.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Visibility</h3>
+          <p class="rh-card-text">
+            Participants should be able to see whether something is unknown,
+            paired, trusted, limited, quarantined, or revoked.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Responsibility</h3>
+          <p class="rh-card-text">
+            Communities must remain responsible for membership, moderation,
+            federation, dispute handling, and local governance.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+    <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust states</p>
+
+      <h2 class="rh-section-title">
+        Trust should be visible, limited, and revocable.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should help people understand the status of a relationship.
+        A participant, node, service, community, or federation may move through
+        different states over time.
       </p>
 
       <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        {distinctions.map((item) => (
+        {trustStates.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What trust applies to</p>
+
+      <h2 class="rh-section-title">
+        Trust exists at more than one layer.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub trust is not only about devices. It applies to people,
+        communities, services, operators, federations, and the relationships
+        between them.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trustRelationships.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">What trust is not</p>
+
+      <h2 class="rh-section-title">
+        Connection is not permission.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should avoid false confidence. Seeing another node, joining a
+        community, participating in a marketplace, or sharing a federation does
+        not automatically grant trust across all people, services, or records.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Discovery is not trust</h3>
+          <p class="rh-card-text">
+            A discovered person, node, service, or community is visible, but not
+            automatically trusted.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Reachability is not authority</h3>
+          <p class="rh-card-text">
+            If something can be reached over a network, that does not mean it
+            may administer, moderate, publish, trade, or federate.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Federation is not surrender</h3>
+          <p class="rh-card-text">
+            A community may federate with others while retaining local rules,
+            local identity, local moderation, and local governance.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Federation explained</p>
+
+      <h2 class="rh-section-title">
+        Federation means voluntary cooperation between communities.
+      </h2>
+
+      <p class="rh-section-lead">
+        A federation is not a central authority. It is a relationship between
+        communities that choose to share defined services, information, trust,
+        coordination, or visibility under explicit agreement.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Community A</h3>
+          <p class="rh-card-text">
+            Keeps its members, identity, governance, moderation, culture,
+            knowledge, marketplace rules, and recovery paths.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Community B</h3>
+          <p class="rh-card-text">
+            Keeps its own authority as well. Cooperation happens through a
+            defined federation relationship, not forced central control.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-card" style="margin-top: var(--space-8);">
+        <h3 class="rh-card-title">Federation agreement</h3>
+        <p class="rh-card-text">
+          The agreement defines what is shared, what is not shared, who can see
+          it, who can moderate it, how disputes are handled, how records are
+          retained, and how trust can be limited or revoked.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Federation scopes</p>
+
+      <h2 class="rh-section-title">
+        Communities can federate narrowly or broadly.
+      </h2>
+
+      <p class="rh-section-lead">
+        Federation should be modular. A community may share one capability with
+        another community without sharing everything.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {federationScopes.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+    <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Federation lifecycle</p>
+
+      <h2 class="rh-section-title">
+        Federation should be able to begin, change, pause, and end safely.
+      </h2>
+
+      <p class="rh-section-lead">
+        A community should never be trapped inside a federation relationship.
+        Joining, operating, limiting, reviewing, revoking, and leaving should be
+        explicit and recoverable.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {federationLifecycle.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Federation agreements</p>
+
+        <h2 class="rh-section-title">
+          Cooperation needs clear expectations.
+        </h2>
+
+        <p class="rh-section-lead">
+          A federation agreement should be understandable before it is accepted.
+          It should describe what the relationship allows, what it excludes, how
+          it can be reviewed, and how it can be revoked.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Agreement checklist</h3>
+
+        <div class="rh-category-grid" aria-label="Federation agreement checklist">
+          {agreementItems.map((item) => (
+            <div class="rh-category-item">{item}</div>
+          ))}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Joining and leaving</p>
+
+      <h2 class="rh-section-title">
+        A community must remain whole even if federation changes.
+      </h2>
+
+      <p class="rh-section-lead">
+        Federation should strengthen local communities, not replace them. If a
+        federation relationship pauses, degrades, breaks, or ends, the local
+        community should retain its identity, knowledge, governance, recovery,
+        and internal communication wherever supported.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Join</h3>
+          <p class="rh-card-text">
+            A community may join a federation after understanding scope,
+            visibility, shared services, obligations, moderation, risks, and
+            exit paths.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Limit</h3>
+          <p class="rh-card-text">
+            Federation may be narrowed to selected services, read-only access,
+            reduced visibility, temporary pause, or emergency-only cooperation.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Leave</h3>
+          <p class="rh-card-text">
+            A community may leave a federation without losing local records,
+            local identity, local knowledge, local roles, or recovery access
+            where supported.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust degradation and recovery</p>
+
+      <h2 class="rh-section-title">
+        Trust can fail softly.
+      </h2>
+
+      <p class="rh-section-lead">
+        A disagreement, failed service, suspicious behaviour, broken sync,
+        compromised device, or federation dispute should not automatically
+        destroy everything. Trust can be limited, quarantined, revoked, repaired,
+        or restored through explicit process.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Limited</h3>
+          <p class="rh-card-text">
+            Reduce access, visibility, service scope, marketplace participation,
+            or federation sharing while preserving safe local operation.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Quarantined</h3>
+          <p class="rh-card-text">
+            Contain a relationship while operators or community stewards review
+            the issue and protect identity, recovery, and safety.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Revoked</h3>
+          <p class="rh-card-text">
+            Remove trust where necessary. Revocation should be visible,
+            enforced, logged where appropriate, and recoverable from mistakes.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+    <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Examples</p>
+
+      <h2 class="rh-section-title">
+        Trust and federation in practice.
+      </h2>
+
+      <p class="rh-section-lead">
+        Trust and federation should solve real community problems rather than
+        exist as abstract technical concepts. These examples illustrate how
+        communities may cooperate while retaining autonomy.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {examples.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Hard boundaries</p>
+
+      <h2 class="rh-section-title">
+        What trust and federation do not mean.
+      </h2>
+
+      <p class="rh-section-lead">
+        Clear boundaries help prevent false assumptions, excessive trust,
+        accidental centralisation, and avoidable community conflict.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {boundaries.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Technology support</p>
+
+      <h2 class="rh-section-title">
+        Infrastructure should make trust understandable.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub infrastructure should help communities see relationships,
+        understand permissions, identify risks, review federation agreements,
+        recover from mistakes, and operate safely under normal and degraded
+        conditions.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Identity</h3>
+          <p class="rh-card-text">
+            Visible identities, paired relationships, recovery contacts,
+            revocation paths, and understandable ownership.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Policy</h3>
+          <p class="rh-card-text">
+            Community-defined rules governing visibility, federation,
+            participation, moderation, retention, and recovery.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Recovery</h3>
+          <p class="rh-card-text">
+            Clear restoration paths for communities, services, relationships,
+            permissions, records, and infrastructure.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Roadmap</p>
+
+      <h2 class="rh-section-title">
+        Build trust carefully.
+      </h2>
+
+      <p class="rh-section-lead">
+        Trust and federation should expand only as validation, usability,
+        recovery, governance, and observability mature. Communities should be
+        able to understand every trust relationship they create.
+      </p>
+
+      <div class="rh-grid rh-grid-5" style="margin-top: var(--space-10);">
+        {roadmap.map((item) => (
           <article class="rh-card">
             <h3 class="rh-card-title">{item.title}</h3>
             <p class="rh-card-text">{item.text}</p>
@@ -102,120 +737,80 @@ const principles = [
   <section class="rh-section rh-bg-soft">
     <div class="rh-container rh-grid rh-grid-2">
       <div>
-        <p class="rh-kicker">Trust states</p>
+        <p class="rh-kicker">Trust grows through use</p>
 
         <h2 class="rh-section-title">
-          Trust should have visible states.
+          Communities earn trust through participation.
         </h2>
 
         <p class="rh-section-lead">
-          People should be able to understand whether a peer, node, community,
-          service, or federation is unknown, discovered, trusted, limited,
-          quarantined, revoked, or restored.
+          Trust cannot be downloaded, purchased, or automatically assigned.
+          Communities build trust through communication, cooperation, knowledge
+          sharing, accountability, dispute resolution, and long-term
+          participation.
         </p>
       </div>
 
       <article class="rh-card">
-        <div class="rh-trust-state-list">
-          {states.map((state) => (
-            <span class="rh-status rh-status-local">{state}</span>
-          ))}
+        <h3 class="rh-card-title">Explore the ecosystem</h3>
+
+        <p class="rh-card-text">
+          Learn how communities, governance, knowledge, trade, recovery, and
+          federation work together to create resilient local-first
+          infrastructure.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-primary" href="/communities">
+            Communities
+          </a>
+
+          <a class="rh-button rh-button-secondary" href="/library">
+            Relay Library
+          </a>
+
+          <a class="rh-button rh-button-secondary" href="/marketplace">
+            Relay Market
+          </a>
         </div>
       </article>
-    </div>
-  </section>
-
-  <section class="rh-section">
-    <div class="rh-container rh-grid rh-grid-2">
-      <div>
-        <p class="rh-kicker">Community relationships</p>
-
-        <h2 class="rh-section-title">
-          Trust is social before it is technical.
-        </h2>
-
-        <p class="rh-section-lead">
-          Technical identity can support trust, but it cannot replace judgement,
-          relationships, accountability, demonstrated reliability, local
-          knowledge, or community governance.
-        </p>
-      </div>
-
-      <div class="rh-grid">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Household trust</h3>
-          <p class="rh-card-text">
-            A household may trust family members, devices, local users, and
-            recovery contacts differently. These roles should not collapse into
-            one universal permission.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Community trust</h3>
-          <p class="rh-card-text">
-            Communities may recognise members, stewards, operators, guests,
-            vendors, developers, and neighbouring communities under different
-            rules.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Federation trust</h3>
-          <p class="rh-card-text">
-            Federation should be voluntary, limited, reversible, and based on
-            explicit agreements rather than accidental connectivity.
-          </p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="rh-section rh-bg-soft">
-    <div class="rh-container">
-      <p class="rh-kicker">Trust principles</p>
-
-      <h2 class="rh-section-title">
-        Trust should be practical, not mystical.
-      </h2>
-
-      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        {principles.map((principle) => (
-          <article class="rh-card">
-            <p class="rh-card-text">{principle}</p>
-          </article>
-        ))}
-      </div>
     </div>
   </section>
 
   <section class="rh-section rh-dark">
     <div class="rh-container rh-grid rh-grid-2">
       <div>
-        <p class="rh-kicker">Safe failure</p>
+        <p class="rh-kicker">Early interest</p>
 
         <h2 class="rh-section-title">
-          Trust must degrade safely.
+          Help shape the federation model.
         </h2>
 
         <p class="rh-section-lead">
-          When trust is uncertain, expired, revoked, conflicting, or degraded,
-          RelayHub should limit exposure, explain what changed, preserve recovery
-          options, and avoid silently continuing risky behaviour.
+          RelayHub trust and federation should be shaped by real communities,
+          operators, organisers, rural groups, clubs, associations, event teams,
+          educators, and local leaders solving practical problems.
         </p>
       </div>
 
       <article class="rh-card rh-card-dark">
-        <h3 class="rh-card-title">Important boundary</h3>
+        <h3 class="rh-card-title">
+          Interested in trust and federation?
+        </h3>
+
         <p class="rh-card-text">
-          RelayHub should not assume that LAN presence, Reticulum reachability,
-          marketplace participation, federation membership, hardware ownership,
-          or previous interaction creates unlimited trust.
+          Register interest if you want to help test community trust models,
+          federation agreements, governance approaches, recovery processes, or
+          local-first cooperation as RelayHub develops.
         </p>
 
         <div class="rh-actions">
-          <a class="rh-button rh-button-accent" href="/contact">
-            Ask about trust workflows
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+
+          <a class="rh-button rh-button-secondary" href="/governance">
+            Governance
           </a>
         </div>
       </article>

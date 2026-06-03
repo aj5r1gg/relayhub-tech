@@ -1,0 +1,532 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const libraryUses = [
+  {
+    title: "Community guides",
+    text: "Store practical instructions, onboarding guides, operating notes, local procedures, and how-to material.",
+  },
+  {
+    title: "Local knowledge",
+    text: "Preserve maps, supplier notes, repair knowledge, growing notes, field observations, and useful local memory.",
+  },
+  {
+    title: "Emergency plans",
+    text: "Keep checklists, contact procedures, resource plans, fallback instructions, and recovery playbooks available locally.",
+  },
+  {
+    title: "Training material",
+    text: "Publish lessons, workshops, skill notes, manuals, learning paths, and community education material.",
+  },
+  {
+    title: "Meeting records",
+    text: "Preserve decisions, proposals, minutes, notices, agreements, working-group notes, and governance history.",
+  },
+  {
+    title: "Cultural memory",
+    text: "Protect stories, traditions, events, milestones, local history, language, ceremonies, and shared identity.",
+  },
+];
+
+const principles = [
+  {
+    title: "Knowledge is infrastructure",
+    text: "A community that loses its knowledge loses capability. Relay Library treats knowledge as something to preserve, recover, and hand forward.",
+  },
+  {
+    title: "Local-first access",
+    text: "Important material should remain available locally where practical, even when internet, cloud services, or federation links fail.",
+  },
+  {
+    title: "Community-owned memory",
+    text: "Communities should decide what is public, private, shared, archived, deleted, restricted, or federated.",
+  },
+  {
+    title: "Recovery-first records",
+    text: "Critical guides, governance records, recovery steps, and continuity documents should have realistic backup and restore paths.",
+  },
+  {
+    title: "Plain-language usefulness",
+    text: "Relay Library should serve ordinary people under real conditions, not become a technical archive only experts can use.",
+  },
+  {
+    title: "Federation by consent",
+    text: "Communities may share selected knowledge with others without surrendering control over their own library.",
+  },
+];
+
+const knowledgeTypes = [
+  "Guides",
+  "Maps",
+  "Procedures",
+  "Emergency plans",
+  "Training notes",
+  "Meeting records",
+  "Local history",
+  "Supplier notes",
+  "Repair notes",
+  "Cultural records",
+  "Governance records",
+  "Recovery playbooks",
+];
+
+const lifecycle = [
+  {
+    title: "Create",
+    text: "Members, stewards, operators, and working groups create useful knowledge from real community activity.",
+  },
+  {
+    title: "Organise",
+    text: "Material is grouped into guides, records, plans, maps, procedures, decisions, and local reference collections.",
+  },
+  {
+    title: "Preserve",
+    text: "Important knowledge is retained, backed up, versioned where needed, and protected from accidental loss.",
+  },
+  {
+    title: "Recover",
+    text: "Communities can restore critical records, operating knowledge, identity notes, and recovery instructions.",
+  },
+  {
+    title: "Share",
+    text: "Selected material may be shared with trusted communities, federations, or public visitors where policy allows.",
+  },
+];
+
+const boundaries = [
+  "Relay Library should not make private community knowledge public without explicit policy and consent.",
+  "Relay Library should not treat every record as permanent; retention and deletion must be governed.",
+  "Relay Library should not replace community judgement, elders, stewards, or living culture.",
+  "Relay Library should not depend on cloud access for basic local knowledge retrieval.",
+  "Relay Library should not expose recovery material, identities, or sensitive records casually.",
+  "Relay Library should not claim preservation unless backup, restore, and validation paths exist.",
+];
+
+const roadmap = [
+  {
+    title: "Concept",
+    text: "Define library scope, document types, access levels, retention rules, recovery requirements, and federation boundaries.",
+  },
+  {
+    title: "Local library",
+    text: "Support a simple local knowledge base for one household, group, or community.",
+  },
+  {
+    title: "Community roles",
+    text: "Add stewards, editors, contributors, reviewers, moderators, and recovery contacts.",
+  },
+  {
+    title: "Recovery and export",
+    text: "Validate backups, restore, support export, redaction, offline access, and version history.",
+  },
+  {
+    title: "Federated knowledge",
+    text: "Allow selected guides, maps, procedures, or public records to be shared with trusted communities.",
+  },
+];
+---
+
+<BaseLayout
+  title="Relay Library | RelayHub"
+  description="Relay Library is the RelayHub knowledge and memory concept for local-first community guides, records, maps, procedures, training material, recovery information, and cultural continuity."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Relay Library</p>
+
+      <h1 class="rh-title">
+        Community knowledge should survive disruption.
+      </h1>
+
+      <p class="rh-subtitle">
+        Relay Library is the future RelayHub knowledge and memory layer for
+        community guides, maps, procedures, training material, meeting records,
+        emergency plans, recovery information, local history, and cultural
+        continuity.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/community-guides">
+          Community guides
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Purpose</p>
+
+      <h2 class="rh-section-title">
+        Knowledge is community infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Communities need more than chat. They need memory, procedures, maps,
+        guides, decisions, lessons learned, cultural records, and recovery
+        instructions that remain available when ordinary systems fail.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {libraryUses.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Principles</p>
+
+      <h2 class="rh-section-title">
+        A library is not just file storage.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Library should preserve useful community knowledge while keeping
+        ownership, access, trust, privacy, recovery, retention, and federation
+        explicit.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {principles.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">What it can hold</p>
+
+        <h2 class="rh-section-title">
+          Practical knowledge for real communities.
+        </h2>
+
+        <p class="rh-section-lead">
+          Relay Library should begin with the material communities already need:
+          guides, maps, procedures, decisions, recovery steps, training material,
+          and local memory.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Example knowledge types</h3>
+
+        <div class="rh-category-grid" aria-label="Example Relay Library knowledge types">
+          {knowledgeTypes.map((item) => (
+            <div class="rh-category-item">{item}</div>
+          ))}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Knowledge lifecycle</p>
+
+      <h2 class="rh-section-title">
+        Create, organise, preserve, recover, and share.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Library should treat knowledge as a living community asset. Some
+        material changes often. Some must be archived. Some must be restricted.
+        Some must be easy to recover under stress.
+      </p>
+
+      <div class="rh-grid rh-grid-5" style="margin-top: var(--space-10);">
+        {lifecycle.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Local-first memory</p>
+
+      <h2 class="rh-section-title">
+        Important knowledge should not vanish when connectivity fails.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Library should keep essential material available locally wherever
+        practical. Internet access, remote sync, federation, or hosted services
+        may improve the experience, but they should not become hidden
+        dependencies for critical community knowledge.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Offline access</h3>
+          <p class="rh-card-text">
+            Key guides, recovery steps, procedures, and plans should remain
+            reachable from the local node where supported.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Degraded operation</h3>
+          <p class="rh-card-text">
+            If sync or federation fails, the system should explain what is still
+            available locally and what is temporarily unavailable.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Export paths</h3>
+          <p class="rh-card-text">
+            Communities should be able to export selected knowledge for backup,
+            migration, printing, support, or disconnected sharing.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Governance</p>
+
+      <h2 class="rh-section-title">
+        Communities decide what is remembered.
+      </h2>
+
+      <p class="rh-section-lead">
+        A library needs rules. Communities should decide who may create, edit,
+        review, archive, restrict, delete, export, or federate knowledge.
+        Sensitive material requires careful access, retention, and recovery
+        policy.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Access</h3>
+          <p class="rh-card-text">
+            Material may be public, member-only, steward-only, operator-only,
+            federation-shared, archived, or recovery-restricted.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Retention</h3>
+          <p class="rh-card-text">
+            Communities should define what is kept, rotated, expired, archived,
+            deleted, or preserved for long-term continuity.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Review</h3>
+          <p class="rh-card-text">
+            Important material should be reviewed, corrected, superseded, or
+            marked outdated rather than silently trusted forever.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Community roles</p>
+
+      <h2 class="rh-section-title">
+        Knowledge needs stewards, not just storage.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Library should support clear responsibilities for contributors,
+        editors, reviewers, operators, community stewards, and recovery contacts.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Contributors</h3>
+          <p class="rh-card-text">
+            Members who create guides, notes, maps, procedures, local knowledge,
+            event records, or training material.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Stewards</h3>
+          <p class="rh-card-text">
+            Trusted people who maintain structure, quality, continuity,
+            cultural context, and long-term usefulness.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Operators</h3>
+          <p class="rh-card-text">
+            People responsible for backups, recovery, export, migration,
+            validation, storage limits, and safe operation.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Federated knowledge</p>
+
+      <h2 class="rh-section-title">
+        Share knowledge without surrendering control.
+      </h2>
+
+      <p class="rh-section-lead">
+        Communities may choose to share selected guides, maps, procedures,
+        notices, public records, or training material with trusted neighbouring
+        communities. Federation should be voluntary, limited, reviewable, and
+        revocable.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Local library</h3>
+          <p class="rh-card-text">
+            Knowledge visible only inside a household, group, or community.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Shared collections</h3>
+          <p class="rh-card-text">
+            Selected public guides, procedures, maps, or training records shared
+            under explicit federation rules.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Revocable federation</h3>
+          <p class="rh-card-text">
+            Communities should be able to stop sharing, narrow sharing, or
+            change visibility without losing local access.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/communities">
+          Communities
+        </a>
+        <a class="rh-button rh-button-secondary" href="/communities-directory">
+          Community directory
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Hard boundaries</p>
+
+      <h2 class="rh-section-title">
+        What Relay Library should not pretend to do.
+      </h2>
+
+      <p class="rh-section-lead">
+        Preservation claims must be honest. Knowledge systems need backup,
+        recovery, access control, retention, and validation before they can be
+        trusted with serious community memory.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {boundaries.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Roadmap</p>
+
+      <h2 class="rh-section-title">
+        Build the library from useful local knowledge outward.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Library should begin as simple, useful, local-first community
+        knowledge. It should only expand into richer sharing, federation, and
+        long-term archival claims after recovery, governance, and validation are
+        proven.
+      </p>
+
+      <div class="rh-grid rh-grid-5" style="margin-top: var(--space-10);">
+        {roadmap.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Early interest</p>
+
+        <h2 class="rh-section-title">
+          Help shape community memory infrastructure.
+        </h2>
+
+        <p class="rh-section-lead">
+          Relay Library should be shaped by households, local groups, rural
+          communities, event organisers, educators, makers, operators, stewards,
+          and communities that need practical knowledge to endure.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Interested in Relay Library?</h3>
+
+        <p class="rh-card-text">
+          Register interest if you want to test community guides, local
+          knowledge bases, recovery records, training material, offline access,
+          or federated knowledge sharing as RelayHub develops.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/community-guides">
+            Community guides
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

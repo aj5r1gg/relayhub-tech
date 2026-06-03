@@ -1,100 +1,463 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const faqs = [
+const faqSections = [
   {
-    question: "What is RelayHub?",
-    answer:
-      "RelayHub is a local-first ecosystem for helping communities communicate, coordinate, share knowledge, trade, govern, recover, and remain connected. It is not just a messaging app or a single hardware product.",
+    eyebrow: "Basics",
+    title: "What RelayHub is",
+    description:
+      "The simplest explanation of RelayHub, RelayOS, Reticulum, and the purpose of the ecosystem.",
+    items: [
+      {
+        question: "What is RelayHub?",
+        answer:
+          "RelayHub is a local-first ecosystem for resilient communities. It is being designed to help households, groups, and communities communicate, coordinate, share knowledge, trade, govern, recover, and remain connected when ordinary infrastructure is unavailable, unreliable, or unsuitable.",
+      },
+      {
+        question: "Is RelayHub a messaging app?",
+        answer:
+          "No. Messaging is one important use case, but RelayHub is broader than a chat app. It is an ecosystem for community infrastructure, trust, discovery, knowledge sharing, local coordination, recovery, marketplace services, and future applications built around local-first operation.",
+      },
+      {
+        question: "What is RelayOS?",
+        answer:
+          "RelayOS is the planned appliance platform that powers RelayHub nodes. It is intended to provide onboarding, local web management, recovery, updates, observability, policy enforcement, Reticulum integration, local APIs, and hardware-aware service activation.",
+      },
+      {
+        question: "Is RelayHub the same as Reticulum?",
+        answer:
+          "No. Reticulum is the communications substrate. RelayHub uses Reticulum as core infrastructure, while RelayOS and the wider RelayHub ecosystem add appliance-level usability, onboarding, recovery, policy governance, documentation, community services, and product validation.",
+      },
+      {
+        question: "What problem is RelayHub trying to solve?",
+        answer:
+          "RelayHub exists because communities should not depend entirely on fragile, centralised, always-online systems to communicate, organise, preserve knowledge, coordinate resources, and recover from disruption. The goal is not isolation. The goal is resilient interconnection.",
+      },
+      {
+        question: "What does local-first mean?",
+        answer:
+          "Local-first means useful local operation comes before remote dependency. Setup, dashboard access, recovery, local status, local discovery, and supported local communication should work without requiring a cloud account or continuous internet connection.",
+      },
+      {
+        question: "Is local-first the same as offline-only?",
+        answer:
+          "No. Local-first does not mean anti-internet or permanently offline. Internet-assisted features can be useful. The difference is that remote services should enhance local capability, not become hidden dependencies for basic operation.",
+      },
+    ],
   },
   {
-    question: "What is RelayOS?",
-    answer:
-      "RelayOS is the appliance platform planned to power RelayHub nodes. It is designed to provide onboarding, recovery, updates, observability, policy enforcement, Reticulum integration, and local web-based management.",
+    eyebrow: "Product status",
+    title: "Availability and maturity",
+    description:
+      "RelayHub is still being designed, built, tested, and validated. These answers set expectations clearly.",
+    items: [
+      {
+        question: "Is RelayHub available now?",
+        answer:
+          "RelayHub is currently in the design, build, and validation stage. Early access registration is available, but product-supported hardware should only be offered after capability, recovery, usability, documentation, and validation gates are ready.",
+      },
+      {
+        question: "Can I buy a RelayHub device today?",
+        answer:
+          "Not as a fully product-supported device yet. RelayHub should not be sold as a finished appliance until the core setup, recovery, update, support, privacy, hardware compatibility, and validation requirements have been proven.",
+      },
+      {
+        question: "What is the first product target?",
+        answer:
+          "The primary early product target is a Home Node: a household appliance-style node that can be plugged in, discovered locally, paired through a QR or local web flow, managed through a browser, and recovered safely if something goes wrong.",
+      },
+      {
+        question: "Will RelayHub be factory-built?",
+        answer:
+          "The early direction is professionally home-built or small-batch built rather than mass factory production. That still requires disciplined validation, clear documentation, hardware compatibility records, safe recovery procedures, and honest product claims.",
+      },
+      {
+        question: "What does product-supported mean?",
+        answer:
+          "Product-supported means a device, feature, or release has passed defined validation gates. It should have documented hardware support, tested setup, tested recovery, clear update behaviour, realistic privacy wording, support export, and reproducible evidence that it works as claimed.",
+      },
+      {
+        question: "Can I register interest?",
+        answer:
+          "Yes. The Early Access page exists for people who want to follow the project, test future builds, ask about pilot deployments, or help shape the product before wider availability.",
+      },
+    ],
   },
   {
-    question: "Is RelayHub the same as Reticulum?",
-    answer:
-      "No. Reticulum is the communications substrate. RelayHub uses Reticulum as core infrastructure, while RelayOS and RelayHub add appliance-like usability, onboarding, recovery, policy governance, documentation, and community services.",
+    eyebrow: "Usability",
+    title: "How ordinary people will use it",
+    description:
+      "RelayHub is intended to behave like an appliance, not a Linux server.",
+    items: [
+      {
+        question: "Will ordinary people be able to use RelayHub?",
+        answer:
+          "That is the product goal. The target experience is: plug in the node, open the app or local web UI, scan a QR code, pair, and communicate where supported. The user should not need to understand Linux, NixOS, Reticulum internals, routing, radio, or system administration.",
+      },
+      {
+        question: "Will setup require the terminal?",
+        answer:
+          "No. Ordinary setup should not require SSH, shell commands, editing configuration files, or reading system logs. Advanced operator tools may exist, but the normal household setup path should be browser-first and guided.",
+      },
+      {
+        question: "Will I need a native app?",
+        answer:
+          "The early Home Node direction is browser-first for setup, dashboard, recovery, support export, reset, and transfer. Native apps may come later, but they should not be required for the basic appliance experience.",
+      },
+      {
+        question: "What will the onboarding flow look like?",
+        answer:
+          "The intended flow is simple: power on the node, wait for the setup indicator, scan the setup QR code, confirm the node, claim ownership, acknowledge recovery, name the node, and reach the dashboard.",
+      },
+      {
+        question: "What if the node cannot find the internet?",
+        answer:
+          "That should not automatically be treated as a failure. If local operation still works, the node should explain that it is in local-only mode and show what still works, what does not work, and what to do next.",
+      },
+      {
+        question: "What if there are no other nodes nearby?",
+        answer:
+          "The node should explain that it is running but has not found peers yet. No-peers is not automatically an error. It may simply mean there are no reachable nodes, no trusted peers, or no configured community connection yet.",
+      },
+    ],
   },
   {
-    question: "Does RelayHub require the internet?",
-    answer:
-      "Basic local-first operation should not depend on continuous internet access. Some features may be internet-assisted, but the goal is for useful local operation, setup, recovery, and community coordination to continue during disruption where supported.",
+    eyebrow: "Hardware",
+    title: "Nodes, roles, and capability limits",
+    description:
+      "RelayHub is capability-aware. Not every device performs every role.",
+    items: [
+      {
+        question: "What hardware will RelayHub use?",
+        answer:
+          "RelayHub is designed around hardware classes rather than a single universal device. Planned classes include Radio Micro Nodes, Nano Linux Nodes, Home Nodes, Strong Home Nodes, Infrastructure Nodes, Mini PC Nodes, Developer Nodes, and Factory/Test Nodes.",
+      },
+      {
+        question: "Can every node do everything?",
+        answer:
+          "No. RelayHub must never treat every device as a universal node. Hardware capability, software capability, policy permission, runtime availability, trust permission, legal permission, and user enablement are all separate.",
+      },
+      {
+        question: "What is a Home Node?",
+        answer:
+          "A Home Node is the household appliance target. It is intended for ordinary homes or small groups. It should provide local setup, local dashboard, pairing, basic observability, recovery, update handling, and communication support where validated.",
+      },
+      {
+        question: "What is an Infrastructure Node?",
+        answer:
+          "An Infrastructure Node is a higher-capability node for bridge, gateway, larger DTN, community, or operator roles. It should not be confused with a Home Node, and its advanced controls should be policy-governed and role-gated.",
+      },
+      {
+        question: "What is a Radio Micro Node?",
+        answer:
+          "A Radio Micro Node is a small radio-focused device used for transport or field relay roles. It is not automatically a full household appliance, and radio transmit must never be assumed to be lawful or active simply because radio hardware exists.",
+      },
+      {
+        question: "What does capability-aware mean?",
+        answer:
+          "Capability-aware means a feature only appears available when the device can actually support it, the software supports it, policy allows it, the runtime state is healthy, trust allows it, legal conditions permit it, and the user has enabled it where required.",
+      },
+      {
+        question: "Can a Raspberry Pi become an Infrastructure Node?",
+        answer:
+          "Only if the specific hardware class, storage, power, thermal behaviour, software, policy, and validation results support that role. A larger board does not automatically become infrastructure-class just because it has more resources.",
+      },
+    ],
   },
   {
-    question: "Is RelayHub anonymous?",
-    answer:
-      "No. RelayHub must not be described as perfectly anonymous. It can reduce dependence on central services and support resilient communication, but metadata, trusted peers, radio visibility, device seizure, and local configuration still matter.",
+    eyebrow: "Communication",
+    title: "Reticulum, messaging, and delivery expectations",
+    description:
+      "RelayHub aims for resilient communication, but it must avoid false guarantees.",
+    items: [
+      {
+        question: "Will RelayHub include messaging?",
+        answer:
+          "Communication is central to RelayHub, but the first Home Node should be understood as infrastructure first. It may guide users to compatible Reticulum clients or provide validated communication paths, but it should not claim full messaging capability unless that path exists and has been tested.",
+      },
+      {
+        question: "Can RelayHub guarantee message delivery?",
+        answer:
+          "No. RelayHub should not claim guaranteed delivery. Messages may be delivered, queued, delayed, expired, failed, imported, exported, or waiting for a route depending on connectivity, trust, transport, queue policy, and runtime conditions.",
+      },
+      {
+        question: "What is store-and-forward?",
+        answer:
+          "Store-and-forward means a node may hold messages or bundles until a suitable path becomes available. This is useful in intermittent networks, but it is still not a guarantee that every message will arrive.",
+      },
+      {
+        question: "Can RelayHub connect communities together?",
+        answer:
+          "That is one of the major goals. Communities should be able to operate locally, establish trust, share selected services, and federate voluntarily with other communities where capability, policy, trust, and validation allow.",
+      },
+      {
+        question: "Can RelayHub connect to a wider Reticulum network?",
+        answer:
+          "The architecture is designed around Reticulum as a core substrate, so wider Reticulum connectivity is part of the intended direction. Actual behaviour depends on configuration, transports, reachable peers, trust relationships, policy, and validated client support.",
+      },
+      {
+        question: "Will RelayHub work on iPhone?",
+        answer:
+          "RelayHub’s local web setup and dashboard may work through a supported iPhone browser if validated. Reticulum-native mobile communication through Sideband should not be claimed for iOS unless a validated iOS-compatible Reticulum client exists.",
+      },
+      {
+        question: "Will RelayHub work on Android?",
+        answer:
+          "Android is a stronger early fit for Reticulum-native mobile communication because compatible Reticulum client paths are more realistic there. Browser-based setup and management should still be tested separately from messaging support.",
+      },
+    ],
   },
   {
-    question: "Who is RelayHub for?",
-    answer:
-      "RelayHub is for households, local groups, rural communities, field teams, developers, infrastructure operators, and communities that want practical local-first infrastructure with simple onboarding and realistic recovery paths.",
+    eyebrow: "Privacy and security",
+    title: "Honest claims only",
+    description:
+      "RelayHub should improve resilience and reduce dependency without promising magic anonymity.",
+    items: [
+      {
+        question: "Is RelayHub anonymous?",
+        answer:
+          "No. RelayHub must not be described as perfectly anonymous. It may reduce dependence on central services and support more resilient communication, but metadata, trusted peers, radio visibility, local configuration, compromised devices, and physical seizure still matter.",
+      },
+      {
+        question: "Does RelayHub make me invisible?",
+        answer:
+          "No. The approved baseline is: this node is designed for local-first, resilient communication. It can reduce dependence on central services, but it does not make you invisible.",
+      },
+      {
+        question: "Is Reticulum anonymous?",
+        answer:
+          "Reticulum can support resilient and censorship-resistant communication, but it should not be presented as magical anonymity. Privacy, anonymity, encryption, metadata exposure, RF observability, peer trust, and physical risk are separate issues.",
+      },
+      {
+        question: "Can anyone on my local network control the node?",
+        answer:
+          "No. Local network presence should not automatically grant trust. RelayHub should require pairing, roles, permissions, and policy enforcement before management actions are allowed.",
+      },
+      {
+        question: "Will RelayHub upload diagnostics automatically?",
+        answer:
+          "The Home Node direction is explicit support export only. Support bundles should be user-controlled, redacted by default, and should not include message content, private keys, recovery secrets, or unnecessary identities by default.",
+      },
+      {
+        question: "Can support staff remotely control my node?",
+        answer:
+          "Remote vendor control should not be part of the default Home Node model. Support should rely on local help, recovery guidance, and user-exported support bundles unless a future remote-support model is separately specified, consented to, and validated.",
+      },
+      {
+        question: "What happens if a phone or paired device is compromised?",
+        answer:
+          "The system should support revocation, role limits, event history, recovery paths, and explicit trust management. A paired device should not automatically have unlimited authority unless its role allows the action and policy permits it.",
+      },
+    ],
   },
   {
-    question: "Will ordinary people be able to use it?",
-    answer:
-      "That is the product goal. The target experience is: plug in node, open app or local web UI, scan QR code, communicate where supported. The system must behave like an appliance, not a Linux server.",
+    eyebrow: "Recovery",
+    title: "What happens when things go wrong",
+    description:
+      "Recovery is architecture, not an optional feature.",
+    items: [
+      {
+        question: "What happens if something breaks?",
+        answer:
+          "RelayHub systems should degrade gracefully and explain what changed, what still works, what does not work, and what action is available. Recovery should be visible, local-first, guided, role-aware, and validated.",
+      },
+      {
+        question: "What is recovery-first design?",
+        answer:
+          "Recovery-first design means rollback, guided repair, identity preservation where possible, safe reset, transfer, support export, offline documentation, and recovery access are treated as core product requirements rather than afterthoughts.",
+      },
+      {
+        question: "What if an update fails?",
+        answer:
+          "A failed update should roll back to the previous working version or enter guided recovery. A rollback is not a catastrophe. It is a successful safety behaviour.",
+      },
+      {
+        question: "What if I lose access as the owner?",
+        answer:
+          "RelayHub should provide a defined recovery flow. Recovery must check authority and should not allow silent takeover. The exact recovery method depends on the product version, hardware class, and validated recovery design.",
+      },
+      {
+        question: "Can I factory reset a node?",
+        answer:
+          "A factory reset should be possible, but it must not be accidental. It should explain what happens to owner access, paired users, settings, local data, recovery, and transfer or resale state before confirmation.",
+      },
+      {
+        question: "Can ownership be transferred?",
+        answer:
+          "Ownership transfer is part of the intended lifecycle. Transfer should prevent orphaned devices, stale owner authority, insecure resale, and support confusion. It must revoke the previous owner where appropriate and establish the new owner through a clear flow.",
+      },
+    ],
   },
   {
-    question: "What hardware will RelayHub use?",
-    answer:
-      "RelayHub is designed around hardware classes, not one universal device. Planned classes include Home Nodes, Strong Home Nodes, Infrastructure Nodes, Mini PC Nodes, Nano Linux Nodes, and Radio Micro Nodes.",
+    eyebrow: "Radio",
+    title: "LoRa, packet radio, and legal limits",
+    description:
+      "Radio can be valuable, but it must be explicit, validated, and region-aware.",
+    items: [
+      {
+        question: "Will RelayHub support radio?",
+        answer:
+          "Radio support is part of the broader architecture, including LoRa and other possible transport paths. However, radio operation must be validated, capability-aware, region-aware, policy-controlled, and legally configured.",
+      },
+      {
+        question: "Will radio transmit be enabled automatically?",
+        answer:
+          "No. Radio transmit must not be enabled merely because radio hardware exists. It should require validated hardware, correct firmware, region setup, legal permission, policy permission, and explicit user enablement where required.",
+      },
+      {
+        question: "Can RelayHub use LoRa?",
+        answer:
+          "LoRa is a planned radio transport class, but actual support depends on hardware, firmware, Reticulum integration, radio policy, region rules, airtime limits, and validation.",
+      },
+      {
+        question: "Can RelayHub use packet radio?",
+        answer:
+          "Packet radio is an experimental or specialist area and may involve legal, licensing, encryption, and operator constraints depending on jurisdiction. RelayHub should not claim general packet radio support until specific use cases are validated.",
+      },
+      {
+        question: "Can radio be used in emergencies?",
+        answer:
+          "Radio may be useful in degraded environments, but RelayHub should not be marketed as a guaranteed emergency service. Coverage, legality, bandwidth, congestion, power, antennas, terrain, licensing, and peer availability all matter.",
+      },
+    ],
   },
   {
-    question: "Can every node do everything?",
-    answer:
-      "No. RelayHub is capability-aware. Hardware capability, software capability, policy permission, legal permission, trust permission, runtime state, and user enablement are all separate. A feature is not active just because hardware exists.",
+    eyebrow: "Communities",
+    title: "Community services and federation",
+    description:
+      "The purpose is not merely communication. The purpose is resilient community capability.",
+    items: [
+      {
+        question: "Can communities run their own RelayHub network?",
+        answer:
+          "That is one of the central goals. Communities should be able to operate locally, form trust relationships, coordinate resources, preserve knowledge, and federate voluntarily with other communities.",
+      },
+      {
+        question: "What is federation?",
+        answer:
+          "Federation is voluntary coordination between communities. It may include shared directories, marketplace visibility, knowledge sharing, events, emergency notices, trusted gateways, or governance agreements. Federation should strengthen local communities rather than replace them.",
+      },
+      {
+        question: "Will RelayHub include a marketplace?",
+        answer:
+          "A marketplace is part of the wider ecosystem vision. It should support local trade, services, offers, requests, reputation, and settlement-neutral coordination. It must not imply payment custody or settlement guarantees unless separately implemented, audited, and validated.",
+      },
+      {
+        question: "Will RelayHub include community knowledge systems?",
+        answer:
+          "Yes, knowledge preservation is part of the long-term purpose. Communities should be able to store, recover, share, and transmit useful knowledge, local guides, procedures, maps, records, lessons learned, and cultural memory.",
+      },
+      {
+        question: "Does RelayHub impose one governance model?",
+        answer:
+          "No. Communities should be able to define their own membership, roles, moderation, marketplace rules, governance processes, and federation relationships, within safety, recovery, lawful operation, identity, and security boundaries.",
+      },
+      {
+        question: "Can communities disconnect or leave a federation?",
+        answer:
+          "Yes. Federation should be voluntary, modular, revocable, and consent-based. Communities should be able to operate locally even when federation is unavailable or no longer desired.",
+      },
+    ],
   },
   {
-    question: "Will there be radio support?",
-    answer:
-      "Radio support is part of the broader architecture, but radio transmit must be validated, region-aware, policy-controlled, and legally configured. RelayHub will not assume that radio operation is lawful everywhere.",
+    eyebrow: "Developers and operators",
+    title: "Building with RelayHub",
+    description:
+      "RelayHub should be extensible, but extensions must remain policy-aware and validation-gated.",
+    items: [
+      {
+        question: "Can developers build applications for RelayHub?",
+        answer:
+          "Yes. The ecosystem is expected to support applications and services through local APIs, documentation, validation rules, policy boundaries, and future developer guidance. Applications must not bypass identity, trust, recovery, privacy, or hardware limits.",
+      },
+      {
+        question: "What languages or stack will RelayHub use?",
+        answer:
+          "RelayHub’s public website currently uses Astro and Cloudflare infrastructure. RelayOS itself is planned around NixOS, Reticulum, local APIs, browser-first UI, policy enforcement, validation tooling, and hardware-specific service profiles. Exact implementation choices should remain tied to the architecture and validation documents.",
+      },
+      {
+        question: "Why NixOS?",
+        answer:
+          "NixOS is foundational because it supports declarative configuration, reproducible builds, rollback-safe upgrades, and controlled system behaviour. Those qualities align strongly with appliance-like recovery and validation requirements.",
+      },
+      {
+        question: "Will RelayHub use Kubernetes?",
+        answer:
+          "Kubernetes is not the default fit for household appliance nodes. It may be useful in some infrastructure or development contexts, but the product should avoid unnecessary complexity, especially for Home Nodes.",
+      },
+      {
+        question: "Can third-party hardware be compatible?",
+        answer:
+          "Potentially, yes. Compatibility must be accurate and should not imply certification. A device may be compatible, experimental, unsupported, certified, or official depending on validation, documentation, support, and governance status.",
+      },
+      {
+        question: "What does certification mean?",
+        answer:
+          "Certification means a product, application, community, or service has been validated against published requirements. Compatibility means something interoperates. Compatibility alone must not imply certification.",
+      },
+    ],
   },
   {
-    question: "Can I use RelayHub for emergencies?",
-    answer:
-      "RelayHub is being designed for resilience and degraded operation, but it should not be treated as a guaranteed emergency service. It cannot promise universal coverage, guaranteed delivery, or replacement of official emergency systems.",
-  },
-  {
-    question: "What happens if something breaks?",
-    answer:
-      "Recovery is a core design requirement. RelayHub systems should provide rollback, guided recovery, safe reset, identity preservation where possible, support export, and clear degraded-state explanations.",
-  },
-  {
-    question: "Is RelayHub available now?",
-    answer:
-      "RelayHub is currently being designed, built, tested, and validated. Early access registration is available, but product-supported hardware should only be offered once capability, recovery, documentation, and validation are ready.",
-  },
-  {
-    question: "Can developers build for RelayHub?",
-    answer:
-      "Yes. RelayHub is expected to support developers through documentation, local APIs, Reticulum integration, application concepts, validation requirements, and future ecosystem services.",
-  },
-  {
-    question: "Can communities run their own RelayHub network?",
-    answer:
-      "That is one of the goals. Communities should be able to operate locally, form trust relationships, coordinate services, and federate voluntarily with other communities where policy and capability allow.",
-  },
-  {
-    question: "Will RelayHub include a marketplace?",
-    answer:
-      "A marketplace is part of the broader ecosystem vision. It should support local trade, services, requests, offers, reputation, and settlement-neutral coordination. It must not imply payment custody or settlement guarantees unless separately implemented and validated.",
-  },
-  {
-    question: "How do I get involved?",
-    answer:
-      "You can register interest through the Early Access page or send a message through the Contact page. Developers, communities, field testers, and practical operators are especially useful at this stage.",
+    eyebrow: "Getting involved",
+    title: "Early access, pilots, and questions",
+    description:
+      "RelayHub is still forming. Practical questions and real use cases are valuable.",
+    items: [
+      {
+        question: "Who should register for early access?",
+        answer:
+          "Early access is useful for households, rural communities, community organisers, field operators, developers, hardware builders, Reticulum users, local resilience groups, and people interested in testing practical local-first infrastructure.",
+      },
+      {
+        question: "Can I suggest a pilot project?",
+        answer:
+          "Yes. Pilot ideas are welcome, especially if they involve real community needs, difficult connectivity, rural conditions, field deployments, local coordination, recovery requirements, or non-technical users.",
+      },
+      {
+        question: "Can I contribute as a developer?",
+        answer:
+          "Yes. Developer involvement will become more useful as APIs, validation requirements, application boundaries, and reference implementations become clearer. The most useful early contributions are practical, testable, documented, and recovery-aware.",
+      },
+      {
+        question: "Can I help without being technical?",
+        answer:
+          "Yes. Non-technical feedback is essential. RelayHub succeeds only if ordinary people can understand it, set it up, recover it, and trust what it says. Questions, confusion, wording feedback, and field-test observations are valuable.",
+      },
+      {
+        question: "What kind of feedback is most useful?",
+        answer:
+          "The best feedback identifies what is confusing, what feels too technical, what claims sound unclear, what recovery steps are missing, what real-world use cases matter, and what would make a household or community actually trust the system.",
+      },
+    ],
   },
 ];
+
+const allFaqs = faqSections.flatMap((section) => section.items);
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: allFaqs.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
 ---
 
 <BaseLayout
   title="FAQ | RelayHub"
-  description="Frequently asked questions about RelayHub, RelayOS, Reticulum, local-first operation, hardware nodes, recovery, privacy, radio support, communities, and early access."
+  description="Frequently asked questions about RelayHub, RelayOS, Reticulum, local-first operation, hardware nodes, recovery, privacy, radio support, communities, developers, pilots, and early access."
 >
-  <section class="rh-hero">
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(faqJsonLd)}
+  />
+
+  <section class="rh-hero rh-faq-hero">
     <div class="rh-container rh-hero-inner">
       <p class="rh-eyebrow">FAQ</p>
 
@@ -103,8 +466,9 @@ const faqs = [
       </h1>
 
       <p class="rh-subtitle">
-        Clear answers about RelayHub, RelayOS, Reticulum, hardware nodes,
-        local-first operation, privacy, recovery, radio support, and early access.
+        Plain answers about RelayHub, RelayOS, Reticulum, local-first operation,
+        hardware nodes, privacy, recovery, radio support, community services,
+        developers, and early access.
       </p>
 
       <div class="rh-actions">
@@ -112,33 +476,85 @@ const faqs = [
           Register interest
         </a>
         <a class="rh-button rh-button-secondary" href="/contact">
-          Contact RelayHub
+          Ask a question
         </a>
       </div>
     </div>
   </section>
 
-  <section class="rh-section">
+  <section class="rh-section rh-faq-intro-section">
     <div class="rh-container">
-      <p class="rh-kicker">Plain answers</p>
+      <div class="rh-faq-intro">
+        <div>
+          <p class="rh-kicker">Plain answers</p>
 
-      <h2 class="rh-section-title">
-        RelayHub should be understandable before it is technical.
-      </h2>
+          <h2 class="rh-section-title">
+            RelayHub should be understandable before it is technical.
+          </h2>
 
-      <p class="rh-section-lead">
-        These answers avoid hype and false guarantees. RelayHub is being built
-        around practical usefulness, local-first operation, capability awareness,
-        recovery, and realistic trust.
-      </p>
+          <p class="rh-section-lead">
+            These answers avoid hype and false guarantees. RelayHub is being
+            built around practical usefulness, local-first operation,
+            capability awareness, recovery, realistic privacy, and validation.
+          </p>
+        </div>
 
-      <div class="rh-faq-list">
-        {faqs.map((item) => (
-          <article class="rh-faq-item">
-            <h3>{item.question}</h3>
-            <p>{item.answer}</p>
-          </article>
-        ))}
+        <aside class="rh-faq-principle-card" aria-label="RelayHub summary">
+          <p class="rh-faq-principle-label">Core idea</p>
+          <p class="rh-faq-principle-text">
+            Technology is the tool.<br />
+            Community is the purpose.
+          </p>
+        </aside>
+      </div>
+
+      <div class="rh-faq-jump">
+        <p class="rh-faq-jump-label">Jump to:</p>
+
+        <div class="rh-faq-jump-links">
+          {faqSections.map((section) => (
+            <a href={`#${section.eyebrow.toLowerCase().replaceAll(" ", "-")}`}>
+              {section.eyebrow}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-faq-sections-section">
+    <div class="rh-container">
+      <div class="rh-faq-sections">
+        {faqSections.map((section) => {
+          const sectionId = section.eyebrow.toLowerCase().replaceAll(" ", "-");
+
+          return (
+            <section class="rh-faq-section" id={sectionId}>
+              <div class="rh-faq-section-heading">
+                <p class="rh-kicker">{section.eyebrow}</p>
+
+                <h2>{section.title}</h2>
+
+                <p>{section.description}</p>
+              </div>
+
+              <div class="rh-faq-list">
+                {section.items.map((item) => (
+                  <details class="rh-faq-item">
+                    <summary>
+                      <span>{item.question}</span>
+                      <span class="rh-faq-icon" aria-hidden="true">+</span>
+                    </summary>
+
+                    <div class="rh-faq-answer">
+                      <p>{item.answer}</p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   </section>
@@ -161,6 +577,7 @@ const faqs = [
 
       <div class="rh-card rh-card-dark">
         <h3 class="rh-card-title">Ask something specific</h3>
+
         <p class="rh-card-text">
           Use the Contact page for detailed questions, pilot ideas, developer
           interest, documentation feedback, community use cases, or practical
@@ -171,8 +588,250 @@ const faqs = [
           <a class="rh-button rh-button-accent" href="/contact">
             Contact RelayHub
           </a>
+          <a class="rh-button rh-button-secondary" href="/docs">
+            Read the docs
+          </a>
         </div>
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .rh-faq-hero {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .rh-faq-intro-section {
+    padding-bottom: var(--space-8);
+  }
+
+  .rh-faq-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: var(--space-8);
+    align-items: stretch;
+  }
+
+  .rh-faq-principle-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(circle at top left, rgb(202 138 4 / 0.12), transparent 38%),
+      var(--color-surface);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .rh-faq-principle-label {
+    margin: 0 0 var(--space-3);
+    color: var(--color-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .rh-faq-principle-text {
+    margin: 0;
+    color: var(--color-heading);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 760;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .rh-faq-jump {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .rh-faq-jump-label {
+    margin: 0 0 var(--space-3);
+    color: var(--color-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+  }
+
+  .rh-faq-jump-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .rh-faq-jump-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .rh-faq-jump-links a:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+    color: var(--color-heading);
+    transform: translateY(-1px);
+  }
+
+  .rh-faq-sections-section {
+    padding-top: var(--space-8);
+  }
+
+  .rh-faq-sections {
+    display: grid;
+    gap: var(--space-10);
+  }
+
+  .rh-faq-section {
+    scroll-margin-top: 96px;
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+    padding-bottom: var(--space-10);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .rh-faq-section:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .rh-faq-section-heading {
+    position: sticky;
+    top: 96px;
+  }
+
+  .rh-faq-section-heading h2 {
+    margin: 0;
+    color: var(--color-heading);
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+  }
+
+  .rh-faq-section-heading p:last-child {
+    margin: var(--space-4) 0 0;
+    color: var(--color-muted);
+    font-size: var(--font-size-base);
+    line-height: 1.65;
+  }
+
+  .rh-faq-list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .rh-faq-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .rh-faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    cursor: pointer;
+    padding: var(--space-5);
+    color: var(--color-heading);
+    font-size: var(--font-size-lg);
+    font-weight: 760;
+    line-height: 1.25;
+    list-style: none;
+  }
+
+  .rh-faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .rh-faq-item summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
+  }
+
+  .rh-faq-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-muted);
+    font-weight: 800;
+    transition:
+      transform 160ms ease,
+      background 160ms ease,
+      color 160ms ease;
+  }
+
+  .rh-faq-item[open] .rh-faq-icon {
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+    transform: rotate(45deg);
+  }
+
+  .rh-faq-answer {
+    padding: 0 var(--space-5) var(--space-5);
+  }
+
+  .rh-faq-answer p {
+    margin: 0;
+    max-width: 72ch;
+    color: var(--color-muted);
+    font-size: var(--font-size-base);
+    line-height: 1.75;
+  }
+
+  @media (max-width: 900px) {
+    .rh-faq-intro {
+      grid-template-columns: 1fr;
+    }
+
+    .rh-faq-section {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+
+    .rh-faq-section-heading {
+      position: static;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .rh-faq-item summary {
+      padding: var(--space-4);
+      font-size: var(--font-size-base);
+    }
+
+    .rh-faq-answer {
+      padding: 0 var(--space-4) var(--space-4);
+    }
+
+    .rh-faq-jump-links a {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+</style>

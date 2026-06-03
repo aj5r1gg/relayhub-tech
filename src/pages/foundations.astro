@@ -1,0 +1,269 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const values = [
+  "Truthfulness",
+  "Stewardship",
+  "Service",
+  "Practicality",
+  "Responsibility",
+  "Respect",
+  "Cooperation",
+  "Curiosity",
+  "Humility",
+  "Resilience",
+  "Inclusivity of Capability",
+  "Preservation",
+];
+
+const principles = [
+  "Human dignity",
+  "Human flourishing",
+  "Community first",
+  "Local first",
+  "Capability before dependency",
+  "Trust through relationships",
+  "Voluntary participation",
+  "Pluralism",
+  "Stewardship over consumption",
+  "Generational continuity",
+  "Collective memory",
+  "Knowledge preservation",
+  "Cultural continuity",
+  "Economic participation",
+  "Voluntary federation",
+  "Interconnection without centralisation",
+  "Human scale",
+  "Resilience over convenience",
+  "Graceful degradation",
+  "Recovery is essential",
+  "Reality over assumption",
+  "Transparency of capability",
+  "Simplicity at the edge",
+  "Service to future communities",
+];
+
+const foundationStack = [
+  "Purpose",
+  "Vision",
+  "Mission",
+  "Values",
+  "Principles",
+  "Governance & Policy",
+  "Architecture",
+  "Products",
+  "Validation",
+  "Deployment",
+];
+
+const policies = [
+  {
+    title: "Local-first",
+    text: "Core community functions should remain useful without continuous internet access wherever practical.",
+  },
+  {
+    title: "Recovery-first",
+    text: "Every critical capability needs a realistic recovery path before it can be treated as supported.",
+  },
+  {
+    title: "Capability-aware",
+    text: "Hardware capability, software capability, policy permission, trust, legality, and runtime activation are separate gates.",
+  },
+  {
+    title: "Community autonomy",
+    text: "Communities should govern themselves within safety, legal, identity, security, and recovery limits.",
+  },
+  {
+    title: "Voluntary federation",
+    text: "Communities may cooperate without surrendering local identity, governance, or autonomy.",
+  },
+  {
+    title: "Truthful claims",
+    text: "RelayHub must not exaggerate privacy, security, resilience, anonymity, delivery, or support claims.",
+  },
+];
+---
+
+<BaseLayout
+  title="Foundations | RelayHub"
+  description="The public foundations of RelayHub: purpose, vision, mission, values, principles, governance, and the constitutional idea that technology serves resilient communities."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Foundations</p>
+
+      <h1 class="rh-title">
+        Technology is the tool. Communities are the purpose.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub exists to help people build, sustain, and interconnect
+        resilient communities through local-first infrastructure for
+        communication, trust, knowledge, trade, coordination, governance,
+        recovery, and cultural continuity.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/communities">
+          Communities
+        </a>
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Purpose</p>
+
+      <h2 class="rh-section-title">
+        RelayHub is not merely a communications project.
+      </h2>
+
+      <p class="rh-section-lead">
+        The purpose of RelayHub is to enable people to build, sustain, and
+        interconnect resilient communities by providing local-first
+        infrastructure for communication, trust, knowledge, trade, coordination,
+        governance, and cultural continuity.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <article class="rh-card rh-card-dark">
+        <p class="rh-kicker">Vision</p>
+        <h2 class="rh-section-title">Resilient interdependence.</h2>
+        <p class="rh-card-text">
+          A world where communities possess the tools, knowledge, and
+          infrastructure required to communicate, organise, preserve culture,
+          coordinate resources, exchange value, recover from disruption, and
+          cooperate with others.
+        </p>
+      </article>
+
+      <article class="rh-card rh-card-dark">
+        <p class="rh-kicker">Mission</p>
+        <h2 class="rh-section-title">Build what makes that possible.</h2>
+        <p class="rh-card-text">
+          To design, build, validate, and maintain accessible, resilient,
+          local-first infrastructure that enables individuals and communities to
+          communicate, coordinate, learn, trade, govern, preserve knowledge, and
+          cooperate under ordinary and adverse conditions.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Values</p>
+
+      <h2 class="rh-section-title">
+        How RelayHub should conduct itself.
+      </h2>
+
+      <div class="rh-category-grid" style="margin-top: var(--space-10);">
+        {values.map((item) => (
+          <div class="rh-category-item">{item}</div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Principles</p>
+
+      <h2 class="rh-section-title">
+        The principles that govern the ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        These principles guide architecture, governance, products, deployment,
+        recovery, documentation, validation, and future evolution.
+      </p>
+
+      <div class="rh-category-grid" style="margin-top: var(--space-10);">
+        {principles.map((item) => (
+          <div class="rh-category-item">{item}</div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Constitutional stack</p>
+
+      <h2 class="rh-section-title">
+        Lower layers must not contradict higher layers.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub decisions should flow from purpose to implementation. A
+        technical feature may not override policy. A policy may not override the
+        purpose, mission, values, or principles.
+      </p>
+
+      <div class="rh-category-grid" style="margin-top: var(--space-10);">
+        {foundationStack.map((item) => (
+          <div class="rh-category-item">{item}</div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Policy foundations</p>
+
+      <h2 class="rh-section-title">
+        Principles become real through policy.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {policies.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Read governance
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Final position</p>
+
+      <h2 class="rh-section-title">
+        The community remains the centre.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub exists to provide digital foundations that enable resilient
+        human communities to form, flourish, govern themselves, preserve their
+        knowledge and culture, coordinate resources, conduct trade, cooperate
+        across distance, recover from adversity, and endure across generations.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/vision">
+          Vision
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

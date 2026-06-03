@@ -6,29 +6,29 @@ const ecosystemLayers = [
     title: "RelayHub",
     text: "The ecosystem: communities, products, services, applications, trust networks, knowledge systems, marketplaces, and federations.",
     href: "/ecosystem",
-    label: "Ecosystem",
+    label: "Explore ecosystem",
   },
   {
     title: "RelayOS",
-    text: "The platform: appliance onboarding, local web UI, policy, recovery, updates, observability, and future local APIs.",
+    text: "The platform: appliance onboarding, local web UI, policy enforcement, recovery, updates, observability, and future local APIs.",
     href: "/relayos",
-    label: "RelayOS",
+    label: "View platform",
   },
   {
     title: "Relay products",
     text: "The appliances: Relay Home, Relay Radio, Relay Infrastructure, and future validated product families.",
     href: "/products",
-    label: "Products",
+    label: "View products",
   },
   {
     title: "Relay applications",
-    text: "Future services for chat, boards, marketplace, library, events, identity, governance, and community coordination.",
+    text: "Future local-first services for chat, boards, marketplace, library, files, events, identity, and governance.",
     href: "/developers",
-    label: "Developers",
+    label: "Developer path",
   },
   {
     title: "Communities",
-    text: "The purpose: households, groups, towns, regions, clubs, associations, and local organising networks.",
+    text: "The purpose: households, groups, towns, clubs, associations, local networks, and regional communities.",
     href: "/communities",
     label: "Communities",
   },
@@ -39,32 +39,134 @@ const ecosystemLayers = [
     label: "Trust model",
   },
 ];
+
+const howItWorks = [
+  {
+    step: "01",
+    title: "Plug in the node",
+    text: "The appliance starts locally and exposes setup, status, and recovery without requiring a cloud account.",
+  },
+  {
+    step: "02",
+    title: "Open the local UI",
+    text: "Use a browser-first interface designed for ordinary users, not Linux administrators.",
+  },
+  {
+    step: "03",
+    title: "Scan the QR code",
+    text: "Pair, claim ownership, invite trusted users, and understand what this node can actually do.",
+  },
+  {
+    step: "04",
+    title: "Communicate and coordinate",
+    text: "Use validated communication paths today, then expand toward boards, market, library, and federation as the ecosystem matures.",
+  },
+];
+
+const communityFunctions = [
+  {
+    title: "Communicate",
+    text: "Local-first communication for households, groups, field teams, and communities where supported paths are validated.",
+  },
+  {
+    title: "Coordinate",
+    text: "Notices, events, rosters, alerts, working bees, local updates, and practical community action.",
+  },
+  {
+    title: "Preserve knowledge",
+    text: "Guides, maps, procedures, history, lessons learned, and local memory that remains useful during disruption.",
+  },
+  {
+    title: "Trade",
+    text: "Future settlement-neutral marketplace coordination for goods, services, requests, offers, barter, and local enterprise.",
+  },
+  {
+    title: "Govern",
+    text: "Future voluntary tools for proposals, roles, decisions, notices, working groups, and community records.",
+  },
+  {
+    title: "Federate",
+    text: "Communities can connect with other communities while keeping local autonomy, trust, policy, and identity intact.",
+  },
+];
+
+const products = [
+  {
+    status: "MVP target",
+    statusClass: "rh-status-ready",
+    title: "Relay Home",
+    text: "A household appliance target for local setup, QR pairing, dashboard status, updates, support export, and guided recovery.",
+  },
+  {
+    status: "Concept",
+    statusClass: "rh-status-local",
+    title: "Relay Radio",
+    text: "A radio-assisted field relay class for validated transport use where lawful, supported, policy-enabled, and user-enabled.",
+  },
+  {
+    status: "Future",
+    statusClass: "rh-status-updating",
+    title: "Relay Infrastructure",
+    text: "A stronger node class for community infrastructure, DTN, bridge, gateway, observability, and operator-governed services.",
+  },
+];
+
+const futureApps = [
+  {
+    title: "Relay Chat",
+    text: "Future user-facing messaging and trusted communication tools.",
+  },
+  {
+    title: "Relay Boards",
+    text: "Community notices, requests, announcements, alerts, and local coordination.",
+  },
+  {
+    title: "Relay Market",
+    text: "Settlement-neutral coordination for goods, services, skills, offers, and requests.",
+  },
+  {
+    title: "Relay Library",
+    text: "Local knowledge, guides, maps, procedures, community memory, and cultural continuity.",
+  },
+  {
+    title: "Relay Events",
+    text: "Calendars, training, meetings, working bees, rosters, and local gatherings.",
+  },
+  {
+    title: "Relay Governance",
+    text: "Future proposals, roles, decisions, delegations, records, and transparent local processes.",
+  },
+];
 ---
 
 <BaseLayout
-  title="RelayHub | Local-First Infrastructure for Resilient Communities"
-  description="RelayHub helps communities communicate, coordinate, share knowledge, trade, govern, recover, and remain connected through local-first infrastructure."
+  title="RelayHub | Build Resilient Communities"
+  description="RelayHub helps communities communicate, coordinate, preserve knowledge, trade, govern, recover, and remain connected through local-first infrastructure."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
-      <p class="rh-eyebrow">Local-first communication infrastructure</p>
+      <p class="rh-eyebrow">Local-first infrastructure for resilient communities</p>
 
       <h1 class="rh-title">
         Build resilient communities.
       </h1>
 
       <p class="rh-subtitle">
-        RelayHub helps homes, groups, and communities communicate, coordinate,
-        recover, and remain connected through simple local-first infrastructure
-        powered by RelayOS and Reticulum.
+        RelayHub helps households, groups, and communities communicate,
+        coordinate, preserve knowledge, trade, govern, recover, and remain
+        connected through local-first infrastructure powered by RelayOS and
+        Reticulum.
       </p>
 
       <div class="rh-actions">
         <a class="rh-button rh-button-primary" href="/early-access">
           Register interest
         </a>
-        <a class="rh-button rh-button-secondary" href="/products">
-          View products
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          How it works
+        </a>
+        <a class="rh-button rh-button-secondary" href="/vision">
+          Read the vision
         </a>
       </div>
     </div>
@@ -72,40 +174,40 @@ const ecosystemLayers = [
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Why RelayHub</p>
+      <p class="rh-kicker">The problem</p>
 
       <h2 class="rh-section-title">
-        Communication should not depend entirely on fragile central systems.
+        Communities should not depend entirely on fragile central systems.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub is being built for practical local-first communication,
-        community coordination, knowledge sharing, recovery, and future
-        federation — without turning ordinary users into system administrators.
+        Internet outages, platform control, weak local coordination, poor
+        recovery paths, and centralised services can leave people disconnected
+        exactly when local trust, knowledge, and cooperation matter most.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
-          <h3 class="rh-card-title">Local-first</h3>
+          <h3 class="rh-card-title">Centralised dependency</h3>
           <p class="rh-card-text">
-            Setup, status, recovery, documentation, and local operation should
-            remain useful without continuous internet access.
+            Many communities rely on services they do not own, cannot repair,
+            and cannot operate locally when connectivity fails.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Appliance-simple</h3>
+          <h3 class="rh-card-title">Technical barriers</h3>
           <p class="rh-card-text">
-            RelayHub is designed around QR onboarding, plain-language states,
-            visible recovery, and browser-first local management.
+            Resilient tools often expect users to understand Linux, networking,
+            radio, cryptography, routing, or command-line recovery.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Reality-based</h3>
+          <h3 class="rh-card-title">Poor recovery</h3>
           <p class="rh-card-text">
-            No magic anonymity, no guaranteed delivery, no universal emergency
-            promise. Capabilities must be validated before they are claimed.
+            If updates fail, keys are lost, hardware breaks, or connectivity
+            disappears, ordinary users need clear recovery paths, not panic.
           </p>
         </article>
       </div>
@@ -114,21 +216,91 @@ const ecosystemLayers = [
 
   <section class="rh-section rh-bg-soft">
     <div class="rh-container">
-      <p class="rh-kicker">Ecosystem</p>
+      <p class="rh-kicker">The RelayHub answer</p>
+
+      <h2 class="rh-section-title">
+        Technology is the tool. Communities are the purpose.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is being built as a local-first ecosystem for communication,
+        trust, knowledge, trade, coordination, governance, and cultural
+        continuity — with appliance-level usability instead of server-room
+        complexity.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {communityFunctions.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/communities">
+          Explore communities
+        </a>
+        <a class="rh-button rh-button-secondary" href="/use-cases">
+          View use cases
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Simple at the edge</p>
+
+      <h2 class="rh-section-title">
+        Reticulum-level infrastructure with appliance-level usability.
+      </h2>
+
+      <p class="rh-section-lead">
+        The internal architecture may be sophisticated. The user experience must
+        remain understandable: plug in the node, open the local UI, scan a QR
+        code, pair, and communicate where supported.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {howItWorks.map((item) => (
+          <article class="rh-card">
+            <p class="rh-eyebrow">{item.step}</p>
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          See the full flow
+        </a>
+        <a class="rh-button rh-button-secondary" href="/early-access">
+          Join early access
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Ecosystem architecture</p>
 
       <h2 class="rh-section-title">
         RelayHub is more than a device.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub is the ecosystem. RelayOS is the platform. Products are the
-        appliances. Applications are the services. Communities are the purpose.
-        Federation is voluntary interconnection without centralised control.
+        RelayHub is the ecosystem. RelayOS is the platform. Relay products are
+        the appliances. Relay applications are the services. Communities are the
+        primary social units. Federations are voluntary interconnection.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         {ecosystemLayers.map((item) => (
-          <article class="rh-card">
+          <article class="rh-card rh-card-dark">
             <h3 class="rh-card-title">{item.title}</h3>
             <p class="rh-card-text">{item.text}</p>
             <div class="rh-actions">
@@ -141,32 +313,43 @@ const ecosystemLayers = [
       </div>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-primary" href="/ecosystem">
+        <a class="rh-button rh-button-accent" href="/ecosystem">
           Explore the ecosystem
         </a>
-        <a class="rh-button rh-button-secondary" href="/use-cases">
-          View use cases
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
         </a>
       </div>
     </div>
   </section>
 
-  <section class="rh-section rh-dark">
-    <div class="rh-container">
-      <p class="rh-kicker">RelayOS</p>
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">RelayOS</p>
 
-      <h2 class="rh-section-title">
-        The appliance platform behind RelayHub nodes.
-      </h2>
+        <h2 class="rh-section-title">
+          The local-first appliance platform behind RelayHub nodes.
+        </h2>
 
-      <p class="rh-section-lead">
-        RelayOS turns NixOS, Reticulum, policy governance, hardware profiles,
-        local APIs, observability, updates, and recovery into a simple node
-        experience.
-      </p>
+        <p class="rh-section-lead">
+          RelayOS turns NixOS, Reticulum, policy governance, hardware profiles,
+          local APIs, observability, updates, and recovery into a simple node
+          experience.
+        </p>
 
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
+        <div class="rh-actions">
+          <a class="rh-button rh-button-primary" href="/relayos">
+            Learn about RelayOS
+          </a>
+          <a class="rh-button rh-button-secondary" href="/developers">
+            Developer path
+          </a>
+        </div>
+      </div>
+
+      <div class="rh-grid rh-grid-1">
+        <article class="rh-card">
           <h3 class="rh-card-title">NixOS foundation</h3>
           <p class="rh-card-text">
             Reproducible builds, declarative configuration, rollback-safe
@@ -174,131 +357,58 @@ const ecosystemLayers = [
           </p>
         </article>
 
-        <article class="rh-card rh-card-dark">
+        <article class="rh-card">
           <h3 class="rh-card-title">Reticulum substrate</h3>
           <p class="rh-card-text">
-            Local-first communication across supported transports and
-            intermittent connectivity.
+            Local-first communication over supported transports, intermittent
+            connectivity, and future delay-tolerant behaviour.
           </p>
         </article>
 
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">RelayOS appliance layer</h3>
+        <article class="rh-card">
+          <h3 class="rh-card-title">Appliance layer</h3>
           <p class="rh-card-text">
-            QR setup, pairing, trust, dashboard, policy gates, recovery, support,
-            and plain-language state.
+            QR setup, pairing, trust, dashboard, policy gates, guided recovery,
+            support export, and plain-language state.
           </p>
         </article>
-      </div>
-
-      <div class="rh-actions">
-        <a class="rh-button rh-button-accent" href="/relayos">
-          Learn about RelayOS
-        </a>
       </div>
     </div>
   </section>
 
-  <section class="rh-section">
+  <section class="rh-section rh-bg-soft">
     <div class="rh-container">
-      <p class="rh-kicker">Products</p>
+      <p class="rh-kicker">Product family</p>
 
       <h2 class="rh-section-title">
         A family of nodes, not one universal box.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub products are capability-aware. A household appliance, a field
-        radio node, and an infrastructure node should not pretend to do the same
-        job.
+        RelayHub is capability-aware. A household appliance, radio relay, and
+        infrastructure node should not pretend to do the same job. Hardware
+        capability, software capability, policy permission, runtime state, trust,
+        legal permission, and user enablement are separate.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <span class="rh-status rh-status-ready">MVP Target</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            Relay Home
-          </h3>
-          <p class="rh-card-text">
-            A household communication appliance for local setup, QR pairing,
-            status, updates, support export, and guided recovery.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <span class="rh-status rh-status-local">Concept</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            Relay Radio
-          </h3>
-          <p class="rh-card-text">
-            A radio-assisted field relay class for validated transport use where
-            lawful, supported, and policy-enabled.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <span class="rh-status rh-status-updating">Future</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            Relay Infrastructure
-          </h3>
-          <p class="rh-card-text">
-            A stronger node for community infrastructure, DTN, bridge, gateway,
-            observability, and operator roles.
-          </p>
-        </article>
+        {products.map((item) => (
+          <article class="rh-card">
+            <span class={`rh-status ${item.statusClass}`}>{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-secondary" href="/products">
+        <a class="rh-button rh-button-primary" href="/products">
           Explore products
         </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="rh-section rh-bg-soft">
-    <div class="rh-container">
-      <p class="rh-kicker">Hardware</p>
-
-      <h2 class="rh-section-title">
-        Hardware capability comes before product claims.
-      </h2>
-
-      <p class="rh-section-lead">
-        RelayHub nodes are built around hardware classes. A small radio relay,
-        household appliance, and infrastructure node have different ceilings,
-        recovery expectations, and support boundaries.
-      </p>
-
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Hardware classes</h3>
-          <p class="rh-card-text">
-            Radio Micro Node, Nano Linux Node, Home Node, Strong Home Node,
-            Infrastructure Node, and Mini PC Node each have different roles.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Compatibility status</h3>
-          <p class="rh-card-text">
-            Hardware may be Candidate, Boots, Reticulum Works, Stable,
-            Product-Supported, Deprecated, Unsupported, or Unknown.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Radio reality</h3>
-          <p class="rh-card-text">
-            Radio transmit is never assumed. Region, legal limits, policy,
-            hardware, firmware, user enablement, and runtime state all matter.
-          </p>
-        </article>
-      </div>
-
-      <div class="rh-actions">
         <a class="rh-button rh-button-secondary" href="/hardware">
-          Explore hardware
+          Hardware classes
         </a>
       </div>
     </div>
@@ -306,59 +416,110 @@ const ecosystemLayers = [
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Communities</p>
+      <p class="rh-kicker">Trust, policy, and federation</p>
 
       <h2 class="rh-section-title">
-        Technology is the tool. Communities are the purpose.
+        Discovery is not trust. Connectivity is not permission.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub exists to help people build, sustain, and interconnect
-        resilient communities through communication, trust, knowledge, trade,
-        coordination, governance, and cultural continuity.
+        RelayHub must distinguish what is discovered, paired, trusted, limited,
+        quarantined, revoked, policy-allowed, legally allowed, and actually
+        available at runtime.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
-          <h3 class="rh-card-title">Households</h3>
+          <h3 class="rh-card-title">Explicit trust</h3>
           <p class="rh-card-text">
-            Simple local infrastructure for families, homes, rural properties,
-            and small trusted groups.
+            LAN presence, Reticulum reachability, and marketplace participation
+            must not automatically become administrative trust.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Groups</h3>
+          <h3 class="rh-card-title">Policy-governed behaviour</h3>
           <p class="rh-card-text">
-            Practical coordination for clubs, events, field teams, volunteer
-            groups, and preparedness circles.
+            Transport, gateway, bridge, discovery, radio, privacy, resource,
+            support, update, and recovery behaviour are governed by policy.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Communities</h3>
+          <h3 class="rh-card-title">Voluntary federation</h3>
           <p class="rh-card-text">
-            Future local directories, bulletin boards, markets, libraries,
-            governance tools, and voluntary federation.
+            Communities can cooperate, share, and interconnect without losing
+            autonomy or being forced into a single central authority.
           </p>
         </article>
       </div>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-secondary" href="/communities">
-          Communities
+        <a class="rh-button rh-button-secondary" href="/trust">
+          Trust model
         </a>
-        <a class="rh-button rh-button-secondary" href="/community-guides">
-          Community guides
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
         </a>
-        <a class="rh-button rh-button-secondary" href="/pilot-program">
-          Pilot program
+        <a class="rh-button rh-button-secondary" href="/privacy">
+          Privacy
         </a>
       </div>
     </div>
   </section>
 
   <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Recovery-first design</p>
+
+      <h2 class="rh-section-title">
+        Failure is expected. Recovery must be designed in.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should fail softly rather than catastrophically. Updates,
+        identity, pairing, reset, transfer, power loss, storage pressure, and
+        degraded operation all need observable and documented recovery paths.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Rollback-safe updates</h3>
+          <p class="rh-card-text">
+            Failed updates should return to a previous working state or enter
+            guided recovery instead of silently breaking the node.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Identity preservation</h3>
+          <p class="rh-card-text">
+            Node identity, owner identity, recovery authority, trust state, and
+            transfer state need clear lifecycle rules.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Guided recovery</h3>
+          <p class="rh-card-text">
+            Recovery should be visible, local-first, documented, role-aware,
+            authority-checked, and usable by non-technical users.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/recovery">
+          Recovery architecture
+        </a>
+        <a class="rh-button rh-button-secondary" href="/support">
+          Support model
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
     <div class="rh-container">
       <p class="rh-kicker">Future applications</p>
 
@@ -373,57 +534,71 @@ const ecosystemLayers = [
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {futureApps.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/marketplace">
+          Relay Market concept
+        </a>
+        <a class="rh-button rh-button-secondary" href="/community-guides">
+          Community guides
+        </a>
+        <a class="rh-button rh-button-secondary" href="/roadmap">
+          Roadmap
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Validation</p>
+
+      <h2 class="rh-section-title">
+        Claims must be proven before they become promises.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should not present experimental ideas as product-supported.
+        Every major claim should be testable, observable, reproducible,
+        recoverable, evidence-backed, and release-gated.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
-          <h3 class="rh-card-title">Relay Chat</h3>
+          <h3 class="rh-card-title">Build minimally</h3>
           <p class="rh-card-text">
-            Future user-facing messaging and trusted communication tools.
+            Start with the smallest working appliance loop: boot, setup, QR,
+            owner claim, dashboard, Reticulum status, and recovery entry.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Relay Boards</h3>
+          <h3 class="rh-card-title">Validate honestly</h3>
           <p class="rh-card-text">
-            Notices, requests, announcements, alerts, and local coordination.
+            Test setup, power loss, update rollback, local-only mode, no-peers,
+            storage pressure, browser compatibility, and recovery drills.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Relay Market</h3>
+          <h3 class="rh-card-title">Release carefully</h3>
           <p class="rh-card-text">
-            Settlement-neutral trade coordination for goods, services, skills,
-            offers, and requests.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Library</h3>
-          <p class="rh-card-text">
-            Local knowledge, guides, maps, procedures, community memory, and
-            cultural continuity.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Events</h3>
-          <p class="rh-card-text">
-            Community calendars, rosters, working bees, training, and meetings.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Governance</h3>
-          <p class="rh-card-text">
-            Future proposal, decision, role, delegation, and record tools.
+            Product-supported status should require documentation, support,
+            recovery, field evidence, compatibility boundaries, and known limits.
           </p>
         </article>
       </div>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-secondary" href="/marketplace">
-          Marketplace concept
-        </a>
-        <a class="rh-button rh-button-secondary" href="/developers">
-          Developers
+        <a class="rh-button rh-button-primary" href="/validation">
+          Validation approach
         </a>
         <a class="rh-button rh-button-secondary" href="/status">
           Current status
@@ -432,58 +607,7 @@ const ecosystemLayers = [
     </div>
   </section>
 
-  <section class="rh-section rh-dark">
-    <div class="rh-container">
-      <p class="rh-kicker">Developer pathway</p>
-
-      <h2 class="rh-section-title">
-        Build useful infrastructure without breaking the appliance.
-      </h2>
-
-      <p class="rh-section-lead">
-        RelayHub needs developers, hardware testers, documentation writers,
-        validators, designers, and community operators who respect local-first,
-        recovery-first, capability-aware design.
-      </p>
-
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Build</h3>
-          <p class="rh-card-text">
-            RelayOS services, local APIs, web UI, hardware profiles, and future
-            applications.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Validate</h3>
-          <p class="rh-card-text">
-            Boot, setup, pairing, recovery, rollback, degraded operation,
-            documentation, and field usability.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Document</h3>
-          <p class="rh-card-text">
-            Quick starts, status meanings, privacy reality, recovery guides,
-            operator notes, and support boundaries.
-          </p>
-        </article>
-      </div>
-
-      <div class="rh-actions">
-        <a class="rh-button rh-button-accent" href="/developers">
-          Developers
-        </a>
-        <a class="rh-button rh-button-secondary" href="/downloads">
-          Downloads
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="rh-section">
+  <section class="rh-section rh-bg-soft">
     <div class="rh-container">
       <p class="rh-kicker">Honest limits</p>
 
@@ -496,8 +620,8 @@ const ecosystemLayers = [
           <h3 class="rh-card-title">What RelayHub is designed for</h3>
           <p class="rh-card-text">
             Local-first operation, QR onboarding, explicit trust, graceful
-            degradation, visible recovery, and reduced dependence on centralised
-            communication paths.
+            degradation, visible recovery, capability-aware products, and
+            reduced dependence on centralised communication paths.
           </p>
         </article>
 
@@ -505,8 +629,8 @@ const ecosystemLayers = [
           <h3 class="rh-card-title">What RelayHub does not promise</h3>
           <p class="rh-card-text">
             Perfect anonymity, invisible metadata, guaranteed message delivery,
-            universal emergency coverage, or lawful radio transmit in every
-            region.
+            universal emergency coverage, automatic trust, or lawful radio
+            transmit in every region.
           </p>
         </article>
       </div>
@@ -518,14 +642,14 @@ const ecosystemLayers = [
         <a class="rh-button rh-button-secondary" href="/privacy">
           Privacy
         </a>
-        <a class="rh-button rh-button-secondary" href="/validation">
-          Validation
+        <a class="rh-button rh-button-secondary" href="/faq">
+          FAQ
         </a>
       </div>
     </div>
   </section>
 
-  <section class="rh-section rh-bg-soft">
+  <section class="rh-section">
     <div class="rh-container">
       <p class="rh-kicker">Documentation and support</p>
 
@@ -540,33 +664,37 @@ const ecosystemLayers = [
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
-          <h3 class="rh-card-title">Docs</h3>
+          <h3 class="rh-card-title">Beginner documentation</h3>
           <p class="rh-card-text">
-            Quick starts, status meanings, recovery guides, hardware notes, and
-            operator documentation.
+            Quick starts, setup flow, status meanings, onboarding, local-only
+            explanations, and household guidance.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Support</h3>
+          <h3 class="rh-card-title">Recovery documentation</h3>
           <p class="rh-card-text">
-            User-controlled support export, redaction by default, and no hidden
-            remote control.
+            What failed, what still works, what recovery can do, what it cannot
+            do, and how to restore safe operation.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Accessibility</h3>
+          <h3 class="rh-card-title">Support boundaries</h3>
           <p class="rh-card-text">
-            Plain language, readable layout, mobile usability, non-colour-only
-            status, and recovery usability.
+            User-controlled support export, redaction by default, no hidden
+            remote control, and clear support levels.
           </p>
         </article>
       </div>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-secondary" href="/docs">Read docs</a>
-        <a class="rh-button rh-button-secondary" href="/support">Support</a>
+        <a class="rh-button rh-button-secondary" href="/docs">
+          Read docs
+        </a>
+        <a class="rh-button rh-button-secondary" href="/support">
+          Support
+        </a>
         <a class="rh-button rh-button-secondary" href="/accessibility">
           Accessibility
         </a>
@@ -584,9 +712,9 @@ const ecosystemLayers = [
         </h2>
 
         <p class="rh-section-lead">
-          Register interest for product updates, RelayOS progress, documentation
-          releases, developer resources, Etsy availability, and future community
-          pilot programs.
+          Register interest for RelayOS progress, product updates,
+          documentation releases, developer resources, hardware validation,
+          Etsy availability, and future community pilot programs.
         </p>
       </div>
 

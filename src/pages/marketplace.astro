@@ -1,59 +1,153 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const examples = [
+const marketplaceUses = [
   {
-    title: "Local goods",
-    text: "List useful items, tools, surplus produce, equipment, supplies, and community resources.",
-  },
-  {
-    title: "Local services",
-    text: "Offer repair work, transport help, tutoring, technical support, gardening, building, and practical skills.",
+    title: "Offers",
+    text: "List useful goods, tools, produce, equipment, spare materials, supplies, and community resources.",
   },
   {
     title: "Requests",
-    text: "Ask for help, materials, labour, advice, transport, introductions, or community support.",
+    text: "Ask for help, transport, materials, labour, introductions, advice, repairs, or local support.",
   },
   {
-    title: "Skills exchange",
-    text: "Coordinate learning, mentoring, apprenticeships, volunteer help, workshops, and mutual assistance.",
+    title: "Services",
+    text: "Coordinate repair work, gardening, building, tutoring, technical support, food, transport, and practical services.",
+  },
+  {
+    title: "Skills",
+    text: "Share skills, mentoring, apprenticeships, workshops, learning sessions, and mutual assistance.",
+  },
+  {
+    title: "Community notices",
+    text: "Publish working bees, local needs, resource updates, lost-and-found, event needs, and practical announcements.",
+  },
+  {
+    title: "Local resources",
+    text: "Help people find shared tools, spaces, equipment, storage, vehicles, supplies, and local capability.",
   },
 ];
 
 const principles = [
-  "Trade coordination is separate from payment settlement.",
-  "Marketplace visibility does not equal trust or endorsement.",
-  "Communities should control their own marketplace rules.",
-  "Listings should work locally where practical.",
-  "Reputation should be transparent, challengeable, and never absolute.",
-  "Illegal, unsafe, or exploitative listings must be policy-governed.",
+  {
+    title: "Coordination, not custody",
+    text: "Relay Market should help people coordinate exchange. It should not custody funds unless separately specified, audited, legally reviewed, and validated.",
+  },
+  {
+    title: "Settlement-neutral by default",
+    text: "Communities may use cash, barter, mutual credit, bank transfer, local credit, TNE, or other lawful methods without forcing one model.",
+  },
+  {
+    title: "Listings are not endorsement",
+    text: "A visible listing does not automatically mean trust, certification, recommendation, payment confirmation, or delivery guarantee.",
+  },
+  {
+    title: "Trust remains local",
+    text: "Reputation and trust should be contextual, transparent, challengeable, revocable, and subordinate to community governance.",
+  },
+  {
+    title: "Community rules matter",
+    text: "Each community should define who may list, what may be listed, moderation expectations, retention rules, and dispute handling.",
+  },
+  {
+    title: "Policy still governs",
+    text: "Local autonomy does not override safety, lawful operation, identity integrity, recovery, privacy, security, or validated hardware limits.",
+  },
+];
+
+const states = [
+  {
+    title: "Local-only",
+    text: "The local marketplace should remain useful inside a community even when internet or wider federation links are unavailable.",
+  },
+  {
+    title: "Federated",
+    text: "Communities may choose to share selected marketplace listings with trusted neighbouring communities or federations.",
+  },
+  {
+    title: "Degraded",
+    text: "If sync, storage, transport, or federation fails, the system should explain what still works and what no longer works.",
+  },
+  {
+    title: "Recovered",
+    text: "Marketplace records, trust state, community rules, and useful history should have realistic recovery paths where supported.",
+  },
+];
+
+const roadmap = [
+  {
+    title: "Concept",
+    text: "Define marketplace scope, policies, listing types, trust boundaries, moderation rules, and settlement boundaries.",
+  },
+  {
+    title: "Local trial",
+    text: "Validate simple offers, requests, services, local notices, and community moderation inside one small community.",
+  },
+  {
+    title: "Community operation",
+    text: "Add roles, retention, local search, categories, support export, recovery guidance, and plain-language state visibility.",
+  },
+  {
+    title: "Federated sharing",
+    text: "Allow selected listing types to be shared with trusted communities under explicit federation policy.",
+  },
+  {
+    title: "Optional integrations",
+    text: "Explore settlement references, receipts, invoices, payment intent messages, and lawful external integrations.",
+  },
+];
+
+const listingTypes = [
+  "Goods",
+  "Services",
+  "Tools",
+  "Produce",
+  "Transport",
+  "Repairs",
+  "Training",
+  "Accommodation",
+  "Volunteer help",
+  "Community resources",
+  "Event needs",
+  "Emergency supplies",
+];
+
+const boundaries = [
+  "Relay Market should not guarantee payment unless a validated settlement confirmation system exists.",
+  "Relay Market should not imply endorsement merely because a listing is visible.",
+  "Relay Market should not require one currency, token, payment provider, or economic model.",
+  "Relay Market should not become a hidden dependency for basic community communication.",
+  "Relay Market should not bypass community rules, safety policy, legal limits, or trust boundaries.",
+  "Relay Market should not expose private marketplace records without explicit policy and consent.",
 ];
 ---
 
 <BaseLayout
-  title="Marketplace | RelayHub"
-  description="Explore the RelayHub marketplace concept for local trade, services, requests, skills exchange, community notices, and settlement-neutral economic coordination."
+  title="Relay Market | RelayHub"
+  description="Relay Market is the RelayHub marketplace concept for local-first trade coordination, offers, requests, services, skills, community resources, and settlement-neutral exchange."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
-      <p class="rh-eyebrow">Marketplace concept</p>
+      <p class="rh-eyebrow">Relay Market</p>
 
       <h1 class="rh-title">
-        Local trade without making messaging the whole story.
+        Local trade coordination for resilient communities.
       </h1>
 
       <p class="rh-subtitle">
-        RelayHub is not just about communication. A future marketplace could help
-        communities coordinate goods, services, skills, requests, notices, and
-        local economic activity through local-first infrastructure.
+        Relay Market is the future RelayHub marketplace concept for offers,
+        requests, services, skills, local resources, community notices, and
+        settlement-neutral exchange. It is designed to help communities
+        coordinate economic life without turning RelayHub into a bank, wallet,
+        payment processor, or endorsement authority.
       </p>
 
       <div class="rh-actions">
         <a class="rh-button rh-button-primary" href="/early-access">
           Register interest
         </a>
-        <a class="rh-button rh-button-secondary" href="/communities-directory">
-          View community directory
+        <a class="rh-button rh-button-secondary" href="/communities">
+          Communities
         </a>
       </div>
     </div>
@@ -61,21 +155,49 @@ const principles = [
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Future capability</p>
+      <p class="rh-kicker">Purpose</p>
 
       <h2 class="rh-section-title">
-        A community marketplace should coordinate activity, not control it.
+        A marketplace should help people find each other.
       </h2>
 
       <p class="rh-section-lead">
-        This page is a concept preview. It shows how RelayHub could support
-        local trade and mutual assistance while keeping settlement, trust,
-        legality, and community rules explicit.
+        Healthy communities need practical ways to exchange goods, services,
+        labour, skills, knowledge, resources, and help. Relay Market should
+        support that coordination while keeping trust, legality, payment,
+        moderation, privacy, and recovery explicit.
       </p>
 
-      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        {examples.map((item) => (
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {marketplaceUses.map((item) => (
           <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Core boundary</p>
+
+      <h2 class="rh-section-title">
+        Trade coordination is not the same as payment settlement.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Market should help communities coordinate trade. It should not
+        pretend to confirm external payment, guarantee delivery, custody funds,
+        recover wallets, certify sellers, or make every listing trustworthy.
+        Those are separate capabilities requiring separate policy, validation,
+        review, and implementation.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {principles.map((item) => (
+          <article class="rh-card rh-card-dark">
             <h3 class="rh-card-title">{item.title}</h3>
             <p class="rh-card-text">{item.text}</p>
           </article>
@@ -87,41 +209,231 @@ const principles = [
   <section class="rh-section rh-bg-soft">
     <div class="rh-container rh-grid rh-grid-2">
       <div>
-        <p class="rh-kicker">What it could include</p>
+        <p class="rh-kicker">What could be listed</p>
 
         <h2 class="rh-section-title">
-          Notices, offers, requests, services, and skills.
+          Practical exchange, not abstract ecommerce.
         </h2>
 
         <p class="rh-section-lead">
-          A RelayHub marketplace should help communities see what people need,
-          what people can offer, what skills exist locally, and what coordination
-          is possible.
+          Relay Market should focus on what communities actually need: local
+          help, available resources, useful skills, small trade, practical
+          services, community notices, and coordination under real-world
+          conditions.
         </p>
       </div>
 
-      <div class="rh-grid">
+      <article class="rh-card">
+        <h3 class="rh-card-title">Example listing categories</h3>
+
+        <div class="rh-category-grid">
+          {listingTypes.map((item) => (
+        <div class="rh-category-item">{item}</div>
+          ))}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Settlement-neutral</p>
+
+      <h2 class="rh-section-title">
+        Communities should not be forced into one economic model.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub community may coordinate trade while using cash, barter,
+        mutual credit, local credit, bank transfer, TNE, invoices, receipts, or
+        other lawful settlement methods. Relay Market should support economic
+        diversity without making any one settlement layer mandatory.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
-          <h3 class="rh-card-title">Community noticeboard</h3>
+          <h3 class="rh-card-title">Payment intent</h3>
           <p class="rh-card-text">
-            Announcements, local needs, working bees, workshops, lost-and-found,
-            transport requests, tool sharing, and community updates.
+            A future listing may express intent to pay, request payment, or
+            reference an invoice without proving that settlement occurred.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Offers and requests</h3>
+          <h3 class="rh-card-title">Settlement notes</h3>
           <p class="rh-card-text">
-            People could post what they have, what they need, what they can do,
-            and what they are willing to exchange.
+            Communities may record notes, receipts, references, or status where
+            policy allows, but external confirmation must not be claimed unless validated.
           </p>
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Local-first access</h3>
+          <h3 class="rh-card-title">Optional integrations</h3>
           <p class="rh-card-text">
-            Marketplace data should remain useful inside a local community even
-            when wider internet or federation links are unavailable.
+            Settlement integrations should remain optional, explicit, lawful,
+            reviewable, and unable to compromise local operation or recovery.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust and reputation</p>
+
+      <h2 class="rh-section-title">
+        Trust is not manufactured by a marketplace.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Market should support trust, but it should not replace human
+        judgement, community relationships, moderation, accountability, or local
+        governance. Visibility is not verification. Participation is not endorsement.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Known participants</h3>
+          <p class="rh-card-text">
+            Communities should be able to distinguish unknown, discovered,
+            paired, trusted, limited, quarantined, and revoked participants.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Contextual reputation</h3>
+          <p class="rh-card-text">
+            Reputation should be local, explainable, challengeable, reversible,
+            and never treated as absolute truth.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Dispute paths</h3>
+          <p class="rh-card-text">
+            Communities should be able to define their own dispute process,
+            moderation rules, listing rules, and escalation paths.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/governance">
+          Governance
+        </a>
+        <a class="rh-button rh-button-secondary" href="/communities">
+          Community model
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Local-first operation</p>
+
+      <h2 class="rh-section-title">
+        A local marketplace should not die when the internet does.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Market should remain useful inside a local community wherever
+        practical. Wider federation, sync, remote visibility, or external
+        settlement tools may enhance the marketplace, but they should not become
+        hidden dependencies for basic local coordination.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {states.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Community policy</p>
+
+      <h2 class="rh-section-title">
+        Each community needs its own marketplace rules.
+      </h2>
+
+      <p class="rh-section-lead">
+        Marketplace rules should be understandable, visible, enforceable, and
+        recoverable. The ecosystem can provide defaults, but communities should
+        govern their own local spaces within safety, legal, trust, privacy,
+        identity, and recovery limits.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Who may list?</h3>
+          <p class="rh-card-text">
+            Communities may decide whether listings are open to members, guests,
+            verified members, trusted vendors, stewards, or federation partners.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">What may be listed?</h3>
+          <p class="rh-card-text">
+            Communities should define permitted categories, restricted items,
+            illegal or unsafe listings, moderation rules, and review expectations.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">How long does it remain?</h3>
+          <p class="rh-card-text">
+            Listings, requests, receipts, disputes, reputation notes, and
+            marketplace records require explicit retention and deletion rules.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Federated marketplace</p>
+
+      <h2 class="rh-section-title">
+        Communities may share listings without surrendering autonomy.
+      </h2>
+
+      <p class="rh-section-lead">
+        Federation should be selective and consent-based. A community may choose
+        to share only certain listing types, only with specific communities, only
+        under defined moderation expectations, and only while retaining the right
+        to revoke federation trust.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Local marketplace</h3>
+          <p class="rh-card-text">
+            Listings visible only to the local community or household network.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Shared categories</h3>
+          <p class="rh-card-text">
+            Selected categories such as tools, produce, transport, workshops, or
+            emergency supplies may be shared wider.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Federation agreement</h3>
+          <p class="rh-card-text">
+            Shared visibility should be governed by explicit trust, moderation,
+            data retention, and dispute expectations.
           </p>
         </article>
       </div>
@@ -130,16 +442,46 @@ const principles = [
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Marketplace principles</p>
+      <p class="rh-kicker">Hard boundaries</p>
 
       <h2 class="rh-section-title">
-        Coordination must not pretend to be custody, endorsement, or trust.
+        What Relay Market should not pretend to do.
       </h2>
 
+      <p class="rh-section-lead">
+        Clear boundaries protect users, communities, operators, and the RelayHub
+        ecosystem from false confidence.
+      </p>
+
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        {principles.map((principle) => (
+        {boundaries.map((item) => (
           <article class="rh-card">
-            <p class="rh-card-text">{principle}</p>
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Roadmap</p>
+
+      <h2 class="rh-section-title">
+        Build the marketplace only after the basics are trustworthy.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay Market should grow through validation: simple local coordination
+        first, then policy, trust, recovery, community operation, federation, and
+        optional settlement integrations.
+      </p>
+
+      <div class="rh-grid rh-grid-5" style="margin-top: var(--space-10);">
+        {roadmap.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
           </article>
         ))}
       </div>
@@ -149,31 +491,33 @@ const principles = [
   <section class="rh-section rh-dark">
     <div class="rh-container rh-grid rh-grid-2">
       <div>
-        <p class="rh-kicker">Settlement-neutral</p>
+        <p class="rh-kicker">Early interest</p>
 
         <h2 class="rh-section-title">
-          RelayHub should help people coordinate trade without forcing one payment model.
+          Help shape local-first trade coordination.
         </h2>
 
         <p class="rh-section-lead">
-          A future marketplace may support cash, barter, mutual credit, local
-          credit, bank transfer, TNE, or other lawful settlement methods. Unless
-          separately implemented and validated, RelayHub should not claim to
-          custody funds or confirm external payment.
+          Relay Market should be shaped by real households, rural communities,
+          local groups, small producers, service providers, tool-sharing groups,
+          preparedness circles, and community operators.
         </p>
       </div>
 
       <article class="rh-card rh-card-dark">
-        <h3 class="rh-card-title">Important boundary</h3>
+        <h3 class="rh-card-title">Interested in Relay Market?</h3>
+
         <p class="rh-card-text">
-          Marketplace listings would not automatically mean endorsement,
-          certification, payment confirmation, delivery guarantee, or trust.
-          Communities must be able to define their own rules while still obeying
-          safety, recovery, legal, and policy boundaries.
+          Register interest if you want to test marketplace concepts, community
+          listings, offers and requests, services, skills exchange, or federated
+          trade coordination as RelayHub develops.
         </p>
 
         <div class="rh-actions">
-          <a class="rh-button rh-button-accent" href="/contact">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/contact">
             Discuss marketplace use
           </a>
         </div>

@@ -1,0 +1,544 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const quickRecommendations = [
+  {
+    need: "A simple household starting point",
+    choose: "Relay Home",
+    why: "Best first appliance-class target for ordinary households and small trusted groups.",
+  },
+  {
+    need: "More comfort and performance at home",
+    choose: "Strong Home Node",
+    why: "Better headroom for richer local UI, larger queues where validated, and more active household use.",
+  },
+  {
+    need: "A field radio relay",
+    choose: "Relay Radio",
+    why: "Radio transport and field relay class where lawful, validated, policy-enabled, and region-configured.",
+  },
+  {
+    need: "A tiny lightweight relay",
+    choose: "Nano Linux Node",
+    why: "Useful for small relay tasks, but not a full household appliance unless separately validated.",
+  },
+  {
+    need: "Community infrastructure",
+    choose: "Relay Infrastructure",
+    why: "Intended for bridge, gateway, DTN, observability, and community service roles where validated.",
+  },
+  {
+    need: "Maximum capability and operator control",
+    choose: "Mini PC Node",
+    why: "Best fit for full infrastructure roles, larger storage, heavier workloads, and community operators.",
+  },
+];
+
+const nodeClasses = [
+  {
+    title: "Radio Micro Node",
+    example: "LilyGo T-Beam Supreme, T3S3",
+    product: "Relay Radio",
+    bestFor: "LoRa/radio transport, field relay experiments, mobile field work, and low-power radio-assisted links.",
+    notFor: "A complete household appliance, full local web UI, marketplace hosting, large DTN queues, or general community server duties.",
+  },
+  {
+    title: "Nano Linux Node",
+    example: "Raspberry Pi Zero 2 W",
+    product: "Nano relay class",
+    bestFor: "Small Linux relay tasks, lightweight local routing, lab testing, and constrained deployments.",
+    notFor: "A polished household product experience, infrastructure gateways, large queues, heavy services, or non-technical users without support.",
+  },
+  {
+    title: "Home Node v1",
+    example: "Raspberry Pi 4 2GB class",
+    product: "Relay Home",
+    bestFor: "Household appliance target, QR onboarding, local web UI, simple status, basic paired users, recovery, and local-first operation.",
+    notFor: "Bridge by default, gateway by default, radio transmit by default, full infrastructure operation, or large community workloads.",
+  },
+  {
+    title: "Strong Home Node",
+    example: "Pi 4 4GB / Pi 5 4GB class",
+    product: "Enhanced Relay Home",
+    bestFor: "A stronger household node with more comfort, better UI headroom, larger validated queues, and more simultaneous household activity.",
+    notFor: "Automatically becoming infrastructure, bridge, gateway, federation host, or large operator node without validation and policy approval.",
+  },
+  {
+    title: "Infrastructure Node",
+    example: "Pi 5 8GB class",
+    product: "Relay Infrastructure",
+    bestFor: "Community infrastructure, bridge/gateway roles, larger DTN, operator dashboard, observability, staged updates, and managed services.",
+    notFor: "Unattended consumer use without an operator, unclear recovery, unvalidated gateway behaviour, or casual plug-and-forget deployment.",
+  },
+  {
+    title: "Mini PC Node",
+    example: "N100/N150-class mini PC",
+    product: "Full infrastructure class",
+    bestFor: "Maximum capability, larger storage, operator workloads, federation services, observability, local services, and community infrastructure.",
+    notFor: "Low-power field use, simple radio relay, or households wanting the smallest simplest appliance.",
+  },
+];
+
+const comparisonRows = [
+  {
+    capability: "Household onboarding",
+    radio: "Limited",
+    nano: "Limited",
+    home: "Yes",
+    strong: "Yes",
+    infra: "Yes",
+    mini: "Yes",
+  },
+  {
+    capability: "Local web dashboard",
+    radio: "No / limited",
+    nano: "Limited",
+    home: "Yes",
+    strong: "Yes",
+    infra: "Yes",
+    mini: "Yes",
+  },
+  {
+    capability: "Simple non-technical UX",
+    radio: "No",
+    nano: "Limited",
+    home: "Primary target",
+    strong: "Strong",
+    infra: "Operator-led",
+    mini: "Operator-led",
+  },
+  {
+    capability: "Reticulum transport",
+    radio: "Yes",
+    nano: "Yes",
+    home: "Yes",
+    strong: "Yes",
+    infra: "Yes",
+    mini: "Yes",
+  },
+  {
+    capability: "Radio transport",
+    radio: "Primary role",
+    nano: "No / external",
+    home: "Variant only",
+    strong: "Variant only",
+    infra: "Possible variant",
+    mini: "External / variant",
+  },
+  {
+    capability: "Bridge role",
+    radio: "No",
+    nano: "Limited",
+    home: "Disabled by default",
+    strong: "Not automatic",
+    infra: "Supported where validated",
+    mini: "Supported where validated",
+  },
+  {
+    capability: "Gateway role",
+    radio: "No",
+    nano: "No / limited",
+    home: "Disabled by default",
+    strong: "Not automatic",
+    infra: "Supported where validated",
+    mini: "Supported where validated",
+  },
+  {
+    capability: "DTN queues",
+    radio: "Tiny",
+    nano: "Small",
+    home: "Small",
+    strong: "Small / medium",
+    infra: "Medium / large",
+    mini: "Large",
+  },
+  {
+    capability: "Relay Library",
+    radio: "No",
+    nano: "Limited",
+    home: "Limited",
+    strong: "Better",
+    infra: "Good",
+    mini: "Best",
+  },
+  {
+    capability: "Relay Market",
+    radio: "No",
+    nano: "Limited",
+    home: "Limited",
+    strong: "Better",
+    infra: "Good",
+    mini: "Best",
+  },
+  {
+    capability: "Federation services",
+    radio: "No",
+    nano: "Limited",
+    home: "Limited",
+    strong: "Limited",
+    infra: "Good",
+    mini: "Best",
+  },
+  {
+    capability: "Operator workloads",
+    radio: "No",
+    nano: "No",
+    home: "No",
+    strong: "Limited",
+    infra: "Yes",
+    mini: "Yes",
+  },
+];
+
+const growthPath = [
+  {
+    title: "Start",
+    node: "Relay Home",
+    text: "Begin with a household-class node and validate onboarding, local operation, recovery, and basic communication.",
+  },
+  {
+    title: "Strengthen",
+    node: "Strong Home Node",
+    text: "Move to stronger household hardware when local UI, queue pressure, storage, or household activity needs more headroom.",
+  },
+  {
+    title: "Coordinate",
+    node: "Relay Infrastructure",
+    text: "Add an operator-managed infrastructure node for community services, gateway/bridge roles, DTN, and observability.",
+  },
+  {
+    title: "Expand",
+    node: "Mini PC Node",
+    text: "Use mini PC hardware when the community needs serious infrastructure, larger storage, and heavier operator workloads.",
+  },
+];
+
+const validationStates = [
+  {
+    title: "Candidate",
+    text: "Hardware looks promising, but is not yet validated.",
+  },
+  {
+    title: "Boots",
+    text: "The device starts, but that does not mean it is product-ready.",
+  },
+  {
+    title: "Reticulum Works",
+    text: "Reticulum operation is demonstrated, but product UX may still be incomplete.",
+  },
+  {
+    title: "Stable",
+    text: "Basic operation appears reliable under repeated testing.",
+  },
+  {
+    title: "Product-Supported",
+    text: "The hardware has passed required validation, recovery, documentation, and release gates.",
+  },
+  {
+    title: "Unsupported",
+    text: "The hardware must not be presented as a supported RelayHub node.",
+  },
+];
+
+const realityChecks = [
+  "More RAM does not automatically enable more roles.",
+  "A radio chip does not automatically mean radio transmit is enabled.",
+  "Ethernet access does not automatically make a node a gateway.",
+  "Reticulum running does not automatically mean peers are reachable.",
+  "A device that boots is not automatically product-supported.",
+  "Hardware capability, policy permission, legal permission, trust, runtime availability, and user enablement are separate gates.",
+];
+
+const buyerQuestions = [
+  {
+    question: "I just want one simple household device. What should I choose?",
+    answer: "Start with Relay Home / Home Node v1 once the target hardware and build are product-supported.",
+  },
+  {
+    question: "Should I skip straight to a Mini PC?",
+    answer: "Only if you are comfortable operating infrastructure. Mini PC Nodes are powerful, but power does not replace recovery, validation, documentation, or operator discipline.",
+  },
+  {
+    question: "Can a Home Node become a gateway?",
+    answer: "Not by default. Gateway behaviour requires hardware capability, policy permission, validation, role enablement, and runtime activation.",
+  },
+  {
+    question: "Is Relay Radio the same as a full RelayHub node?",
+    answer: "No. Radio Micro Nodes are radio transport or field relay class. They are not a full household appliance unless paired with other validated infrastructure.",
+  },
+];
+---
+
+<BaseLayout
+  title="Hardware Comparison | RelayHub"
+  description="Compare RelayHub hardware classes, node roles, capability ceilings, validation states, and recommended starting points for households, communities, field relays, and infrastructure operators."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Hardware comparison</p>
+
+      <h1 class="rh-title">
+        Which RelayHub node is right for you?
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is not one universal device. Different hardware classes have
+        different ceilings, roles, risks, and recovery expectations. This page
+        helps households, communities, field teams, and operators choose the
+        right starting point.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/hardware">
+          Hardware philosophy
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Quick recommendations</p>
+
+      <h2 class="rh-section-title">
+        Start with the job, then choose the node.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub hardware should be selected by purpose, not by raw specs. A
+        stronger machine is not automatically the right machine.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {quickRecommendations.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text"><strong>If you want:</strong> {item.need}</p>
+            <h3 class="rh-card-title">{item.choose}</h3>
+            <p class="rh-card-text">{item.why}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Core rule</p>
+
+      <h2 class="rh-section-title">
+        Hardware capability is not the same as active capability.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub separates what hardware can theoretically do from what the
+        product is allowed, validated, configured, trusted, and legally permitted
+        to do.
+      </p>
+
+      <div class="rh-card rh-card-dark" style="margin-top: var(--space-10);">
+        <p class="rh-card-text">
+          Hardware class → capability ceiling → policy evaluation → role
+          enablement → operational mode → runtime activation.
+        </p>
+      </div>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-8);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Node classes</p>
+
+      <h2 class="rh-section-title">
+        Each class has a different ceiling.
+      </h2>
+
+      <p class="rh-section-lead">
+        These classes describe practical roles, not status levels. A Radio Micro
+        Node is not a failed Mini PC. It has a different job.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {nodeClasses.map((item) => (
+          <article class="rh-card">
+            <p class="rh-kicker">{item.product}</p>
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text"><strong>Example:</strong> {item.example}</p>
+            <p class="rh-card-text"><strong>Best for:</strong> {item.bestFor}</p>
+            <p class="rh-card-text"><strong>Not for:</strong> {item.notFor}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Capability comparison</p>
+
+      <h2 class="rh-section-title">
+        Compare roles before choosing hardware.
+      </h2>
+
+      <p class="rh-section-lead">
+        This is a guide, not a promise. A capability only becomes available when
+        hardware, software, policy, trust, legal requirements, validation, and
+        runtime conditions all allow it.
+      </p>
+
+      <div class="rh-table-wrap" style="margin-top: var(--space-10);">
+        <table class="rh-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Radio Micro</th>
+              <th>Nano Linux</th>
+              <th>Home</th>
+              <th>Strong Home</th>
+              <th>Infrastructure</th>
+              <th>Mini PC</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparisonRows.map((row) => (
+              <tr>
+                <th>{row.capability}</th>
+                <td>{row.radio}</td>
+                <td>{row.nano}</td>
+                <td>{row.home}</td>
+                <td>{row.strong}</td>
+                <td>{row.infra}</td>
+                <td>{row.mini}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Growth path</p>
+
+      <h2 class="rh-section-title">
+        A community can start small and grow deliberately.
+      </h2>
+
+      <p class="rh-section-lead">
+        The safest path is not to buy the biggest device first. The safest path
+        is to validate the smallest useful system, prove recovery, and then
+        expand capability as the community matures.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {growthPath.map((item) => (
+          <article class="rh-card">
+            <p class="rh-kicker">{item.title}</p>
+            <h3 class="rh-card-title">{item.node}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Validation status</p>
+
+      <h2 class="rh-section-title">
+        Do not confuse experimental hardware with supported hardware.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub hardware must move through validation before it should be
+        treated as product-supported. Booting is only one step.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {validationStates.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/compatibility">
+          Compatibility
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Common questions</p>
+
+      <h2 class="rh-section-title">
+        Practical buying and building guidance.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {buyerQuestions.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.question}</h3>
+            <p class="rh-card-text">{item.answer}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Recommended starting point</p>
+
+        <h2 class="rh-section-title">
+          Most people should start with Relay Home.
+        </h2>
+
+        <p class="rh-section-lead">
+          For ordinary households and small trusted groups, the right first goal
+          is not infrastructure complexity. The right first goal is a working,
+          understandable, recoverable local-first appliance.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Then grow only when validated.</h3>
+
+        <p class="rh-card-text">
+          Add stronger hardware, radio relays, infrastructure nodes, or Mini PC
+          nodes when there is a real community need, an operator, documentation,
+          recovery procedures, support expectations, and validation evidence.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/products">
+            View products
+          </a>
+          <a class="rh-button rh-button-secondary" href="/early-access">
+            Register interest
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

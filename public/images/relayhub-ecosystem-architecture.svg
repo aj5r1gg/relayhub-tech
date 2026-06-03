@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1320" role="img" aria-labelledby="title desc">
+  <title id="title">RelayHub Ecosystem Architecture</title>
+  <desc id="desc">A six-layer architecture stack showing RelayHub as the ecosystem, RelayOS as the platform, Relay Products as appliances, Relay Applications as services, Communities as the purpose, and Federations as voluntary interconnection.</desc>
+
+  <defs>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 54px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; letter-spacing: -1.4px; }
+      .subtitle { font: 400 24px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .card { fill: #ffffff; stroke-width: 2; filter: url(#softShadow); }
+      .layer-title { font: 700 38px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; letter-spacing: -0.8px; }
+      .layer-label { font: 700 16px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+      .body { font: 400 21px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; }
+      .connector { stroke: #94a3b8; stroke-width: 3; stroke-linecap: round; }
+      .arrow { fill: #94a3b8; }
+      .connector-label { font: 600 16px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; letter-spacing: 0.2px; }
+      .footnote { font: 600 18px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; }
+      .muted { fill: #64748b; }
+      .icon-stroke { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+      .icon-fill { fill: currentColor; }
+      .blue { color: #1d4ed8; fill: #1d4ed8; stroke: #93c5fd; }
+      .green { color: #15803d; fill: #15803d; stroke: #86efac; }
+      .amber { color: #b45309; fill: #b45309; stroke: #fcd34d; }
+      .violet { color: #6d28d9; fill: #6d28d9; stroke: #c4b5fd; }
+      .cyan { color: #0e7490; fill: #0e7490; stroke: #67e8f9; }
+      .slate { color: #334155; fill: #334155; stroke: #cbd5e1; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="1320" rx="0"/>
+
+  <text class="title" x="600" y="88" text-anchor="middle">RelayHub ecosystem architecture</text>
+  <text class="subtitle" x="600" y="128" text-anchor="middle">A local-first foundation for resilient communities, built in layers.</text>
+
+  <!-- Card 1 -->
+  <g transform="translate(80 180)">
+    <rect class="card blue" x="0" y="0" width="1040" height="140" rx="24"/>
+    <circle cx="78" cy="70" r="48" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <g class="blue" transform="translate(44 36)">
+      <circle class="icon-fill" cx="34" cy="16" r="9"/>
+      <circle class="icon-fill" cx="12" cy="56" r="9"/>
+      <circle class="icon-fill" cx="56" cy="56" r="9"/>
+      <path class="icon-stroke" d="M34 27v18M22 50l-7 4M46 50l7 4M18 51c4-14 28-14 32 0"/>
+      <path class="icon-stroke" d="M12 42c2-24 42-24 44 0"/>
+    </g>
+    <text class="layer-title" x="160" y="58">RelayHub</text>
+    <text class="layer-label blue" x="160" y="91">Ecosystem layer</text>
+    <text class="body" x="505" y="48">The ecosystem for communities, trust networks,</text>
+    <text class="body" x="505" y="78">marketplaces, knowledge systems, governance</text>
+    <text class="body" x="505" y="108">and federation.</text>
+  </g>
+
+  <g transform="translate(600 340)">
+    <line class="connector" x1="0" y1="0" x2="0" y2="52"/>
+    <path class="arrow" d="M0 64 L-11 48 L11 48 Z"/>
+    <text class="connector-label" x="34" y="34">contains and governs</text>
+  </g>
+
+  <!-- Card 2 -->
+  <g transform="translate(80 420)">
+    <rect class="card green" x="0" y="0" width="1040" height="140" rx="24"/>
+    <circle cx="78" cy="70" r="48" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+    <g class="green" transform="translate(41 35)">
+      <path class="icon-stroke" d="M37 4l33 18-33 18L4 22 37 4z"/>
+      <path class="icon-stroke" d="M70 36L37 54 4 36"/>
+      <path class="icon-stroke" d="M70 50L37 68 4 50"/>
+    </g>
+    <text class="layer-title" x="160" y="58">RelayOS</text>
+    <text class="layer-label green" x="160" y="91">Platform layer</text>
+    <text class="body" x="505" y="48">The local-first appliance platform for onboarding,</text>
+    <text class="body" x="505" y="78">policy, trust, recovery, updates, observability,</text>
+    <text class="body" x="505" y="108">Reticulum integration and local APIs.</text>
+  </g>
+
+  <g transform="translate(600 580)">
+    <line class="connector" x1="0" y1="0" x2="0" y2="52"/>
+    <path class="arrow" d="M0 64 L-11 48 L11 48 Z"/>
+    <text class="connector-label" x="34" y="34">powers</text>
+  </g>
+
+  <!-- Card 3 -->
+  <g transform="translate(80 660)">
+    <rect class="card amber" x="0" y="0" width="1040" height="140" rx="24"/>
+    <circle cx="78" cy="70" r="48" fill="#fffbeb" stroke="#fde68a" stroke-width="2"/>
+    <g class="amber" transform="translate(38 43)">
+      <rect class="icon-stroke" x="4" y="16" width="72" height="36" rx="8"/>
+      <circle class="icon-fill" cx="20" cy="34" r="4"/>
+      <circle class="icon-fill" cx="36" cy="34" r="4"/>
+      <path class="icon-stroke" d="M54 34h10"/>
+    </g>
+    <text class="layer-title" x="160" y="58">Relay Products</text>
+    <text class="layer-label amber" x="160" y="91">Appliance layer</text>
+    <text class="body" x="505" y="48">Validated appliance hardware running RelayOS:</text>
+    <text class="body" x="505" y="78">Relay Home, Relay Radio, Relay Infrastructure</text>
+    <text class="body" x="505" y="108">and future approved product families.</text>
+  </g>
+
+  <g transform="translate(600 820)">
+    <line class="connector" x1="0" y1="0" x2="0" y2="52"/>
+    <path class="arrow" d="M0 64 L-11 48 L11 48 Z"/>
+    <text class="connector-label" x="34" y="34">run</text>
+  </g>
+
+  <!-- Card 4 -->
+  <g transform="translate(80 900)">
+    <rect class="card violet" x="0" y="0" width="1040" height="140" rx="24"/>
+    <circle cx="78" cy="70" r="48" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="2"/>
+    <g class="violet" transform="translate(42 34)">
+      <rect class="icon-fill" x="4" y="4" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="28" y="4" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="52" y="4" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="4" y="28" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="28" y="28" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="52" y="28" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="4" y="52" width="18" height="18" rx="4"/>
+      <rect class="icon-fill" x="28" y="52" width="18" height="18" rx="4"/>
+      <rect class="icon-stroke" x="52" y="52" width="18" height="18" rx="4"/>
+    </g>
+    <text class="layer-title" x="160" y="58">Relay Applications</text>
+    <text class="layer-label violet" x="160" y="91">Service layer</text>
+    <text class="body" x="505" y="48">Applications and services for communication,</text>
+    <text class="body" x="505" y="78">coordination, knowledge, trade, identity,</text>
+    <text class="body" x="505" y="108">events and governance.</text>
+  </g>
+
+  <g transform="translate(600 1060)">
+    <line class="connector" x1="0" y1="0" x2="0" y2="52"/>
+    <path class="arrow" d="M0 64 L-11 48 L11 48 Z"/>
+    <text class="connector-label" x="34" y="34">serve</text>
+  </g>
+
+  <!-- Card 5 -->
+  <g transform="translate(80 1140)">
+    <rect class="card cyan" x="0" y="0" width="1040" height="140" rx="24"/>
+    <circle cx="78" cy="70" r="48" fill="#ecfeff" stroke="#a5f3fc" stroke-width="2"/>
+    <g class="cyan" transform="translate(38 38)">
+      <circle class="icon-fill" cx="40" cy="18" r="12"/>
+      <circle class="icon-fill" cx="18" cy="30" r="9"/>
+      <circle class="icon-fill" cx="62" cy="30" r="9"/>
+      <path class="icon-fill" d="M23 68c0-18 34-18 34 0v3H23z"/>
+      <path class="icon-fill" d="M2 68c0-14 25-14 25 0v3H2z" opacity="0.8"/>
+      <path class="icon-fill" d="M53 68c0-14 25-14 25 0v3H53z" opacity="0.8"/>
+    </g>
+    <text class="layer-title" x="160" y="58">Communities</text>
+    <text class="layer-label cyan" x="160" y="91">Human layer</text>
+    <text class="body" x="505" y="48">The purpose: households, groups, towns, clubs,</text>
+    <text class="body" x="505" y="78">organisations and local networks using the</text>
+    <text class="body" x="505" y="108">ecosystem to communicate and coordinate.</text>
+  </g>
+
+  <!-- Federation side callout for wide screens within same SVG -->
+  <g transform="translate(80 1298)">
+    <text class="footnote" x="520" y="0" text-anchor="middle">Local-first · Resilient · Recovery-ready · Community-owned · Privacy-respecting</text>
+  </g>
+</svg>

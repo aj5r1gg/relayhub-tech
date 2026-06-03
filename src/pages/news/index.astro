@@ -1,0 +1,86 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = [
+  {
+    title: "Why RelayHub exists",
+    date: "2026-06-03",
+    category: "Founding note",
+    excerpt:
+        "RelayHub exists because communities need more than apps. They need communication, trust, memory, coordination, recovery, and continuity.",
+    href: "/news/why-relayhub-exists",
+  },
+  {
+    title: "Why local-first matters",
+    date: "2026-06-03",
+    category: "Founding note",
+    excerpt:
+        "Local-first does not mean isolated. It means communities should retain useful capability even when remote systems are unavailable.",
+    href: "/news/why-local-first-matters",
+  },
+    {
+    title: "Reticulum-Level Infrastructure with Appliance-Level Usability",
+    date: "2026-06-03",
+    category: "Architecture",
+    excerpt:
+        "Why RelayHub is pursuing Reticulum-level infrastructure with appliance-level usability, and why both are necessary for meaningful adoption.",
+    href: "/news/reticulum-level-infrastructure-appliance-level-usability",
+  },
+  {
+    title: "RelayHub is becoming a public ecosystem portal",
+    date: "2026-06-03",
+    category: "Project update",
+    excerpt:
+      "RelayHub has moved beyond a landing page into a structured public website for products, trust, recovery, validation, community pilots, developers, partners, and ecosystem documentation.",
+    href: "/news/relayhub-public-ecosystem-portal",
+  },
+];
+---
+
+<BaseLayout
+  title="News | RelayHub"
+  description="RelayHub news, project updates, development notes, validation progress, community pilot updates, and ecosystem announcements."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">News</p>
+
+      <h1 class="rh-title">RelayHub updates.</h1>
+
+      <p class="rh-subtitle">
+        Project updates, development notes, validation progress, community pilot
+        news, ecosystem announcements, and future release information.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Latest</p>
+
+      <h2 class="rh-section-title">Recent updates</h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {posts.map((post) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-local">{post.category}</span>
+
+            <p class="rh-card-text" style="margin-top: var(--space-4);">
+              {post.date}
+            </p>
+
+            <h3 class="rh-card-title">{post.title}</h3>
+
+            <p class="rh-card-text">{post.excerpt}</p>
+
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={post.href}>
+                Read update
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

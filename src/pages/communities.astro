@@ -1,32 +1,167 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const communityTypes = [
+  {
+    title: "Households",
+    text: "Families, shared homes, rural properties, and small trusted groups that need simple local communication, clear status, and safe recovery.",
+  },
+  {
+    title: "Groups",
+    text: "Clubs, associations, volunteer teams, event crews, makerspaces, field teams, and preparedness circles that need practical coordination.",
+  },
+  {
+    title: "Communities",
+    text: "Towns, regions, neighbourhoods, local networks, and organised communities that need communication, knowledge, trust, trade, and continuity.",
+  },
+];
+
+const needs = [
+  {
+    title: "Communication",
+    text: "Messages, notices, announcements, alerts, bulletins, updates, and local coordination.",
+  },
+  {
+    title: "Trust",
+    text: "Explicit pairing, known nodes, trusted peers, invitations, roles, revocation, and recoverable identity.",
+  },
+  {
+    title: "Knowledge",
+    text: "Guides, procedures, maps, emergency plans, training notes, local history, and offline-first documentation.",
+  },
+  {
+    title: "Trade",
+    text: "Future tools for offers, requests, services, goods, skills, resources, receipts, and settlement-neutral exchange.",
+  },
+  {
+    title: "Governance",
+    text: "Proposals, notices, decisions, roles, working groups, delegation, and community-defined processes.",
+  },
+  {
+    title: "Continuity",
+    text: "Shared memory, cultural records, handover paths, recovery plans, and knowledge that survives disruption.",
+  },
+];
+
+const lifecycle = [
+  {
+    title: "Start",
+    text: "A few trusted people establish a shared purpose, simple expectations, and local infrastructure.",
+  },
+  {
+    title: "Coordinate",
+    text: "Members communicate, publish notices, organise work, share knowledge, and support each other.",
+  },
+  {
+    title: "Grow",
+    text: "The community adds roles, guides, directories, services, operators, and governance as needed.",
+  },
+  {
+    title: "Federate",
+    text: "Communities may voluntarily connect with others while keeping their own autonomy and rules.",
+  },
+];
+
+const roles = [
+  {
+    title: "Members",
+    text: "People participating through communication, events, trade, knowledge sharing, governance, or local work.",
+  },
+  {
+    title: "Stewards",
+    text: "People who care for culture, continuity, onboarding, norms, knowledge, and long-term community health.",
+  },
+  {
+    title: "Operators",
+    text: "People responsible for nodes, updates, recovery, support, backups, validation, and infrastructure.",
+  },
+  {
+    title: "Moderators",
+    text: "People entrusted to manage local spaces, boards, listings, notices, directories, or standards.",
+  },
+  {
+    title: "Builders",
+    text: "Developers, testers, designers, documenters, hardware builders, and maintainers growing capability.",
+  },
+  {
+    title: "Recovery contacts",
+    text: "Trusted people who help restore access or continuity without creating hidden takeover authority.",
+  },
+];
+
+const services = [
+  {
+    title: "Relay Chat",
+    text: "Future user-facing messaging and communication tools built around local-first operation and explicit trust.",
+  },
+  {
+    title: "Relay Boards",
+    text: "Bulletin boards for announcements, notices, requests, alerts, meeting notes, and local coordination.",
+  },
+  {
+    title: "Relay Market",
+    text: "Marketplace tools for local trade coordination without forcing one currency or payment model.",
+  },
+  {
+    title: "Relay Library",
+    text: "Community knowledge bases for guides, procedures, maps, training, history, and memory.",
+  },
+  {
+    title: "Relay Events",
+    text: "Event notices, rosters, meetings, working bees, training sessions, and local activities.",
+  },
+  {
+    title: "Relay Governance",
+    text: "Proposal, decision, role, delegation, record, notice, and working-group tools where communities choose them.",
+  },
+];
+
+const readiness = [
+  {
+    title: "People",
+    text: "A few trusted participants who want to communicate, coordinate, learn, trade, govern, or help each other.",
+  },
+  {
+    title: "Purpose",
+    text: "A practical reason to exist: household resilience, local coordination, rural support, events, or training.",
+  },
+  {
+    title: "Node",
+    text: "A suitable RelayHub node used within its validated hardware, role, and policy limits.",
+  },
+  {
+    title: "Recovery",
+    text: "Clear recovery steps, documented ownership, trusted contacts, and realistic handover planning.",
+  },
+];
 ---
 
 <BaseLayout
   title="Communities | RelayHub"
-  description="RelayHub helps communities coordinate communication, trust, knowledge, trade, governance, cultural continuity, and local resilience."
+  description="RelayHub helps households, groups, towns, and regions build resilient local-first community infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity."
   image="https://www.relayhub.tech/og/communities.svg"
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
-      <p class="rh-eyebrow">Communities</p>
+      <p class="rh-eyebrow">Community-first infrastructure</p>
 
       <h1 class="rh-title">
-        Local communities, connected on their own terms.
+        Technology is the tool. Communities are the purpose.
       </h1>
 
       <p class="rh-subtitle">
-        RelayHub exists to help people build, sustain, and interconnect resilient
-        communities through communication, trust, knowledge, trade, coordination,
-        governance, recovery, and cultural continuity.
+        RelayHub helps people build, sustain, and interconnect resilient
+        communities through local-first infrastructure for communication,
+        trust, knowledge, trade, coordination, governance, recovery, and
+        cultural continuity.
       </p>
 
       <div class="rh-actions">
         <a class="rh-button rh-button-primary" href="/early-access">
-          Start a community
+          Register interest
         </a>
-        <a class="rh-button rh-button-secondary" href="/governance">
-          Read governance
+        <a class="rh-button rh-button-secondary" href="/community-guides">
+          Community guides
         </a>
       </div>
     </div>
@@ -34,43 +169,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Community first</p>
+      <p class="rh-kicker">Who RelayHub is for</p>
 
       <h2 class="rh-section-title">
-        Technology is not the community. It supports the community.
+        Start with real people, not abstract networks.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub is designed for households, groups, neighbourhoods, towns,
-        regional networks, and federations that need practical infrastructure
-        for real human cooperation.
+        RelayHub is designed for communities that need practical tools they can
+        understand, operate, recover, and grow over time.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Households</h3>
-          <p class="rh-card-text">
-            A household can operate a local node, invite trusted users, understand
-            status, recover safely, and participate in wider community networks.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Groups</h3>
-          <p class="rh-card-text">
-            Clubs, events, field teams, volunteer groups, rural networks, and
-            preparedness circles can coordinate without depending entirely on
-            centralised platforms.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Communities</h3>
-          <p class="rh-card-text">
-            Local communities can build shared communication, directories, knowledge,
-            marketplace, governance, memory, and recovery infrastructure over time.
-          </p>
-        </article>
+        {communityTypes.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -84,60 +200,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        A resilient community needs more than messages. It needs memory,
-        coordination, trust, practical knowledge, economic exchange, governance,
-        recovery, and the ability to keep functioning when normal systems are
-        unavailable.
+        A resilient community needs memory, coordination, trust, knowledge,
+        economic exchange, governance, recovery, and the ability to keep
+        functioning when normal systems are unavailable.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Communication</h3>
-          <p class="rh-card-text">
-            Local-first messaging, notices, announcements, alerts, bulletins,
-            status updates, and community coordination.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Trust</h3>
-          <p class="rh-card-text">
-            Explicit pairing, known nodes, trusted peers, role-based access,
-            invitations, revocation, and recoverable identity.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Knowledge</h3>
-          <p class="rh-card-text">
-            Local guides, procedures, maps, recovery instructions, training notes,
-            community memory, and offline-first documentation.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Trade</h3>
-          <p class="rh-card-text">
-            Future local marketplace tools for offers, requests, services, goods,
-            skills, resources, invoices, receipts, and settlement-neutral exchange.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Governance</h3>
-          <p class="rh-card-text">
-            Proposal, notice, decision, role, record, working group, and delegation
-            tools for communities that choose to use them.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Continuity</h3>
-          <p class="rh-card-text">
-            Shared memory, cultural records, institutional knowledge, recovery
-            paths, and handover between generations of community stewards.
-          </p>
-        </article>
+        {needs.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -151,43 +225,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub communities should not depend on one person, one device,
-        one company, one app, one cloud account, or one internet path. The goal
-        is continuity through change.
+        RelayHub communities should not depend on one person, one company,
+        one cloud account, one app, one device, or one internet path.
       </p>
 
       <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Create</h3>
-          <p class="rh-card-text">
-            A small group establishes local infrastructure, identity, basic roles,
-            and a shared purpose.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Coordinate</h3>
-          <p class="rh-card-text">
-            Members communicate, publish notices, share knowledge, and organise
-            practical work.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Federate</h3>
-          <p class="rh-card-text">
-            Communities may voluntarily connect with other communities while
-            retaining local autonomy.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Recover</h3>
-          <p class="rh-card-text">
-            Identity, knowledge, governance, trust, and infrastructure should
-            have realistic recovery and handover paths.
-          </p>
-        </article>
+        {lifecycle.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -201,59 +249,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub should distinguish social authority, technical operation,
-        governance roles, support roles, trust relationships, and ordinary
-        participation.
+        RelayHub separates ordinary participation, social authority, technical
+        operation, moderation, support, trust, and recovery responsibility.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Members</h3>
-          <p class="rh-card-text">
-            People participating in the community through communication, events,
-            trade, knowledge sharing, governance, or local work.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Stewards</h3>
-          <p class="rh-card-text">
-            People responsible for culture, continuity, onboarding, knowledge,
-            norms, and the long-term health of the community.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Operators</h3>
-          <p class="rh-card-text">
-            People responsible for running infrastructure, nodes, backups,
-            recovery procedures, updates, support, and validation.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Moderators</h3>
-          <p class="rh-card-text">
-            People entrusted by the community to manage local spaces, notices,
-            boards, marketplace rules, or community standards.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Builders</h3>
-          <p class="rh-card-text">
-            Developers, hardware testers, documentation writers, designers,
-            validators, and maintainers contributing to community capability.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Recovery contacts</h3>
-          <p class="rh-card-text">
-            Trusted people or roles that help restore access or continuity without
-            creating hidden takeover authority.
-          </p>
-        </article>
+        {roles.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -267,102 +273,69 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub communities should be able to cooperate without surrendering
-        autonomy. A community may share messages, directories, marketplace listings,
-        knowledge, events, emergency notices, or governance records only where
-        policy, trust, consent, and capability allow.
+        Communities should be able to cooperate without surrendering local
+        autonomy. Federation may be narrow or broad, temporary or long-term,
+        local or regional, but it must remain voluntary, visible, and revocable.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Local authority</h3>
           <p class="rh-card-text">
-            Each community should retain control over its own membership, roles,
-            moderation, knowledge, marketplace, culture, and governance choices.
+            Each community keeps control over membership, roles, moderation,
+            culture, knowledge, marketplace rules, and governance choices.
           </p>
         </article>
 
         <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Selective sharing</h3>
           <p class="rh-card-text">
-            Federation can be narrow or broad: emergency notices only, marketplace
-            only, knowledge only, directory only, events only, or deeper cooperation.
+            A community may share emergency notices only, marketplace only,
+            knowledge only, directory only, events only, or deeper cooperation.
           </p>
         </article>
 
         <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Revocable trust</h3>
           <p class="rh-card-text">
-            Federation relationships should be visible, voluntary, limited,
-            reviewable, and reversible.
+            Federation relationships should be understandable, limited,
+            reviewable, reversible, and governed by explicit trust.
           </p>
         </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/governance">
+          Governance
+        </a>
+        <a class="rh-button rh-button-secondary" href="/communities-directory">
+          Community directory
+        </a>
       </div>
     </div>
   </section>
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Community services</p>
+      <p class="rh-kicker">Community applications</p>
 
       <h2 class="rh-section-title">
-        Future applications for real local coordination.
+        Future tools for real local coordination.
       </h2>
 
       <p class="rh-section-lead">
         RelayHub begins with communications infrastructure, but the ecosystem is
-        designed to grow into practical community tools as validation, hardware,
-        policy, and usability allow.
+        designed to grow into practical community services as validation,
+        hardware, policy, trust, and usability allow.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Chat</h3>
-          <p class="rh-card-text">
-            Future user-facing messaging and communication tools built around
-            local-first operation and explicit trust.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Boards</h3>
-          <p class="rh-card-text">
-            Community bulletin boards for announcements, notices, requests,
-            alerts, meeting notes, and local coordination.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Market</h3>
-          <p class="rh-card-text">
-            A future marketplace layer for local trade coordination without forcing
-            a single currency, payment method, or economic model.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Library</h3>
-          <p class="rh-card-text">
-            Local knowledge bases for guides, procedures, maps, training, history,
-            practical instructions, and community memory.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Events</h3>
-          <p class="rh-card-text">
-            Event notices, rosters, meetings, working bees, training sessions,
-            field activities, and community coordination calendars.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Relay Governance</h3>
-          <p class="rh-card-text">
-            Proposal, decision, role, delegation, record, notice, and working-group
-            tools for communities that choose to use them.
-          </p>
-        </article>
+        {services.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -376,24 +349,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub should help communities preserve and transmit practical knowledge,
-        local history, procedures, lessons learned, cultural records, and recovery
-        information across time.
+        RelayHub should help communities preserve and transmit practical
+        knowledge, local history, procedures, lessons learned, cultural records,
+        and recovery information across time.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
           <h3 class="rh-card-title">Local knowledge</h3>
           <p class="rh-card-text">
-            Guides, maps, supplier notes, procedures, emergency plans, field notes,
-            training material, and local operating knowledge.
+            Guides, maps, supplier notes, procedures, emergency plans, field
+            notes, training material, and operating knowledge.
           </p>
         </article>
 
         <article class="rh-card">
           <h3 class="rh-card-title">Collective memory</h3>
           <p class="rh-card-text">
-            Decisions, stories, achievements, failures, lessons learned, events,
+            Decisions, events, lessons learned, achievements, failures, stories,
             working history, and institutional knowledge.
           </p>
         </article>
@@ -401,10 +374,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <article class="rh-card">
           <h3 class="rh-card-title">Cultural continuity</h3>
           <p class="rh-card-text">
-            Traditions, customs, local identity, shared values, language, ceremony,
-            and community practices where communities choose to preserve them.
+            Traditions, customs, local identity, shared values, language,
+            ceremony, and community practices where communities preserve them.
           </p>
         </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/community-guides">
+          Community guides
+        </a>
       </div>
     </div>
   </section>
@@ -418,33 +397,33 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        Future RelayHub marketplace tools should help communities coordinate goods,
-        services, requests, offers, skills, invoices, receipts, and reputation
-        without forcing one currency, payment system, or economic model.
+        Future RelayHub marketplace tools should help communities coordinate
+        goods, services, requests, offers, skills, invoices, receipts, and
+        reputation without forcing one currency, payment system, or economic model.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card">
           <h3 class="rh-card-title">Offers and requests</h3>
           <p class="rh-card-text">
-            A community can list what people have, what people need, who can help,
-            and what resources are available.
+            A community can list what people have, what people need, who can
+            help, and what resources are available.
           </p>
         </article>
 
         <article class="rh-card">
           <h3 class="rh-card-title">Services and skills</h3>
           <p class="rh-card-text">
-            Local skills, repairs, transport, food, tools, training, craft, labour,
-            and professional services can become easier to find.
+            Local repairs, transport, food, tools, training, craft, labour, and
+            professional services can become easier to find.
           </p>
         </article>
 
         <article class="rh-card">
           <h3 class="rh-card-title">Settlement choices</h3>
           <p class="rh-card-text">
-            Communities may coordinate trade while using cash, barter, bank transfer,
-            mutual credit, local credit, or other lawful settlement methods.
+            Communities may coordinate trade while using cash, barter, bank
+            transfer, mutual credit, local credit, or other lawful methods.
           </p>
         </article>
       </div>
@@ -453,55 +432,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   <section class="rh-section rh-dark">
     <div class="rh-container">
-      <p class="rh-kicker">Governance and moderation</p>
-
-      <h2 class="rh-section-title">
-        Communities should define their own rules.
-      </h2>
-
-      <p class="rh-section-lead">
-        RelayHub should support local governance without imposing one model.
-        Governance, moderation, marketplace rules, directory visibility, federation
-        scope, and knowledge access should remain community-controlled within
-        safe and lawful boundaries.
-      </p>
-
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Local governance</h3>
-          <p class="rh-card-text">
-            Proposals, notices, working groups, votes, consensus processes, role
-            assignment, delegation, and decision records where communities choose them.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Moderation</h3>
-          <p class="rh-card-text">
-            Communities may define acceptable conduct in their own spaces while
-            distinguishing local moderation from technical censorship.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Disputes</h3>
-          <p class="rh-card-text">
-            Future marketplace, directory, federation, and governance tools may
-            support community-defined dispute processes.
-          </p>
-        </article>
-      </div>
-
-      <div class="rh-actions">
-        <a class="rh-button rh-button-accent" href="/governance">
-          Governance
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="rh-section">
-    <div class="rh-container">
       <p class="rh-kicker">Infrastructure</p>
 
       <h2 class="rh-section-title">
@@ -509,20 +439,21 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        A RelayHub community may begin with a single household node and grow toward
+        A community may begin with a single household node and grow toward
         stronger infrastructure only when hardware, operators, documentation,
         recovery, support, and validation are ready.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
+        <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Relay Home</h3>
           <p class="rh-card-text">
-            Household-class local infrastructure for small groups and ordinary users.
+            Household-class local infrastructure for small groups and ordinary
+            users.
           </p>
         </article>
 
-        <article class="rh-card">
+        <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Relay Radio</h3>
           <p class="rh-card-text">
             Field relay and radio-assisted communication where lawful, validated,
@@ -530,7 +461,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           </p>
         </article>
 
-        <article class="rh-card">
+        <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Relay Infrastructure</h3>
           <p class="rh-card-text">
             Community infrastructure for operators, DTN, bridging, gateways,
@@ -540,7 +471,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-secondary" href="/products">
+        <a class="rh-button rh-button-accent" href="/products">
           Products
         </a>
         <a class="rh-button rh-button-secondary" href="/hardware">
@@ -565,37 +496,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </p>
 
       <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">People</h3>
-          <p class="rh-card-text">
-            Trusted participants who want to communicate, coordinate, learn, trade,
-            govern, and help each other.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Purpose</h3>
-          <p class="rh-card-text">
-            A practical reason to exist: household resilience, local coordination,
-            rural support, events, training, or mutual assistance.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Node</h3>
-          <p class="rh-card-text">
-            A suitable RelayHub node or future supported product used within its
-            validated hardware and policy limits.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Recovery</h3>
-          <p class="rh-card-text">
-            Clear recovery steps, documented ownership, trusted recovery contacts,
-            and realistic handover planning.
-          </p>
-        </article>
+        {readiness.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -618,6 +524,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <article class="rh-card rh-card-dark">
         <h3 class="rh-card-title">Early community interest</h3>
+
         <p class="rh-card-text">
           Register interest if you want to test RelayHub with a household, local
           group, rural property, event team, community project, or future federation.
