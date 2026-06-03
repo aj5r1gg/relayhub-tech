@@ -607,16 +607,22 @@ a {
   box-shadow: var(--shadow-glow);
 }
 
-/* Expanded footer */
+/* Footer */
 
-.rh-footer-grid {
+.rh-footer-top {
   display: grid;
-  grid-template-columns: 2fr repeat(4, 1fr);
-  gap: var(--space-10);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr);
+  gap: var(--space-12);
 }
 
 .rh-footer-main {
-  max-width: 360px;
+  max-width: 420px;
+}
+
+.rh-footer-link-groups {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-8);
 }
 
 .rh-footer-text {
@@ -635,6 +641,13 @@ a {
 
 .rh-footer-small {
   margin-top: var(--space-4);
+}
+
+.rh-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
 }
 
 .rh-footer-heading {
@@ -684,29 +697,38 @@ a {
 }
 
 .rh-footer-disclaimer {
-  max-width: 760px;
+  max-width: 860px;
   margin: var(--space-6) 0 0;
 }
 
-@media (max-width: 1000px) {
-  .rh-footer-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 1100px) {
+  .rh-footer-top {
+    grid-template-columns: 1fr;
   }
 
   .rh-footer-main {
-    grid-column: 1 / -1;
-    max-width: 620px;
+    max-width: 680px;
+  }
+
+  .rh-footer-link-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 640px) {
-  .rh-footer-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 760px) {
+  .rh-footer-link-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rh-footer-bottom {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .rh-footer-link-groups {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1162,4 +1184,48 @@ a {
 
 .rh-download-list li + li {
   margin-top: var(--space-2);
+}
+
+/* Pilot Program */
+
+.rh-pilot-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-pilot-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Use Cases */
+
+.rh-use-case-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  font-size: var(--text-sm);
+}
+
+.rh-use-case-table th,
+.rh-use-case-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rh-use-case-table th {
+  color: var(--color-white);
+  font-weight: 800;
+}
+
+.rh-use-case-table td {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.rh-use-case-table a {
+  color: var(--rh-sky-200);
+  font-weight: 800;
 }

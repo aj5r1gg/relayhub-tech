@@ -1,0 +1,367 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const useCases = [
+  {
+    title: "Families and households",
+    text: "Local-first communication, family notices, shared household information, recovery access, and simple local coordination.",
+  },
+  {
+    title: "Community groups",
+    text: "Clubs, associations, volunteer groups, neighbourhood groups, and local organisations that need notices, discussion, and shared knowledge.",
+  },
+  {
+    title: "Regional communities",
+    text: "Towns, villages, rural regions, and local networks that need community directories, knowledge sharing, coordination, and resilience.",
+  },
+  {
+    title: "Events and festivals",
+    text: "Temporary local coordination, announcements, volunteer communication, maps, schedules, lost-and-found notes, and information sharing.",
+  },
+  {
+    title: "Remote and rural areas",
+    text: "Intermittent connectivity, local services, community information, offline knowledge, and practical local coordination.",
+  },
+  {
+    title: "Education and workshops",
+    text: "Training groups, local learning, documentation libraries, workshops, skill sharing, and community education programmes.",
+  },
+  {
+    title: "Preparedness groups",
+    text: "Local preparedness, resource directories, contact lists, continuity planning, and community coordination. RelayHub is not an emergency service.",
+  },
+  {
+    title: "Local economies",
+    text: "Marketplace concepts, service listings, skills exchange, community trade, requests, offers, and settlement-neutral coordination.",
+  },
+];
+
+const scenarioCards = [
+  {
+    title: "A family wants local communication",
+    text: "A household wants a simple way to keep local information, contact notes, and recovery instructions available even when internet access is unreliable.",
+    links: [
+      { label: "Relay Home", href: "/products" },
+      { label: "Recovery", href: "/recovery" },
+    ],
+  },
+  {
+    title: "A club wants a local noticeboard",
+    text: "A club wants announcements, event information, useful documents, membership notes, and volunteer coordination without relying entirely on social media.",
+    links: [
+      { label: "Communities", href: "/communities" },
+      { label: "Community guides", href: "/community-guides" },
+    ],
+  },
+  {
+    title: "A regional group wants resilience",
+    text: "A local group wants to preserve knowledge, coordinate practical help, build trust, and prepare for intermittent connectivity or disruption.",
+    links: [
+      { label: "Ecosystem", href: "/ecosystem" },
+      { label: "Trust", href: "/trust" },
+    ],
+  },
+  {
+    title: "An event needs temporary coordination",
+    text: "A festival, market, workshop, or community event wants local announcements, maps, volunteer updates, and useful information in one place.",
+    links: [
+      { label: "Marketplace", href: "/marketplace" },
+      { label: "Pilot program", href: "/pilot-program" },
+    ],
+  },
+];
+
+const benefits = [
+  "Reduce dependence on central platforms.",
+  "Keep local knowledge available.",
+  "Support local coordination.",
+  "Help people understand degraded operation.",
+  "Make trust and roles explicit.",
+  "Support recovery and continuity.",
+  "Encourage community participation.",
+  "Prepare for intermittent connectivity.",
+];
+
+const carefulBoundaries = [
+  "RelayHub is not an emergency service.",
+  "RelayHub does not guarantee message delivery.",
+  "RelayHub does not provide perfect anonymity.",
+  "RelayHub does not automatically make every device compatible or supported.",
+  "RelayHub does not replace local governance, judgement, or trust.",
+  "Radio use must be lawful and region-aware.",
+  "Planned features are not product-supported until validated.",
+  "A pilot is not the same as a supported release.",
+];
+
+const matching = [
+  {
+    need: "I want local household communication.",
+    page: "Products / Recovery",
+    href: "/products",
+  },
+  {
+    need: "I want to organise a community group.",
+    page: "Communities",
+    href: "/communities",
+  },
+  {
+    need: "I want to test RelayHub with a group.",
+    page: "Pilot Program",
+    href: "/pilot-program",
+  },
+  {
+    need: "I want to build or integrate with RelayHub.",
+    page: "Developers",
+    href: "/developers",
+  },
+  {
+    need: "I want to understand hardware options.",
+    page: "Hardware",
+    href: "/hardware",
+  },
+  {
+    need: "I want to know what exists today.",
+    page: "Status",
+    href: "/status",
+  },
+];
+---
+
+<BaseLayout
+  title="Use Cases | RelayHub"
+  description="RelayHub use cases for families, households, community groups, regional communities, events, rural areas, education, preparedness, local economies, and community coordination."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Use Cases</p>
+
+      <h1 class="rh-title">
+        RelayHub is for communities that need to keep working.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is being designed for families, households, community groups,
+        regional communities, events, rural areas, educators, preparedness
+        groups, and local economies that need practical local-first coordination.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/pilot-program">
+          Pilot program
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Who is RelayHub for?</p>
+
+      <h2 class="rh-section-title">
+        People understand RelayHub when they can see themselves in it.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is not only about devices, protocols, or infrastructure. It is
+        about the practical things people need to do together: communicate,
+        organise, preserve knowledge, coordinate resources, trade, govern, and
+        recover from disruption.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {useCases.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Example scenarios</p>
+
+      <h2 class="rh-section-title">
+        Practical situations RelayHub is being designed for.
+      </h2>
+
+      <p class="rh-section-lead">
+        These examples describe future RelayHub use cases. Specific product
+        features must still be implemented, validated, documented, and supported
+        before being treated as product-ready.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {scenarioCards.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+
+            <div class="rh-actions">
+              {item.links.map((link) => (
+                <a class="rh-button rh-button-secondary" href={link.href}>
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Why it matters</p>
+
+      <h2 class="rh-section-title">
+        The value is not the box. The value is community capability.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should help people become more capable, not more dependent. The
+        goal is practical community usefulness under ordinary and adverse
+        conditions.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {benefits.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Preparedness without overclaiming</p>
+
+        <h2 class="rh-section-title">
+          Useful for preparedness. Not an emergency service.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub can support preparedness thinking, local coordination, contact
+          information, resource directories, community continuity, and knowledge
+          preservation. It must not be presented as guaranteed emergency
+          communications or a replacement for emergency services.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Preparedness examples</h3>
+        <p class="rh-card-text">
+          Local contact lists, printed recovery cards, community resource notes,
+          volunteer coordination, local directories, offline guides, and
+          continuity planning.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/security">
+            Security
+          </a>
+          <a class="rh-button rh-button-secondary" href="/support">
+            Support
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Clear boundaries</p>
+
+      <h2 class="rh-section-title">
+        RelayHub should be useful without false promises.
+      </h2>
+
+      <p class="rh-section-lead">
+        Use cases must remain honest. A compelling scenario is not the same as a
+        validated product guarantee.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {carefulBoundaries.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Find your path</p>
+
+      <h2 class="rh-section-title">
+        Start with the page that matches your need.
+      </h2>
+
+      <div class="rh-card rh-card-dark" style="margin-top: var(--space-8); overflow-x: auto;">
+        <table class="rh-use-case-table">
+          <thead>
+            <tr>
+              <th>Need</th>
+              <th>Start here</th>
+            </tr>
+          </thead>
+          <tbody>
+            {matching.map((item) => (
+              <tr>
+                <td>{item.need}</td>
+                <td>
+                  <a href={item.href}>{item.page}</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Have a use case?</p>
+
+        <h2 class="rh-section-title">
+          Tell us what you want RelayHub to help with.
+        </h2>
+
+        <p class="rh-section-lead">
+          The best use cases come from real communities, real households, real
+          events, real rural constraints, and real coordination problems.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Useful details</h3>
+        <p class="rh-card-text">
+          Tell us who you are, where you operate, what problem you are solving,
+          how many people are involved, what connectivity is like, and what a
+          successful pilot would prove.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Share a use case
+          </a>
+          <a class="rh-button rh-button-secondary" href="/early-access">
+            Register interest
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

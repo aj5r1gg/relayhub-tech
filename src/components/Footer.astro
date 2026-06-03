@@ -1,84 +1,127 @@
 ---
 const year = new Date().getFullYear();
+
+const primaryLinks = [
+  { href: "/products", label: "Products" },
+  { href: "/hardware", label: "Hardware" },
+  { href: "/relayos", label: "RelayOS" },
+  { href: "/use-cases", label: "Use cases" },
+  { href: "/early-access", label: "Early access" },
+];
+
+const ecosystemLinks = [
+  { href: "/ecosystem", label: "Ecosystem" },
+  { href: "/communities", label: "Communities" },
+  { href: "/community-guides", label: "Community guides" },
+  { href: "/marketplace", label: "Marketplace" },
+  { href: "/pilot-program", label: "Pilot program" },
+];
+
+const trustLinks = [
+  { href: "/trust", label: "Trust" },
+  { href: "/security", label: "Security" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/recovery", label: "Recovery" },
+  { href: "/validation", label: "Validation" },
+];
+
+const resourcesLinks = [
+  { href: "/docs", label: "Docs" },
+  { href: "/developers", label: "Developers" },
+  { href: "/compatibility", label: "Compatibility" },
+  { href: "/certification", label: "Certification" },
+  { href: "/downloads", label: "Downloads" },
+];
+
+const companyLinks = [
+  { href: "/status", label: "Status" },
+  { href: "/roadmap", label: "Roadmap" },
+  { href: "/partners", label: "Partners" },
+  { href: "/media", label: "Media kit" },
+  { href: "/contact", label: "Contact" },
+];
+
+const legalLinks = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/accessibility", label: "Accessibility" },
+  { href: "/faq", label: "FAQ" },
+];
 ---
 
 <footer class="rh-footer">
-  <div class="rh-container rh-footer-grid">
-    <div class="rh-footer-main">
-      <a href="/" class="rh-footer-brand">RELAYHUB</a>
+  <div class="rh-container">
+    <div class="rh-footer-top">
+      <div class="rh-footer-main">
+        <a href="/" class="rh-footer-brand">RELAYHUB</a>
 
-      <p class="rh-footer-text">
-        Local-first infrastructure for resilient communities.
-      </p>
+        <p class="rh-footer-text">
+          Local-first infrastructure for resilient communities.
+        </p>
 
-      <p class="rh-footer-small">
-        RelayHub helps homes, groups, and communities communicate, coordinate,
-        recover, share knowledge, and remain connected without depending entirely
-        on centralised systems.
-      </p>
+        <p class="rh-footer-small">
+          RelayHub helps homes, groups, and communities communicate, coordinate,
+          recover, share knowledge, trade, govern, and remain connected without
+          depending entirely on centralised systems.
+        </p>
+
+        <div class="rh-footer-actions">
+          <a class="rh-button rh-button-primary" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/contact">
+            Contact
+          </a>
+        </div>
+      </div>
+
+      <div class="rh-footer-link-groups">
+        <nav class="rh-footer-column" aria-label="Start">
+          <h2 class="rh-footer-heading">Start</h2>
+          {primaryLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+
+        <nav class="rh-footer-column" aria-label="Ecosystem">
+          <h2 class="rh-footer-heading">Ecosystem</h2>
+          {ecosystemLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+
+        <nav class="rh-footer-column" aria-label="Trust">
+          <h2 class="rh-footer-heading">Trust</h2>
+          {trustLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+
+        <nav class="rh-footer-column" aria-label="Resources">
+          <h2 class="rh-footer-heading">Resources</h2>
+          {resourcesLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+
+        <nav class="rh-footer-column" aria-label="Company">
+          <h2 class="rh-footer-heading">Company</h2>
+          {companyLinks.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+      </div>
     </div>
 
-    <nav class="rh-footer-column" aria-label="Products">
-      <h2 class="rh-footer-heading">Products</h2>
-      <a href="/products">Products</a>
-      <a href="/hardware">Hardware</a>
-      <a href="/relayos">RelayOS</a>
-      <a href="/early-access">Early access</a>
-    </nav>
-
-    <nav class="rh-footer-column" aria-label="Explore">
-      <h2 class="rh-footer-heading">Explore</h2>
-      <a href="/how-it-works">How it works</a>
-      <a href="/compatibility">Compatibility</a>
-      <a href="/communities">Communities</a>
-      <a href="/community-guides">Community guides</a>
-      <a href="/communities-directory">Community directory</a>
-      <a href="/marketplace">Marketplace</a>
-      <a href="/ecosystem">Ecosystem</a>
-      <a href="/roadmap">Roadmap</a>
-      <a href="/developers">Developers</a>
-      <a href="/docs">Documentation</a>
-      <a href="/partners">Partners</a>
-      <a href="/downloads">Downloads</a>
-      <a href="/faq">FAQ</a>
-    </nav>
-
-    <nav class="rh-footer-column" aria-label="Trust">
-      <h2 class="rh-footer-heading">Trust</h2>
-      <a href="/trust">Trust model</a>
-      <a href="/governance">Governance</a>
-      <a href="/support">Support</a>
-      <a href="/security">Security</a>
-      <a href="/recovery">Recovery</a>
-      <a href="/validation">Validation</a>
-      <a href="/certification">Certification</a>
-      <a href="/status">Status</a>
-    </nav>
-
-    <nav class="rh-footer-column" aria-label="Contact">
-      <h2 class="rh-footer-heading">Contact</h2>
-      <a href="/contact">Contact form</a>
-      <a href="mailto:hello@relayhub.tech">hello@relayhub.tech</a>
-      <a href="/early-access">Register interest</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/accessibility">Accessibility</a>
-      <a href="/media">Media Kit</a>
-      <a href="/terms">Terms</a>
-    </nav>
-  </div>
-
-  <div class="rh-container">
     <hr class="rh-footer-divider" />
 
     <div class="rh-footer-bottom">
       <p>© {year} RelayHub. All rights reserved.</p>
 
       <div class="rh-footer-legal">
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/accessibility">Accessibility</a>
-        <a href="/faq">FAQ</a>
-        <a href="/contact">Contact</a>
+        {legalLinks.map((link) => (
+          <a href={link.href}>{link.label}</a>
+        ))}
       </div>
     </div>
 

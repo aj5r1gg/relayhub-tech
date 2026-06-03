@@ -1,0 +1,337 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const pilotTypes = [
+  {
+    title: "Community pilot",
+    text: "A small group tests local-first communication, trust, documentation, recovery, and community coordination workflows.",
+  },
+  {
+    title: "Household pilot",
+    text: "A household tests appliance-style setup, pairing, local dashboard, recovery, status comprehension, and ordinary usability.",
+  },
+  {
+    title: "Developer pilot",
+    text: "Developers test RelayOS concepts, future APIs, validation tooling, documentation, and integration boundaries.",
+  },
+  {
+    title: "Hardware pilot",
+    text: "Builders test hardware classes, boot behaviour, storage, power, thermal behaviour, Reticulum operation, and recovery paths.",
+  },
+  {
+    title: "Education pilot",
+    text: "Trainers and organisers test workshop material, onboarding guides, recovery cards, and non-technical explanations.",
+  },
+  {
+    title: "Field pilot",
+    text: "A controlled real-world test of degraded operation, intermittent connectivity, local-only workflows, and support expectations.",
+  },
+];
+
+const idealParticipants = [
+  "Community organisers",
+  "Local resilience groups",
+  "Households willing to test setup and recovery",
+  "Reticulum users",
+  "NixOS users",
+  "Hardware builders",
+  "Documentation contributors",
+  "Accessibility testers",
+  "Regional community groups",
+  "People comfortable giving detailed feedback",
+];
+
+const pilotStages = [
+  {
+    title: "1. Register interest",
+    text: "Tell RelayHub who you are, where you are, what you want to test, and what experience or hardware you already have.",
+  },
+  {
+    title: "2. Scope the pilot",
+    text: "Define the use case, participants, hardware class, support expectations, safety boundaries, and success criteria.",
+  },
+  {
+    title: "3. Prepare materials",
+    text: "Prepare guides, checklists, recovery instructions, status explanations, and feedback forms before testing begins.",
+  },
+  {
+    title: "4. Run the pilot",
+    text: "Test setup, local-only operation, trust, recovery, documentation, degraded states, and support workflows.",
+  },
+  {
+    title: "5. Capture evidence",
+    text: "Record what worked, what failed, what confused users, what needs validation, and what must not be claimed yet.",
+  },
+  {
+    title: "6. Decide next step",
+    text: "Continue, revise, pause, expand, or stop safely based on evidence rather than enthusiasm alone.",
+  },
+];
+
+const whatWillBeTested = [
+  "Can people understand what RelayHub is?",
+  "Can non-technical users find the first step?",
+  "Can users complete setup without terminal instructions?",
+  "Can users explain Ready, Local-Only, No Peers, Degraded, and Recovery?",
+  "Can recovery be found without internet access?",
+  "Can trust and discovery be explained clearly?",
+  "Can support information be shared without exposing secrets?",
+  "Can participants distinguish current features from planned features?",
+];
+
+const pilotRules = [
+  "A pilot is not a product-supported release.",
+  "Experimental hardware must be labelled experimental.",
+  "Recovery must be tested before expansion.",
+  "Support boundaries must be clear before participants rely on the system.",
+  "No participant should be told RelayHub provides perfect anonymity.",
+  "Radio transmit must not be assumed lawful merely because hardware exists.",
+  "Pilot evidence should guide the roadmap.",
+  "A pilot may stop safely if the system is not ready.",
+];
+
+const notYet = [
+  "No public RelayOS images are available yet.",
+  "No certified hardware programme is active yet.",
+  "No partner directory is active yet.",
+  "No formal community federation programme is active yet.",
+  "No emergency service guarantee exists.",
+  "No supported product release exists yet.",
+];
+
+const applyDetails = [
+  "Who you are",
+  "Where you are located",
+  "Whether you are a household, community, developer, builder, or organisation",
+  "What you want to test",
+  "What hardware you already have",
+  "Your technical comfort level",
+  "How many people may participate",
+  "What outcome would make the pilot useful",
+];
+---
+
+<BaseLayout
+  title="Pilot Program | RelayHub"
+  description="RelayHub pilot program information for communities, households, developers, hardware builders, education partners, field pilots, validation, recovery testing, and local-first deployment readiness."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Pilot Program</p>
+
+      <h1 class="rh-title">
+        Test carefully before calling anything supported.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub pilots will help test local-first communication, onboarding,
+        recovery, trust, documentation, hardware classes, support boundaries, and
+        real community usefulness before wider deployment.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+        <a class="rh-button rh-button-secondary" href="/community-guides">
+          Community guides
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Pilot types</p>
+
+      <h2 class="rh-section-title">
+        Different pilots test different risks.
+      </h2>
+
+      <p class="rh-section-lead">
+        A good pilot is small, bounded, observable, recoverable, and honest about
+        what is being tested. RelayHub should validate people, process,
+        documentation, recovery, and hardware — not just connectivity.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {pilotTypes.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Who should apply?</p>
+
+        <h2 class="rh-section-title">
+          Early pilots need patient, practical testers.
+        </h2>
+
+        <p class="rh-section-lead">
+          The best early participants are people who understand that pilots are
+          about learning, validation, feedback, and safe improvement — not
+          polished product promises.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-pilot-list">
+          {idealParticipants.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Pilot pathway</p>
+
+      <h2 class="rh-section-title">
+        A pilot should have a beginning, boundary, and decision point.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub pilots should move through clear stages so participants know
+        what is happening, what is being tested, what evidence matters, and what
+        happens next.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {pilotStages.map((stage) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{stage.title}</h3>
+            <p class="rh-card-text">{stage.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">What pilots test</p>
+
+      <h2 class="rh-section-title">
+        Human comprehension matters as much as technical function.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub pilot should prove whether real people can understand setup,
+        status, trust, recovery, support, and product boundaries.
+      </p>
+
+      <div class="rh-card rh-card-dark" style="margin-top: var(--space-8);">
+        <ul class="rh-pilot-list">
+          {whatWillBeTested.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/validation">
+          Validation
+        </a>
+        <a class="rh-button rh-button-secondary" href="/accessibility">
+          Accessibility
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Pilot rules</p>
+
+      <h2 class="rh-section-title">
+        Pilots must not create false confidence.
+      </h2>
+
+      <p class="rh-section-lead">
+        A pilot is a learning and validation activity. It should not be marketed
+        as a supported release, certified deployment, or emergency service.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {pilotRules.map((rule) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{rule}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Current limitations</p>
+
+        <h2 class="rh-section-title">
+          The pilot programme is not open as a formal release yet.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is currently collecting interest and preparing public
+          foundations. Product builds, hardware certification, and formal pilots
+          come later.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-pilot-list">
+          {notYet.map((item) => <li>{item}</li>)}
+        </ul>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/status">
+            Status
+          </a>
+          <a class="rh-button rh-button-secondary" href="/downloads">
+            Downloads
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Apply for a future pilot</p>
+
+        <h2 class="rh-section-title">
+          Tell us what you want to test.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is looking for practical interest from households,
+          communities, builders, developers, educators, and organisations that
+          understand the difference between a pilot and a supported product.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Useful details</h3>
+
+        <ul class="rh-pilot-list">
+          {applyDetails.map((item) => <li>{item}</li>)}
+        </ul>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/contact">
+            Contact RelayHub
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
