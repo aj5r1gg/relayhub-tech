@@ -1,68 +1,237 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const postureItems = [
+const securityPrinciples = [
   {
-    title: "Local-first by default",
-    text: "RelayHub is designed to keep essential operation local where practical and avoid hidden dependency on centralised services.",
+    title: "Honest claims",
+    text: "RelayHub must not exaggerate privacy, anonymity, security, censorship resistance, delivery, or recovery guarantees.",
+  },
+  {
+    title: "Minimum exposure",
+    text: "Services should expose only what is necessary, preferably local-first, role-gated, and policy-controlled.",
+  },
+  {
+    title: "Explicit trust",
+    text: "Local network access, Reticulum reachability, federation, marketplace participation, or hardware ownership must not automatically mean trust.",
+  },
+  {
+    title: "Recovery-first security",
+    text: "Security controls must not make ordinary recovery impossible. A secure system still needs safe rollback, restore, reset, and transfer paths.",
   },
   {
     title: "Least privilege",
-    text: "Services should run with only the access they need, and administrative control should not be exposed unnecessarily.",
+    text: "Services should run with limited permissions, dedicated users, constrained access, and minimal writable paths wherever practical.",
   },
   {
-    title: "Policy-governed capability",
-    text: "Features should only activate when hardware, software, policy, trust, legal, runtime, and user gates allow them.",
-  },
-  {
-    title: "Recovery-first design",
-    text: "Recovery, rollback, safe reset, support export, and identity preservation are treated as core architecture rather than optional extras.",
+    title: "Capability-aware design",
+    text: "A feature only becomes available when hardware, software, policy, trust, legal, runtime, and user-enablement gates allow it.",
   },
 ];
 
-const limits = [
-  "RelayHub does not provide perfect anonymity.",
-  "Reticulum reachability does not automatically imply trust.",
-  "Radio communication may be observable and regionally regulated.",
-  "Physical device access can change the threat model.",
-  "No system can guarantee message delivery in all conditions.",
-  "Experimental features must not be treated as product-supported.",
+const threatClasses = [
+  {
+    title: "Local network attacker",
+    text: "A hostile or compromised device on the same LAN attempting discovery, access, pairing, or management.",
+  },
+  {
+    title: "Malicious peer",
+    text: "A reachable peer or node attempting abuse, deception, unwanted traffic, metadata exposure, or trust confusion.",
+  },
+  {
+    title: "Physical access",
+    text: "A stolen, seized, borrowed, tampered, or resold device with possible access to storage, identity, or configuration.",
+  },
+  {
+    title: "Hostile gateway",
+    text: "An upstream path, relay, bridge, or gateway that is unreliable, manipulative, compromised, or untrusted.",
+  },
+  {
+    title: "Radio observer",
+    text: "A person or organisation observing radio signals, timing, traffic patterns, location, or equipment use.",
+  },
+  {
+    title: "Supply-chain risk",
+    text: "Modified hardware, altered images, untrusted builds, unsafe updates, or unclear provenance.",
+  },
+  {
+    title: "Misconfiguration",
+    text: "Accidental exposure, incorrect roles, unsafe gateway behaviour, bad regional radio settings, or poor recovery setup.",
+  },
+  {
+    title: "Compromised client",
+    text: "A paired phone, browser, laptop, or operator device that is lost, infected, shared, or no longer trusted.",
+  },
 ];
 
-const reportItems = [
-  "Security vulnerability",
-  "Privacy exposure",
-  "Unsafe default",
-  "Misleading capability claim",
-  "Recovery failure",
-  "Authentication or access-control issue",
-  "Support export redaction issue",
+const securityBoundaries = [
+  "RelayHub does not make users invisible.",
+  "Reticulum is not the same thing as anonymity.",
+  "Encryption does not remove all metadata exposure.",
+  "Radio activity may be observable.",
+  "Physical device access remains a serious risk.",
+  "A trusted community does not mean every participant is trusted.",
+  "A visible listing, peer, or node does not imply endorsement.",
+  "A working transport does not guarantee message delivery.",
+  "A pilot or experimental build is not a product-supported security boundary.",
+];
+
+const exposureDefaults = [
+  {
+    title: "Local API",
+    text: "Local-only by default, paired-client access, role-gated actions, and no hidden remote administration.",
+  },
+  {
+    title: "Discovery",
+    text: "Useful for onboarding, but not a trust grant. Discovery must respect privacy, quiet mode, and policy.",
+  },
+  {
+    title: "Admin access",
+    text: "Administrative paths should be limited, understandable, logged where appropriate, and never exposed casually.",
+  },
+  {
+    title: "Gateway mode",
+    text: "Disabled unless hardware, policy, trust, role, operator intent, validation, and runtime conditions allow it.",
+  },
+  {
+    title: "Bridge mode",
+    text: "Disabled unless explicitly supported, validated, configured, and governed by transport and trust policy.",
+  },
+  {
+    title: "Radio transmit",
+    text: "Not enabled merely because radio hardware exists. Region, legality, policy, and user acknowledgement matter.",
+  },
+];
+
+const trustControls = [
+  {
+    title: "Pairing",
+    text: "Devices, users, and nodes should be paired deliberately through understandable flows such as QR onboarding or explicit invitation.",
+  },
+  {
+    title: "Roles",
+    text: "Owners, admins, trusted users, guests, operators, stewards, and recovery contacts should have different authority.",
+  },
+  {
+    title: "Revocation",
+    text: "Trust must be removable. Devices, users, peers, services, federation links, and recovery authority need revocation paths.",
+  },
+  {
+    title: "Quarantine",
+    text: "Suspicious relationships should be containable without destroying the entire community or local operation.",
+  },
+  {
+    title: "Federation limits",
+    text: "Federation should be narrowable, pausable, reviewable, and revocable without surrendering community autonomy.",
+  },
+  {
+    title: "Recovery authority",
+    text: "Recovery contacts or recovery methods must not become hidden takeover mechanisms.",
+  },
+];
+
+const recoveryControls = [
+  {
+    title: "Rollback",
+    text: "Failed updates should roll back or enter guided recovery rather than leaving a silently broken system.",
+  },
+  {
+    title: "Identity preservation",
+    text: "Recovery should preserve node, owner, community, and trust identity where possible and safe.",
+  },
+  {
+    title: "Factory reset",
+    text: "Reset must be deliberate, explained, and protected against accidental destructive action.",
+  },
+  {
+    title: "Ownership transfer",
+    text: "Devices should be transferable without leaving stale owner authority behind.",
+  },
+  {
+    title: "Offline recovery",
+    text: "Recovery instructions and local recovery paths should not depend on cloud access where practical.",
+  },
+  {
+    title: "Support export",
+    text: "Support bundles should be explicit, local, reviewable, and redacted by default.",
+  },
+];
+
+const validationItems = [
+  "Threat review",
+  "Service exposure review",
+  "Pairing flow test",
+  "Revocation test",
+  "Recovery drill",
+  "Failed update drill",
+  "Support redaction test",
+  "No-cloud setup test",
+  "Local-only operation test",
+  "Hardware compatibility review",
+  "Radio legality review where applicable",
+  "Documentation review",
+];
+
+const reportGuidance = [
+  "Security issue summary",
+  "Affected page, feature, service, or flow",
+  "Steps to reproduce",
+  "Expected behaviour",
+  "Observed behaviour",
+  "Possible impact",
+  "Screenshots or logs if safe",
+  "Whether sensitive information is involved",
+  "Contact details for follow-up",
+];
+
+const securityRoadmap = [
+  {
+    title: "Define boundaries",
+    text: "Publish clear security, privacy, trust, recovery, and support boundaries for each product class.",
+  },
+  {
+    title: "Validate basics",
+    text: "Test onboarding, local API exposure, pairing, revocation, recovery, updates, and support redaction.",
+  },
+  {
+    title: "Review services",
+    text: "Review Relay Chat, Boards, Market, Library, Federation, and future services before supported release.",
+  },
+  {
+    title: "Harden builds",
+    text: "Improve NixOS configuration, least privilege, local-only APIs, service users, update verification, and rollback.",
+  },
+  {
+    title: "Publish evidence",
+    text: "Publish validation notes, known limitations, status, hardware support, and security posture as evidence matures.",
+  },
 ];
 ---
 
 <BaseLayout
   title="Security | RelayHub"
-  description="RelayHub security information covering responsible disclosure, privacy limits, recovery-first design, threat boundaries, and safe reporting."
+  description="RelayHub security explains honest security boundaries, local-first exposure, trust separation, recovery-first design, threat models, validation, support redaction, and responsible disclosure."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
       <p class="rh-eyebrow">Security</p>
 
       <h1 class="rh-title">
-        Security requires honesty, recovery, and evidence.
+        Security must be practical, honest, and recoverable.
       </h1>
 
       <p class="rh-subtitle">
-        RelayHub is being designed as local-first infrastructure for resilient
-        communities. Security claims must remain realistic, testable, and clear.
+        RelayHub is designed around local-first operation, explicit trust,
+        minimum exposure, policy-governed behaviour, realistic privacy claims,
+        and recovery-first security. It should reduce dependence on fragile
+        central systems without pretending to eliminate every risk.
       </p>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-primary" href="/contact">
-          Report a concern
+        <a class="rh-button rh-button-primary" href="/trust">
+          Trust & federation
         </a>
-        <a class="rh-button rh-button-secondary" href="/privacy">
-          Read privacy policy
+        <a class="rh-button rh-button-secondary" href="/recovery">
+          Recovery
         </a>
       </div>
     </div>
@@ -73,18 +242,17 @@ const reportItems = [
       <p class="rh-kicker">Security posture</p>
 
       <h2 class="rh-section-title">
-        Practical security, not magical guarantees.
+        RelayHub should be secure by design, not secure by slogan.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub should reduce unnecessary exposure, support local operation,
-        preserve recovery paths, and make capability boundaries visible. It must
-        not overstate privacy, anonymity, censorship resistance, or operational
-        safety.
+        Security is not a marketing claim. It must be visible in architecture,
+        implementation, documentation, validation, recovery, support, and
+        day-to-day operation.
       </p>
 
-      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        {postureItems.map((item) => (
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {securityPrinciples.map((item) => (
           <article class="rh-card">
             <h3 class="rh-card-title">{item.title}</h3>
             <p class="rh-card-text">{item.text}</p>
@@ -94,26 +262,251 @@ const reportItems = [
     </div>
   </section>
 
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Threat model</p>
+
+      <h2 class="rh-section-title">
+        Security starts by naming the risks.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub assumes hostile networks, unreliable connectivity, compromised
+        clients, malicious peers, misconfiguration, physical access risk,
+        supply-chain risk, and constrained hardware.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {threatClasses.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Honest boundaries</p>
+
+      <h2 class="rh-section-title">
+        What RelayHub does not claim.
+      </h2>
+
+      <p class="rh-section-lead">
+        Honest limits protect users. RelayHub should never encourage false
+        confidence about anonymity, metadata, radio visibility, delivery,
+        physical compromise, or unsupported features.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {securityBoundaries.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Minimum exposure</p>
+
+      <h2 class="rh-section-title">
+        Nothing should be exposed merely because it exists.
+      </h2>
+
+      <p class="rh-section-lead">
+        A RelayHub node should expose services deliberately. A hardware feature,
+        network route, radio, gateway, bridge, API, or service must not become
+        active merely because it is technically possible.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {exposureDefaults.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust separation</p>
+
+      <h2 class="rh-section-title">
+        Security depends on explicit trust.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub must distinguish people, devices, nodes, services,
+        communities, operators, gateways, bridges, marketplaces, libraries, and
+        federations. Trust in one layer must not silently become trust in every
+        layer.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trustControls.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/trust">
+          Trust & federation
+        </a>
+        <a class="rh-button rh-button-secondary" href="/governance">
+          Governance
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Recovery-first security</p>
+
+      <h2 class="rh-section-title">
+        A secure system still needs a way back.
+      </h2>
+
+      <p class="rh-section-lead">
+        Security that prevents recovery can make communities fragile. RelayHub
+        should protect identities, services, and records while preserving safe
+        paths to restore operation after failure, update problems, ownership
+        changes, or mistakes.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {recoveryControls.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/recovery">
+          Recovery
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Privacy reality</p>
+
+      <h2 class="rh-section-title">
+        Privacy is important. Anonymity is not magic.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should minimise exposure and reduce dependence on central
+        services, but it must remain honest about metadata, physical access,
+        radio observation, trusted peers, logs, support exports, and user
+        behaviour.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Metadata</h3>
+          <p class="rh-card-text">
+            Communication systems may still reveal timing, routing, relationship,
+            transport, or presence information depending on use.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Radio</h3>
+          <p class="rh-card-text">
+            Radio transmissions may be observable, localisable, regulated, or
+            restricted. Radio use must be lawful and explicit.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Physical access</h3>
+          <p class="rh-card-text">
+            A person with physical access to a device may create risks that
+            software alone cannot fully remove.
+          </p>
+        </article>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/privacy">
+          Privacy
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Validation</p>
+
+      <h2 class="rh-section-title">
+        Security claims need evidence.
+      </h2>
+
+      <p class="rh-section-lead">
+        A security claim is not complete until it is testable, observable,
+        reproducible, recoverable, and evidence-backed.
+      </p>
+
+      <div class="rh-category-grid" style="margin-top: var(--space-10);">
+        {validationItems.map((item) => (
+          <div class="rh-category-item">{item}</div>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/validation">
+          Validation
+        </a>
+        <a class="rh-button rh-button-secondary" href="/field-trials">
+          Field trials
+        </a>
+      </div>
+    </div>
+  </section>
+
   <section class="rh-section rh-bg-soft">
     <div class="rh-container rh-grid rh-grid-2">
       <div>
-        <p class="rh-kicker">Threat boundaries</p>
+        <p class="rh-kicker">Support and redaction</p>
 
         <h2 class="rh-section-title">
-          What RelayHub does not promise.
+          Support should not become hidden surveillance.
         </h2>
 
         <p class="rh-section-lead">
-          Honest security starts by naming limits. RelayHub is intended to support
-          resilient communication and community coordination, but it must never be
-          described as invulnerable, perfectly anonymous, or guaranteed under all
-          conditions.
+          RelayHub support should be user-controlled and privacy-preserving.
+          Support exports should be explicit, reviewable, local where practical,
+          and redacted by default.
         </p>
       </div>
 
       <article class="rh-card">
-        <ul class="rh-security-list">
-          {limits.map((item) => <li>{item}</li>)}
+        <h3 class="rh-card-title">Default support posture</h3>
+
+        <ul class="rh-pilot-list">
+          <li>No automatic cloud telemetry by default.</li>
+          <li>No message content in support exports by default.</li>
+          <li>No private keys or recovery secrets in normal support bundles.</li>
+          <li>Explicit user action before sharing support information.</li>
+          <li>Clear distinction between help, diagnostics, and recovery.</li>
         </ul>
       </article>
     </div>
@@ -125,88 +518,92 @@ const reportItems = [
         <p class="rh-kicker">Responsible disclosure</p>
 
         <h2 class="rh-section-title">
-          Report security issues clearly and safely.
+          Found a security issue?
         </h2>
 
         <p class="rh-section-lead">
-          If you discover a vulnerability, privacy issue, unsafe behaviour, or
-          misleading security claim, please report it responsibly. Do not exploit
-          systems, access other people’s data, disrupt services, or publish active
-          vulnerabilities before there has been time to assess and respond.
+          RelayHub is early-stage. Security issues should be reported clearly,
+          responsibly, and with enough detail to reproduce and assess risk.
         </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-primary" href="/contact">
+            Contact RelayHub
+          </a>
+        </div>
       </div>
 
       <article class="rh-card">
-        <h3 class="rh-card-title">Reportable concerns</h3>
+        <h3 class="rh-card-title">Helpful report details</h3>
 
-        <ul class="rh-security-list">
-          {reportItems.map((item) => <li>{item}</li>)}
-        </ul>
-
-        <div class="rh-actions">
-          <a class="rh-button rh-button-accent" href="/contact">
-            Send a report
-          </a>
+        <div class="rh-category-grid" aria-label="Helpful security report details">
+          {reportGuidance.map((item) => (
+            <div class="rh-category-item">{item}</div>
+          ))}
         </div>
       </article>
     </div>
   </section>
 
   <section class="rh-section rh-dark">
-    <div class="rh-container rh-grid rh-grid-2">
-      <div>
-        <p class="rh-kicker">Recovery-first</p>
+    <div class="rh-container">
+      <p class="rh-kicker">Roadmap</p>
 
-        <h2 class="rh-section-title">
-          A secure system must still be recoverable.
-        </h2>
+      <h2 class="rh-section-title">
+        Security maturity grows through validation.
+      </h2>
 
-        <p class="rh-section-lead">
-          Security controls that make ordinary recovery impossible can create
-          fragility. RelayHub designs should preserve safe rollback, guided
-          recovery, identity continuity where possible, and privacy-preserving
-          support export.
-        </p>
+      <p class="rh-section-lead">
+        RelayHub security should mature step-by-step: clear boundaries first,
+        validated basics next, then service review, hardening, and published
+        evidence as the product develops.
+      </p>
+
+      <div class="rh-grid rh-grid-5" style="margin-top: var(--space-10);">
+        {securityRoadmap.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
-
-      <article class="rh-card rh-card-dark">
-        <h3 class="rh-card-title">Security principle</h3>
-        <p class="rh-card-text">
-          No convenience feature should silently increase exposure. No update
-          should silently enable new sharing, new federation, new gateway
-          behaviour, or new radio transmission without clear policy permission
-          and validation.
-        </p>
-      </article>
     </div>
   </section>
 
-  <section class="rh-section">
-    <div class="rh-container">
-      <p class="rh-kicker">Contact</p>
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Security and community</p>
 
-      <h2 class="rh-section-title">
-        Security contact
-      </h2>
+        <h2 class="rh-section-title">
+          Secure infrastructure should strengthen human agency.
+        </h2>
 
-      <div class="rh-card">
-        <p class="rh-card-text">
-          Use the contact form for security reports and include as much detail as
-          possible: affected page, endpoint, expected behaviour, observed
-          behaviour, reproduction steps, browser or device context, and whether
-          any data may have been exposed.
-        </p>
-
-        <p>
-          <strong>Email:</strong>
-          <a href="mailto:hello@relayhub.tech">hello@relayhub.tech</a>
-        </p>
-
-        <p>
-          <strong>Contact form:</strong>
-          <a href="/contact">relayhub.tech/contact</a>
+        <p class="rh-section-lead">
+          The point of RelayHub security is not to impress experts. It is to
+          help ordinary people and communities communicate, coordinate, recover,
+          preserve knowledge, trade, federate, and govern with realistic safety
+          and understandable control.
         </p>
       </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Explore related foundations</h3>
+
+        <p class="rh-card-text">
+          Security connects directly to trust, governance, recovery, validation,
+          privacy, hardware capability, and community autonomy.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-primary" href="/foundations">
+            Foundations
+          </a>
+          <a class="rh-button rh-button-secondary" href="/hardware-comparison">
+            Hardware comparison
+          </a>
+        </div>
+      </article>
     </div>
   </section>
 </BaseLayout>
