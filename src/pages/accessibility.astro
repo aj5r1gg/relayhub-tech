@@ -1,17 +1,114 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const commitments = [
+  "Plain language before technical language.",
+  "Readable layouts on desktop and mobile.",
+  "Status explained with text, not colour alone.",
+  "Keyboard-accessible core flows where practical.",
+  "Recovery instructions that are findable under stress.",
+  "Offline and printable help where practical.",
+  "Support paths that do not require hidden technical knowledge.",
+  "Continuous improvement as RelayHub matures.",
+];
+
+const focusAreas = [
+  {
+    title: "Plain language",
+    text: "RelayHub should explain outcomes, risks, limitations, and next actions without forcing users to understand Linux, Reticulum, networking, or radio engineering.",
+  },
+  {
+    title: "Mobile usability",
+    text: "Setup, recovery, status, support, and documentation should work on phone-width screens wherever practical.",
+  },
+  {
+    title: "Keyboard navigation",
+    text: "Important website and product flows should not depend solely on mouse or touch interaction.",
+  },
+  {
+    title: "Readable contrast",
+    text: "Text, buttons, cards, warnings, and status indicators should remain readable and visually clear.",
+  },
+  {
+    title: "Non-colour-only status",
+    text: "Ready, Local-Only, Degraded, Updating, Recovery, and Error states should use text and meaning, not just colour.",
+  },
+  {
+    title: "Recovery under stress",
+    text: "Recovery help should be clear, calm, visible, and usable when the user is tired, worried, offline, or under pressure.",
+  },
+];
+
+const statusExamples = [
+  {
+    label: "Ready",
+    status: "rh-status-ready",
+    text: "The node is working for its current supported role.",
+  },
+  {
+    label: "Local-only",
+    status: "rh-status-local",
+    text: "Local operation may still work even when wider connectivity is unavailable.",
+  },
+  {
+    label: "No peers",
+    status: "rh-status-local",
+    text: "The node is running but has not found reachable peers yet.",
+  },
+  {
+    label: "Degraded",
+    status: "rh-status-degraded",
+    text: "Some capability is reduced, paused, blocked, or unavailable.",
+  },
+  {
+    label: "Updating",
+    status: "rh-status-updating",
+    text: "The node is applying, validating, or rolling back an update.",
+  },
+  {
+    label: "Recovery",
+    status: "rh-status-error",
+    text: "The node needs guided attention before normal operation resumes.",
+  },
+];
+
+const lowConnectivity = [
+  "Critical setup and recovery help should not require continuous internet.",
+  "Local-only should be explained as a valid operating state, not automatic failure.",
+  "Offline or printable documentation should be available where practical.",
+  "Status pages should explain what still works when wider connectivity fails.",
+  "Support export should be possible locally where product state allows.",
+];
+
+const knownLimitations = [
+  "The public website is still evolving.",
+  "Future RelayOS interfaces are not yet product-supported.",
+  "Accessibility testing will need real users and real devices.",
+  "Some third-party services, such as anti-spam challenges, may have their own accessibility behaviour.",
+  "Not every planned product interface exists yet.",
+  "Claims about future accessibility must be validated before being treated as supported.",
+];
+
+const feedbackHelp = [
+  "The page or screen where the issue occurred.",
+  "What you expected to happen.",
+  "What actually happened.",
+  "Your browser and device type, if you are comfortable sharing it.",
+  "Whether the issue affected keyboard, screen reader, mobile, contrast, wording, or recovery.",
+  "A screenshot only if it does not expose private information.",
+];
 ---
 
 <BaseLayout
   title="Accessibility | RelayHub"
-  description="Read the RelayHub accessibility statement covering usability, plain language, mobile support, readable design, and accessibility improvements."
+  description="RelayHub accessibility statement covering plain language, mobile usability, keyboard navigation, readable contrast, non-colour-only status, recovery under stress, and low-connectivity access."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
       <p class="rh-eyebrow">Accessibility</p>
 
       <h1 class="rh-title">
-        Accessibility Statement
+        Accessibility is part of resilience.
       </h1>
 
       <p class="rh-subtitle">
@@ -19,108 +116,245 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         recover, and use local-first communication infrastructure without needing
         specialist technical knowledge.
       </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/contact">
+          Send feedback
+        </a>
+        <a class="rh-button rh-button-secondary" href="/docs">
+          Read docs
+        </a>
+      </div>
     </div>
   </section>
 
   <section class="rh-section">
-    <div class="rh-container rh-content">
-      <h2>1. Our Commitment</h2>
+    <div class="rh-container">
+      <p class="rh-kicker">Commitment</p>
 
-      <p>
-        RelayHub aims to make its website, documentation, products, and user
-        interfaces accessible, understandable, and usable by as many people as
-        practical.
+      <h2 class="rh-section-title">
+        Usability is not a decoration.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should be usable by people who do not understand Linux,
+        networking, Reticulum, radio, cryptography, or infrastructure operations.
+        The system may be sophisticated internally, but the edge should remain
+        understandable.
       </p>
 
-      <p>
-        Accessibility is not treated as an optional extra. It is part of the
-        product’s usability, recovery, safety, and trust model.
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {commitments.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Focus areas</p>
+
+      <h2 class="rh-section-title">
+        Accessibility means clear operation and clear recovery.
+      </h2>
+
+      <p class="rh-section-lead">
+        The most important accessibility work is helping users understand what
+        state the system is in, what still works, what changed, and what safe
+        action comes next.
       </p>
 
-      <h2>2. Plain Language</h2>
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {focusAreas.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
-      <p>
-        RelayHub avoids unnecessary technical language wherever possible.
-        User-facing materials should explain outcomes, risks, limitations,
-        and next steps in ordinary language.
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Status clarity</p>
+
+      <h2 class="rh-section-title">
+        Status must never depend on colour alone.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub status language should combine clear labels, plain text,
+        consistent meaning, and visual distinction. Colour may help, but colour
+        must not be the only way meaning is communicated.
       </p>
 
-      <p>
-        Terms such as Ready, Local-Only, Degraded, Updating, Recovering, and
-        Error should be explained clearly and consistently.
-      </p>
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {statusExamples.map((item) => (
+          <article class="rh-card">
+            <span class={`rh-status ${item.status}`}>{item.label}</span>
+            <p class="rh-card-text" style="margin-top: var(--space-5);">
+              {item.text}
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
-      <h2>3. Visual Accessibility</h2>
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Recovery accessibility</p>
 
-      <p>
-        RelayHub aims to support readable text, strong contrast, responsive
-        layouts, and clear visual hierarchy.
-      </p>
+        <h2 class="rh-section-title">
+          Recovery must be usable under pressure.
+        </h2>
 
-      <p>
-        Status should not rely on colour alone. Where practical, status should
-        also be communicated through text, icon shape, pattern, label, or
-        supporting explanation.
-      </p>
+        <p class="rh-section-lead">
+          A recovery flow that only works for confident technical users is not
+          enough. Recovery should be visible, calm, local-first where practical,
+          and written for people who may be stressed or offline.
+        </p>
+      </div>
 
-      <h2>4. Keyboard and Screen Reader Support</h2>
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Recovery rule</h3>
+        <p class="rh-card-text">
+          Critical recovery should not depend on hidden knowledge, terminal-only
+          instructions, colour-only warnings, or documentation that disappears
+          when the internet fails.
+        </p>
 
-      <p>
-        Core website and product flows should be usable with keyboard navigation
-        and meaningful labels for assistive technologies.
-      </p>
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/recovery">
+            Recovery model
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
 
-      <p>
-        Important actions such as setup, support export, recovery, update
-        approval, reset, and transfer should not depend solely on mouse or touch
-        interaction where a keyboard-accessible alternative is practical.
-      </p>
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Low-connectivity usability</p>
 
-      <h2>5. Mobile Accessibility</h2>
+        <h2 class="rh-section-title">
+          Help should remain available when networks fail.
+        </h2>
 
-      <p>
-        RelayHub’s website and future local web interfaces should work on
-        mobile-width screens, including phones used during setup, recovery,
-        and field operation.
-      </p>
+        <p class="rh-section-lead">
+          RelayHub is local-first. Accessibility must therefore consider
+          offline, local-only, degraded, and intermittent connectivity as normal
+          conditions rather than unusual edge cases.
+        </p>
+      </div>
 
-      <h2>6. Recovery Accessibility</h2>
+      <article class="rh-card">
+        <ul class="rh-accessibility-list">
+          {lowConnectivity.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
 
-      <p>
-        Recovery instructions should be findable, readable, and usable under
-        stress. Recovery should not depend on hidden knowledge, terminal access,
-        or specialist expertise for ordinary user flows.
-      </p>
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Known limitations</p>
 
-      <h2>7. Documentation Accessibility</h2>
+        <h2 class="rh-section-title">
+          Accessibility will need testing, not assumptions.
+        </h2>
 
-      <p>
-        Documentation should be structured, searchable, printable where useful,
-        and written for both non-technical users and deeper technical operators.
-      </p>
+        <p class="rh-section-lead">
+          RelayHub is still in design and validation planning. Accessibility
+          claims must be tested with real browsers, real devices, real recovery
+          flows, and real users.
+        </p>
+      </div>
 
-      <p>
-        Critical setup and recovery guidance should remain available offline
-        where practical.
-      </p>
+      <article class="rh-card">
+        <ul class="rh-accessibility-list">
+          {knownLimitations.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
 
-      <h2>8. Current Status</h2>
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Design standards</p>
 
-      <p>
-        RelayHub is currently in early design and validation planning. Accessibility
-        work will continue as product pages, documentation, local interfaces, and
-        support materials are developed.
-      </p>
+      <h2 class="rh-section-title">
+        What RelayHub should keep improving.
+      </h2>
 
-      <h2>9. Feedback</h2>
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Website</h3>
+          <p class="rh-card-text">
+            The public website should remain readable, responsive, keyboard
+            navigable, and clear about product status, limits, and contact paths.
+          </p>
+        </article>
 
-      <p>
-        Accessibility feedback can be sent to:
-      </p>
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayOS</h3>
+          <p class="rh-card-text">
+            Future local web UI flows should support setup, status, recovery,
+            update, reset, transfer, and support export without unnecessary
+            technical language.
+          </p>
+        </article>
 
-      <p>
-        hello@relayhub.tech
-      </p>
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Documentation</h3>
+          <p class="rh-card-text">
+            Documentation should be structured, searchable, printable where
+            useful, versioned, and written for both ordinary users and deeper
+            operators.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Feedback</p>
+
+        <h2 class="rh-section-title">
+          Tell us what makes RelayHub harder to use.
+        </h2>
+
+        <p class="rh-section-lead">
+          Accessibility feedback helps improve the website, documentation,
+          future product interfaces, recovery flows, and support materials.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Helpful feedback includes</h3>
+
+        <ul class="rh-accessibility-list">
+          {feedbackHelp.map((item) => <li>{item}</li>)}
+        </ul>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Send accessibility feedback
+          </a>
+          <a class="rh-button rh-button-secondary" href="mailto:hello@relayhub.tech">
+            hello@relayhub.tech
+          </a>
+        </div>
+      </article>
     </div>
   </section>
 </BaseLayout>

@@ -1,303 +1,357 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const collectedNow = [
+  "Early access signup details",
+  "Contact form submissions",
+  "Email addresses provided through forms",
+  "Community or organisation names provided by users",
+  "Cloudflare Web Analytics page and device metrics",
+  "Basic security and anti-spam signals",
+  "D1-stored signup and contact records",
+];
+
+const notCollected = [
+  "Private message contents",
+  "Private keys",
+  "Recovery secrets",
+  "Passwords",
+  "Device microphone recordings",
+  "Device camera access",
+  "Precise location tracking",
+  "Advertising profile data",
+  "Behavioural advertising data",
+  "Hidden remote device telemetry",
+];
+
+const analytics = [
+  "Cloudflare Web Analytics is used for privacy-preserving website analytics.",
+  "Google Analytics is not used.",
+  "Advertising trackers are not used.",
+  "Analytics are used to understand page popularity, device types, and broad website usage.",
+  "Form submissions are tracked through D1 records, not invasive tracking pixels.",
+];
+
+const supportExport = [
+  "Support export should require explicit user action.",
+  "Support information should be reviewable before sharing.",
+  "Support exports should be redacted by default.",
+  "Message content, private keys, and recovery secrets should not be included by default.",
+  "Automatic support upload is not part of the current posture.",
+];
+
+const privacyReality = [
+  "Privacy is not the same as anonymity.",
+  "Encryption does not make activity invisible.",
+  "Metadata may still exist.",
+  "Radio traffic may be observable.",
+  "Physical access to a device changes the threat model.",
+  "Trust relationships still matter.",
+  "Communities still need governance, judgement, and consent.",
+];
+
+const futurePrinciples = [
+  "Local-first operation where practical.",
+  "Minimum exposure by default.",
+  "Policy-governed sharing.",
+  "Explicit trust relationships.",
+  "Explicit federation relationships.",
+  "User-controlled support exports.",
+  "Recovery without unnecessary surveillance.",
+  "Clear distinction between implemented and planned privacy behaviour.",
+];
 ---
 
 <BaseLayout
   title="Privacy Policy | RelayHub"
-  description="Read the RelayHub privacy policy covering form submissions, contact details, support data, analytics posture, data retention, and user rights."
+  description="RelayHub privacy policy covering early access signups, contact forms, Cloudflare Web Analytics, D1 records, support exports, privacy limits, and local-first privacy philosophy."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
-      <p class="rh-eyebrow">Legal</p>
+      <p class="rh-eyebrow">Privacy</p>
 
-      <h1 class="rh-title">
-        Privacy Policy
-      </h1>
+      <h1 class="rh-title">Privacy must be honest.</h1>
 
       <p class="rh-subtitle">
-        Last updated: 2 June 2026
+        Last updated: 2 June 2026. RelayHub is designed around local-first,
+        minimum-exposure, policy-governed privacy. This page explains what is
+        collected now, what is not collected, and what privacy cannot honestly
+        promise.
       </p>
     </div>
   </section>
 
   <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Current website collection</p>
+
+      <h2 class="rh-section-title">What RelayHub currently collects.</h2>
+
+      <p class="rh-section-lead">
+        The current public website collects only what is needed for early access,
+        contact, basic security, spam protection, and privacy-preserving website
+        analytics.
+      </p>
+
+      <div class="rh-card" style="margin-top: var(--space-8);">
+        <ul class="rh-privacy-list">
+          {collectedNow.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What is not collected</p>
+
+      <h2 class="rh-section-title">
+        RelayHub does not seek sensitive operational secrets.
+      </h2>
+
+      <p class="rh-section-lead">
+        Do not send private keys, recovery secrets, passwords, message contents,
+        or other sensitive material through website forms or ordinary support
+        messages.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-8);">
+        {notCollected.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Analytics</p>
+
+        <h2 class="rh-section-title">
+          Privacy-preserving analytics, not advertising tracking.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub uses Cloudflare Web Analytics to understand broad website
+          usage. The goal is to learn what visitors care about before launch
+          without using advertising surveillance infrastructure.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-privacy-list">
+          {analytics.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Support exports</p>
+
+        <h2 class="rh-section-title">
+          Support should not become hidden telemetry.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub’s support posture is explicit export, redaction by default,
+          and user review before sharing. Support should help diagnose problems
+          without silently collecting private operational data.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <ul class="rh-privacy-list">
+          {supportExport.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Forms and records</p>
+
+      <h2 class="rh-section-title">
+        Early access and contact submissions.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-8);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Early access</h3>
+          <p class="rh-card-text">
+            Early access forms may store your name, email address, community or
+            organisation, message, submission time, hashed connection signal,
+            and basic user-agent information in D1 for administration and
+            follow-up.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Contact form</h3>
+          <p class="rh-card-text">
+            Contact forms may store your name, email address, topic, message,
+            submission time, hashed connection signal, and basic user-agent
+            information in D1 so RelayHub can respond and review abuse.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Third-party services</p>
+
+      <h2 class="rh-section-title">
+        Current service providers.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-8);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Cloudflare</h3>
+          <p class="rh-card-text">
+            Used for hosting, Workers, Assets, D1, KV, Email Routing,
+            Turnstile, Web Analytics, and security-related infrastructure.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">GitHub</h3>
+          <p class="rh-card-text">
+            Used for source control and deployment workflow. Public website code
+            and deployment history may be managed through GitHub.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Email provider</h3>
+          <p class="rh-card-text">
+            Form notifications may be delivered to a verified destination
+            mailbox. Email content may be handled by the mailbox provider.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Privacy reality</p>
+
+      <h2 class="rh-section-title">
+        Privacy does not mean invisibility.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub must not exaggerate privacy, anonymity, security, or censorship
+        resistance. Local-first infrastructure can reduce dependence on central
+        services, but it cannot remove every observable trace or human trust
+        problem.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-8);">
+        {privacyReality.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Future privacy philosophy</p>
+
+      <h2 class="rh-section-title">
+        Privacy should be built into the architecture.
+      </h2>
+
+      <p class="rh-section-lead">
+        As RelayHub evolves, privacy should be governed by local-first design,
+        explicit consent, transparent trust, support redaction, and policy-based
+        exposure rather than hidden defaults.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-8);">
+        {futurePrinciples.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
     <div class="rh-container rh-content">
-
-      <h2>1. Introduction</h2>
-
-      <p>
-        RelayHub respects your privacy and is committed to handling personal
-        information responsibly.
-      </p>
+      <h2>Use of information</h2>
 
       <p>
-        This Privacy Policy explains how personal information may be collected,
-        used, disclosed, stored, and protected when you interact with:
+        RelayHub may use information to respond to enquiries, manage early
+        access interest, improve website content, understand product interest,
+        protect against spam or abuse, maintain website security, and comply
+        with legal obligations.
       </p>
 
-      <ul>
-        <li>relayhub.tech;</li>
-        <li>RelayHub services;</li>
-        <li>RelayOS-related services;</li>
-        <li>documentation;</li>
-        <li>support channels;</li>
-        <li>early access programs;</li>
-        <li>community initiatives;</li>
-        <li>future products and applications.</li>
-      </ul>
-
-      <h2>2. Privacy Principles</h2>
+      <h2>Disclosure</h2>
 
       <p>
-        RelayHub aims to follow the principles of:
+        RelayHub does not sell personal information. Information may be disclosed
+        to service providers assisting RelayHub, where required by law, where
+        necessary for security or safety, or with your consent.
       </p>
 
-      <ul>
-        <li>minimum necessary collection;</li>
-        <li>purpose limitation;</li>
-        <li>user transparency;</li>
-        <li>local-first operation;</li>
-        <li>security by design;</li>
-        <li>recovery-first design;</li>
-        <li>user control where practical.</li>
-      </ul>
+      <h2>Retention</h2>
 
       <p>
-        RelayHub's design philosophy seeks to reduce unnecessary dependence on
-        centralised services wherever practical.
+        Form submissions and administrative records are retained only as long as
+        reasonably needed for early access, contact, support, security,
+        operational, legal, or record-keeping purposes.
       </p>
 
-      <h2>3. Information We May Collect</h2>
-
-      <p>
-        Depending on how you interact with RelayHub, we may collect:
-      </p>
-
-      <h3>Identity Information</h3>
-
-      <ul>
-        <li>name;</li>
-        <li>organisation name;</li>
-        <li>community name;</li>
-        <li>contact details.</li>
-      </ul>
-
-      <h3>Contact Information</h3>
-
-      <ul>
-        <li>email address;</li>
-        <li>support contact information;</li>
-        <li>communication preferences.</li>
-      </ul>
-
-      <h3>Technical Information</h3>
-
-      <ul>
-        <li>browser type;</li>
-        <li>device type;</li>
-        <li>operating system;</li>
-        <li>website access logs;</li>
-        <li>basic diagnostic information.</li>
-      </ul>
-
-      <h3>Support Information</h3>
-
-      <ul>
-        <li>support requests;</li>
-        <li>voluntarily submitted diagnostics;</li>
-        <li>voluntarily submitted bug reports;</li>
-        <li>voluntarily submitted feedback.</li>
-      </ul>
-
-      <h2>4. Information We Do Not Intentionally Collect</h2>
-
-      <p>
-        RelayHub does not intentionally seek to collect:
-      </p>
-
-      <ul>
-        <li>private message content;</li>
-        <li>private cryptographic keys;</li>
-        <li>recovery secrets;</li>
-        <li>authentication credentials;</li>
-        <li>personal communications unrelated to support.</li>
-      </ul>
-
-      <p>
-        If such information is accidentally received, reasonable efforts may be
-        made to remove or protect it where practical.
-      </p>
-
-      <h2>5. How Information Is Collected</h2>
-
-      <p>
-        Information may be collected when you:
-      </p>
-
-      <ul>
-        <li>visit the website;</li>
-        <li>submit forms;</li>
-        <li>join an early access list;</li>
-        <li>request support;</li>
-        <li>participate in surveys;</li>
-        <li>contact RelayHub;</li>
-        <li>voluntarily provide feedback.</li>
-      </ul>
-
-      <h2>6. Why We Collect Information</h2>
-
-      <p>
-        Information may be used to:
-      </p>
-
-      <ul>
-        <li>respond to enquiries;</li>
-        <li>provide support;</li>
-        <li>improve products and documentation;</li>
-        <li>operate community programs;</li>
-        <li>manage early access participation;</li>
-        <li>maintain security;</li>
-        <li>comply with legal obligations.</li>
-      </ul>
-
-      <h2>7. Cookies and Analytics</h2>
-
-      <p>
-        RelayHub may use cookies or similar technologies for website operation,
-        performance measurement, security, and usability improvements.
-      </p>
-
-      <p>
-        Analytics technologies, if used, may collect aggregated usage information.
-      </p>
-
-      <p>
-        Analytics providers may maintain their own privacy practices.
-      </p>
-
-      <h2>8. Third-Party Services</h2>
-
-      <p>
-        RelayHub may utilise third-party providers for:
-      </p>
-
-      <ul>
-        <li>website hosting;</li>
-        <li>email delivery;</li>
-        <li>forms;</li>
-        <li>analytics;</li>
-        <li>support systems;</li>
-        <li>payment processing;</li>
-        <li>marketplace integrations.</li>
-      </ul>
-
-      <p>
-        These providers may process information under their own privacy policies.
-      </p>
-
-      <h2>9. Disclosure of Information</h2>
-
-      <p>
-        RelayHub does not sell personal information.
-      </p>
-
-      <p>
-        Information may be disclosed:
-      </p>
-
-      <ul>
-        <li>with your consent;</li>
-        <li>to service providers assisting RelayHub;</li>
-        <li>where required by law;</li>
-        <li>to protect safety or security;</li>
-        <li>during business restructuring or asset transfer.</li>
-      </ul>
-
-      <h2>10. Data Security</h2>
-
-      <p>
-        RelayHub seeks to implement reasonable administrative, technical,
-        and organisational safeguards to protect information.
-      </p>
-
-      <p>
-        No internet-connected system can guarantee absolute security.
-      </p>
-
-      <h2>11. Data Retention</h2>
-
-      <p>
-        Information is retained only for as long as reasonably necessary for:
-      </p>
-
-      <ul>
-        <li>the purposes described in this Policy;</li>
-        <li>support obligations;</li>
-        <li>security requirements;</li>
-        <li>legal obligations;</li>
-        <li>business record keeping.</li>
-      </ul>
-
-      <h2>12. Overseas Processing</h2>
-
-      <p>
-        Some service providers may store or process information outside Australia.
-      </p>
-
-      <p>
-        Where practical, RelayHub will seek providers that implement appropriate
-        privacy and security protections.
-      </p>
-
-      <h2>13. Access and Correction</h2>
+      <h2>Access and correction</h2>
 
       <p>
         You may request access to personal information held about you and request
-        corrections where information is inaccurate, incomplete, or outdated.
+        correction where information is inaccurate, incomplete, or outdated.
       </p>
 
-      <h2>14. Complaints</h2>
+      <h2>Overseas processing</h2>
 
       <p>
-        Privacy concerns or complaints may be submitted to:
+        Some service providers may store or process information outside
+        Australia. RelayHub seeks to use reputable providers with appropriate
+        privacy and security practices.
       </p>
 
-      <p>
-        hello@relayhub.tech
-      </p>
-
-      <p>
-        If concerns cannot be resolved, you may have rights to contact the
-        Office of the Australian Information Commissioner (OAIC).
-      </p>
-
-      <h2>15. Children's Privacy</h2>
+      <h2>Children</h2>
 
       <p>
         RelayHub is not intentionally directed toward children under the age
         required to provide valid consent in their jurisdiction.
       </p>
 
-      <h2>16. Changes to this Policy</h2>
+      <h2>Changes</h2>
 
       <p>
-        This Privacy Policy may be updated from time to time.
+        This Privacy Policy may be updated from time to time. Updated versions
+        will be published on this website.
       </p>
+
+      <h2>Contact</h2>
 
       <p>
-        Updated versions will be published on this website.
+        Privacy enquiries may be directed to
+        <a href="mailto:hello@relayhub.tech">hello@relayhub.tech</a>
+        or submitted through the <a href="/contact">contact form</a>.
       </p>
-
-      <h2>17. Contact</h2>
-
-      <p>
-        Privacy enquiries may be directed to:
-      </p>
-
-      <p>
-        hello@relayhub.tech
-      </p>
-
     </div>
   </section>
 </BaseLayout>

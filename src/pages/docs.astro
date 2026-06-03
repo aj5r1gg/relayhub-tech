@@ -1,10 +1,211 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const startHere = [
+  {
+    title: "What is RelayHub?",
+    text: "A local-first ecosystem for communication, coordination, recovery, knowledge sharing, trade, governance, and resilient communities.",
+    href: "/",
+    label: "Home",
+  },
+  {
+    title: "What is RelayOS?",
+    text: "The appliance platform that turns NixOS, Reticulum, policy, recovery, and local management into a usable node experience.",
+    href: "/relayos",
+    label: "RelayOS",
+  },
+  {
+    title: "What is a node?",
+    text: "A device participating in the RelayHub ecosystem according to its hardware class, role, policy, and validation status.",
+    href: "/hardware",
+    label: "Hardware",
+  },
+];
+
+const userGuides = [
+  {
+    title: "Quick start",
+    text: "Plug in the node, wait for setup status, scan the QR code, claim ownership, save recovery, and reach the dashboard.",
+  },
+  {
+    title: "First setup",
+    text: "Browser-first setup, owner claim, privacy reality screen, recovery prompt, node naming, readiness check, and first dashboard.",
+  },
+  {
+    title: "Pairing and invites",
+    text: "How owners, household admins, trusted users, guests, and recovery contacts pair safely using role-aware QR flows.",
+  },
+  {
+    title: "Status meanings",
+    text: "Understand Ready, Local-Only, No Peers, Degraded, Low Power, Updating, Rolled Back, Recovering, Factory Reset, and Error.",
+  },
+  {
+    title: "Local-only operation",
+    text: "Local-only does not mean broken. It means local functions may still work even when wider paths are unavailable.",
+  },
+  {
+    title: "Recovery guide",
+    text: "Restart, rollback, repair settings, restore access, support export, reset, transfer, and last-resort reflash guidance.",
+  },
+];
+
+const coreDocs = [
+  {
+    title: "Products",
+    text: "Relay Home, Relay Radio, Relay Infrastructure, product status, support boundaries, and future application families.",
+    href: "/products",
+    label: "Products",
+  },
+  {
+    title: "Hardware",
+    text: "Hardware classes, compatibility status, capability limits, recovery expectations, radio reality, and product-supported claims.",
+    href: "/hardware",
+    label: "Hardware",
+  },
+  {
+    title: "RelayOS",
+    text: "Platform overview, local web UI, policy gates, identity, trust, recovery, updates, observability, and Reticulum integration.",
+    href: "/relayos",
+    label: "RelayOS",
+  },
+  {
+    title: "Trust",
+    text: "Discovery, identity, reachability, permission, reputation, federation, revocation, and safe trust-state transitions.",
+    href: "/trust",
+    label: "Trust model",
+  },
+  {
+    title: "Security",
+    text: "Responsible disclosure, realistic threat boundaries, service exposure, least privilege, support redaction, and security posture.",
+    href: "/security",
+    label: "Security",
+  },
+  {
+    title: "Recovery",
+    text: "Rollback, safe reset, identity preservation, degraded boot, support exports, and practical recovery boundaries.",
+    href: "/recovery",
+    label: "Recovery",
+  },
+  {
+    title: "Validation",
+    text: "Release gates, hardware class testing, recovery drills, degraded operation, supported status, and experimental boundaries.",
+    href: "/validation",
+    label: "Validation",
+  },
+  {
+    title: "Governance",
+    text: "Principles, policies, trust model, community autonomy, recovery expectations, validation discipline, and responsibilities.",
+    href: "/governance",
+    label: "Governance",
+  },
+  {
+    title: "Support",
+    text: "Local help, support levels, redacted diagnostics, recovery paths, hardware-aware support, and explicit export.",
+    href: "/support",
+    label: "Support",
+  },
+];
+
+const communityDocs = [
+  {
+    title: "Communities",
+    text: "Households, groups, community operation, knowledge, trade, governance, cultural continuity, and voluntary federation.",
+    href: "/communities",
+    label: "Communities",
+  },
+  {
+    title: "Community directory",
+    text: "Future directory concept for discovery, visibility, community identity, trust status, and federation boundaries.",
+    href: "/communities-directory",
+    label: "Directory",
+  },
+  {
+    title: "Marketplace",
+    text: "Local goods, services, requests, skills exchange, community noticeboards, and settlement-neutral coordination.",
+    href: "/marketplace",
+    label: "Marketplace",
+  },
+];
+
+const statuses = [
+  {
+    label: "Ready",
+    className: "rh-status-ready",
+    title: "Your node is ready.",
+    text: "The node is running and the core services for its current role are available.",
+  },
+  {
+    label: "Local-only",
+    className: "rh-status-local",
+    title: "Local communication may still work.",
+    text: "Wider connectivity is unavailable, but local operation is not automatically broken.",
+  },
+  {
+    label: "No peers",
+    className: "rh-status-local",
+    title: "No reachable peers found.",
+    text: "The node may be working correctly even if no other nodes are currently visible.",
+  },
+  {
+    label: "Degraded",
+    className: "rh-status-degraded",
+    title: "Reduced capability.",
+    text: "Some features are limited, paused, blocked, or waiting for recovery.",
+  },
+  {
+    label: "Updating",
+    className: "rh-status-updating",
+    title: "Update in progress.",
+    text: "The node should preserve identity and recovery access while applying or rolling back updates.",
+  },
+  {
+    label: "Recovery",
+    className: "rh-status-error",
+    title: "This node needs attention.",
+    text: "Recovery should guide the user toward safe repair, rollback, reset, transfer, or support export.",
+  },
+];
+
+const offlineDocs = [
+  "Quick Start Card",
+  "Status Meaning Card",
+  "Recovery Card",
+  "Privacy Reality Card",
+  "Support Export Guide",
+  "Factory Reset / Transfer Warning Card",
+  "Radio Warning Card where applicable",
+];
+
+const standards = [
+  "Use plain language before technical language.",
+  "Distinguish implemented, planned, experimental, unsupported, and product-supported behaviour.",
+  "Explain degraded operation as normal, not catastrophic.",
+  "Include recovery paths wherever failure is possible.",
+  "Avoid exaggerated claims about anonymity, delivery, emergency coverage, or radio legality.",
+  "Version guides against product, hardware class, RelayOS version, and release status.",
+  "Keep documentation readable, mobile-friendly, printable, and useful under stress.",
+  "Treat documentation as part of validation, not as marketing decoration.",
+];
+
+const operatorDocs = [
+  {
+    title: "Architecture notes",
+    text: "RelayOS layers, Local API design, policy engine, Reticulum integration, observability, service boundaries, and ADRs.",
+  },
+  {
+    title: "Hardware manifests",
+    text: "Capability manifests, hardware classes, supported roles, known limits, thermal/power profiles, and compatibility status.",
+  },
+  {
+    title: "Validation artefacts",
+    text: "Boot evidence, setup proof, recovery drills, rollback tests, field trial results, support export tests, and release gates.",
+  },
+];
 ---
 
 <BaseLayout
   title="Documentation | RelayHub"
-  description="RelayHub documentation for onboarding, products, hardware, RelayOS, governance, recovery, validation, privacy, and community operation."
+  description="RelayHub documentation hub for onboarding, products, hardware, RelayOS, trust, security, recovery, validation, privacy, governance, and community operation."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
@@ -16,8 +217,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
       <p class="rh-subtitle">
         RelayHub documentation is designed to help ordinary people set up,
-        understand, operate, recover, and safely evaluate local-first communication
-        infrastructure without needing to become Linux, networking, or radio experts.
+        understand, operate, recover, and safely evaluate local-first
+        communication infrastructure without needing to become Linux, networking,
+        Reticulum, or radio experts.
       </p>
 
       <div class="rh-actions">
@@ -40,35 +242,23 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub documentation should begin with clear, practical guidance:
-        what the system is, what it is not, what the user can do now, and what
-        to do when something changes state.
+        RelayHub documentation begins with what the system is, what it is not,
+        what the user can do now, what remains planned, and what to do when the
+        node changes state.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">What is RelayHub?</h3>
-          <p class="rh-card-text">
-            A local-first ecosystem for communication, coordination, recovery,
-            knowledge sharing, trade, governance, and resilient communities.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">What is RelayOS?</h3>
-          <p class="rh-card-text">
-            The appliance platform that turns NixOS, Reticulum, policy, recovery,
-            and local management into a usable node experience.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">What is a node?</h3>
-          <p class="rh-card-text">
-            A device running RelayOS and participating in the RelayHub ecosystem
-            according to its hardware class, role, policy, and validation status.
-          </p>
-        </article>
+        {startHere.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                {item.label}
+              </a>
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </section>
@@ -82,159 +272,81 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        These guides should avoid unnecessary jargon and focus on what the user
-        sees, what it means, and what action is safe.
+        These guides should focus on what the user sees, what it means, what
+        still works, and what action is safe.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Quick start</h3>
-          <p class="rh-card-text">
-            Plug in the node, wait for setup status, scan the QR code, claim
-            ownership, save recovery, and reach the dashboard.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">First setup</h3>
-          <p class="rh-card-text">
-            Browser-first setup, owner claim, privacy reality screen, recovery
-            prompt, node naming, readiness check, and first dashboard.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Pairing and invites</h3>
-          <p class="rh-card-text">
-            How owners, household admins, trusted users, guests, and recovery
-            contacts pair safely using role-aware QR flows.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Status meanings</h3>
-          <p class="rh-card-text">
-            Understand Ready, Local-Only, No Peers, Degraded, Low Power,
-            Updating, Rolled Back, Recovering, Factory Reset, and Error.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Local-only operation</h3>
-          <p class="rh-card-text">
-            Local-only does not mean broken. It means local functions may still
-            work even when wider paths are unavailable.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Recovery guide</h3>
-          <p class="rh-card-text">
-            Restart, rollback, repair settings, restore access, support export,
-            reset, transfer, and last-resort reflash guidance.
-          </p>
-        </article>
+        {userGuides.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Core documentation areas</p>
+      <p class="rh-kicker">Documentation hub</p>
 
       <h2 class="rh-section-title">
-        Documentation should follow the product architecture.
+        Core documentation areas.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub documentation needs to explain the platform, node families,
-        hardware classes, privacy limits, recovery model, support model, and
-        future community applications.
+        RelayHub documentation follows the product architecture: products,
+        hardware classes, RelayOS, trust, security, recovery, validation,
+        governance, and support.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">RelayOS</h3>
-          <p class="rh-card-text">
-            Platform overview, local web UI, policy gates, identity, trust,
-            recovery, updates, observability, and Reticulum integration.
-          </p>
-          <div class="rh-actions">
-            <a class="rh-button rh-button-secondary" href="/relayos">
-              RelayOS
-            </a>
-          </div>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Products</h3>
-          <p class="rh-card-text">
-            Relay Home, Relay Radio, Relay Infrastructure, product status,
-            support boundaries, and future application families.
-          </p>
-          <div class="rh-actions">
-            <a class="rh-button rh-button-secondary" href="/products">
-              Products
-            </a>
-          </div>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Hardware</h3>
-          <p class="rh-card-text">
-            Hardware classes, compatibility status, capability limits, recovery
-            expectations, radio reality, and product-supported claims.
-          </p>
-          <div class="rh-actions">
-            <a class="rh-button rh-button-secondary" href="/hardware">
-              Hardware
-            </a>
-          </div>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Communities</h3>
-          <p class="rh-card-text">
-            Households, groups, community operation, knowledge, trade,
-            governance, continuity, and voluntary federation.
-          </p>
-          <div class="rh-actions">
-            <a class="rh-button rh-button-secondary" href="/communities">
-              Communities
-            </a>
-          </div>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Developers</h3>
-          <p class="rh-card-text">
-            Development stack, contribution expectations, validation discipline,
-            hardware profiles, local services, and future apps.
-          </p>
-          <div class="rh-actions">
-            <a class="rh-button rh-button-secondary" href="/developers">
-              Developers
-            </a>
-          </div>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Support</h3>
-          <p class="rh-card-text">
-            Local help, support levels, redacted diagnostics, recovery paths,
-            hardware-aware support, and explicit export.
-          </p>
-          <div class="rh-actions">
-            <a class="rh-button rh-button-secondary" href="/support">
-              Support
-            </a>
-          </div>
-        </article>
+        {coreDocs.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                {item.label}
+              </a>
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
   <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Community documentation</p>
+
+      <h2 class="rh-section-title">
+        RelayHub is more than messaging.
+      </h2>
+
+      <p class="rh-section-lead">
+        Community documentation should explain coordination, knowledge sharing,
+        trade, governance, culture, federation, discovery, and trust boundaries.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {communityDocs.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+            <div class="rh-actions">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                {item.label}
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
     <div class="rh-container">
       <p class="rh-kicker">Status and recovery</p>
 
@@ -248,115 +360,50 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         to do next.
       </p>
 
-      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <span class="rh-status rh-status-ready">Ready</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            Your node is ready.
-          </h3>
-          <p class="rh-card-text">
-            The node is running and the core services for its current role are
-            available.
-          </p>
-        </article>
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {statuses.map((item) => (
+          <article class="rh-card">
+            <span class={`rh-status ${item.className}`}>{item.label}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
 
-        <article class="rh-card">
-          <span class="rh-status rh-status-local">Local-only</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            Local communication may still work.
-          </h3>
-          <p class="rh-card-text">
-            Wider connectivity is unavailable, but local operation is not
-            automatically broken.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <span class="rh-status rh-status-degraded">Degraded</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            Reduced capability.
-          </h3>
-          <p class="rh-card-text">
-            Some features are limited, paused, blocked, or waiting for recovery.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <span class="rh-status rh-status-error">Recovery</span>
-          <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-            This node needs attention.
-          </h3>
-          <p class="rh-card-text">
-            Recovery should guide the user toward safe repair, rollback, reset,
-            transfer, or support export.
-          </p>
-        </article>
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/recovery">
+          Recovery model
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation model
+        </a>
       </div>
     </div>
   </section>
 
-  <section class="rh-section">
-    <div class="rh-container">
-      <p class="rh-kicker">Offline documentation</p>
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Offline documentation</p>
 
-      <h2 class="rh-section-title">
-        Critical help should not disappear when the internet fails.
-      </h2>
+        <h2 class="rh-section-title">
+          Critical help should not disappear when the internet fails.
+        </h2>
 
-      <p class="rh-section-lead">
-        RelayHub documentation should include online pages, local node help, and
-        printable/offline material for setup, status, recovery, privacy, and support.
-      </p>
-
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Quick Start Card</h3>
-          <p class="rh-card-text">
-            The minimum steps to power on, scan setup, claim ownership, save
-            recovery, and reach the dashboard.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Status Meaning Card</h3>
-          <p class="rh-card-text">
-            Plain-language explanation of lights, status labels, degraded states,
-            local-only operation, recovery, and error messages.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Recovery Card</h3>
-          <p class="rh-card-text">
-            Where recovery is found, what recovery can do, what it cannot do, and
-            when reset, transfer, or reflash may be required.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Privacy Reality Card</h3>
-          <p class="rh-card-text">
-            RelayHub can reduce dependence on central services, but it does not
-            make users invisible or remove every metadata risk.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Support Export Guide</h3>
-          <p class="rh-card-text">
-            What support export includes, what it excludes, how redaction works,
-            and why export should be explicit.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Radio Warning Card</h3>
-          <p class="rh-card-text">
-            Region, frequency, power, duty-cycle, encryption, receive-only, and
-            legal responsibility guidance for radio-capable variants.
-          </p>
-        </article>
+        <p class="rh-section-lead">
+          RelayHub documentation should include online pages, local node help,
+          and printable/offline material for setup, status, recovery, privacy,
+          radio reality, transfer, reset, and support.
+        </p>
       </div>
+
+      <article class="rh-card">
+        <ul class="rh-docs-list">
+          {offlineDocs.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
     </div>
   </section>
 
@@ -369,64 +416,25 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub documentation should make clear distinctions between what exists,
-        what is planned, what is experimental, what is unsupported, and what is
-        product-supported.
+        RelayHub documentation should make clear distinctions between what
+        exists, what is planned, what is experimental, what is unsupported, and
+        what is product-supported.
       </p>
 
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Plain language first</h3>
-          <p class="rh-card-text">
-            User-facing material should avoid unnecessary Linux, networking,
-            Reticulum, radio, and cryptography jargon.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">No exaggerated claims</h3>
-          <p class="rh-card-text">
-            Documentation must not claim perfect anonymity, guaranteed delivery,
-            universal emergency coverage, or automatic lawful radio operation.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Recovery included</h3>
-          <p class="rh-card-text">
-            Every important product guide should explain failure modes, rollback,
-            recovery, reset, transfer, and support boundaries where relevant.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Versioned guidance</h3>
-          <p class="rh-card-text">
-            Guides should clearly state which product, hardware class, RelayOS
-            version, or release status they apply to.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Evidence-aware</h3>
-          <p class="rh-card-text">
-            Product-supported claims should be tied to validation, compatibility,
-            recovery, and release gates.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Accessible by design</h3>
-          <p class="rh-card-text">
-            Documentation should be readable, mobile-friendly, searchable, printable,
-            and useful under stress.
-          </p>
-        </article>
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {standards.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
       </div>
 
       <div class="rh-actions">
         <a class="rh-button rh-button-accent" href="/accessibility">
           Accessibility
+        </a>
+        <a class="rh-button rh-button-secondary" href="/security">
+          Security
         </a>
       </div>
     </div>
@@ -447,29 +455,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Architecture notes</h3>
-          <p class="rh-card-text">
-            RelayOS layers, Local API design, policy engine, Reticulum integration,
-            observability, and service boundaries.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Hardware manifests</h3>
-          <p class="rh-card-text">
-            Capability manifests, hardware classes, supported roles, known limits,
-            thermal/power profiles, and compatibility status.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Validation artefacts</h3>
-          <p class="rh-card-text">
-            Boot evidence, setup proof, recovery drills, rollback tests, field
-            trial results, support export tests, and release gates.
-          </p>
-        </article>
+        {operatorDocs.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
 
       <div class="rh-actions">
@@ -478,6 +469,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </a>
         <a class="rh-button rh-button-secondary" href="/hardware">
           Hardware page
+        </a>
+        <a class="rh-button rh-button-secondary" href="/roadmap">
+          Roadmap
         </a>
       </div>
     </div>
@@ -493,9 +487,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </h2>
 
         <p class="rh-section-lead">
-          RelayHub is still in design and validation planning. Documentation should
-          clearly mark draft, planned, experimental, and product-supported material
-          as the project matures.
+          RelayHub is still in design and validation planning. Documentation
+          should clearly mark draft, planned, experimental, limited, unsupported,
+          and product-supported material as the project matures.
         </p>
       </div>
 
@@ -503,8 +497,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <h3 class="rh-card-title">Follow documentation releases</h3>
         <p class="rh-card-text">
           Register interest for updates about quick starts, recovery guides,
-          hardware compatibility notes, RelayOS documentation, developer resources,
-          and future community guides.
+          hardware compatibility notes, RelayOS documentation, developer
+          resources, and future community guides.
         </p>
 
         <div class="rh-actions">

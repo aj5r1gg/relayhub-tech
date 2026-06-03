@@ -1,0 +1,411 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const guideCategories = [
+  {
+    title: "Starting a community",
+    text: "How to define a local purpose, identify initial participants, choose a practical first use case, and avoid overcomplicating the first deployment.",
+  },
+  {
+    title: "Household deployment",
+    text: "How households may use RelayHub-style infrastructure for local communication, knowledge access, recovery, and participation in wider communities.",
+  },
+  {
+    title: "Community pilots",
+    text: "How early groups can test onboarding, status comprehension, trust, recovery, documentation, and local-first operation before broad rollout.",
+  },
+  {
+    title: "Knowledge sharing",
+    text: "How communities can preserve guides, procedures, local knowledge, maps, histories, lessons learned, and training material.",
+  },
+  {
+    title: "Marketplace coordination",
+    text: "How communities may coordinate offers, requests, services, skills exchange, mutual aid, and local economic activity without implying settlement custody.",
+  },
+  {
+    title: "Federation readiness",
+    text: "How communities can prepare for voluntary federation with neighbouring groups while preserving local autonomy and clear trust boundaries.",
+  },
+];
+
+const deploymentSteps = [
+  "Define the community purpose.",
+  "Identify the first practical use case.",
+  "Choose the initial participants.",
+  "Start with local-first communication.",
+  "Keep governance simple at the beginning.",
+  "Document roles and expectations.",
+  "Test onboarding with non-technical users.",
+  "Test degraded and local-only operation.",
+  "Test recovery before expansion.",
+  "Record lessons learned before scaling.",
+];
+
+const pilotChecklist = [
+  "Can a new user understand what RelayHub is?",
+  "Can a non-technical user find the right first step?",
+  "Can users explain Ready, Local-Only, No Peers, Degraded, and Recovery?",
+  "Can recovery instructions be found without internet access?",
+  "Can participants distinguish trust from discovery?",
+  "Can the group operate without assuming every feature is supported?",
+  "Can support questions be answered without exposing secrets?",
+  "Can the pilot stop safely if it is not ready to expand?",
+];
+
+const trustGuides = [
+  {
+    title: "Discovery",
+    text: "Finding a person, node, group, listing, or service does not automatically mean it is trusted.",
+  },
+  {
+    title: "Invitation",
+    text: "Communities should use clear invitation flows, role expectations, and revocation paths.",
+  },
+  {
+    title: "Membership",
+    text: "Membership should be voluntary, understandable, and governed by local community policy.",
+  },
+  {
+    title: "Reputation",
+    text: "Reputation should emerge from behaviour, reliability, accountability, and community experience.",
+  },
+  {
+    title: "Federation",
+    text: "Federation should be voluntary, limited, reversible, and based on explicit relationships.",
+  },
+  {
+    title: "Recovery",
+    text: "Recovery should preserve continuity without enabling unauthorised takeover or silent authority transfer.",
+  },
+];
+
+const communityRoles = [
+  "Community organiser",
+  "Household owner",
+  "Infrastructure operator",
+  "Documentation steward",
+  "Knowledge steward",
+  "Marketplace steward",
+  "Onboarding helper",
+  "Recovery contact",
+  "Technical reviewer",
+  "Pilot participant",
+];
+
+const warningRules = [
+  "Do not claim a community deployment is product-supported until validated.",
+  "Do not treat internet failure as total failure if local operation still works.",
+  "Do not expose private keys, recovery secrets, or message contents in support requests.",
+  "Do not assume radio transmit is lawful merely because hardware exists.",
+  "Do not treat federation as automatic trust.",
+  "Do not scale before onboarding, recovery, and documentation are understood.",
+];
+
+const futureGuides = [
+  "Quick Start for Communities",
+  "Household Node Setup Guide",
+  "Community Pilot Workbook",
+  "Local-Only Operation Guide",
+  "Trust and Membership Guide",
+  "Recovery Drill Guide",
+  "Marketplace Steward Guide",
+  "Federation Readiness Guide",
+  "Hardware Selection Guide",
+  "Operator Checklist",
+  "Accessibility and Stress-State Guide",
+  "Support Export Guide",
+];
+---
+
+<BaseLayout
+  title="Community Guides | RelayHub"
+  description="RelayHub community guides for starting communities, household deployment, pilots, trust, recovery, local-first operation, knowledge sharing, marketplaces, and federation readiness."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Community Guides</p>
+
+      <h1 class="rh-title">
+        Communities need practical guides, not just technology.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub exists to help people build, sustain, and interconnect resilient
+        communities. These guides outline how communities can prepare for
+        local-first communication, trust, knowledge sharing, trade coordination,
+        governance, recovery, and voluntary federation.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/communities">
+          Communities
+        </a>
+        <a class="rh-button rh-button-secondary" href="/docs">
+          Documentation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Guide areas</p>
+
+      <h2 class="rh-section-title">
+        Start with what communities actually need to do.
+      </h2>
+
+      <p class="rh-section-lead">
+        The first community guides should help ordinary groups begin safely:
+        define purpose, onboard people, test local-first operation, preserve
+        knowledge, recover from failures, and avoid premature complexity.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {guideCategories.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">First deployment path</p>
+
+        <h2 class="rh-section-title">
+          Build the smallest useful community loop first.
+        </h2>
+
+        <p class="rh-section-lead">
+          A community should not begin by trying to deploy every possible
+          feature. Start with a small, understandable, recoverable pilot and grow
+          only after people can operate it safely.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ol class="rh-community-guide-list">
+          {deploymentSteps.map((item) => <li>{item}</li>)}
+        </ol>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Pilot checklist</p>
+
+      <h2 class="rh-section-title">
+        A pilot should test comprehension, not just connectivity.
+      </h2>
+
+      <p class="rh-section-lead">
+        A community pilot is not successful merely because devices boot. It
+        should prove that people understand setup, status, trust, recovery,
+        support, and boundaries.
+      </p>
+
+      <div class="rh-card" style="margin-top: var(--space-8);">
+        <ul class="rh-community-guide-list">
+          {pilotChecklist.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+        <a class="rh-button rh-button-secondary" href="/recovery">
+          Recovery
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Trust guides</p>
+
+      <h2 class="rh-section-title">
+        Community trust is social before it is technical.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub can support trust workflows, but communities still need human
+        judgement, clear roles, accountability, and local governance.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {trustGuides.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/trust">
+          Trust model
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Community roles</p>
+
+      <h2 class="rh-section-title">
+        Communities need roles before they need complexity.
+      </h2>
+
+      <p class="rh-section-lead">
+        Early communities should define simple responsibilities so people know
+        who helps with onboarding, documentation, recovery, hardware, support,
+        marketplace rules, and community coordination.
+      </p>
+
+      <div class="rh-community-role-tags" style="margin-top: var(--space-10);">
+        {communityRoles.map((item) => (
+          <span class="rh-status rh-status-local">{item}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Marketplace and knowledge</p>
+
+        <h2 class="rh-section-title">
+          Community infrastructure is broader than chat.
+        </h2>
+
+        <p class="rh-section-lead">
+          Communities need places to share knowledge, coordinate goods and
+          services, announce needs, preserve local memory, publish guides, and
+          organise practical action.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Knowledge guides</h3>
+          <p class="rh-card-text">
+            Procedures, maps, local instructions, lessons learned, training
+            material, local history, and cultural continuity.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Marketplace guides</h3>
+          <p class="rh-card-text">
+            Offers, requests, skills, local services, community rules,
+            moderation, dispute expectations, and settlement-neutral coordination.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Governance guides</h3>
+          <p class="rh-card-text">
+            Notices, proposals, roles, working groups, decisions, moderation,
+            accountability, and voluntary federation boundaries.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Avoid these mistakes</p>
+
+        <h2 class="rh-section-title">
+          Good community deployment avoids false confidence.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub should help communities build capacity without assuming that
+          technology alone creates trust, governance, resilience, legality, or
+          support readiness.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <ul class="rh-community-guide-list">
+          {warningRules.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Future guide library</p>
+
+      <h2 class="rh-section-title">
+        The guide library is planned, not complete.
+      </h2>
+
+      <p class="rh-section-lead">
+        These are the practical guides RelayHub should eventually publish as the
+        system moves from architecture and website development into pilots and
+        supported releases.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {futureGuides.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-degraded">Planned</span>
+            <p class="rh-card-text" style="margin-top: var(--space-5);">
+              {item}
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Start a pilot</p>
+
+        <h2 class="rh-section-title">
+          Tell us what your community wants to test.
+        </h2>
+
+        <p class="rh-section-lead">
+          If your community is interested in local-first communication,
+          knowledge sharing, marketplace coordination, recovery planning, or
+          community infrastructure, start with a practical pilot conversation.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Useful details</h3>
+        <p class="rh-card-text">
+          Include your community type, region, rough size, first use case,
+          technical comfort level, available hardware, and what you want to test.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Discuss a community pilot
+          </a>
+          <a class="rh-button rh-button-secondary" href="/early-access">
+            Register interest
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

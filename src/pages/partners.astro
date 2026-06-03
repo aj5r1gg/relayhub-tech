@@ -1,0 +1,342 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const partnerTypes = [
+  {
+    title: "Community partners",
+    text: "Community groups, clubs, associations, local resilience groups, regional organisers, and pilot communities.",
+  },
+  {
+    title: "Hardware partners",
+    text: "Node builders, kit suppliers, enclosure makers, electronics suppliers, installers, and hardware validation contributors.",
+  },
+  {
+    title: "Technical partners",
+    text: "NixOS specialists, Reticulum specialists, integrators, application developers, security reviewers, and validation tool builders.",
+  },
+  {
+    title: "Education partners",
+    text: "Workshop operators, documentation contributors, trainers, community onboarding leaders, and local support educators.",
+  },
+  {
+    title: "Deployment partners",
+    text: "People or organisations helping households, communities, and regions deploy local-first infrastructure safely.",
+  },
+  {
+    title: "Validation partners",
+    text: "Field testers, hardware reviewers, accessibility testers, recovery testers, and documentation reviewers.",
+  },
+];
+
+const principles = [
+  "Local-first operation before remote dependency.",
+  "Open standards and interoperability where practical.",
+  "Honest claims over marketing exaggeration.",
+  "Recovery-first design before convenience.",
+  "Validation before product support.",
+  "Respect for community autonomy.",
+  "Clear separation between compatibility, certification, and official status.",
+  "Plain-language support for non-technical users.",
+];
+
+const notPartnership = [
+  {
+    title: "Partnership ≠ Endorsement",
+    text: "Being in conversation with RelayHub does not automatically mean RelayHub endorses a product, service, organisation, or claim.",
+  },
+  {
+    title: "Partnership ≠ Certification",
+    text: "Certification requires defined scope, validation evidence, documentation, support boundaries, and governance approval.",
+  },
+  {
+    title: "Partnership ≠ Employment",
+    text: "Partners are independent unless a separate formal agreement says otherwise.",
+  },
+  {
+    title: "Partnership ≠ Governance authority",
+    text: "Partners do not gain authority over RelayHub governance, terminology, certification, communities, or product direction by default.",
+  },
+];
+
+const directoryItems = [
+  "Partner name",
+  "Partner type",
+  "Region",
+  "Certification status",
+  "Compatibility status",
+  "Services offered",
+  "Hardware classes supported",
+  "Community focus",
+  "Support boundary",
+  "Current lifecycle status",
+];
+
+const tellUs = [
+  "Who you are",
+  "Where you operate",
+  "What you build or provide",
+  "Which communities you serve",
+  "Which hardware, software, or services you understand",
+  "Whether you are interested in pilots, validation, education, hardware, or deployment",
+  "What evidence, experience, or documentation you already have",
+  "What claims you want to make publicly",
+];
+---
+
+<BaseLayout
+  title="Partners | RelayHub"
+  description="RelayHub partner information for community partners, hardware partners, technical partners, education partners, deployment partners, validation partners, and future partner directory."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Partners</p>
+
+      <h1 class="rh-title">
+        RelayHub will need builders, operators, educators, and communities.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is an ecosystem direction, not just a product page. Partners may
+        eventually help with hardware, education, community pilots, validation,
+        deployment, documentation, support, and integrations — without confusing
+        partnership with certification or official endorsement.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/contact">
+          Discuss partnership
+        </a>
+        <a class="rh-button rh-button-secondary" href="/certification">
+          Certification
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Partner types</p>
+
+      <h2 class="rh-section-title">
+        Different partners strengthen different parts of the ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub may eventually involve communities, hardware builders,
+        educators, developers, installers, validation partners, and support
+        providers. Each role needs clear boundaries and honest status language.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {partnerTypes.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Partnership principles</p>
+
+      <h2 class="rh-section-title">
+        Partnership should strengthen the RelayHub mission.
+      </h2>
+
+      <p class="rh-section-lead">
+        Partners should support local-first, recovery-aware, validation-gated,
+        community-centred infrastructure rather than creating dependency,
+        confusion, or exaggerated claims.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {principles.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Important boundaries</p>
+
+      <h2 class="rh-section-title">
+        Partnership is not automatic authority.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should remain open to cooperation while preventing confusion
+        about endorsement, certification, employment, governance, and official
+        status.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {notPartnership.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Partner directory</p>
+
+        <h2 class="rh-section-title">
+          A future partner directory is planned, not implemented.
+        </h2>
+
+        <p class="rh-section-lead">
+          A future partner directory could help people find builders, educators,
+          installers, technical specialists, community operators, and validation
+          partners by region, service type, and status.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <span class="rh-status rh-status-degraded">Planned</span>
+
+        <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+          partners.relayhub.tech
+        </h3>
+
+        <p class="rh-card-text">
+          This registry concept is not yet implemented. It should appear only
+          after partnership rules, certification relationships, and status labels
+          are clearly defined.
+        </p>
+      </article>
+    </div>
+
+    <div class="rh-container" style="margin-top: var(--space-10);">
+      <div class="rh-grid rh-grid-5">
+        {directoryItems.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Who builds the ecosystem?</p>
+
+      <h2 class="rh-section-title">
+        RelayHub should grow through responsible participation.
+      </h2>
+
+      <p class="rh-section-lead">
+        The ecosystem may eventually include community organisers, regional
+        pilots, home builders, professional installers, educators, developers,
+        technical reviewers, and hardware suppliers.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Builders</h3>
+          <p class="rh-card-text">
+            People who build nodes, kits, enclosures, software, services,
+            documentation, and validation tools.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Operators</h3>
+          <p class="rh-card-text">
+            People who operate household, community, infrastructure, and field
+            deployments responsibly.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Educators</h3>
+          <p class="rh-card-text">
+            People who teach setup, recovery, community coordination, safety,
+            privacy reality, and practical operation.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Becoming a partner</p>
+
+        <h2 class="rh-section-title">
+          Tell us what you can responsibly help with.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub partnership should begin with clarity: who you are, where you
+          operate, what you build, what communities you serve, and what claims
+          you want to make.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <ul class="rh-partner-list">
+          {tellUs.map((item) => <li>{item}</li>)}
+        </ul>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Contact RelayHub
+          </a>
+          <a class="rh-button rh-button-secondary" href="/developers">
+            Developers
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Status</p>
+
+        <h2 class="rh-section-title">
+          No formal partner programme is open yet.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub is still in public website, architecture, documentation, and
+          validation planning. Partnership conversations are welcome, but formal
+          partner status, certification, and directory listing are future
+          governance steps.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Current status</h3>
+        <p class="rh-card-text">
+          Partnership enquiries are open. Formal partner registry, certification,
+          and public listings are planned but not yet implemented.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/status">
+            View status
+          </a>
+          <a class="rh-button rh-button-secondary" href="/compatibility">
+            Compatibility
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

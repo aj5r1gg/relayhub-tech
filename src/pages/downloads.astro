@@ -1,0 +1,357 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const documentDownloads = [
+  {
+    title: "System Architecture Specification",
+    status: "Document available",
+    text: "Canonical architecture source for hardware classes, policy, recovery, validation, operational modes, and ecosystem design.",
+  },
+  {
+    title: "Product Requirements Document",
+    status: "Document available",
+    text: "Product-facing requirements for appliance behaviour, onboarding, recovery, support, validation, and user experience.",
+  },
+  {
+    title: "Purpose, Mission, Values & Principles",
+    status: "Document available",
+    text: "Foundational purpose and principles guiding the RelayHub ecosystem.",
+  },
+  {
+    title: "Governance & Policy Framework",
+    status: "Document available",
+    text: "Policy hierarchy, policy domains, enforcement expectations, validation, and governance lifecycle.",
+  },
+  {
+    title: "Branding & Identity Specification",
+    status: "Document available",
+    text: "Canonical RelayHub, RelayOS, product, application, community, federation, compatibility, and certification language.",
+  },
+  {
+    title: "Validation Plan",
+    status: "Planned",
+    text: "Future public validation plan covering evidence, release gates, hardware classes, recovery drills, and support readiness.",
+  },
+];
+
+const mediaAssets = [
+  "Logo package",
+  "Brand colour palette",
+  "OpenGraph images",
+  "Product screenshots",
+  "Hardware photographs",
+  "Media kit",
+];
+
+const communityResources = [
+  "Community Quick Start",
+  "Community Pilot Checklist",
+  "Deployment Worksheet",
+  "Recovery Drill Worksheet",
+  "Trust and Membership Worksheet",
+  "Marketplace Steward Guide",
+  "Presentation Slides",
+  "Workshop Handouts",
+];
+
+const softwareDownloads = [
+  {
+    title: "RelayOS Images",
+    status: "Planned",
+    text: "Future appliance images for validated hardware classes.",
+  },
+  {
+    title: "Home Node Images",
+    status: "Planned",
+    text: "Future Home Node builds after recovery, onboarding, and validation gates are satisfied.",
+  },
+  {
+    title: "Infrastructure Node Images",
+    status: "Planned",
+    text: "Future infrastructure builds for validated bridge, gateway, DTN, and operator workflows.",
+  },
+  {
+    title: "Recovery Images",
+    status: "Planned",
+    text: "Future recovery-focused images or bundles for safe restore and repair.",
+  },
+  {
+    title: "Offline Update Packages",
+    status: "Planned",
+    text: "Future signed offline update bundles after compatibility and rollback behaviour are validated.",
+  },
+  {
+    title: "Validation Tools",
+    status: "Planned",
+    text: "Future test tools for boot, setup, Reticulum, recovery, update, support export, and hardware validation.",
+  },
+];
+
+const hardwareResources = [
+  "Bills of materials",
+  "Assembly guides",
+  "Hardware compatibility lists",
+  "Capability manifests",
+  "Power and thermal notes",
+  "Radio policy notes",
+  "Certification documents",
+  "Manufacturing test checklists",
+];
+
+const downloadRules = [
+  "Downloads should be versioned.",
+  "Downloads should clearly show status.",
+  "Experimental files must be labelled experimental.",
+  "Product-supported files require validation evidence.",
+  "Software images must preserve recovery paths.",
+  "Offline updates must be signed and validated.",
+  "Hardware resources must not imply certification unless certified.",
+  "Documents should distinguish current, planned, experimental, and supported material.",
+];
+---
+
+<BaseLayout
+  title="Downloads | RelayHub"
+  description="RelayHub downloads hub for documents, media assets, community resources, future RelayOS images, hardware resources, validation tools, and release artefacts."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Downloads</p>
+
+      <h1 class="rh-title">
+        Documents first. Software only when validated.
+      </h1>
+
+      <p class="rh-subtitle">
+        This page is the future home for RelayHub documents, media assets,
+        community resources, hardware resources, validation artefacts, and
+        eventual RelayOS software releases.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/docs">
+          Documentation
+        </a>
+        <a class="rh-button rh-button-secondary" href="/status">
+          Status
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Documents</p>
+
+      <h2 class="rh-section-title">
+        Foundational documents and future public artefacts.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub begins with architecture, product requirements, governance,
+        values, policy, validation, and branding documents. Public download
+        links can be added here as documents are prepared for release.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {documentDownloads.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-local">{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Media assets</p>
+
+        <h2 class="rh-section-title">
+          Brand and media resources.
+        </h2>
+
+        <p class="rh-section-lead">
+          Media assets should help journalists, presenters, community organisers,
+          and partners describe RelayHub consistently.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/media">
+            Media kit
+          </a>
+        </div>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-download-list">
+          {mediaAssets.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Community resources</p>
+
+        <h2 class="rh-section-title">
+          Practical resources for future pilots and communities.
+        </h2>
+
+        <p class="rh-section-lead">
+          Community resources should help groups start small, test onboarding,
+          document lessons, practise recovery, and avoid false confidence before
+          scaling.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/community-guides">
+            Community guides
+          </a>
+        </div>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-download-list">
+          {communityResources.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Future software</p>
+
+      <h2 class="rh-section-title">
+        No RelayOS images are available yet.
+      </h2>
+
+      <p class="rh-section-lead">
+        Software downloads should not appear until builds, recovery, update,
+        hardware compatibility, documentation, and validation boundaries are
+        ready.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {softwareDownloads.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <span class="rh-status rh-status-degraded">{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/validation">
+          Validation
+        </a>
+        <a class="rh-button rh-button-secondary" href="/recovery">
+          Recovery
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Hardware resources</p>
+
+        <h2 class="rh-section-title">
+          Hardware files must not imply support before validation.
+        </h2>
+
+        <p class="rh-section-lead">
+          Future hardware resources should clearly identify whether they are
+          concept, experimental, compatible, verified, certified, or officially
+          supported.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/hardware">
+            Hardware
+          </a>
+          <a class="rh-button rh-button-secondary" href="/certification">
+            Certification
+          </a>
+        </div>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-download-list">
+          {hardwareResources.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Download rules</p>
+
+      <h2 class="rh-section-title">
+        Every download should carry status and scope.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should avoid publishing files that create false expectations.
+        Downloads should explain their version, maturity, hardware class,
+        support boundary, and recovery implications.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {downloadRules.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Current status</p>
+
+        <h2 class="rh-section-title">
+          Downloads are being prepared as the project matures.
+        </h2>
+
+        <p class="rh-section-lead">
+          The downloads hub is ready as a public structure. Documents, assets,
+          guides, software, and hardware resources can be added as they become
+          appropriate for public release.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Need something specific?</h3>
+        <p class="rh-card-text">
+          Ask for documents, media assets, community resources, validation
+          materials, or future software availability.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Contact RelayHub
+          </a>
+          <a class="rh-button rh-button-secondary" href="/early-access">
+            Register interest
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

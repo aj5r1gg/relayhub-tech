@@ -998,3 +998,168 @@ a {
 .rh-validation-list li + li {
   margin-top: var(--space-2);
 }
+
+/* Docs */
+
+.rh-docs-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-docs-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Developers */
+
+.rh-developer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Support */
+
+.rh-support-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-support-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Privacy */
+
+.rh-privacy-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-privacy-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Accessibility */
+
+.rh-accessibility-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-accessibility-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Compatibility */
+
+.rh-compatibility-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-compatibility-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Certification */
+
+.rh-certification-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-certification-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Status */
+
+.rh-status-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  font-size: var(--text-sm);
+}
+
+.rh-status-table th,
+.rh-status-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rh-status-table th {
+  color: var(--rh-navy-950);
+  font-weight: 800;
+}
+
+.rh-status-table td {
+  color: var(--color-text-muted);
+}
+
+/* Partners */
+
+.rh-partner-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-partner-list li + li {
+  margin-top: var(--space-2);
+}
+
+/* Community Guides */
+
+.rh-community-guide-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-community-guide-list li + li {
+  margin-top: var(--space-2);
+}
+
+.rh-community-role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Ecosystem */
+
+.rh-ecosystem-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Downloads */
+
+.rh-download-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.rh-download-list li + li {
+  margin-top: var(--space-2);
+}

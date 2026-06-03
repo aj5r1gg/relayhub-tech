@@ -1,5 +1,137 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const buildAreas = [
+  {
+    title: "Applications",
+    text: "Future Relay applications for chat, boards, markets, libraries, maps, events, files, identity, and community coordination.",
+  },
+  {
+    title: "Integrations",
+    text: "Careful integrations with Reticulum clients, local services, transport tools, hardware profiles, and community workflows.",
+  },
+  {
+    title: "Services",
+    text: "Local-first services for discovery, trust, federation, support, knowledge, marketplace coordination, and observability.",
+  },
+  {
+    title: "Hardware",
+    text: "Hardware validation, capability manifests, node profiles, boot tests, recovery drills, and compatibility evidence.",
+  },
+  {
+    title: "Community tools",
+    text: "Tools that help communities onboard people, preserve knowledge, coordinate resources, govern locally, and recover safely.",
+  },
+  {
+    title: "Documentation",
+    text: "Quick starts, recovery guides, API notes, validation evidence, hardware guides, and plain-language explanations.",
+  },
+];
+
+const foundations = [
+  {
+    title: "RelayOS",
+    text: "The appliance platform that powers RelayHub nodes and provides onboarding, recovery, observability, policy, identity, trust, and local management.",
+  },
+  {
+    title: "Reticulum",
+    text: "The communications substrate. RelayHub builds usability, policy, recovery, documentation, and community services around it.",
+  },
+  {
+    title: "NixOS",
+    text: "The intended foundation for reproducible builds, declarative configuration, rollback-safe upgrades, and hardware-specific profiles.",
+  },
+  {
+    title: "Local APIs",
+    text: "The planned local appliance control plane for setup, pairing, state, recovery, updates, support export, and future applications.",
+  },
+  {
+    title: "Policy engine",
+    text: "The governance layer that determines whether capabilities, roles, transports, services, and runtime behaviours are allowed.",
+  },
+  {
+    title: "Trust model",
+    text: "Discovery, identity, reachability, permission, reputation, federation, revocation, and recovery must remain separate.",
+  },
+];
+
+const futureApis = [
+  {
+    title: "Local API",
+    status: "Planned",
+    text: "Node health, setup, pairing, recovery, updates, status, support export, and local web UI integration.",
+  },
+  {
+    title: "Application API",
+    status: "Planned",
+    text: "Future application hosting and service access for Relay applications running on RelayOS.",
+  },
+  {
+    title: "Discovery API",
+    status: "Planned",
+    text: "Local discovery, QR bootstrap, setup flows, recovery discovery, and service visibility.",
+  },
+  {
+    title: "Trust API",
+    status: "Planned",
+    text: "Trust states, paired devices, roles, revocation, limited access, federation trust, and recovery authority.",
+  },
+  {
+    title: "Marketplace API",
+    status: "Concept",
+    text: "Offers, requests, listings, skills exchange, local services, community rules, and settlement-neutral coordination.",
+  },
+  {
+    title: "Community API",
+    status: "Concept",
+    text: "Community identity, membership, governance notices, knowledge sharing, events, directories, and federation boundaries.",
+  },
+];
+
+const contributionAreas = [
+  "NixOS module design",
+  "Reticulum integration",
+  "Local web UI",
+  "Browser-first onboarding",
+  "Hardware validation",
+  "Recovery drills",
+  "Support export redaction",
+  "Documentation",
+  "Accessibility testing",
+  "Community pilots",
+  "Application concepts",
+  "Validation tooling",
+];
+
+const roadmap = [
+  {
+    stage: "Now",
+    text: "Website, concept pages, early access, contact, D1 storage, admin tools, analytics, and public positioning.",
+  },
+  {
+    stage: "Next",
+    text: "Documentation structure, hardware pages, product boundaries, developer guidance, support workflows, and validation language.",
+  },
+  {
+    stage: "Future",
+    text: "RelayOS builds, local APIs, application framework, community directory, marketplace coordination, and field trials.",
+  },
+  {
+    stage: "Research",
+    text: "Appliance usability, Reticulum onboarding, NixOS reproducibility, DTN behaviour, radio policy, recovery UX, and federation governance.",
+  },
+];
+
+const rules = [
+  "Do not overclaim experimental features.",
+  "Do not imply compatibility means certification.",
+  "Do not activate features merely because hardware exists.",
+  "Preserve recovery paths before adding convenience.",
+  "Keep local-first operation visible.",
+  "Make privacy and security limits clear.",
+  "Respect hardware class ceilings.",
+  "Treat documentation as part of the product.",
+];
 ---
 
 <BaseLayout
@@ -12,13 +144,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <p class="rh-eyebrow">Developers</p>
 
       <h1 class="rh-title">
-        Build useful infrastructure without breaking the appliance.
+        Build the ecosystem without breaking the appliance.
       </h1>
 
       <p class="rh-subtitle">
-        RelayHub welcomes developers, builders, testers, documentation writers,
-        hardware experimenters, and infrastructure operators who want to help create
-        local-first tools for resilient communities.
+        RelayHub is being designed as a local-first ecosystem for resilient
+        communities. Developers can help build applications, services, hardware
+        validation, documentation, integrations, and community tools — but every
+        contribution must preserve usability, recovery, policy, and trust.
       </p>
 
       <div class="rh-actions">
@@ -34,106 +167,124 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Developer principle</p>
+      <p class="rh-kicker">Build on RelayHub</p>
 
       <h2 class="rh-section-title">
-        Complexity belongs inside the system, not on the user.
+        RelayHub is a platform direction, not just a hardware idea.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub development must preserve the core product promise: local-first,
-        recovery-first, policy-governed, capability-aware infrastructure that ordinary
-        people can understand and use.
+        The long-term ecosystem includes RelayOS, local APIs, applications,
+        community services, hardware classes, validation tooling, documentation,
+        and voluntary federation. Developer participation should strengthen the
+        appliance experience rather than expose unnecessary complexity.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Local-first</h3>
-          <p class="rh-card-text">
-            Core setup, recovery, status, and local operation should not require
-            cloud accounts or continuous internet access.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Recovery-first</h3>
-          <p class="rh-card-text">
-            A feature is not product-ready unless it can fail safely, roll back,
-            recover, and be explained to the user.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Capability-aware</h3>
-          <p class="rh-card-text">
-            Hardware capability, software capability, policy permission, trust,
-            legality, and runtime availability must remain separate.
-          </p>
-        </article>
+        {buildAreas.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
   <section class="rh-section rh-dark">
     <div class="rh-container">
-      <p class="rh-kicker">What developers can build</p>
+      <p class="rh-kicker">Platform foundations</p>
 
       <h2 class="rh-section-title">
-        RelayHub needs more than code.
+        Advanced foundations. Simple edge.
       </h2>
 
       <p class="rh-section-lead">
-        The ecosystem needs platform work, product work, validation work,
-        documentation, hardware testing, interface design, and careful community
-        tooling.
+        RelayHub may be sophisticated internally, but ordinary users should not
+        need to understand Linux, Reticulum internals, routing, radio engineering,
+        service management, or cryptographic plumbing to participate.
       </p>
 
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">RelayOS modules</h3>
+        {foundations.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Future APIs</p>
+
+      <h2 class="rh-section-title">
+        Planned interfaces must remain honest about their status.
+      </h2>
+
+      <p class="rh-section-lead">
+        These API areas are planning concepts, not current public contracts.
+        They should become developer-facing only after architecture, recovery,
+        security, validation, documentation, and compatibility boundaries are
+        ready.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {futureApis.map((api) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-local">{api.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {api.title}
+            </h3>
+            <p class="rh-card-text">{api.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Open ecosystem posture</p>
+
+        <h2 class="rh-section-title">
+          Interoperability matters, but support must be earned.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub should encourage open standards, local-first design,
+          community participation, and compatible tools. But compatibility,
+          certification, official status, and product support are separate
+          claims.
+        </p>
+      </div>
+
+      <div class="rh-grid">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Compatible</h3>
           <p class="rh-card-text">
-            Appliance services, local APIs, status models, policy enforcement,
-            updates, recovery, onboarding, and observability.
+            A tool or device may interoperate with RelayHub concepts without
+            being official, certified, or product-supported.
           </p>
         </article>
 
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Reticulum integration</h3>
+        <article class="rh-card">
+          <h3 class="rh-card-title">Certified</h3>
           <p class="rh-card-text">
-            Transport profiles, node roles, DTN behaviour, peer discovery,
-            client guidance, and safe communication boundaries.
+            Certification should require published requirements, validation
+            evidence, support boundaries, and compatibility expectations.
           </p>
         </article>
 
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Local web UI</h3>
+        <article class="rh-card">
+          <h3 class="rh-card-title">Official</h3>
           <p class="rh-card-text">
-            Browser-first setup, dashboard, people management, update screens,
-            recovery flows, support export, and event history.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Hardware validation</h3>
-          <p class="rh-card-text">
-            Hardware profiles, capability manifests, boot tests, thermal checks,
-            storage checks, radio validation, and support-state classification.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Community applications</h3>
-          <p class="rh-card-text">
-            Future apps such as Relay Chat, Relay Boards, Relay Market,
-            Relay Library, Relay Events, and Relay Governance.
-          </p>
-        </article>
-
-        <article class="rh-card rh-card-dark">
-          <h3 class="rh-card-title">Documentation</h3>
-          <p class="rh-card-text">
-            Quick starts, recovery guides, operator notes, privacy explanations,
-            status meanings, compatibility notes, and validation evidence.
+            Official products, services, and applications are governed by the
+            RelayHub ecosystem and must follow its terminology, policy, and
+            validation rules.
           </p>
         </article>
       </div>
@@ -142,110 +293,109 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   <section class="rh-section">
     <div class="rh-container">
-      <p class="rh-kicker">Development stack</p>
+      <p class="rh-kicker">Developer roadmap</p>
 
       <h2 class="rh-section-title">
-        Built from reproducible, inspectable foundations.
+        Development should follow validation, not excitement.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub’s core direction is NixOS, Reticulum, local web interfaces,
-        policy-controlled services, and validation-gated releases.
+        The project should grow from a minimal validated appliance loop into a
+        broader application and community ecosystem only after recovery,
+        usability, and hardware-class boundaries are proven.
       </p>
 
       <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">NixOS</h3>
-          <p class="rh-card-text">
-            Declarative system configuration, reproducible builds, rollback-safe
-            updates, and hardware-specific profiles.
-          </p>
-        </article>
+        {roadmap.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-ready">{item.stage}</span>
+            <p class="rh-card-text" style="margin-top: var(--space-5);">
+              {item.text}
+            </p>
+          </article>
+        ))}
+      </div>
 
-        <article class="rh-card">
-          <h3 class="rh-card-title">Reticulum</h3>
-          <p class="rh-card-text">
-            Local-first communication substrate for heterogeneous and intermittent
-            connectivity.
-          </p>
-        </article>
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/roadmap">
+          Public roadmap
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation model
+        </a>
+      </div>
+    </div>
+  </section>
 
-        <article class="rh-card">
-          <h3 class="rh-card-title">Local API</h3>
-          <p class="rh-card-text">
-            A local-only appliance control plane for setup, pairing, state,
-            recovery, updates, and support export.
-          </p>
-        </article>
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Contribution areas</p>
 
-        <article class="rh-card">
-          <h3 class="rh-card-title">Astro</h3>
-          <p class="rh-card-text">
-            Website and documentation publishing for clear public communication,
-            guides, and product pages.
-          </p>
-        </article>
+      <h2 class="rh-section-title">
+        Useful help is broader than code.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub needs builders who care about usability, validation, recovery,
+        documentation, hardware evidence, and community operation as much as
+        features.
+      </p>
+
+      <div class="rh-developer-tags" style="margin-top: var(--space-10);">
+        {contributionAreas.map((item) => (
+          <span class="rh-status rh-status-local">{item}</span>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/early-access">
+          Register developer interest
+        </a>
       </div>
     </div>
   </section>
 
   <section class="rh-section rh-bg-soft">
     <div class="rh-container">
-      <p class="rh-kicker">Contribution rules</p>
+      <p class="rh-kicker">Developer rules</p>
 
       <h2 class="rh-section-title">
-        Product-supported means validated, not merely working.
+        The appliance promise comes first.
       </h2>
 
       <p class="rh-section-lead">
-        A pull request, hardware experiment, service module, or application idea
-        should move through clear evidence: it must be testable, observable,
-        reproducible, recoverable, and documented.
+        Developer work must preserve the core promise: plug in node, open app or
+        local web UI, scan QR code, communicate where supported, and recover
+        safely when something goes wrong.
       </p>
 
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        <article class="rh-card">
-          <h3 class="rh-card-title">Do not overclaim</h3>
-          <p class="rh-card-text">
-            Experimental features must be labelled experimental. Compatibility
-            is not certification. A prototype is not a supported product.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Preserve recovery</h3>
-          <p class="rh-card-text">
-            New services must not break rollback, identity preservation, recovery
-            access, safe reset, transfer, or support export.
-          </p>
-        </article>
-
-        <article class="rh-card">
-          <h3 class="rh-card-title">Respect policy</h3>
-          <p class="rh-card-text">
-            Features must obey capability, trust, privacy, security, legal,
-            radio, resource, update, and validation policy.
-          </p>
-        </article>
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {rules.map((rule) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{rule}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
   <section class="rh-section">
-    <div class="rh-container">
-      <p class="rh-kicker">Release discipline</p>
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Release discipline</p>
 
-      <h2 class="rh-section-title">
-        The order matters.
-      </h2>
+        <h2 class="rh-section-title">
+          Build minimal. Validate. Recover. Then expand.
+        </h2>
 
-      <p class="rh-section-lead">
-        Build the minimal system first. Validate operation. Validate recovery.
-        Validate reproducibility. Validate upgrades. Validate degraded operation.
-        Then expand features.
-      </p>
+        <p class="rh-section-lead">
+          A feature is not ready merely because it works once. It should be
+          reproducible, observable, recoverable, documented, and validated across
+          the hardware class it claims to support.
+        </p>
+      </div>
 
-      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+      <div class="rh-grid">
         <article class="rh-card">
           <h3 class="rh-card-title">1. Build</h3>
           <p class="rh-card-text">
@@ -256,21 +406,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <article class="rh-card">
           <h3 class="rh-card-title">2. Validate</h3>
           <p class="rh-card-text">
-            Capture evidence for boot, setup, pairing, status, recovery, and update safety.
+            Capture evidence for boot, setup, pairing, state, update, support,
+            and recovery.
           </p>
         </article>
 
         <article class="rh-card">
           <h3 class="rh-card-title">3. Field test</h3>
           <p class="rh-card-text">
-            Watch real users attempt setup, recovery, status interpretation, and support export.
+            Watch real users attempt setup, recovery, state interpretation, and
+            support export.
           </p>
         </article>
 
         <article class="rh-card">
           <h3 class="rh-card-title">4. Support</h3>
           <p class="rh-card-text">
-            Only call something supported when documentation, recovery, and validation are complete.
+            Call something supported only when documentation, recovery, and
+            validation are complete.
           </p>
         </article>
       </div>
@@ -283,29 +436,30 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <p class="rh-kicker">Developer access</p>
 
         <h2 class="rh-section-title">
-          Early developer channels are coming later.
+          Structured developer access will come after the foundations.
         </h2>
 
         <p class="rh-section-lead">
-          For now, RelayHub is still in design and validation planning. Public repositories,
-          contribution guides, issue templates, hardware manifests, and validation harnesses
-          should appear only when the project is ready for structured collaboration.
+          Public repositories, contribution guides, issue templates, API
+          contracts, hardware manifests, and validation harnesses should appear
+          only when the project is ready for structured collaboration.
         </p>
       </div>
 
       <article class="rh-card rh-card-dark">
         <h3 class="rh-card-title">Register as a developer</h3>
         <p class="rh-card-text">
-          Register interest if you want to help with NixOS, Reticulum integration,
-          local web UI, hardware testing, documentation, validation, or community applications.
+          Register interest if you want to help with NixOS, Reticulum,
+          RelayOS, local web UI, hardware testing, documentation, validation,
+          or future community applications.
         </p>
 
         <div class="rh-actions">
           <a class="rh-button rh-button-accent" href="/early-access">
             Register interest
           </a>
-          <a class="rh-button rh-button-secondary" href="/governance">
-            Read governance
+          <a class="rh-button rh-button-secondary" href="/docs">
+            Documentation
           </a>
         </div>
       </article>

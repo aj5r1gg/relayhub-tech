@@ -1,0 +1,438 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const currentCompatibility = [
+  {
+    title: "Reticulum",
+    status: "Core foundation",
+    text: "Reticulum is the core communications substrate RelayHub is being designed around.",
+  },
+  {
+    title: "LXMF",
+    status: "Expected ecosystem fit",
+    text: "LXMF is part of the wider Reticulum messaging ecosystem and is relevant to future communication workflows.",
+  },
+  {
+    title: "Sideband",
+    status: "Android ecosystem tool",
+    text: "Sideband is relevant to Reticulum-based messaging, especially on Android. RelayHub must not claim iOS Sideband support.",
+  },
+  {
+    title: "NomadNet",
+    status: "Relevant ecosystem tool",
+    text: "NomadNet-style bulletin and information workflows are relevant to future RelayHub knowledge and board concepts.",
+  },
+  {
+    title: "RNode devices",
+    status: "Radio ecosystem fit",
+    text: "RNode-compatible devices may be relevant to radio transport, subject to validation, firmware, regional policy, and legal operation.",
+  },
+  {
+    title: "TCP/IP transports",
+    status: "Baseline transport",
+    text: "TCP/IP over Ethernet or Wi-Fi is expected to be a baseline transport for many RelayHub node classes.",
+  },
+];
+
+const plannedCompatibility = [
+  {
+    title: "RelayOS applications",
+    text: "Future applications for chat, boards, markets, libraries, maps, events, files, identity, and community coordination.",
+  },
+  {
+    title: "Community directory",
+    text: "Future directory compatibility for community discovery, visibility, trust state, federation scope, and local identity.",
+  },
+  {
+    title: "Marketplace",
+    text: "Future compatibility for local listings, offers, requests, services, skills exchange, and settlement-neutral trade coordination.",
+  },
+  {
+    title: "Future APIs",
+    text: "Planned Local API, Application API, Discovery API, Trust API, Marketplace API, and Community API concepts.",
+  },
+];
+
+const hardwareClasses = [
+  {
+    title: "Radio Micro Node",
+    examples: "LilyGo T-Beam Supreme, T3S3",
+    text: "Radio transport and field relay class. Not a full household appliance.",
+  },
+  {
+    title: "Nano Linux Node",
+    examples: "Raspberry Pi Zero 2 W",
+    text: "Lightweight relay class with constrained compute, storage, and service capacity.",
+  },
+  {
+    title: "Home Node",
+    examples: "Raspberry Pi 4 2GB",
+    text: "Household appliance target with simple setup, local web UI, recovery, and limited household operation.",
+  },
+  {
+    title: "Strong Home Node",
+    examples: "Pi 4 4GB / Pi 5 4GB",
+    text: "Enhanced household node with more comfortable performance and stronger local capability where validated.",
+  },
+  {
+    title: "Infrastructure Node",
+    examples: "Pi 5 8GB",
+    text: "Bridge, gateway, DTN, community infrastructure, and operator-oriented capability where validated.",
+  },
+  {
+    title: "Mini PC Node",
+    examples: "N100 / N150-class mini PC",
+    text: "Full infrastructure class for advanced services, larger queues, and broader operator workflows.",
+  },
+];
+
+const compatibilityClaims = [
+  {
+    title: "Compatible",
+    text: "A tool, device, or service may interoperate in some way. Compatibility does not automatically mean official support.",
+  },
+  {
+    title: "Supported",
+    text: "Supported means RelayHub has defined a support boundary, documentation, recovery path, and validation expectation.",
+  },
+  {
+    title: "Certified",
+    text: "Certified should mean a product, integration, or service has passed published requirements and evidence review.",
+  },
+  {
+    title: "Experimental",
+    text: "Experimental means the idea may work in limited conditions but must not be relied on as product-supported.",
+  },
+];
+
+const browsers = [
+  "Firefox",
+  "Firefox ESR",
+  "Chromium",
+  "Chrome",
+  "Brave",
+  "Edge",
+  "GrapheneOS Vanadium",
+  "Mobile browsers where layouts and forms are validated",
+];
+
+const operatingSystems = [
+  {
+    title: "Linux",
+    text: "Current development and deployment work is Linux-oriented. Fedora Silverblue/toolbox is being used for the website workflow.",
+  },
+  {
+    title: "Android",
+    text: "Android is relevant through the existing Reticulum ecosystem, especially Sideband. Support must be validated before being claimed.",
+  },
+  {
+    title: "RelayOS",
+    text: "Future appliance platform direction for RelayHub nodes, based on local-first, NixOS-backed, recovery-aware operation.",
+  },
+  {
+    title: "iOS",
+    text: "RelayHub should not claim Reticulum/Sideband-native iOS support unless a validated iOS-compatible path exists.",
+  },
+];
+
+const principles = [
+  "Interoperability should reduce lock-in.",
+  "Compatibility must not imply certification.",
+  "Certification must be evidence-backed.",
+  "Support must include recovery paths.",
+  "Hardware capability does not equal feature activation.",
+  "Radio capability does not equal legal transmit permission.",
+  "Experimental integrations must be labelled honestly.",
+  "Local-first operation should remain the default expectation.",
+];
+---
+
+<BaseLayout
+  title="Compatibility | RelayHub"
+  description="RelayHub compatibility information for Reticulum, Sideband, NomadNet, LXMF, RNode devices, hardware classes, browsers, operating systems, APIs, certification, and support boundaries."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Compatibility</p>
+
+      <h1 class="rh-title">
+        Compatibility must be clear before people rely on it.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is designed around interoperability, local-first operation, and
+        open ecosystem participation. But compatibility, support, certification,
+        and experimental status are different claims.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/hardware">
+          Hardware
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Current compatibility direction</p>
+
+      <h2 class="rh-section-title">
+        Built around the Reticulum ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub’s compatibility story begins with Reticulum and the tools,
+        transports, and workflows that already exist around it. Compatibility
+        must still be validated before being treated as supported behaviour.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {currentCompatibility.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-local">{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Planned compatibility</p>
+
+      <h2 class="rh-section-title">
+        Planned means not yet implemented.
+      </h2>
+
+      <p class="rh-section-lead">
+        These areas are important to the RelayHub ecosystem vision, but they
+        should not be treated as current product-supported compatibility until
+        implemented, validated, documented, and released.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {plannedCompatibility.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-degraded">Planned</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Hardware compatibility</p>
+
+      <h2 class="rh-section-title">
+        Not every node can do everything.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub hardware compatibility must be capability-aware. Hardware class
+        defines the ceiling. Policy, validation, trust, legal permission, runtime
+        availability, and user enablement determine what can actually activate.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {hardwareClasses.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">
+              <strong>Examples:</strong> {item.examples}
+            </p>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/hardware">
+          View hardware page
+        </a>
+        <a class="rh-button rh-button-secondary" href="/support">
+          Support boundaries
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Claim language</p>
+
+      <h2 class="rh-section-title">
+        Compatible, supported, certified, and experimental are not the same.
+      </h2>
+
+      <p class="rh-section-lead">
+        Clear language protects users, developers, vendors, and communities from
+        false expectations.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {compatibilityClaims.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Browser compatibility</p>
+
+        <h2 class="rh-section-title">
+          The public website is browser-first.
+        </h2>
+
+        <p class="rh-section-lead">
+          The current public website should work across modern desktop and
+          mobile browsers. Future RelayOS local UI compatibility will need its
+          own validation matrix.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-compatibility-list">
+          {browsers.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Operating systems</p>
+
+      <h2 class="rh-section-title">
+        Website, development, mobile, and future appliance support are separate.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub must distinguish website compatibility, developer workstation
+        compatibility, mobile client compatibility, and future RelayOS appliance
+        compatibility.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {operatingSystems.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Radio compatibility</p>
+
+        <h2 class="rh-section-title">
+          Radio compatibility requires more than working hardware.
+        </h2>
+
+        <p class="rh-section-lead">
+          Radio-capable devices must be evaluated through hardware support,
+          firmware support, regional policy, legal permission, airtime limits,
+          power limits, antenna setup, and validation evidence.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Important boundary</h3>
+        <p class="rh-card-text">
+          A radio device being technically compatible does not mean transmit is
+          enabled, lawful, supported, certified, or appropriate in every region.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/security">
+            Security posture
+          </a>
+          <a class="rh-button rh-button-secondary" href="/hardware">
+            Hardware
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Compatibility philosophy</p>
+
+      <h2 class="rh-section-title">
+        Open participation without false certainty.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should encourage interoperability and avoid unnecessary lock-in,
+        while still making support, certification, and validation boundaries
+        clear.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {principles.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Want something checked?</p>
+
+        <h2 class="rh-section-title">
+          Ask before assuming support.
+        </h2>
+
+        <p class="rh-section-lead">
+          If you are considering a device, transport, integration, browser,
+          operating system, or community workflow, ask whether it is compatible,
+          experimental, supported, or planned.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Compatibility enquiries</h3>
+        <p class="rh-card-text">
+          Include the device, operating system, browser, Reticulum tool,
+          transport, firmware, radio region, and what you expect it to do.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Ask about compatibility
+          </a>
+          <a class="rh-button rh-button-secondary" href="/docs">
+            Documentation
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

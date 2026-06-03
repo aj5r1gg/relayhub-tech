@@ -1,0 +1,378 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const websiteStatus = [
+  "Early Access Registration",
+  "Contact Forms",
+  "D1 Signup Storage",
+  "D1 Contact Storage",
+  "Newsletter Admin",
+  "Contact Admin",
+  "FAQ",
+  "Documentation Hub",
+  "Media Kit",
+  "Public Roadmap",
+  "Community Directory Concept",
+  "Marketplace Concept",
+  "Privacy-Preserving Analytics",
+];
+
+const productStatus = [
+  {
+    title: "RelayHub Website",
+    status: "Active",
+    className: "rh-status-ready",
+    text: "The public website is live and actively expanding.",
+  },
+  {
+    title: "RelayOS",
+    status: "Research & Architecture",
+    className: "rh-status-degraded",
+    text: "RelayOS is a platform direction, not yet a supported product release.",
+  },
+  {
+    title: "Relay Home",
+    status: "Architecture & Validation Planning",
+    className: "rh-status-degraded",
+    text: "Home Node product work is currently architectural and validation-oriented.",
+  },
+  {
+    title: "Relay Infrastructure",
+    status: "Architecture & Validation Planning",
+    className: "rh-status-degraded",
+    text: "Infrastructure roles require hardware validation, recovery testing, and operator documentation.",
+  },
+  {
+    title: "Relay Radio",
+    status: "Research",
+    className: "rh-status-local",
+    text: "Radio operation requires firmware, regional policy, validation, and lawful transmit boundaries.",
+  },
+  {
+    title: "Certification Program",
+    status: "Planned",
+    className: "rh-status-updating",
+    text: "Certification language exists conceptually, but no formal registry is implemented yet.",
+  },
+];
+
+const platformStatus = [
+  { area: "Branding", status: "Active" },
+  { area: "Governance", status: "Active" },
+  { area: "Documentation", status: "Active" },
+  { area: "Validation Planning", status: "Active" },
+  { area: "Hardware Validation", status: "Planned" },
+  { area: "RelayOS Builds", status: "Planned" },
+  { area: "Community Pilots", status: "Research" },
+  { area: "Certification Registry", status: "Planned" },
+];
+
+const stages = [
+  {
+    title: "Concept",
+    text: "The idea is being described and scoped.",
+  },
+  {
+    title: "Research",
+    text: "The problem, options, risks, and unknowns are being investigated.",
+  },
+  {
+    title: "Architecture",
+    text: "The system shape, boundaries, roles, and policies are being defined.",
+  },
+  {
+    title: "Prototype",
+    text: "A limited implementation exists to test feasibility.",
+  },
+  {
+    title: "Validation",
+    text: "The behaviour is tested, observed, reproduced, and documented.",
+  },
+  {
+    title: "Field Trial",
+    text: "Real users test the system in realistic conditions.",
+  },
+  {
+    title: "Limited Release",
+    text: "The system is available in a constrained, support-aware deployment.",
+  },
+  {
+    title: "Supported Release",
+    text: "The system has documented support, recovery, validation, and compatibility boundaries.",
+  },
+];
+
+const serviceStatus = [
+  {
+    title: "Website",
+    status: "Available",
+    className: "rh-status-ready",
+  },
+  {
+    title: "Early Access",
+    status: "Available",
+    className: "rh-status-ready",
+  },
+  {
+    title: "Contact",
+    status: "Available",
+    className: "rh-status-ready",
+  },
+  {
+    title: "Documentation",
+    status: "Available",
+    className: "rh-status-ready",
+  },
+  {
+    title: "Community Directory",
+    status: "Concept Only",
+    className: "rh-status-degraded",
+  },
+  {
+    title: "Marketplace",
+    status: "Concept Only",
+    className: "rh-status-degraded",
+  },
+  {
+    title: "Certification Registry",
+    status: "Not Yet Available",
+    className: "rh-status-updating",
+  },
+  {
+    title: "RelayOS Downloads",
+    status: "Not Yet Available",
+    className: "rh-status-updating",
+  },
+];
+
+const nowNextFuture = [
+  {
+    title: "Now",
+    text: "Public website, contact flows, early access, documentation, trust pages, concept pages, admin tools, and clear public positioning.",
+  },
+  {
+    title: "Next",
+    text: "Deeper product pages, partner pages, community guides, hardware validation planning, practical documentation, and clearer pilot pathways.",
+  },
+  {
+    title: "Future",
+    text: "RelayOS builds, local APIs, hardware validation, field trials, community pilots, certification registry, and supported product pathways.",
+  },
+];
+---
+
+<BaseLayout
+  title="Status | RelayHub"
+  description="RelayHub status page showing what is active now, what is in development, what is planned, what is research, and what is not yet product-supported."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Status</p>
+
+      <h1 class="rh-title">
+        Clear status beats exaggerated claims.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub separates what is live today, what is in design, what is
+        planned, what is research, and what is not yet product-supported.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/roadmap">
+          Roadmap
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Current website status</p>
+
+      <h2 class="rh-section-title">
+        What is live now.
+      </h2>
+
+      <p class="rh-section-lead">
+        The public website is active and includes working forms, storage,
+        anti-spam protection, admin tools, documentation pages, and public
+        concept pages.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {websiteStatus.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-ready">Active</span>
+            <p class="rh-card-text" style="margin-top: var(--space-5);">
+              {item}
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Product status</p>
+
+      <h2 class="rh-section-title">
+        Product maturity is not the same across the ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub website work is active. RelayOS and product hardware pathways
+        remain in architecture, research, and validation planning until real
+        builds and evidence exist.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {productStatus.map((item) => (
+          <article class="rh-card">
+            <span class={`rh-status ${item.className}`}>{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Platform status</p>
+
+      <h2 class="rh-section-title">
+        The ecosystem foundation is being assembled.
+      </h2>
+
+      <div class="rh-card" style="margin-top: var(--space-8); overflow-x: auto;">
+        <table class="rh-status-table">
+          <thead>
+            <tr>
+              <th>Area</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {platformStatus.map((item) => (
+              <tr>
+                <td>{item.area}</td>
+                <td>{item.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Development stages</p>
+
+      <h2 class="rh-section-title">
+        Status labels should mean something.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub uses maturity language to avoid confusing concepts, prototypes,
+        validated behaviour, field trials, and supported releases.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {stages.map((stage) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{stage.title}</h3>
+            <p class="rh-card-text">{stage.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Service status</p>
+
+      <h2 class="rh-section-title">
+        Website services are live. Product services are not yet released.
+      </h2>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {serviceStatus.map((item) => (
+          <article class="rh-card">
+            <span class={`rh-status ${item.className}`}>{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Now, next, future</p>
+
+      <h2 class="rh-section-title">
+        Status shows where things actually stand.
+      </h2>
+
+      <p class="rh-section-lead">
+        Roadmap shows direction. Status shows current maturity.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {nowNextFuture.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Transparency statement</p>
+
+        <h2 class="rh-section-title">
+          RelayHub prefers clear status over marketing certainty.
+        </h2>
+
+        <p class="rh-section-lead">
+          Features are described according to their current maturity, validation
+          status, and support level. Planned features are not presented as
+          product-supported behaviour.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Ask about status</h3>
+        <p class="rh-card-text">
+          If you are unsure whether something is active, planned, experimental,
+          validated, compatible, certified, or supported, ask before relying on it.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Contact RelayHub
+          </a>
+          <a class="rh-button rh-button-secondary" href="/certification">
+            Certification
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

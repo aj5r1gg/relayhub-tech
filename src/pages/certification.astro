@@ -1,0 +1,395 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const certificationReasons = [
+  {
+    title: "Prevent confusion",
+    text: "Certification helps users distinguish compatible, experimental, supported, certified, and official ecosystem participation.",
+  },
+  {
+    title: "Improve interoperability",
+    text: "Certified products, applications, services, and guides should meet published expectations for safe interoperability.",
+  },
+  {
+    title: "Increase trust",
+    text: "Certification provides evidence that something has been tested against defined requirements rather than merely claimed.",
+  },
+  {
+    title: "Define support boundaries",
+    text: "Certification should make clear what is supported, what is limited, what is excluded, and what recovery path exists.",
+  },
+  {
+    title: "Reduce fragmentation",
+    text: "Certification helps the ecosystem grow without creating incompatible terminology, unclear claims, or misleading product status.",
+  },
+  {
+    title: "Protect users",
+    text: "Certification should prevent unsupported or unsafe configurations from being presented as product-ready.",
+  },
+];
+
+const certificationLevels = [
+  {
+    title: "Compatible",
+    status: "rh-status-local",
+    text: "Works with RelayHub in some defined way. Not necessarily tested by RelayHub and no support guarantee is implied.",
+  },
+  {
+    title: "Verified",
+    status: "rh-status-degraded",
+    text: "Basic validation evidence has been provided for a limited scope, version, hardware class, or integration path.",
+  },
+  {
+    title: "Certified",
+    status: "rh-status-ready",
+    text: "Validation is complete for the stated scope. Recovery, documentation, compatibility, and support boundaries are defined.",
+  },
+  {
+    title: "Official",
+    status: "rh-status-updating",
+    text: "Built, governed, maintained, or formally adopted by RelayHub as part of the official ecosystem.",
+  },
+];
+
+const certifiableItems = [
+  {
+    title: "Hardware",
+    examples: "Home Nodes, Infrastructure Nodes, Radio Nodes, Mini PC Nodes, power profiles, storage profiles, and enclosure builds.",
+  },
+  {
+    title: "Software",
+    examples: "RelayOS applications, local web UI modules, companion tools, local services, and community software.",
+  },
+  {
+    title: "Integrations",
+    examples: "Reticulum integrations, marketplace integrations, directory integrations, community tools, and future API integrations.",
+  },
+  {
+    title: "Documentation",
+    examples: "Deployment guides, recovery guides, training materials, community onboarding guides, and operator procedures.",
+  },
+  {
+    title: "Communities",
+    examples: "Community deployments, field pilots, local operating groups, federation participants, and support-ready community hubs.",
+  },
+  {
+    title: "Vendors",
+    examples: "Commercial builders, kit makers, service providers, hardware suppliers, and support partners.",
+  },
+];
+
+const requirements = [
+  "Defined certification scope",
+  "Hardware or software version identified",
+  "Compatibility expectations documented",
+  "Validation evidence provided",
+  "Recovery behaviour tested",
+  "Security posture reviewed",
+  "Privacy claims reviewed",
+  "Support boundary defined",
+  "Documentation reviewed",
+  "Known limitations declared",
+  "Retest triggers defined",
+  "Revocation path documented",
+];
+
+const notPermanent = [
+  "Certification is version-specific.",
+  "Certification may be limited to one hardware class.",
+  "Certification may expire.",
+  "Certification may be revoked.",
+  "Major updates may require retesting.",
+  "Changed hardware may require retesting.",
+  "Changed radio behaviour may require legal and technical review.",
+  "Changed support claims may require documentation review.",
+];
+
+const relationshipRules = [
+  {
+    title: "Compatible ≠ Certified",
+    text: "A device or tool may interoperate without passing RelayHub certification.",
+  },
+  {
+    title: "Certified ≠ Official",
+    text: "A certified third-party product may meet requirements without being built or governed by RelayHub.",
+  },
+  {
+    title: "Official ≠ Required",
+    text: "The ecosystem should remain open to compatible participation where safe and clearly labelled.",
+  },
+  {
+    title: "Experimental ≠ Supported",
+    text: "Working once in a test does not make a feature, device, or integration product-supported.",
+  },
+];
+
+const futureRegistry = [
+  "Certified hardware",
+  "Certified software",
+  "Certified integrations",
+  "Certified documentation",
+  "Certified partners",
+  "Certified communities",
+  "Certification scope",
+  "Version and expiry status",
+  "Known limitations",
+  "Support boundary",
+];
+---
+
+<BaseLayout
+  title="Certification | RelayHub"
+  description="RelayHub certification model explaining compatible, verified, certified, official, validation evidence, recovery testing, support boundaries, revocation, and future certification registry."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Certification</p>
+
+      <h1 class="rh-title">
+        Certification turns claims into evidence.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub certification is a future governance and validation pathway for
+        hardware, software, integrations, documentation, vendors, and communities.
+        It exists to prevent confusion, protect users, and make support
+        boundaries clear.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compatibility">
+          Compatibility
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Why certification exists</p>
+
+      <h2 class="rh-section-title">
+        Ecosystems need clear status language.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should encourage open participation without allowing misleading
+        claims. Certification helps distinguish what merely works, what has been
+        checked, what is supported, and what is official.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {certificationReasons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Certification levels</p>
+
+      <h2 class="rh-section-title">
+        Four labels, four different meanings.
+      </h2>
+
+      <p class="rh-section-lead">
+        These labels should not be mixed. Each one carries a different level of
+        evidence, authority, and support expectation.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {certificationLevels.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <span class={`rh-status ${item.status}`}>{item.title}</span>
+            <p class="rh-card-text" style="margin-top: var(--space-5);">
+              {item.text}
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What can be certified</p>
+
+      <h2 class="rh-section-title">
+        Certification can apply beyond hardware.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub certification may eventually cover devices, software,
+        integrations, documentation, communities, vendors, and services — but
+        only within a clearly defined scope.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {certifiableItems.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.examples}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Requirements</p>
+
+        <h2 class="rh-section-title">
+          Certification should require more than a badge.
+        </h2>
+
+        <p class="rh-section-lead">
+          A certified item should have documented scope, validation evidence,
+          recovery expectations, security review, privacy review, and support
+          boundaries.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-certification-list">
+          {requirements.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Lifecycle</p>
+
+        <h2 class="rh-section-title">
+          Certification is not permanent.
+        </h2>
+
+        <p class="rh-section-lead">
+          Certification should apply to a specific version, scope, hardware
+          class, integration path, documentation set, or community deployment.
+          It must be reviewable and revocable.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-certification-list">
+          {notPermanent.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Relationship to compatibility</p>
+
+      <h2 class="rh-section-title">
+        Compatibility, certification, and official status must stay separate.
+      </h2>
+
+      <p class="rh-section-lead">
+        Clear separation prevents ecosystem confusion, accidental endorsement,
+        false support expectations, and misleading marketplace or vendor claims.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {relationshipRules.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-accent" href="/compatibility">
+          Compatibility model
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Future registry</p>
+
+      <h2 class="rh-section-title">
+        A certification registry is planned, not implemented.
+      </h2>
+
+      <p class="rh-section-lead">
+        A future certification registry could show which hardware, software,
+        integrations, partners, documentation, and communities have been
+        certified, along with their scope, status, version, and limitations.
+      </p>
+
+      <div class="rh-card" style="margin-top: var(--space-8);">
+        <span class="rh-status rh-status-degraded">Planned</span>
+        <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+          certification.relayhub.tech
+        </h3>
+        <p class="rh-card-text">
+          This registry concept is not yet implemented. It should only appear
+          once certification standards, review process, evidence requirements,
+          and governance procedures are ready.
+        </p>
+      </div>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {futureRegistry.map((item) => (
+          <article class="rh-card">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Interested in certification?</p>
+
+        <h2 class="rh-section-title">
+          Ask before using certification language.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub certification is not yet open as a formal programme. If you
+          are building hardware, software, documentation, or a community pilot,
+          describe the scope and the claim you want to make.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Certification enquiries</h3>
+        <p class="rh-card-text">
+          Include the product, version, hardware class, integration path,
+          validation evidence, documentation, support expectations, and known
+          limitations.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/contact">
+            Ask about certification
+          </a>
+          <a class="rh-button rh-button-secondary" href="/developers">
+            Developers
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>

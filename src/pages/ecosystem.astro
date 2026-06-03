@@ -1,0 +1,472 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const layers = [
+  {
+    title: "RelayHub",
+    text: "The ecosystem: communities, products, services, applications, trust networks, knowledge systems, marketplaces, and federations.",
+  },
+  {
+    title: "RelayOS",
+    text: "The appliance platform that powers RelayHub nodes and provides onboarding, recovery, policy, observability, updates, and local APIs.",
+  },
+  {
+    title: "Products",
+    text: "Relay Home, Relay Infrastructure, Relay Radio, Relay Developer, and future approved product families.",
+  },
+  {
+    title: "Applications",
+    text: "Future Relay applications for chat, boards, marketplace, library, files, maps, events, voice, identity, and community coordination.",
+  },
+  {
+    title: "Communities",
+    text: "The primary social units: households, groups, neighbourhoods, towns, regions, associations, and local organising networks.",
+  },
+  {
+    title: "Federations",
+    text: "Voluntary coordination structures linking communities without replacing community autonomy.",
+  },
+];
+
+const capabilities = [
+  "Communication",
+  "Trust",
+  "Knowledge",
+  "Trade",
+  "Coordination",
+  "Governance",
+  "Cultural continuity",
+  "Recovery",
+  "Discovery",
+  "Federation",
+  "Marketplace",
+  "Documentation",
+];
+
+const productFamilies = [
+  {
+    title: "Relay Home",
+    status: "Architecture & validation planning",
+    text: "Household appliance-class nodes focused on setup, local web UI, pairing, recovery, and ordinary home/community use.",
+  },
+  {
+    title: "Relay Infrastructure",
+    status: "Architecture & validation planning",
+    text: "Stronger nodes for community infrastructure, bridge/gateway roles, DTN, observability, and operator workflows.",
+  },
+  {
+    title: "Relay Radio",
+    status: "Research",
+    text: "Radio transport and field relay concepts requiring firmware, regional policy, lawful operation, and hardware validation.",
+  },
+  {
+    title: "Relay Developer",
+    status: "Future",
+    text: "Developer-oriented tooling, APIs, validation harnesses, application frameworks, and integration documentation.",
+  },
+];
+
+const applicationFamilies = [
+  {
+    title: "Relay Chat",
+    text: "Future user communication layer where supported.",
+  },
+  {
+    title: "Relay Boards",
+    text: "Community bulletin boards, notices, requests, and announcements.",
+  },
+  {
+    title: "Relay Market",
+    text: "Local goods, services, offers, requests, skills exchange, and settlement-neutral coordination.",
+  },
+  {
+    title: "Relay Library",
+    text: "Knowledge preservation, guides, procedures, maps, memory, and training material.",
+  },
+  {
+    title: "Relay Events",
+    text: "Local events, working groups, meetings, tasks, and community coordination.",
+  },
+  {
+    title: "Relay Identity",
+    text: "Identity, membership, trust, roles, reputation context, and recovery authority.",
+  },
+];
+
+const ecosystemRules = [
+  "The community is the purpose.",
+  "Technology is the tool.",
+  "Local-first comes before remote dependency.",
+  "Trust is explicit, limited, and revocable.",
+  "Recovery is mandatory.",
+  "Capabilities require validation before support.",
+  "Compatibility does not imply certification.",
+  "Federation must remain voluntary.",
+];
+
+const participation = [
+  {
+    title: "Individuals",
+    text: "Use RelayHub tools, join communities, participate in local coordination, and contribute feedback.",
+  },
+  {
+    title: "Households",
+    text: "Operate local infrastructure, pair trusted users, preserve recovery paths, and participate in nearby communities.",
+  },
+  {
+    title: "Communities",
+    text: "Define local purpose, governance, trust rules, directories, knowledge bases, marketplace rules, and federation relationships.",
+  },
+  {
+    title: "Developers",
+    text: "Build applications, services, integrations, documentation, validation tooling, local UI components, and operator tools.",
+  },
+  {
+    title: "Vendors",
+    text: "Offer compatible products or services while clearly distinguishing compatibility, certification, and official status.",
+  },
+  {
+    title: "Partners",
+    text: "Help with deployment, education, validation, hardware, support, documentation, pilots, and community onboarding.",
+  },
+];
+
+const growthPath = [
+  {
+    title: "1. Website and public story",
+    text: "Explain RelayHub, collect interest, define trust, security, privacy, recovery, compatibility, certification, and status.",
+  },
+  {
+    title: "2. Architecture and validation",
+    text: "Define RelayOS, hardware classes, product boundaries, validation gates, recovery drills, and support expectations.",
+  },
+  {
+    title: "3. Prototype and lab validation",
+    text: "Build minimal nodes, prove setup, pairing, recovery, update, local-only operation, and support export.",
+  },
+  {
+    title: "4. Community pilots",
+    text: "Test with real communities, non-technical users, degraded states, documentation, trust workflows, and recovery.",
+  },
+  {
+    title: "5. Limited deployment",
+    text: "Deploy with clear support boundaries, hardware status, compatibility limits, and evidence-backed documentation.",
+  },
+  {
+    title: "6. Supported ecosystem",
+    text: "Grow products, applications, certification, partners, community guides, and federation pathways carefully.",
+  },
+];
+---
+
+<BaseLayout
+  title="Ecosystem | RelayHub"
+  description="RelayHub ecosystem overview covering RelayHub, RelayOS, products, applications, communities, federations, communication, trust, knowledge, trade, governance, recovery, and cultural continuity."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Ecosystem</p>
+
+      <h1 class="rh-title">
+        RelayHub is the ecosystem. RelayOS is the platform. Communities are the purpose.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is being built as a local-first ecosystem for communication,
+        trust, knowledge, trade, coordination, governance, recovery, and cultural
+        continuity — not merely as a device or messaging app.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/communities">
+          Communities
+        </a>
+        <a class="rh-button rh-button-secondary" href="/relayos">
+          RelayOS
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Ecosystem layers</p>
+
+      <h2 class="rh-section-title">
+        Each layer has a distinct role.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should remain coherent as it grows. The ecosystem, platform,
+        products, applications, communities, and federations must not be confused
+        with one another.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {layers.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">What the ecosystem enables</p>
+
+      <h2 class="rh-section-title">
+        RelayHub is broader than messaging.
+      </h2>
+
+      <p class="rh-section-lead">
+        The purpose is resilient community capability: people should be able to
+        communicate, coordinate, preserve knowledge, exchange value, govern
+        locally, recover from disruption, and cooperate with neighbouring groups.
+      </p>
+
+      <div class="rh-ecosystem-tags" style="margin-top: var(--space-10);">
+        {capabilities.map((item) => (
+          <span class="rh-status rh-status-local">{item}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Product families</p>
+
+      <h2 class="rh-section-title">
+        Products are appliances within the ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        Product families should be capability-aware, policy-governed,
+        validation-gated, and honest about current maturity.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {productFamilies.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-degraded">{item.status}</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/products">
+          Products
+        </a>
+        <a class="rh-button rh-button-secondary" href="/hardware">
+          Hardware
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Application families</p>
+
+      <h2 class="rh-section-title">
+        Applications are future services, not current promises.
+      </h2>
+
+      <p class="rh-section-lead">
+        Relay applications are future ecosystem concepts. They should be labelled
+        clearly until implemented, validated, documented, and supported.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {applicationFamilies.map((item) => (
+          <article class="rh-card">
+            <span class="rh-status rh-status-updating">Future</span>
+            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
+              {item.title}
+            </h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/developers">
+          Developers
+        </a>
+        <a class="rh-button rh-button-secondary" href="/status">
+          Status
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Ecosystem rules</p>
+
+      <h2 class="rh-section-title">
+        Growth must not undermine the mission.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub can grow into products, applications, services, communities,
+        federations, partners, and certification, but the core principles should
+        remain stable.
+      </p>
+
+      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+        {ecosystemRules.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Participation</p>
+
+      <h2 class="rh-section-title">
+        Different participants strengthen different parts of RelayHub.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should support individuals, households, communities, developers,
+        vendors, and partners without confusing participation with governance
+        authority or certification.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {participation.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/partners">
+          Partners
+        </a>
+        <a class="rh-button rh-button-secondary" href="/certification">
+          Certification
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Federation</p>
+
+        <h2 class="rh-section-title">
+          Interconnection without centralisation.
+        </h2>
+
+        <p class="rh-section-lead">
+          Federation should allow communities to cooperate voluntarily without
+          surrendering autonomy. A federation can share directories, knowledge,
+          marketplace visibility, emergency coordination, governance notices, or
+          other scoped services.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <h3 class="rh-card-title">Federation boundary</h3>
+        <p class="rh-card-text">
+          Federation must not imply total trust, automatic authority, mandatory
+          participation, or replacement of local community governance.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-secondary" href="/trust">
+            Trust model
+          </a>
+          <a class="rh-button rh-button-secondary" href="/community-guides">
+            Community guides
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Growth path</p>
+
+      <h2 class="rh-section-title">
+        Build carefully. Validate before expanding.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should grow from clear public explanation into validated
+        appliance behaviour, then community pilots, limited deployments, and
+        eventually a supported ecosystem.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {growthPath.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/roadmap">
+          Roadmap
+        </a>
+        <a class="rh-button rh-button-secondary" href="/validation">
+          Validation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Current status</p>
+
+        <h2 class="rh-section-title">
+          The ecosystem is being defined before it is broadly deployed.
+        </h2>
+
+        <p class="rh-section-lead">
+          RelayHub’s public ecosystem language is active. Product builds,
+          applications, certification, directories, marketplaces, and federations
+          remain planned, research, or architecture-stage until validated.
+        </p>
+      </div>
+
+      <article class="rh-card rh-card-dark">
+        <h3 class="rh-card-title">Follow the ecosystem</h3>
+        <p class="rh-card-text">
+          Register interest if you want updates about RelayOS, hardware, pilots,
+          applications, communities, partners, or future ecosystem services.
+        </p>
+
+        <div class="rh-actions">
+          <a class="rh-button rh-button-accent" href="/early-access">
+            Register interest
+          </a>
+          <a class="rh-button rh-button-secondary" href="/status">
+            Status
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
