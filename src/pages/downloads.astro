@@ -1,93 +1,218 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const documentDownloads = [
+const DOWNLOAD_BASE = "https://downloads.relayhub.tech";
+
+type DownloadStatus =
+  | "Final"
+  | "Current"
+  | "Preparing"
+  | "Drafting"
+  | "Planned"
+  | "Not released";
+
+type DownloadItem = {
+  title: string;
+  status: DownloadStatus;
+  type?: string;
+  version?: string;
+  description: string;
+  href?: string;
+  filename?: string;
+};
+
+type ReleaseDownloadItem = {
+  title: string;
+  status: DownloadStatus;
+  maturity: string;
+  description: string;
+  imageHref?: string;
+  imageFilename?: string;
+  checksumHref?: string;
+  checksumFilename?: string;
+  signatureHref?: string;
+  signatureFilename?: string;
+};
+
+const documentDownloads: DownloadItem[] = [
   {
-    title: "System Architecture Specification",
-    status: "Document available",
-    text: "Canonical architecture source for hardware classes, policy, recovery, validation, operational modes, and ecosystem design.",
+    title: "RelayHub Overview",
+    status: "Final",
+    type: "PDF",
+    version: "v0.2",
+    description:
+      "Plain-language introduction to RelayHub, RelayOS, local-first operation, recovery-first design, and the community infrastructure goal.",
+    href: `${DOWNLOAD_BASE}/docs/RelayHub-Overview-v0.2.pdf?v=1`,
+    filename: "RelayHub-Overview-v0.2.pdf",
   },
   {
-    title: "Product Requirements Document",
-    status: "Document available",
-    text: "Product-facing requirements for appliance behaviour, onboarding, recovery, support, validation, and user experience.",
+    title: "RelayHub Constitution",
+    status: "Final",
+    type: "PDF",
+    version: "Foundational, v1.0",
+    description:
+      "Highest-level governance document defining RelayHub’s constitutional authority, ecosystem purpose, rights, responsibilities, limits, institutional structure, and amendment rules.",
+    href: `${DOWNLOAD_BASE}/docs/RelayHub-Constitution-v1.0.pdf?v=1`,
+    filename: "RelayHub-Constitution-v1.0.pdf",
   },
   {
     title: "Purpose, Mission, Values & Principles",
-    status: "Document available",
-    text: "Foundational purpose and principles guiding the RelayHub ecosystem.",
+    status: "Final",
+    type: "PDF",
+    version: "Foundational",
+    description:
+      "Foundational RelayHub doctrine defining why the ecosystem exists, what it serves, and the values and principles that inform the Constitution, policies, architecture, and product decisions.",
+    href: `${DOWNLOAD_BASE}/docs/RelayHub-PurposeMissionValuesPrinciples.pdf?v=1`,
+    filename: "RelayHub-PurposeMissionValuesPrinciples.pdf",
+  },
+  {
+    title: "RelayHub Policy Registry",
+    status: "Final",
+    type: "PDF",
+    version: "Foundational, v0.2",
+    description:
+	    "Plain-language guide to the RelayHub Policy Registry, including policy IDs, lifecycle states, authority, validation, release gates, waivers, review processes, and how RelayHub keeps governance traceable.",
+    href: `${DOWNLOAD_BASE}/docs/RelayHub-PolicyRegistry-v0.2.pdf`,
+    filename: "RelayHub-PolicyRegistry-v0.2.pdf",
+  },
+  {
+    title: "System Architecture Specification",
+    status: "Preparing",
+    type: "PDF",
+    version: "v0.7",
+    description:
+      "Canonical architecture source for hardware classes, policy governance, recovery, validation, operational modes, and ecosystem design.",
+  },
+  {
+    title: "Product Requirements Document",
+    status: "Preparing",
+    type: "PDF",
+    version: "v0.3",
+    description:
+      "Product-facing requirements for appliance behaviour, QR onboarding, local web UI, recovery, support export, validation, and user experience.",
   },
   {
     title: "Governance & Policy Framework",
-    status: "Document available",
-    text: "Policy hierarchy, policy domains, enforcement expectations, validation, and governance lifecycle.",
+    status: "Preparing",
+    type: "PDF",
+    version: "v0.1",
+    description:
+      "Policy hierarchy, policy domains, enforcement expectations, validation requirements, and governance lifecycle.",
   },
   {
     title: "Branding & Identity Specification",
-    status: "Document available",
-    text: "Canonical RelayHub, RelayOS, product, application, community, federation, compatibility, and certification language.",
-  },
-  {
-    title: "Validation Plan",
-    status: "Planned",
-    text: "Future public validation plan covering evidence, release gates, hardware classes, recovery drills, and support readiness.",
+    status: "Preparing",
+    type: "PDF",
+    version: "v1.2",
+    description:
+      "Canonical RelayHub, RelayOS, product, application, community, federation, compatibility, and certification language.",
   },
 ];
 
-const mediaAssets = [
-  "Logo package",
-  "Brand colour palette",
-  "OpenGraph images",
-  "Product screenshots",
-  "Hardware photographs",
-  "Media kit",
-];
-
-const communityResources = [
-  "Community Quick Start",
-  "Community Pilot Checklist",
-  "Deployment Worksheet",
-  "Recovery Drill Worksheet",
-  "Trust and Membership Worksheet",
-  "Marketplace Steward Guide",
-  "Presentation Slides",
-  "Workshop Handouts",
-];
-
-const softwareDownloads = [
+const guideDownloads: DownloadItem[] = [
   {
-    title: "RelayOS Images",
+    title: "Home Node Quick Start",
     status: "Planned",
-    text: "Future appliance images for validated hardware classes.",
+    type: "PDF",
+    description:
+      "Beginner setup guide for plugging in a Home Node, scanning the QR code, claiming ownership, and reaching the dashboard.",
   },
   {
-    title: "Home Node Images",
+    title: "Recovery Guide",
     status: "Planned",
-    text: "Future Home Node builds after recovery, onboarding, and validation gates are satisfied.",
+    type: "PDF",
+    description:
+      "Offline-first recovery guidance covering rollback, local recovery, reset, transfer, and last-resort rebuild paths.",
   },
   {
-    title: "Infrastructure Node Images",
+    title: "Hardware Compatibility Guide",
     status: "Planned",
-    text: "Future infrastructure builds for validated bridge, gateway, DTN, and operator workflows.",
+    type: "PDF",
+    description:
+      "Hardware support states, validated classes, known limits, power notes, storage notes, and capability boundaries.",
   },
   {
-    title: "Recovery Images",
+    title: "Validation Guide",
     status: "Planned",
-    text: "Future recovery-focused images or bundles for safe restore and repair.",
-  },
-  {
-    title: "Offline Update Packages",
-    status: "Planned",
-    text: "Future signed offline update bundles after compatibility and rollback behaviour are validated.",
-  },
-  {
-    title: "Validation Tools",
-    status: "Planned",
-    text: "Future test tools for boot, setup, Reticulum, recovery, update, support export, and hardware validation.",
+    type: "PDF",
+    description:
+      "How RelayHub claims are tested, observed, reproduced, recovered, and promoted through release gates.",
   },
 ];
 
-const hardwareResources = [
+const releaseDownloads: ReleaseDownloadItem[] = [
+  {
+    title: "RelayOS Home Node Image",
+    status: "Not released",
+    maturity: "Future validated build",
+    description:
+      "No public RelayOS Home Node image is available yet. Images should only be published after boot, setup, recovery, rollback, support export, and hardware validation gates are satisfied.",
+  },
+  {
+    title: "RelayOS Infrastructure Node Image",
+    status: "Not released",
+    maturity: "Future infrastructure build",
+    description:
+      "Infrastructure images will require stronger validation because bridge, gateway, DTN, operator, and community deployment behaviours carry greater risk.",
+  },
+  {
+    title: "Offline Update Bundle",
+    status: "Not released",
+    maturity: "Future signed bundle",
+    description:
+      "Offline update packages must be signed, versioned, compatibility-checked, rollback-safe, and documented before public release.",
+  },
+];
+
+const brandDownloads: DownloadItem[] = [
+  {
+    title: "RelayHub Logo Pack",
+    status: "Planned",
+    type: "ZIP",
+    description:
+      "Approved RelayHub logo files for public, media, and community use once the brand pack is finalised.",
+  },
+  {
+    title: "RelayHub Brand Pack",
+    status: "Planned",
+    type: "ZIP",
+    description:
+      "Logos, colour references, social images, OpenGraph images, and approved usage notes.",
+  },
+  {
+    title: "Media Kit",
+    status: "Planned",
+    type: "ZIP",
+    description:
+      "Public media resources for journalists, presenters, community organisers, and partners.",
+  },
+];
+
+const fieldTrialDownloads: DownloadItem[] = [
+  {
+    title: "Pilot Program Pack",
+    status: "Planned",
+    type: "PDF",
+    description:
+      "Pilot readiness notes, participant expectations, onboarding flow, field observations, and feedback capture.",
+  },
+  {
+    title: "Field Trial Checklist",
+    status: "Planned",
+    type: "PDF",
+    description:
+      "Task checklist for testing setup, local-only operation, no-peers state, recovery, support export, and comprehension.",
+  },
+  {
+    title: "Recovery Drill Worksheet",
+    status: "Planned",
+    type: "PDF",
+    description:
+      "Worksheet for rehearsing recovery without assuming terminal access or live internet.",
+  },
+];
+
+const hardwareDownloads = [
   "Bills of materials",
   "Assembly guides",
   "Hardware compatibility lists",
@@ -99,155 +224,283 @@ const hardwareResources = [
 ];
 
 const downloadRules = [
-  "Downloads should be versioned.",
-  "Downloads should clearly show status.",
-  "Experimental files must be labelled experimental.",
-  "Product-supported files require validation evidence.",
-  "Software images must preserve recovery paths.",
-  "Offline updates must be signed and validated.",
-  "Hardware resources must not imply certification unless certified.",
-  "Documents should distinguish current, planned, experimental, and supported material.",
+  {
+    title: "Final files only",
+    text: "Only files marked Final and given a verified download URL receive an active download button.",
+  },
+  {
+    title: "Downloads must actually download",
+    text: "Active links use direct R2 URLs with download filenames. R2 objects must also be uploaded with Content-Disposition: attachment.",
+  },
+  {
+    title: "No dead public links",
+    text: "Preparing, Drafting, Planned, and Not released files are listed for transparency but do not expose broken links.",
+  },
+  {
+    title: "Version everything",
+    text: "Every public file should include a version, date, maturity state, or release label.",
+  },
+  {
+    title: "Do not imply support early",
+    text: "Experimental, planned, prototype, and unsupported files must be labelled clearly.",
+  },
+  {
+    title: "Keep releases verifiable",
+    text: "Software images should be accompanied by checksums, signatures, release notes, and recovery notes.",
+  },
+  {
+    title: "Separate public from private",
+    text: "Never publish private keys, support bundles, unpublished builds, recovery material, or user data in a public bucket.",
+  },
+  {
+    title: "Preserve recovery",
+    text: "Downloads must not encourage workflows that make rollback, reset, transfer, or recovery harder.",
+  },
+  {
+    title: "Tell the truth",
+    text: "Downloads should distinguish implemented, planned, experimental, compatible, certified, and product-supported material.",
+  },
 ];
+
+const r2Structure = [
+  "/docs/",
+  "/guides/",
+  "/releases/",
+  "/brand/",
+  "/media/",
+  "/field-trials/",
+  "/validation/",
+  "/hardware/",
+];
+
+const renderDownloadStatus = (status: DownloadStatus) => {
+  if (status === "Final") return "rh-download-status rh-download-status-available";
+  if (status === "Current") return "rh-download-status rh-download-status-available";
+  if (status === "Preparing") return "rh-download-status rh-download-status-preparing";
+  if (status === "Drafting") return "rh-download-status rh-download-status-preparing";
+  if (status === "Planned") return "rh-download-status rh-download-status-planned";
+  return "rh-download-status rh-download-status-muted";
+};
+
+const hasFinalDownload = (item: DownloadItem) => {
+  return item.status === "Final" && Boolean(item.href);
+};
+
+const getDownloadFilename = (item: DownloadItem) => {
+  if (item.filename) return item.filename;
+  if (!item.href) return undefined;
+
+  const cleanHref = item.href.split("?")[0];
+  const filename = cleanHref.split("/").pop();
+
+  return filename || undefined;
+};
+
+const getReleaseFilename = (href?: string, filename?: string) => {
+  if (filename) return filename;
+  if (!href) return undefined;
+
+  const cleanHref = href.split("?")[0];
+  const derivedFilename = cleanHref.split("/").pop();
+
+  return derivedFilename || undefined;
+};
 ---
 
 <BaseLayout
   title="Downloads | RelayHub"
-  description="RelayHub downloads hub for documents, media assets, community resources, future RelayOS images, hardware resources, validation tools, and release artefacts."
+  description="RelayHub downloads hub for final public documents, guides, brand assets, field trial resources, future RelayOS images, checksums, signatures, hardware resources, and validation artefacts."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
       <p class="rh-eyebrow">Downloads</p>
 
       <h1 class="rh-title">
-        Documents first. Software only when validated.
+        Public downloads for RelayHub.
       </h1>
 
       <p class="rh-subtitle">
-        This page is the future home for RelayHub documents, media assets,
-        community resources, hardware resources, validation artefacts, and
-        eventual RelayOS software releases.
+        Final files download directly. Draft, planned, preparing, and unreleased
+        files may be listed for transparency, but they do not receive active
+        download links until they are ready and verified.
       </p>
 
       <div class="rh-actions">
-        <a class="rh-button rh-button-primary" href="/docs">
-          Documentation
+        <a class="rh-button rh-button-primary" href="#documents">
+          View documents
         </a>
-        <a class="rh-button rh-button-secondary" href="/status">
-          Status
+        <a class="rh-button rh-button-secondary" href="#releases">
+          Release status
         </a>
       </div>
     </div>
   </section>
 
-  <section class="rh-section">
+  <section class="rh-section" id="documents">
     <div class="rh-container">
       <p class="rh-kicker">Documents</p>
 
       <h2 class="rh-section-title">
-        Foundational documents and future public artefacts.
+        Foundational RelayHub documents.
       </h2>
 
       <p class="rh-section-lead">
-        RelayHub begins with architecture, product requirements, governance,
-        values, policy, validation, and branding documents. Public download
-        links can be added here as documents are prepared for release.
+        Only final, verified files have active download buttons. Preparing or
+        planned documents are shown without links so the page does not expose
+        broken downloads.
       </p>
 
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+      <div class="rh-download-grid">
         {documentDownloads.map((item) => (
-          <article class="rh-card">
-            <span class="rh-status rh-status-local">{item.status}</span>
-            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-              {item.title}
-            </h3>
-            <p class="rh-card-text">{item.text}</p>
+          <article class="rh-download-card">
+            <div class="rh-download-card-top">
+              <span class={renderDownloadStatus(item.status)}>
+                {item.status}
+              </span>
+              {item.type && <span class="rh-download-type">{item.type}</span>}
+            </div>
+
+            <h3 class="rh-download-title">{item.title}</h3>
+
+            {item.version && <p class="rh-download-meta">{item.version}</p>}
+
+            <p class="rh-download-text">{item.description}</p>
+
+            <div class="rh-download-actions">
+              {hasFinalDownload(item) ? (
+                <a
+                  class="rh-download-button"
+                  href={item.href}
+                  download={getDownloadFilename(item)}
+                >
+                  Download
+                </a>
+              ) : (
+                <span class="rh-download-unavailable">
+                  Download not available yet
+                </span>
+              )}
+            </div>
           </article>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="rh-section rh-bg-soft">
-    <div class="rh-container rh-grid rh-grid-2">
-      <div>
-        <p class="rh-kicker">Media assets</p>
-
-        <h2 class="rh-section-title">
-          Brand and media resources.
-        </h2>
-
-        <p class="rh-section-lead">
-          Media assets should help journalists, presenters, community organisers,
-          and partners describe RelayHub consistently.
-        </p>
-
-        <div class="rh-actions">
-          <a class="rh-button rh-button-secondary" href="/media">
-            Media kit
-          </a>
-        </div>
-      </div>
-
-      <article class="rh-card">
-        <ul class="rh-download-list">
-          {mediaAssets.map((item) => <li>{item}</li>)}
-        </ul>
-      </article>
-    </div>
-  </section>
-
-  <section class="rh-section">
-    <div class="rh-container rh-grid rh-grid-2">
-      <div>
-        <p class="rh-kicker">Community resources</p>
-
-        <h2 class="rh-section-title">
-          Practical resources for future pilots and communities.
-        </h2>
-
-        <p class="rh-section-lead">
-          Community resources should help groups start small, test onboarding,
-          document lessons, practise recovery, and avoid false confidence before
-          scaling.
-        </p>
-
-        <div class="rh-actions">
-          <a class="rh-button rh-button-secondary" href="/community-guides">
-            Community guides
-          </a>
-        </div>
-      </div>
-
-      <article class="rh-card">
-        <ul class="rh-download-list">
-          {communityResources.map((item) => <li>{item}</li>)}
-        </ul>
-      </article>
-    </div>
-  </section>
-
-  <section class="rh-section rh-dark">
+  <section class="rh-section rh-bg-soft" id="guides">
     <div class="rh-container">
-      <p class="rh-kicker">Future software</p>
+      <p class="rh-kicker">Guides</p>
 
       <h2 class="rh-section-title">
-        No RelayOS images are available yet.
+        Practical guides for setup, recovery, hardware, and validation.
       </h2>
 
       <p class="rh-section-lead">
-        Software downloads should not appear until builds, recovery, update,
-        hardware compatibility, documentation, and validation boundaries are
-        ready.
+        RelayHub documentation should remain useful for ordinary people, not
+        just developers. Setup, recovery, and validation guidance should be
+        available offline wherever practical.
       </p>
 
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        {softwareDownloads.map((item) => (
-          <article class="rh-card rh-card-dark">
-            <span class="rh-status rh-status-degraded">{item.status}</span>
-            <h3 class="rh-card-title" style="margin-top: var(--space-5);">
-              {item.title}
-            </h3>
-            <p class="rh-card-text">{item.text}</p>
+      <div class="rh-download-grid rh-download-grid-2">
+        {guideDownloads.map((item) => (
+          <article class="rh-download-card">
+            <div class="rh-download-card-top">
+              <span class={renderDownloadStatus(item.status)}>
+                {item.status}
+              </span>
+              {item.type && <span class="rh-download-type">{item.type}</span>}
+            </div>
+
+            <h3 class="rh-download-title">{item.title}</h3>
+            <p class="rh-download-text">{item.description}</p>
+
+            <div class="rh-download-actions">
+              {hasFinalDownload(item) ? (
+                <a
+                  class="rh-download-button"
+                  href={item.href}
+                  download={getDownloadFilename(item)}
+                >
+                  Download
+                </a>
+              ) : (
+                <span class="rh-download-unavailable">
+                  Download not available yet
+                </span>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark" id="releases">
+    <div class="rh-container">
+      <p class="rh-kicker">RelayOS releases</p>
+
+      <h2 class="rh-section-title">
+        No public RelayOS images are available yet.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayOS images should not be published merely because a build exists.
+        A release must have a clear hardware class, support state, checksum,
+        signature, release notes, rollback path, and recovery path.
+      </p>
+
+      <div class="rh-download-grid">
+        {releaseDownloads.map((item) => (
+          <article class="rh-download-card rh-download-card-dark">
+            <div class="rh-download-card-top">
+              <span class={renderDownloadStatus(item.status)}>
+                {item.status}
+              </span>
+              <span class="rh-download-type">{item.maturity}</span>
+            </div>
+
+            <h3 class="rh-download-title">{item.title}</h3>
+            <p class="rh-download-text">{item.description}</p>
+
+            <div class="rh-download-actions rh-download-actions-stacked">
+              {item.imageHref ? (
+                <a
+                  class="rh-download-button"
+                  href={item.imageHref}
+                  download={getReleaseFilename(item.imageHref, item.imageFilename)}
+                >
+                  Download image
+                </a>
+              ) : (
+                <span class="rh-download-button rh-download-button-disabled">
+                  Image not available
+                </span>
+              )}
+
+              {item.checksumHref ? (
+                <a
+                  class="rh-download-link"
+                  href={item.checksumHref}
+                  download={getReleaseFilename(item.checksumHref, item.checksumFilename)}
+                >
+                  SHA256 checksum
+                </a>
+              ) : (
+                <span class="rh-download-link-muted">Checksum pending</span>
+              )}
+
+              {item.signatureHref ? (
+                <a
+                  class="rh-download-link"
+                  href={item.signatureHref}
+                  download={getReleaseFilename(item.signatureHref, item.signatureFilename)}
+                >
+                  Signature
+                </a>
+              ) : (
+                <span class="rh-download-link-muted">Signature pending</span>
+              )}
+            </div>
           </article>
         ))}
       </div>
@@ -263,7 +516,117 @@ const downloadRules = [
     </div>
   </section>
 
-  <section class="rh-section rh-bg-soft">
+  <section class="rh-section" id="brand">
+    <div class="rh-container">
+      <p class="rh-kicker">Brand and media</p>
+
+      <h2 class="rh-section-title">
+        Brand assets should keep RelayHub consistent.
+      </h2>
+
+      <p class="rh-section-lead">
+        Logos, colour references, media assets, and public identity material
+        should match the RelayHub brand and terminology rules.
+      </p>
+
+      <div class="rh-download-grid rh-download-grid-3">
+        {brandDownloads.map((item) => (
+          <article class="rh-download-card">
+            <div class="rh-download-card-top">
+              <span class={renderDownloadStatus(item.status)}>
+                {item.status}
+              </span>
+              {item.type && <span class="rh-download-type">{item.type}</span>}
+            </div>
+
+            <h3 class="rh-download-title">{item.title}</h3>
+            <p class="rh-download-text">{item.description}</p>
+
+            <div class="rh-download-actions">
+              {hasFinalDownload(item) ? (
+                <a
+                  class="rh-download-button"
+                  href={item.href}
+                  download={getDownloadFilename(item)}
+                >
+                  Download
+                </a>
+              ) : (
+                <span class="rh-download-unavailable">
+                  Download not available yet
+                </span>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/media">
+          Media page
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft" id="field-trials">
+    <div class="rh-container">
+      <p class="rh-kicker">Field trials</p>
+
+      <h2 class="rh-section-title">
+        Resources for pilots, testing, and real-world feedback.
+      </h2>
+
+      <p class="rh-section-lead">
+        Field trial files should help communities test onboarding, local-only
+        operation, no-peers behaviour, recovery, support export, and user
+        comprehension before scaling.
+      </p>
+
+      <div class="rh-download-grid rh-download-grid-3">
+        {fieldTrialDownloads.map((item) => (
+          <article class="rh-download-card">
+            <div class="rh-download-card-top">
+              <span class={renderDownloadStatus(item.status)}>
+                {item.status}
+              </span>
+              {item.type && <span class="rh-download-type">{item.type}</span>}
+            </div>
+
+            <h3 class="rh-download-title">{item.title}</h3>
+            <p class="rh-download-text">{item.description}</p>
+
+            <div class="rh-download-actions">
+              {hasFinalDownload(item) ? (
+                <a
+                  class="rh-download-button"
+                  href={item.href}
+                  download={getDownloadFilename(item)}
+                >
+                  Download
+                </a>
+              ) : (
+                <span class="rh-download-unavailable">
+                  Download not available yet
+                </span>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-secondary" href="/pilot-program">
+          Pilot program
+        </a>
+        <a class="rh-button rh-button-secondary" href="/field-trials">
+          Field trials
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="hardware">
     <div class="rh-container rh-grid rh-grid-2">
       <div>
         <p class="rh-kicker">Hardware resources</p>
@@ -273,7 +636,7 @@ const downloadRules = [
         </h2>
 
         <p class="rh-section-lead">
-          Future hardware resources should clearly identify whether they are
+          Future hardware downloads should clearly identify whether they are
           concept, experimental, compatible, verified, certified, or officially
           supported.
         </p>
@@ -281,6 +644,9 @@ const downloadRules = [
         <div class="rh-actions">
           <a class="rh-button rh-button-secondary" href="/hardware">
             Hardware
+          </a>
+          <a class="rh-button rh-button-secondary" href="/hardware-comparison">
+            Compare hardware
           </a>
           <a class="rh-button rh-button-secondary" href="/certification">
             Certification
@@ -290,7 +656,31 @@ const downloadRules = [
 
       <article class="rh-card">
         <ul class="rh-download-list">
-          {hardwareResources.map((item) => <li>{item}</li>)}
+          {hardwareDownloads.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft" id="cloudflare">
+    <div class="rh-container rh-grid rh-grid-2">
+      <div>
+        <p class="rh-kicker">Cloudflare R2 structure</p>
+
+        <h2 class="rh-section-title">
+          Upload files to the matching R2 folders.
+        </h2>
+
+        <p class="rh-section-lead">
+          This page assumes the public downloads bucket is available at
+          <strong> downloads.relayhub.tech</strong>. Upload files into these
+          folders so the links resolve cleanly.
+        </p>
+      </div>
+
+      <article class="rh-card">
+        <ul class="rh-download-list rh-mono-list">
+          {r2Structure.map((item) => <li>{item}</li>)}
         </ul>
       </article>
     </div>
@@ -310,10 +700,11 @@ const downloadRules = [
         support boundary, and recovery implications.
       </p>
 
-      <div class="rh-grid rh-grid-4" style="margin-top: var(--space-10);">
+      <div class="rh-download-grid rh-download-grid-3">
         {downloadRules.map((item) => (
           <article class="rh-card">
-            <p class="rh-card-text">{item}</p>
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
           </article>
         ))}
       </div>
@@ -326,18 +717,18 @@ const downloadRules = [
         <p class="rh-kicker">Current status</p>
 
         <h2 class="rh-section-title">
-          Downloads are being prepared as the project matures.
+          The downloads hub is ready for final public files.
         </h2>
 
         <p class="rh-section-lead">
-          The downloads hub is ready as a public structure. Documents, assets,
-          guides, software, and hardware resources can be added as they become
-          appropriate for public release.
+          Upload final files to Cloudflare R2 with Content-Disposition:
+          attachment. Once the public URL returns 200 and the attachment header
+          is present, add the verified URL to this page.
         </p>
       </div>
 
       <article class="rh-card rh-card-dark">
-        <h3 class="rh-card-title">Need something specific?</h3>
+        <h3 class="rh-card-title">Need a file?</h3>
         <p class="rh-card-text">
           Ask for documents, media assets, community resources, validation
           materials, or future software availability.
@@ -355,3 +746,266 @@ const downloadRules = [
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .rh-download-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin-top: var(--space-10);
+  }
+
+  .rh-download-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rh-download-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rh-download-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .rh-download-card-dark {
+    border-color: rgb(255 255 255 / 0.14);
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  .rh-download-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  .rh-download-status,
+  .rh-download-type {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .rh-download-status-available {
+    border: 1px solid rgb(22 163 74 / 0.25);
+    background: rgb(22 163 74 / 0.1);
+    color: rgb(21 128 61);
+  }
+
+  .rh-download-status-preparing {
+    border: 1px solid rgb(217 119 6 / 0.25);
+    background: rgb(217 119 6 / 0.1);
+    color: rgb(180 83 9);
+  }
+
+  .rh-download-status-planned {
+    border: 1px solid rgb(37 99 235 / 0.2);
+    background: rgb(37 99 235 / 0.08);
+    color: rgb(29 78 216);
+  }
+
+  .rh-download-status-muted {
+    border: 1px solid rgb(148 163 184 / 0.25);
+    background: rgb(148 163 184 / 0.1);
+    color: rgb(100 116 139);
+  }
+
+  .rh-download-type {
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-muted);
+  }
+
+  .rh-dark .rh-download-type,
+  .rh-download-card-dark .rh-download-type {
+    border-color: rgb(255 255 255 / 0.16);
+    background: rgb(255 255 255 / 0.08);
+    color: rgb(226 232 240);
+  }
+
+  .rh-download-title {
+    margin: 0;
+    color: var(--color-heading);
+    font-size: 1.15rem;
+    line-height: 1.25;
+  }
+
+  .rh-dark .rh-download-title,
+  .rh-download-card-dark .rh-download-title {
+    color: var(--rh-white);
+  }
+
+  .rh-download-meta {
+    margin: var(--space-2) 0 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .rh-dark .rh-download-meta,
+  .rh-download-card-dark .rh-download-meta {
+    color: rgb(203 213 225);
+  }
+
+  .rh-download-text {
+    margin: var(--space-4) 0 0;
+    color: var(--color-text);
+    line-height: 1.7;
+  }
+
+  .rh-dark .rh-download-text,
+  .rh-download-card-dark .rh-download-text {
+    color: rgb(226 232 240);
+  }
+
+  .rh-download-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-6);
+  }
+
+  .rh-download-actions-stacked {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rh-download-button,
+  .rh-download-link,
+  .rh-download-link-muted,
+  .rh-download-unavailable {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .rh-download-button {
+    min-height: 42px;
+    justify-content: center;
+    border: 1px solid var(--rh-navy-900);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    background: var(--rh-navy-900);
+    color: var(--rh-white);
+  }
+
+  .rh-download-button:hover {
+    transform: translateY(-1px);
+    background: var(--rh-navy-800, var(--rh-navy-900));
+    color: var(--rh-white);
+  }
+
+  .rh-download-button-disabled,
+  .rh-download-unavailable {
+    min-height: 42px;
+    justify-content: center;
+    cursor: not-allowed;
+    border: 1px dashed rgb(148 163 184 / 0.45);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    background: rgb(148 163 184 / 0.1);
+    color: rgb(100 116 139);
+  }
+
+  .rh-download-button-disabled:hover {
+    transform: none;
+    background: rgb(148 163 184 / 0.1);
+    color: rgb(100 116 139);
+  }
+
+  .rh-download-link {
+    color: var(--color-link);
+  }
+
+  .rh-download-link:hover {
+    color: var(--color-link-hover, var(--color-link));
+  }
+
+  .rh-download-link-muted {
+    color: var(--color-muted);
+  }
+
+  .rh-dark .rh-download-link,
+  .rh-download-card-dark .rh-download-link {
+    color: var(--rh-white);
+  }
+
+  .rh-dark .rh-download-link-muted,
+  .rh-download-card-dark .rh-download-link-muted {
+    color: rgb(148 163 184);
+  }
+
+  .rh-dark .rh-download-unavailable,
+  .rh-download-card-dark .rh-download-unavailable,
+  .rh-dark .rh-download-button-disabled,
+  .rh-download-card-dark .rh-download-button-disabled {
+    border-color: rgb(255 255 255 / 0.2);
+    background: rgb(255 255 255 / 0.08);
+    color: rgb(203 213 225);
+  }
+
+  .rh-download-list {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .rh-download-list li {
+    color: var(--color-text);
+    line-height: 1.6;
+  }
+
+  .rh-mono-list li {
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 960px) {
+    .rh-download-grid,
+    .rh-download-grid-2,
+    .rh-download-grid-3 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 680px) {
+    .rh-download-grid,
+    .rh-download-grid-2,
+    .rh-download-grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .rh-download-card-top {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>
