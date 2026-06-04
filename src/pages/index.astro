@@ -1,6 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
+const DOWNLOAD_BASE = "https://downloads.relayhub.tech";
+
+const relayHubOverviewDownload = {
+  href: `${DOWNLOAD_BASE}/docs/RelayHub-Overview-v0.2.pdf?v=1`,
+  filename: "RelayHub-Overview-v0.2.pdf",
+};
+
 const ecosystemLayers = [
   {
     title: "RelayHub",
@@ -161,6 +168,13 @@ const futureApps = [
       <div class="rh-actions">
         <a class="rh-button rh-button-primary" href="/early-access">
           Register interest
+        </a>
+        <a
+          class="rh-button rh-button-secondary"
+          href={relayHubOverviewDownload.href}
+          download={relayHubOverviewDownload.filename}
+        >
+          Download overview
         </a>
         <a class="rh-button rh-button-secondary" href="/how-it-works">
           How it works
@@ -680,11 +694,25 @@ const futureApps = [
         </article>
 
         <article class="rh-card">
-          <h3 class="rh-card-title">Support boundaries</h3>
+          <h3 class="rh-card-title">RelayHub Overview</h3>
           <p class="rh-card-text">
-            User-controlled support export, redaction by default, no hidden
-            remote control, and clear support levels.
+            Download the public overview document for a plain-language
+            introduction to RelayHub, RelayOS, local-first operation, recovery,
+            and the community infrastructure goal.
           </p>
+
+          <div class="rh-actions">
+            <a
+              class="rh-button rh-button-primary"
+              href={relayHubOverviewDownload.href}
+              download={relayHubOverviewDownload.filename}
+            >
+              Download overview
+            </a>
+            <a class="rh-button rh-button-secondary" href="/downloads">
+              All downloads
+            </a>
+          </div>
         </article>
       </div>
 

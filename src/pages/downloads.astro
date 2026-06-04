@@ -76,12 +76,24 @@ const documentDownloads: DownloadItem[] = [
     filename: "RelayHub-PolicyRegistry-v0.2.pdf",
   },
   {
-    title: "System Architecture Specification",
-    status: "Preparing",
+    title: "RelayHub System Architecture Specification",
+    status: "Final",
     type: "PDF",
-    version: "v0.7",
+    version: "v0.8",
     description:
-      "Canonical architecture source for hardware classes, policy governance, recovery, validation, operational modes, and ecosystem design.",
+      "Canonical technical architecture for RelayHub and RelayOS, defining hardware classes, capability governance, policy enforcement, Reticulum integration, recovery-first design, validation gates, product boundaries, and community infrastructure roles.",
+    href: `${DOWNLOAD_BASE}/docs/RelayHub-SystemArchitectureSpecification-v0.8.pdf`,
+    filename: "RelayHub-SystemArchitectureSpecification-v0.8.pdf",
+  },
+  {
+    title: "RelayOS Platform Architecture Specification",
+    status: "Final",
+    type: "PDF",
+    version: "v0.3",
+    description:
+      "Implementation architecture for RelayOS, defining the NixOS module structure, systemd service graph, Local API, state engine, policy engine, capability detection, recovery flows, update and rollback model, observability, support export, validation fixtures, release artefacts, and Relay Home MVP boundaries.",
+    href: `${DOWNLOAD_BASE}/docs/RelayOS-PlatformArchitectureSpecification-v0.3.pdf`,
+    filename: "RelayOS-PlatformArchitectureSpecification-v0.3.pdf",
   },
   {
     title: "Product Requirements Document",
