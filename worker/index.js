@@ -7,9 +7,20 @@ const RATE_LIMIT_MAX_REQUESTS = 5;
 const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
 const MIN_FORM_FILL_TIME_MS = 3000;
 
+const DOWNLOAD_ALLOWED_PREFIXES = ["docs/"];
+const DOWNLOAD_ALLOWED_EXTENSIONS = [".pdf", ".zip", ".txt", ".sha256", ".sig"];
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith("/download/")) {
+      if (request.method !== "GET" && request.method !== "HEAD") {
+        return methodNotAllowed("GET, HEAD");
+      }
+
+      return handleDownload(request, env, url);
+    }
 
     if (url.pathname === "/api/early-access") {
       if (request.method === "GET") {
@@ -70,6 +81,80 @@ export default {
     return env.ASSETS.fetch(request);
   },
 };
+
+async function handleDownload(request, env, url) {
+  const started = Date.now();
+  const key = getDownloadKey(url.pathname);
+
+  if (!isSafeDownloadKey(key)) {
+    return textResponse("Invalid or disallowed download path", 400);
+  }
+
+  const object = await env.RELAYHUB_DOWNLOADS.get(key);
+
+  if (!object) {
+    return textResponse("Download not found", 404);
+  }
+
+  env.DOWNLOAD_ANALYTICS?.writeDataPoint({
+    blobs: [
+      key,
+      request.headers.get("cf-ipcountry") ?? "unknown",
+      url.searchParams.get("utm_source") ?? "direct",
+      url.searchParams.get("utm_campaign") ?? "none",
+      request.headers.get("referer") ?? "none",
+      object.httpMetadata?.contentType ?? "unknown",
+    ],
+    doubles: [1, object.size, Date.now() - started],
+    indexes: [key],
+  });
+
+  const headers = new Headers();
+
+  object.writeHttpMetadata(headers);
+  headers.set("etag", object.httpEtag);
+  headers.set("cache-control", "public, max-age=3600");
+  headers.set("x-content-type-options", "nosniff");
+  headers.set("content-disposition", `attachment; filename="${safeDownloadFilename(key)}"`);
+
+  return new Response(request.method === "HEAD" ? null : object.body, {
+    status: 200,
+    headers,
+  });
+}
+
+function getDownloadKey(pathname) {
+  const raw = pathname.replace(/^\/download\/+/, "");
+
+  try {
+    return decodeURIComponent(raw).replace(/^\/+/, "");
+  } catch {
+    return "";
+  }
+}
+
+function isSafeDownloadKey(key) {
+  if (!key) return false;
+  if (key.includes("..")) return false;
+  if (key.includes("\\")) return false;
+  if (key.startsWith("/")) return false;
+  if (key.includes("//")) return false;
+
+  const hasAllowedPrefix = DOWNLOAD_ALLOWED_PREFIXES.some((prefix) =>
+    key.startsWith(prefix)
+  );
+
+  const hasAllowedExtension = DOWNLOAD_ALLOWED_EXTENSIONS.some((extension) =>
+    key.toLowerCase().endsWith(extension)
+  );
+
+  return hasAllowedPrefix && hasAllowedExtension;
+}
+
+function safeDownloadFilename(key) {
+  const raw = key.split("/").pop() || "download";
+  return raw.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
 
 async function handleEarlyAccessPost(request, env, url) {
   try {
