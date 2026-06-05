@@ -78,6 +78,14 @@ export default {
       return methodNotAllowed("GET");
     }
 
+    if (url.pathname === "/api/admin/downloads") {
+      if (request.method === "GET") {
+        return handleDownloadAnalyticsAdminJson(request, env, url);
+      }
+
+      return methodNotAllowed("GET");
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
@@ -87,26 +95,40 @@ async function handleDownload(request, env, url) {
   const key = getDownloadKey(url.pathname);
 
   if (!isSafeDownloadKey(key)) {
+    recordDownloadAnalytics(request, env, url, {
+      key: key || "invalid",
+      statusCode: 400,
+      outcome: "invalid",
+      contentType: "text/plain",
+      size: 0,
+      started,
+    });
+
     return textResponse("Invalid or disallowed download path", 400);
   }
 
   const object = await env.RELAYHUB_DOWNLOADS.get(key);
 
   if (!object) {
+    recordDownloadAnalytics(request, env, url, {
+      key,
+      statusCode: 404,
+      outcome: "not_found",
+      contentType: "text/plain",
+      size: 0,
+      started,
+    });
+
     return textResponse("Download not found", 404);
   }
 
-  env.DOWNLOAD_ANALYTICS?.writeDataPoint({
-    blobs: [
-      key,
-      request.headers.get("cf-ipcountry") ?? "unknown",
-      url.searchParams.get("utm_source") ?? "direct",
-      url.searchParams.get("utm_campaign") ?? "none",
-      request.headers.get("referer") ?? "none",
-      object.httpMetadata?.contentType ?? "unknown",
-    ],
-    doubles: [1, object.size, Date.now() - started],
-    indexes: [key],
+  recordDownloadAnalytics(request, env, url, {
+    key,
+    statusCode: 200,
+    outcome: "success",
+    contentType: object.httpMetadata?.contentType ?? "unknown",
+    size: object.size,
+    started,
   });
 
   const headers = new Headers();
@@ -120,6 +142,29 @@ async function handleDownload(request, env, url) {
   return new Response(request.method === "HEAD" ? null : object.body, {
     status: 200,
     headers,
+  });
+}
+
+function recordDownloadAnalytics(request, env, url, event) {
+  env.DOWNLOAD_ANALYTICS?.writeDataPoint({
+    blobs: [
+      event.key,
+      request.headers.get("cf-ipcountry") ?? "unknown",
+      url.searchParams.get("utm_source") ?? "direct",
+      url.searchParams.get("utm_campaign") ?? "none",
+      request.headers.get("referer") ?? "none",
+      event.contentType,
+      event.outcome,
+      String(event.statusCode),
+    ],
+    doubles: [
+      1,
+      event.size,
+      Date.now() - event.started,
+      event.outcome === "success" ? 1 : 0,
+      event.outcome === "success" ? 0 : 1,
+    ],
+    indexes: [event.key],
   });
 }
 
@@ -306,6 +351,242 @@ async function handleContactPost(request, env, url) {
     console.error("Contact submission failed:", error);
     return redirect(url, "/contact?error=submission-failed");
   }
+}
+
+async function handleDownloadAnalyticsAdminJson(request, env, url) {
+  if (!isAdminAuthorized(request, env, url)) {
+    return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
+  const days = Math.min(
+    Math.max(Number(url.searchParams.get("days") || "30"), 1),
+    90
+  );
+
+  try {
+    const queries = {
+      summary: `
+        SELECT
+          SUM(_sample_interval * double1) AS requests,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures,
+          SUM(_sample_interval * double2) AS bytes,
+          AVG(double3) AS avg_duration_ms
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        FORMAT JSON
+      `,
+
+      documents: `
+        SELECT
+          blob1 AS document,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures,
+          SUM(_sample_interval * double2) AS bytes,
+          AVG(double3) AS avg_duration_ms
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY document
+        ORDER BY downloads DESC, failures DESC
+        LIMIT 50
+        FORMAT JSON
+      `,
+
+      daily: `
+        SELECT
+          toStartOfDay(timestamp) AS day,
+          SUM(_sample_interval * double1) AS requests,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY day
+        ORDER BY day ASC
+        FORMAT JSON
+      `,
+
+      countries: `
+        SELECT
+          blob2 AS country,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY country
+        ORDER BY downloads DESC, failures DESC
+        LIMIT 20
+        FORMAT JSON
+      `,
+
+      sources: `
+        SELECT
+          blob3 AS source,
+          blob4 AS campaign,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY source, campaign
+        ORDER BY downloads DESC, failures DESC
+        LIMIT 30
+        FORMAT JSON
+      `,
+
+      referrers: `
+        SELECT
+          blob5 AS referrer,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY referrer
+        ORDER BY downloads DESC, failures DESC
+        LIMIT 20
+        FORMAT JSON
+      `,
+
+      errors: `
+        SELECT
+          blob1 AS document,
+          blob7 AS outcome,
+          blob8 AS status_code,
+          SUM(_sample_interval * double5) AS failures
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+          AND double5 > 0
+        GROUP BY document, outcome, status_code
+        ORDER BY failures DESC
+        LIMIT 50
+        FORMAT JSON
+      `,
+
+      contentTypes: `
+        SELECT
+          blob6 AS content_type,
+          SUM(_sample_interval * double1) AS requests,
+          SUM(_sample_interval * double4) AS downloads,
+          SUM(_sample_interval * double5) AS failures
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY content_type
+        ORDER BY requests DESC
+        LIMIT 20
+        FORMAT JSON
+      `,
+
+      outcomes: `
+        SELECT
+          blob7 AS outcome,
+          blob8 AS status_code,
+          SUM(_sample_interval * double1) AS requests
+        FROM relayhub_downloads
+        WHERE timestamp > NOW() - INTERVAL '${days}' DAY
+        GROUP BY outcome, status_code
+        ORDER BY requests DESC
+        FORMAT JSON
+      `,
+    };
+
+    const [
+      summary,
+      documents,
+      daily,
+      countries,
+      sources,
+      referrers,
+      errors,
+      contentTypes,
+      outcomes,
+    ] = await Promise.all([
+      queryAnalyticsEngine(env, queries.summary),
+      queryAnalyticsEngine(env, queries.documents),
+      queryAnalyticsEngine(env, queries.daily),
+      queryAnalyticsEngine(env, queries.countries),
+      queryAnalyticsEngine(env, queries.sources),
+      queryAnalyticsEngine(env, queries.referrers),
+      queryAnalyticsEngine(env, queries.errors),
+      queryAnalyticsEngine(env, queries.contentTypes),
+      queryAnalyticsEngine(env, queries.outcomes),
+    ]);
+
+    return jsonResponse({
+      days,
+      summary: summary[0] || {
+        requests: 0,
+        downloads: 0,
+        failures: 0,
+        bytes: 0,
+        avg_duration_ms: 0,
+      },
+      documents,
+      daily,
+      countries,
+      sources,
+      referrers,
+      errors,
+      contentTypes,
+      outcomes,
+    });
+  } catch (error) {
+    console.error("Download analytics admin query failed:", error);
+
+    return jsonResponse(
+      {
+        error: "Download analytics query failed",
+        detail: "Check CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_ANALYTICS_TOKEN.",
+      },
+      500
+    );
+  }
+}
+
+async function queryAnalyticsEngine(env, query) {
+  if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_ANALYTICS_TOKEN) {
+    throw new Error("Analytics Engine API credentials are not configured.");
+  }
+
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/analytics_engine/sql`,
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${env.CLOUDFLARE_ANALYTICS_TOKEN}`,
+        "content-type": "text/plain; charset=UTF-8",
+      },
+      body: query,
+    }
+  );
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    console.error("Analytics Engine SQL API error:", text);
+    throw new Error("Analytics Engine SQL API request failed.");
+  }
+
+  return parseAnalyticsEngineResponse(text);
+}
+
+function parseAnalyticsEngineResponse(text) {
+  if (!text.trim()) {
+    return [];
+  }
+
+  const parsed = JSON.parse(text);
+
+  if (Array.isArray(parsed)) {
+    return parsed;
+  }
+
+  if (Array.isArray(parsed.data)) {
+    return parsed.data;
+  }
+
+  if (Array.isArray(parsed.results)) {
+    return parsed.results;
+  }
+
+  return [];
 }
 
 async function verifyTurnstile(form, env, ip) {

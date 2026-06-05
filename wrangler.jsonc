@@ -13,6 +13,10 @@
     "binding": "ASSETS"
   },
 
+  "vars": {
+    "CLOUDFLARE_ACCOUNT_ID": "352103b7d81e95afd64f6bd38d129ef6"
+  },
+
   "send_email": [
     {
       "name": "RELAYHUB_EMAIL",

@@ -1,0 +1,916 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Download Analytics | RelayHub Admin"
+  description="RelayHub private download analytics dashboard."
+>
+  <section class="rh-section rh-admin-downloads">
+    <div class="rh-container">
+      <p class="rh-kicker">RelayHub Admin</p>
+
+      <div class="rh-admin-header">
+        <div>
+          <h1 class="rh-title">Download Analytics</h1>
+          <p class="rh-section-lead">
+            Private dashboard for tracked RelayHub document downloads, broken
+            links, campaign performance, bandwidth, and operational health.
+          </p>
+        </div>
+
+        <div class="rh-admin-status" id="analytics-status">
+          Not loaded
+        </div>
+      </div>
+
+      <div class="rh-card rh-admin-controls">
+        <label>
+          <span>Admin token</span>
+          <input id="admin-token" type="password" autocomplete="off" />
+        </label>
+
+        <label>
+          <span>Period</span>
+          <select id="days">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Filter documents</span>
+          <input
+            id="document-filter"
+            type="search"
+            placeholder="Search filename..."
+            autocomplete="off"
+          />
+        </label>
+
+        <button class="rh-button rh-button-primary" id="load-downloads">
+          Load analytics
+        </button>
+      </div>
+
+      <div class="rh-admin-action-row">
+        <button class="rh-button rh-button-secondary" id="export-csv" disabled>
+          Export CSV
+        </button>
+        <button class="rh-button rh-button-secondary" id="copy-summary" disabled>
+          Copy summary
+        </button>
+        <button class="rh-button rh-button-secondary" id="print-report" disabled>
+          Print report
+        </button>
+      </div>
+
+      <div id="downloads-output" class="rh-admin-output">
+        <article class="rh-card">
+          Enter the admin token and load analytics.
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .rh-admin-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1.5rem;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+
+    .rh-admin-status {
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      background: var(--color-surface);
+    }
+
+    .rh-admin-controls {
+      display: grid;
+      grid-template-columns: 1.5fr 0.8fr 1.2fr auto;
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 1rem;
+    }
+
+    .rh-admin-controls label {
+      display: grid;
+      gap: 0.35rem;
+      font-weight: 700;
+    }
+
+    .rh-admin-controls input,
+    .rh-admin-controls select {
+      width: 100%;
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      padding: 0.8rem 0.9rem;
+      font: inherit;
+    }
+
+    .rh-admin-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .rh-admin-action-row button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .rh-admin-output {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .rh-admin-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .rh-admin-metric {
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .rh-admin-metric span {
+      color: var(--color-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .rh-admin-metric strong {
+      font-size: clamp(1.35rem, 3vw, 2.2rem);
+      line-height: 1;
+      word-break: break-word;
+    }
+
+    .rh-admin-section {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .rh-admin-section-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: baseline;
+    }
+
+    .rh-admin-section-header p {
+      margin: 0;
+      color: var(--color-muted);
+    }
+
+    .rh-admin-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .rh-admin-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .rh-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+    }
+
+    .rh-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .rh-table th,
+    .rh-table td {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+
+    .rh-table th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-muted);
+      background: var(--color-surface-soft);
+    }
+
+    .rh-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .rh-admin-note {
+      color: var(--color-muted);
+      font-size: 0.95rem;
+    }
+
+    .rh-admin-error {
+      border-color: #b42318;
+    }
+
+    .rh-admin-warning {
+      border-color: #b54708;
+    }
+
+    .rh-admin-ok {
+      border-color: #067647;
+    }
+
+    .rh-admin-pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .rh-admin-alert-list {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .rh-admin-alert-list li {
+      border: 1px solid var(--color-border);
+      border-radius: 0.9rem;
+      padding: 0.85rem 1rem;
+      background: var(--color-surface);
+    }
+
+    .rh-admin-mini-list {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .rh-admin-mini-list li {
+      margin: 0.35rem 0;
+    }
+
+    @media (max-width: 1100px) {
+      .rh-admin-summary-grid,
+      .rh-admin-grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
+      .rh-admin-header {
+        display: grid;
+      }
+
+      .rh-admin-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .rh-admin-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .rh-admin-summary-grid,
+      .rh-admin-grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      .rh-admin-controls,
+      .rh-admin-action-row,
+      .rh-admin-status {
+        display: none;
+      }
+
+      .rh-section {
+        padding-top: 1rem;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    const tokenInput = document.querySelector("#admin-token");
+    const daysInput = document.querySelector("#days");
+    const filterInput = document.querySelector("#document-filter");
+    const button = document.querySelector("#load-downloads");
+    const output = document.querySelector("#downloads-output");
+    const statusBadge = document.querySelector("#analytics-status");
+    const exportCsvButton = document.querySelector("#export-csv");
+    const copySummaryButton = document.querySelector("#copy-summary");
+    const printReportButton = document.querySelector("#print-report");
+
+    if (
+      !tokenInput ||
+      !daysInput ||
+      !filterInput ||
+      !button ||
+      !output ||
+      !statusBadge ||
+      !exportCsvButton ||
+      !copySummaryButton ||
+      !printReportButton
+    ) {
+      throw new Error("Download analytics page failed to initialise.");
+    }
+
+    let latestData = null;
+
+    const storedToken = sessionStorage.getItem("relayhub_admin_token");
+
+    if (storedToken) {
+      tokenInput.value = storedToken;
+    }
+
+    const escapeHtml = (value) =>
+      String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    const formatNumber = (value) =>
+      Number(value || 0).toLocaleString();
+
+    const formatPercent = (value) =>
+      `${Number(value || 0).toFixed(1)}%`;
+
+    const formatMs = (value) =>
+      `${Number(value || 0).toFixed(0)} ms`;
+
+    const formatBytes = (bytes) => {
+      const value = Number(bytes || 0);
+
+      if (value < 1024) return `${value} B`;
+      if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+      if (value < 1024 * 1024 * 1024) {
+        return `${(value / 1024 / 1024).toFixed(1)} MB`;
+      }
+
+      return `${(value / 1024 / 1024 / 1024).toFixed(1)} GB`;
+    };
+
+    const filenameOnly = (value) => {
+      const text = String(value || "");
+      return text.split("/").pop() || text;
+    };
+
+    const normaliseDay = (value) => {
+      if (!value) return "";
+      return String(value).replace("T00:00:00Z", "").replace(" 00:00:00", "");
+    };
+
+    const safeRows = (rows) => (Array.isArray(rows) ? rows : []);
+
+    const table = (rows, columns) => {
+      const safe = safeRows(rows);
+
+      if (safe.length === 0) {
+        return `<p class="rh-admin-note">No data yet.</p>`;
+      }
+
+      return `
+        <div class="rh-table-wrap">
+          <table class="rh-table">
+            <thead>
+              <tr>
+                ${columns
+                  .map((column) => `<th>${escapeHtml(column.label)}</th>`)
+                  .join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${safe
+                .map(
+                  (row) => `
+                    <tr>
+                      ${columns
+                        .map((column) => {
+                          const rawValue = row[column.key];
+                          const rendered = column.render
+                            ? column.render(rawValue, row)
+                            : rawValue ?? "";
+
+                          return `<td>${escapeHtml(rendered)}</td>`;
+                        })
+                        .join("")}
+                    </tr>
+                  `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    };
+
+    const metricCard = (label, value, note = "") => `
+      <article class="rh-card rh-admin-metric">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        ${note ? `<p class="rh-admin-note">${escapeHtml(note)}</p>` : ""}
+      </article>
+    `;
+
+    const setStatus = (message) => {
+      statusBadge.textContent = message;
+    };
+
+    const enableActions = (enabled) => {
+      exportCsvButton.disabled = !enabled;
+      copySummaryButton.disabled = !enabled;
+      printReportButton.disabled = !enabled;
+    };
+
+    const filteredDocuments = (documents) => {
+      const filter = filterInput.value.trim().toLowerCase();
+
+      if (!filter) return safeRows(documents);
+
+      return safeRows(documents).filter((row) =>
+        String(row.document || "").toLowerCase().includes(filter)
+      );
+    };
+
+    const getFailureRate = (summary) => {
+      const requests = Number(summary.requests || 0);
+      const failures = Number(summary.failures || 0);
+
+      if (!requests) return 0;
+
+      return (failures / requests) * 100;
+    };
+
+    const getSuccessRate = (summary) => {
+      const requests = Number(summary.requests || 0);
+      const downloads = Number(summary.downloads || 0);
+
+      if (!requests) return 0;
+
+      return (downloads / requests) * 100;
+    };
+
+    const buildAlerts = (data, documents) => {
+      const summary = data.summary || {};
+      const alerts = [];
+      const failureRate = getFailureRate(summary);
+      const failures = Number(summary.failures || 0);
+      const avgMs = Number(summary.avg_duration_ms || 0);
+
+      if (failures > 0) {
+        alerts.push({
+          level: "warning",
+          title: "Failed downloads detected",
+          text: `${formatNumber(failures)} failed request(s) were recorded in the selected period.`,
+        });
+      }
+
+      if (failureRate >= 10) {
+        alerts.push({
+          level: "error",
+          title: "High failure rate",
+          text: `${formatPercent(failureRate)} of download requests failed. Check broken links and R2 object names.`,
+        });
+      }
+
+      if (avgMs >= 1000) {
+        alerts.push({
+          level: "warning",
+          title: "Slow average response",
+          text: `Average response time is ${formatMs(avgMs)}. Check R2 response behaviour or large files.`,
+        });
+      }
+
+      const noDownloadRows = documents.filter(
+        (row) => Number(row.downloads || 0) === 0 && Number(row.failures || 0) > 0
+      );
+
+      if (noDownloadRows.length > 0) {
+        alerts.push({
+          level: "error",
+          title: "Broken document links likely",
+          text: `${noDownloadRows.length} document key(s) produced failures but no successful downloads.`,
+        });
+      }
+
+      if (alerts.length === 0) {
+        alerts.push({
+          level: "ok",
+          title: "No operational download issues detected",
+          text: "No failed downloads or severe response problems were detected in this period.",
+        });
+      }
+
+      return alerts;
+    };
+
+    const renderAlerts = (alerts) => `
+      <ul class="rh-admin-alert-list">
+        ${alerts
+          .map((alert) => {
+            const klass =
+              alert.level === "error"
+                ? "rh-admin-error"
+                : alert.level === "warning"
+                  ? "rh-admin-warning"
+                  : "rh-admin-ok";
+
+            return `
+              <li class="${klass}">
+                <strong>${escapeHtml(alert.title)}</strong>
+                <p class="rh-admin-note">${escapeHtml(alert.text)}</p>
+              </li>
+            `;
+          })
+          .join("")}
+      </ul>
+    `;
+
+    const renderDashboard = () => {
+      if (!latestData) {
+        output.innerHTML = `
+          <article class="rh-card">
+            Enter the admin token and load analytics.
+          </article>
+        `;
+        enableActions(false);
+        return;
+      }
+
+      const data = latestData;
+
+      const summary = data.summary || {
+        requests: 0,
+        downloads: 0,
+        failures: 0,
+        bytes: 0,
+        avg_duration_ms: 0,
+      };
+
+      const documents = filteredDocuments(data.documents);
+      const allDocuments = safeRows(data.documents);
+      const alerts = buildAlerts(data, allDocuments);
+
+      const topDocument = documents?.[0]?.document
+        ? filenameOnly(documents[0].document)
+        : "None yet";
+
+      const successRate = getSuccessRate(summary);
+      const failureRate = getFailureRate(summary);
+
+      output.innerHTML = `
+        <section class="rh-admin-section">
+          <div class="rh-admin-summary-grid">
+            ${metricCard("Requests", formatNumber(summary.requests), "All tracked download requests")}
+            ${metricCard("Downloads", formatNumber(summary.downloads), "Successful R2 responses")}
+            ${metricCard("Failures", formatNumber(summary.failures), `${formatPercent(failureRate)} failure rate`)}
+            ${metricCard("Bandwidth", formatBytes(summary.bytes), "Successful file bytes served")}
+            ${metricCard("Avg response", formatMs(summary.avg_duration_ms), `${formatPercent(successRate)} success rate`)}
+          </div>
+        </section>
+
+        <section class="rh-admin-grid-2">
+          <article class="rh-card rh-admin-section">
+            <div class="rh-admin-section-header">
+              <div>
+                <h2>Operational alerts</h2>
+                <p>Broken links, 404s, invalid paths, and response warnings.</p>
+              </div>
+              <span class="rh-admin-pill">${escapeHtml(data.days)} days</span>
+            </div>
+            ${renderAlerts(alerts)}
+          </article>
+
+          <article class="rh-card rh-admin-section">
+            <div class="rh-admin-section-header">
+              <div>
+                <h2>Privacy posture</h2>
+                <p>What this dashboard does and does not collect.</p>
+              </div>
+            </div>
+
+            <ul class="rh-admin-mini-list">
+              <li>Tracks document key, country, referrer, campaign, status, content type, size, and response time.</li>
+              <li>Does not intentionally store names, email addresses, message contents, account identities, or file contents.</li>
+              <li>Uses coarse request metadata for operational observability and campaign measurement.</li>
+              <li>Failed downloads are recorded so broken links can be fixed quickly.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="rh-card rh-admin-section">
+          <div class="rh-admin-section-header">
+            <div>
+              <h2>Document catalogue</h2>
+              <p>${documents.length} document rows shown. Top document: ${escapeHtml(topDocument)}.</p>
+            </div>
+            <span class="rh-admin-pill">${escapeHtml(data.days)} days</span>
+          </div>
+
+          ${table(documents, [
+            { key: "document", label: "Document", render: filenameOnly },
+            { key: "downloads", label: "Downloads", render: formatNumber },
+            { key: "failures", label: "Failures", render: formatNumber },
+            { key: "bytes", label: "Bandwidth", render: formatBytes },
+            { key: "avg_duration_ms", label: "Avg response", render: formatMs },
+          ])}
+        </section>
+
+        <section class="rh-card rh-admin-section">
+          <div class="rh-admin-section-header">
+            <div>
+              <h2>Failed downloads</h2>
+              <p>Use this to catch broken links, missing R2 objects, bad paths, or invalid download URLs.</p>
+            </div>
+          </div>
+
+          ${table(data.errors, [
+            { key: "document", label: "Requested key", render: filenameOnly },
+            { key: "outcome", label: "Outcome" },
+            { key: "status_code", label: "Status" },
+            { key: "failures", label: "Failures", render: formatNumber },
+          ])}
+        </section>
+
+        <section class="rh-admin-grid-2">
+          <article class="rh-card rh-admin-section">
+            <div class="rh-admin-section-header">
+              <div>
+                <h2>Outcomes</h2>
+                <p>Success, not-found, and invalid request distribution.</p>
+              </div>
+            </div>
+
+            ${table(data.outcomes, [
+              { key: "outcome", label: "Outcome" },
+              { key: "status_code", label: "Status" },
+              { key: "requests", label: "Requests", render: formatNumber },
+            ])}
+          </article>
+
+          <article class="rh-card rh-admin-section">
+            <div class="rh-admin-section-header">
+              <div>
+                <h2>Content types</h2>
+                <p>Useful for confirming PDFs and support files are served correctly.</p>
+              </div>
+            </div>
+
+            ${table(data.contentTypes, [
+              { key: "content_type", label: "Content type" },
+              { key: "requests", label: "Requests", render: formatNumber },
+              { key: "downloads", label: "Downloads", render: formatNumber },
+              { key: "failures", label: "Failures", render: formatNumber },
+            ])}
+          </article>
+        </section>
+
+        <section class="rh-card rh-admin-section">
+          <div class="rh-admin-section-header">
+            <div>
+              <h2>Daily trend</h2>
+              <p>Requests, successful downloads, and failures over the selected period.</p>
+            </div>
+          </div>
+
+          ${table(data.daily, [
+            { key: "day", label: "Day", render: normaliseDay },
+            { key: "requests", label: "Requests", render: formatNumber },
+            { key: "downloads", label: "Downloads", render: formatNumber },
+            { key: "failures", label: "Failures", render: formatNumber },
+          ])}
+        </section>
+
+        <section class="rh-admin-grid-2">
+          <article class="rh-card rh-admin-section">
+            <div class="rh-admin-section-header">
+              <div>
+                <h2>Countries</h2>
+                <p>Approximate country from Cloudflare request metadata.</p>
+              </div>
+            </div>
+
+            ${table(data.countries, [
+              { key: "country", label: "Country" },
+              { key: "downloads", label: "Downloads", render: formatNumber },
+              { key: "failures", label: "Failures", render: formatNumber },
+            ])}
+          </article>
+
+          <article class="rh-card rh-admin-section">
+            <div class="rh-admin-section-header">
+              <div>
+                <h2>Sources and campaigns</h2>
+                <p>Uses UTM values from download links.</p>
+              </div>
+            </div>
+
+            ${table(data.sources, [
+              { key: "source", label: "Source" },
+              { key: "campaign", label: "Campaign" },
+              { key: "downloads", label: "Downloads", render: formatNumber },
+              { key: "failures", label: "Failures", render: formatNumber },
+            ])}
+          </article>
+        </section>
+
+        <section class="rh-card rh-admin-section">
+          <div class="rh-admin-section-header">
+            <div>
+              <h2>Referrers</h2>
+              <p>Where visitors came from before downloading.</p>
+            </div>
+          </div>
+
+          ${table(data.referrers, [
+            { key: "referrer", label: "Referrer" },
+            { key: "downloads", label: "Downloads", render: formatNumber },
+            { key: "failures", label: "Failures", render: formatNumber },
+          ])}
+        </section>
+      `;
+
+      enableActions(true);
+    };
+
+    const loadAnalytics = async () => {
+      const token = tokenInput.value.trim();
+      const days = daysInput.value;
+
+      if (!token) {
+        output.innerHTML = `
+          <article class="rh-card rh-admin-error">
+            <p>Please enter the admin token.</p>
+          </article>
+        `;
+        setStatus("Missing token");
+        enableActions(false);
+        return;
+      }
+
+      sessionStorage.setItem("relayhub_admin_token", token);
+
+      button.disabled = true;
+      button.textContent = "Loading…";
+      setStatus("Loading");
+      output.innerHTML = `
+        <article class="rh-card">
+          <p>Loading download analytics…</p>
+        </article>
+      `;
+
+      try {
+        const response = await fetch(`/api/admin/downloads?days=${encodeURIComponent(days)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          output.innerHTML = `
+            <article class="rh-card rh-admin-error">
+              <h2>Failed to load analytics</h2>
+              <p>Status: ${escapeHtml(response.status)}</p>
+              <p class="rh-admin-note">
+                Check the admin token, Analytics Engine API token, Worker logs, and Analytics Engine dataset name.
+              </p>
+            </article>
+          `;
+          setStatus(`Error ${response.status}`);
+          enableActions(false);
+          return;
+        }
+
+        latestData = await response.json();
+        setStatus(`Loaded ${new Date().toLocaleTimeString()}`);
+        renderDashboard();
+      } catch (error) {
+        console.error(error);
+        output.innerHTML = `
+          <article class="rh-card rh-admin-error">
+            <h2>Download analytics failed</h2>
+            <p>The dashboard could not load data from the admin API.</p>
+          </article>
+        `;
+        setStatus("Failed");
+        enableActions(false);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Load analytics";
+      }
+    };
+
+    const toCsv = (rows) => {
+      const safe = safeRows(rows);
+
+      if (safe.length === 0) return "";
+
+      const headers = Array.from(
+        safe.reduce((set, row) => {
+          Object.keys(row).forEach((key) => set.add(key));
+          return set;
+        }, new Set())
+      );
+
+      const escapeCsv = (value) =>
+        `"${String(value ?? "").replaceAll('"', '""')}"`;
+
+      return [
+        headers.map(escapeCsv).join(","),
+        ...safe.map((row) =>
+          headers.map((header) => escapeCsv(row[header])).join(",")
+        ),
+      ].join("\r\n");
+    };
+
+    const downloadTextFile = (filename, content, type = "text/plain") => {
+      const blob = new Blob([content], { type });
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = href;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(href);
+    };
+
+    exportCsvButton.addEventListener("click", () => {
+      if (!latestData) return;
+
+      const sections = [
+        ["documents", latestData.documents],
+        ["daily", latestData.daily],
+        ["countries", latestData.countries],
+        ["sources", latestData.sources],
+        ["referrers", latestData.referrers],
+        ["errors", latestData.errors],
+        ["contentTypes", latestData.contentTypes],
+        ["outcomes", latestData.outcomes],
+      ];
+
+      const combined = sections
+        .map(([name, rows]) => {
+          const csv = toCsv(rows);
+          return csv ? `# ${name}\r\n${csv}` : `# ${name}\r\n`;
+        })
+        .join("\r\n\r\n");
+
+      downloadTextFile(
+        `relayhub-download-analytics-${latestData.days || "period"}-days.csv`,
+        combined,
+        "text/csv"
+      );
+    });
+
+    copySummaryButton.addEventListener("click", async () => {
+      if (!latestData) return;
+
+      const summary = latestData.summary || {};
+      const text = [
+        "RelayHub Download Analytics",
+        `Period: ${latestData.days} days`,
+        `Requests: ${formatNumber(summary.requests)}`,
+        `Downloads: ${formatNumber(summary.downloads)}`,
+        `Failures: ${formatNumber(summary.failures)}`,
+        `Bandwidth: ${formatBytes(summary.bytes)}`,
+        `Average response: ${formatMs(summary.avg_duration_ms)}`,
+      ].join("\n");
+
+      await navigator.clipboard.writeText(text);
+      setStatus("Summary copied");
+    });
+
+    printReportButton.addEventListener("click", () => {
+      window.print();
+    });
+
+    button.addEventListener("click", loadAnalytics);
+    filterInput.addEventListener("input", renderDashboard);
+    daysInput.addEventListener("change", () => {
+      if (latestData) loadAnalytics();
+    });
+  </script>
+</BaseLayout>
