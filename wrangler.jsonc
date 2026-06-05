@@ -33,5 +33,19 @@
       "database_name": "relayhub_early_access",
       "database_id": "3d056ea7-e390-42d2-874e-38a797655484"
     }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "RELAYHUB_DOWNLOADS",
+      "bucket_name": "relayhub-downloads"
+    }
+  ],
+
+  "analytics_engine_datasets": [
+    {
+      "binding": "DOWNLOAD_ANALYTICS",
+      "dataset": "relayhub_downloads"
+    }
   ]
 }

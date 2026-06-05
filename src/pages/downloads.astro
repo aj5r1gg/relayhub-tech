@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const DOWNLOAD_BASE = "https://downloads.relayhub.tech";
+const DOWNLOAD_BASE = "";
 
 type DownloadStatus =
   | "Final"
@@ -42,7 +42,7 @@ const documentDownloads: DownloadItem[] = [
     version: "v0.2",
     description:
       "Plain-language introduction to RelayHub, RelayOS, local-first operation, recovery-first design, and the community infrastructure goal.",
-    href: `${DOWNLOAD_BASE}/docs/RelayHub-Overview-v0.2.pdf?v=1`,
+    href: `/download/docs/RelayHub-Overview-v0.2.pdf?v=1`,
     filename: "RelayHub-Overview-v0.2.pdf",
   },
   {
@@ -52,7 +52,7 @@ const documentDownloads: DownloadItem[] = [
     version: "Foundational, v1.0",
     description:
       "Highest-level governance document defining RelayHub’s constitutional authority, ecosystem purpose, rights, responsibilities, limits, institutional structure, and amendment rules.",
-    href: `${DOWNLOAD_BASE}/docs/RelayHub-Constitution-v1.0.pdf?v=1`,
+    href: `/download/docs/RelayHub-Constitution-v1.0.pdf?v=1`,
     filename: "RelayHub-Constitution-v1.0.pdf",
   },
   {
@@ -62,7 +62,7 @@ const documentDownloads: DownloadItem[] = [
     version: "Foundational",
     description:
       "Foundational RelayHub doctrine defining why the ecosystem exists, what it serves, and the values and principles that inform the Constitution, policies, architecture, and product decisions.",
-    href: `${DOWNLOAD_BASE}/docs/RelayHub-PurposeMissionValuesPrinciples.pdf?v=1`,
+    href: `/download/docs/RelayHub-PurposeMissionValuesPrinciples.pdf?v=1`,
     filename: "RelayHub-PurposeMissionValuesPrinciples.pdf",
   },
   {
@@ -72,7 +72,7 @@ const documentDownloads: DownloadItem[] = [
     version: "Foundational, v0.2",
     description:
 	    "Plain-language guide to the RelayHub Policy Registry, including policy IDs, lifecycle states, authority, validation, release gates, waivers, review processes, and how RelayHub keeps governance traceable.",
-    href: `${DOWNLOAD_BASE}/docs/RelayHub-PolicyRegistry-v0.2.pdf`,
+    href: `/download/docs/RelayHub-PolicyRegistry-v0.2.pdf`,
     filename: "RelayHub-PolicyRegistry-v0.2.pdf",
   },
   {
@@ -82,7 +82,7 @@ const documentDownloads: DownloadItem[] = [
     version: "v0.8",
     description:
       "Canonical technical architecture for RelayHub and RelayOS, defining hardware classes, capability governance, policy enforcement, Reticulum integration, recovery-first design, validation gates, product boundaries, and community infrastructure roles.",
-    href: `${DOWNLOAD_BASE}/docs/RelayHub-SystemArchitectureSpecification-v0.8.pdf`,
+    href: `/download/docs/RelayHub-SystemArchitectureSpecification-v0.8.pdf`,
     filename: "RelayHub-SystemArchitectureSpecification-v0.8.pdf",
   },
   {
@@ -92,7 +92,7 @@ const documentDownloads: DownloadItem[] = [
     version: "v0.3",
     description:
       "Implementation architecture for RelayOS, defining the NixOS module structure, systemd service graph, Local API, state engine, policy engine, capability detection, recovery flows, update and rollback model, observability, support export, validation fixtures, release artefacts, and Relay Home MVP boundaries.",
-    href: `${DOWNLOAD_BASE}/docs/RelayOS-PlatformArchitectureSpecification-v0.3.pdf`,
+    href: `/download/docs/RelayOS-PlatformArchitectureSpecification-v0.3.pdf`,
     filename: "RelayOS-PlatformArchitectureSpecification-v0.3.pdf",
   },
   {
