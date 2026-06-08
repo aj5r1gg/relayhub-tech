@@ -1511,3 +1511,70 @@ a {
     width: 180px;
   }
 }
+
+/* Free Downloads Page */
+
+.rh-doc-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.rh-doc-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+
+.rh-doc-meta {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+.rh-download-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.rh-download-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.rh-download-form input[type="text"],
+.rh-download-form input[type="email"],
+.rh-download-form input:not([type]) {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.7rem;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.rh-checkbox {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: flex-start;
+  gap: 0.65rem !important;
+  font-weight: 400 !important;
+  color: var(--color-muted);
+}
+
+.rh-checkbox input {
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 860px) {
+  .rh-doc-card {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+  }
+}

@@ -12,7 +12,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.4.2"
+    "@astrojs/cloudflare": "^13.6.1",
+    "astro": "^6.4.2",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "wrangler": "^4.98.0"

@@ -1,0 +1,77 @@
+---
+import Layout from "../layouts/BaseLayout.astro";
+import { getFreeDocuments, formatDocumentPrice } from "../lib/documents";
+
+const freeDocuments = getFreeDocuments();
+---
+
+<Layout title="Free Downloads | RelayHub">
+  <main class="rh-page">
+    <section class="rh-section rh-section-hero">
+      <div class="rh-container">
+        <p class="rh-eyebrow">RelayHub Documents</p>
+        <h1>Free Downloads</h1>
+        <p class="rh-lede">
+          Download free RelayHub documents. Each copy is personalised with your
+          details so we can understand who is using the material and preserve
+          attribution.
+        </p>
+      </div>
+    </section>
+
+    <section class="rh-section">
+      <div class="rh-container">
+        <div class="rh-doc-grid">
+          {freeDocuments.map((doc) => (
+            <article class="rh-doc-card">
+              <div>
+                <p class="rh-doc-meta">
+                  {doc.category} · v{doc.version} · {formatDocumentPrice(doc)}
+                </p>
+
+                <h2>{doc.title}</h2>
+
+                <p>
+                  This document is free to download and may be shared in its
+                  complete and unmodified form.
+                </p>
+              </div>
+
+              <form method="POST" action="/api/free-download" class="rh-download-form">
+                <input type="hidden" name="documentId" value={doc.documentId} />
+
+                <label>
+                  First name
+                  <input name="firstName" autocomplete="given-name" required />
+                </label>
+
+                <label>
+                  Last name
+                  <input name="lastName" autocomplete="family-name" required />
+                </label>
+
+                <label>
+                  Email
+                  <input name="email" type="email" autocomplete="email" required />
+                </label>
+
+                <label class="rh-checkbox">
+                  <input name="consent" type="checkbox" value="yes" required />
+                  <span>
+                    I agree to receive this personalised document and understand
+                    that attribution and download information may be embedded in
+                    the file.
+                  </span>
+                </label>
+
+                <button type="submit" class="rh-button rh-button-primary">
+                  Generate download
+                </button>
+              </form>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

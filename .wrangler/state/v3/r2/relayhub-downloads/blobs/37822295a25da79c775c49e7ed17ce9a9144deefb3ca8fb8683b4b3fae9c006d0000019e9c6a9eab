@@ -1,0 +1,57 @@
+{
+  "relayhub-overview": {
+    "documentId": "relayhub-overview",
+    "title": "RelayHub Overview",
+    "version": "0.2",
+    "category": "relayhub",
+    "classification": "public",
+    "access": "free",
+    "licenceType": "free-public-distribution",
+    "price": 0,
+    "currency": "AUD",
+    "sourceObject": "docs/originals/relayhub/RelayHub-Overview-v0.2.pdf",
+    "generatedPrefix": "docs/generated/free/",
+    "watermark": true,
+    "requiresDownloaderDetails": true,
+    "requiresPayment": false,
+    "active": true
+  },
+
+  "example-relayhub-paid-document": {
+    "documentId": "example-relayhub-paid-document",
+    "title": "Example RelayHub Paid Document",
+    "version": "0.1",
+    "category": "relayhub",
+    "classification": "paid",
+    "access": "paid",
+    "licenceType": "personal-use",
+    "price": 2900,
+    "currency": "AUD",
+    "squareItemId": "REPLACE_WITH_SQUARE_ITEM_ID",
+    "sourceObject": "docs/originals/relayhub/example-relayhub-paid-document-v0.1.pdf",
+    "generatedPrefix": "docs/generated/paid/",
+    "watermark": true,
+    "requiresDownloaderDetails": true,
+    "requiresPayment": true,
+    "active": false
+  },
+
+  "example-private-paid-document": {
+    "documentId": "example-private-paid-document",
+    "title": "Example Private Paid Document",
+    "version": "0.1",
+    "category": "private",
+    "classification": "paid",
+    "access": "paid",
+    "licenceType": "personal-use",
+    "price": 4900,
+    "currency": "AUD",
+    "squareItemId": "REPLACE_WITH_SQUARE_ITEM_ID",
+    "sourceObject": "docs/originals/private/example-private-paid-document-v0.1.pdf",
+    "generatedPrefix": "docs/generated/paid/",
+    "watermark": true,
+    "requiresDownloaderDetails": true,
+    "requiresPayment": true,
+    "active": false
+  }
+}

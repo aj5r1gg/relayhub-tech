@@ -1,0 +1,73 @@
+---
+import Layout from "../layouts/BaseLayout.astro";
+---
+
+<Layout title="Download Requested | RelayHub">
+  <main class="rh-page">
+    <section class="rh-section rh-section-hero">
+      <div class="rh-container">
+        <p class="rh-eyebrow">Download requested</p>
+
+        <div id="download-success" hidden>
+          <h1>Your personalised document is ready.</h1>
+
+          <p class="rh-lede">
+            Your personalised download request has been created.
+          </p>
+
+          <p>
+            Download ID: <strong id="download-id"></strong>
+          </p>
+
+          <a id="download-link" href="#" class="rh-button rh-button-primary">
+            Download personalised PDF
+          </a>
+        </div>
+
+        <div id="download-missing" hidden>
+          <h1>No download request was found.</h1>
+
+          <p class="rh-lede">
+            Please return to the downloads page and submit the form again.
+          </p>
+
+          <p>
+            Debug URL: <code id="debug-url"></code>
+          </p>
+
+          <a href="/free-downloads/" class="rh-button rh-button-primary">
+            Back to free downloads
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const token = params.get("token");
+    const downloadId = params.get("downloadId");
+
+    const success = document.getElementById("download-success");
+    const missing = document.getElementById("download-missing");
+    const downloadIdEl = document.getElementById("download-id");
+    const downloadLink = document.getElementById("download-link");
+    const debugUrl = document.getElementById("debug-url");
+
+    if (
+      token &&
+      downloadId &&
+      success &&
+      downloadIdEl &&
+      downloadLink instanceof HTMLAnchorElement
+    ) {
+      downloadIdEl.textContent = downloadId;
+      downloadLink.href = `/api/download/${encodeURIComponent(token)}`;
+      success.hidden = false;
+    } else if (missing && debugUrl) {
+      debugUrl.textContent = window.location.href;
+      missing.hidden = false;
+    }
+  </script>
+</Layout>

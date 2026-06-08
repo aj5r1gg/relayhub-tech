@@ -11,30 +11,32 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     <div class="rh-container">
       <p class="rh-kicker">Admin</p>
 
-      <h1 class="rh-section-title">Contact messages</h1>
+      <h1 class="rh-section-title">Contact Messages</h1>
 
       <p class="rh-section-lead">
         Private admin page for checking contact form messages, searching records,
         and exporting CSV data.
       </p>
 
-      <div class="rh-card" style="margin-top: var(--space-8);">
+      <div class="rh-card rh-admin-controls">
         <label class="rh-label" for="admin-token">Admin token</label>
         <input
           class="rh-input"
           id="admin-token"
           type="password"
           placeholder="Paste admin token"
+          autocomplete="off"
         />
 
         <div style="height: var(--space-5);"></div>
 
-        <label class="rh-label" for="search">Search</label>
+        <label class="rh-label" for="search">Search contact messages</label>
         <input
           class="rh-input"
           id="search"
           type="search"
           placeholder="Search name, email, topic, or message"
+          autocomplete="off"
         />
 
         <div class="rh-actions">
@@ -42,8 +44,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
             Load messages
           </button>
 
-          <button class="rh-button rh-button-secondary" type="button" id="export-csv">
+          <button class="rh-button rh-button-secondary" type="button" id="search-server">
+            Search server
+          </button>
+
+          <button class="rh-button rh-button-secondary" type="button" id="export-csv" disabled>
             Export CSV
+          </button>
+
+          <button class="rh-button rh-button-secondary" type="button" id="clear-token">
+            Clear token
           </button>
         </div>
       </div>
@@ -77,123 +87,264 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     </div>
   </section>
 
-  <script>
-    const tokenInput =
-      document.querySelector<HTMLInputElement>("#admin-token");
+  <script is:inline>
+    (() => {
+      const tokenInput = document.querySelector("#admin-token");
+      const searchInput = document.querySelector("#search");
+      const loadButton = document.querySelector("#load-messages");
+      const searchServerButton = document.querySelector("#search-server");
+      const exportButton = document.querySelector("#export-csv");
+      const clearTokenButton = document.querySelector("#clear-token");
+      const summary = document.querySelector("#summary");
+      const table = document.querySelector("#message-table");
 
-    const searchInput =
-      document.querySelector<HTMLInputElement>("#search");
+      let loadedRows = [];
+      let serverTotal = 0;
 
-    const loadButton =
-      document.querySelector<HTMLButtonElement>("#load-messages");
-
-    const exportButton =
-      document.querySelector<HTMLButtonElement>("#export-csv");
-
-    const summary =
-      document.querySelector<HTMLElement>("#summary");
-
-    const table =
-      document.querySelector<HTMLElement>("#message-table");
-
-    async function loadMessages() {
-      if (!tokenInput || !searchInput || !summary || !table) {
-        return;
+      const storedToken = sessionStorage.getItem("relayhub_admin_token");
+      if (storedToken && tokenInput) {
+        tokenInput.value = storedToken;
       }
 
-      const token = tokenInput.value.trim();
-      const q = searchInput.value.trim();
-
-      if (!token) {
-        summary.textContent = "Admin token is required.";
-        return;
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
       }
 
-      const params = new URLSearchParams();
-
-      if (q) {
-        params.set("q", q);
+      function formatDate(value) {
+        if (!value) return "";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return date.toLocaleString();
       }
 
-      const response = await fetch(`/api/admin/contact?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      function matchesSearch(row, query) {
+        if (!query) return true;
+
+        const haystack = [
+          row.id,
+          row.created_at,
+          row.name,
+          row.email,
+          row.topic,
+          row.subject,
+          row.message,
+        ]
+          .map((value) => String(value ?? "").toLowerCase())
+          .join(" ");
+
+        return haystack.includes(query.toLowerCase());
+      }
+
+      function normaliseRows(data) {
+        if (Array.isArray(data?.messages)) return data.messages;
+        if (Array.isArray(data?.rows)) return data.rows;
+        return [];
+      }
+
+      function renderRows() {
+        if (!table || !summary || !exportButton || !searchInput) return;
+
+        const query = searchInput.value.trim();
+        const filtered = loadedRows.filter((row) => matchesSearch(row, query));
+
+        const totalText =
+          serverTotal && serverTotal !== loadedRows.length
+            ? `${serverTotal} total server record(s), ${loadedRows.length} loaded`
+            : `${loadedRows.length} contact message(s) loaded`;
+
+        summary.textContent = `${totalText}. Showing ${filtered.length}.`;
+
+        exportButton.disabled = loadedRows.length === 0;
+
+        if (filtered.length === 0) {
+          table.innerHTML = `<tr><td colspan="6">No records found.</td></tr>`;
+          return;
+        }
+
+        table.innerHTML = filtered
+          .map((message) => {
+            const topic = message.topic || message.subject || "";
+
+            return `
+              <tr>
+                <td>${escapeHtml(message.id)}</td>
+                <td>${escapeHtml(formatDate(message.created_at))}</td>
+                <td>${escapeHtml(message.name)}</td>
+                <td>${escapeHtml(message.email)}</td>
+                <td>${escapeHtml(topic)}</td>
+                <td>${escapeHtml(message.message)}</td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadMessages({ useServerSearch = false } = {}) {
+        if (!tokenInput || !summary || !table) return;
+
+        const token = tokenInput.value.trim();
+
+        if (!token) {
+          summary.textContent = "Admin token is required.";
+          return;
+        }
+
+        sessionStorage.setItem("relayhub_admin_token", token);
+        summary.textContent = "Loading contact messages...";
+
+        try {
+          const params = new URLSearchParams();
+
+          if (useServerSearch && searchInput?.value.trim()) {
+            params.set("q", searchInput.value.trim());
+          }
+
+          const query = params.toString();
+          const endpoint = query
+            ? `/api/admin/contact?${query}`
+            : "/api/admin/contact";
+
+          const response = await fetch(endpoint, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
+          });
+
+          const data = await response.json().catch(() => null);
+
+          if (!response.ok) {
+            throw new Error(data?.error || `Request failed: ${response.status}`);
+          }
+
+          loadedRows = normaliseRows(data);
+          serverTotal = Number(data?.total || loadedRows.length || 0);
+
+          renderRows();
+        } catch (error) {
+          loadedRows = [];
+          serverTotal = 0;
+
+          table.innerHTML = `<tr><td colspan="6">No records loaded.</td></tr>`;
+          summary.textContent =
+            error instanceof Error ? error.message : "Failed to load contact messages.";
+
+          if (exportButton) exportButton.disabled = true;
+        }
+      }
+
+      function toCsv(rows) {
+        const headers = [
+          "id",
+          "created_at",
+          "name",
+          "email",
+          "topic",
+          "message",
+        ];
+
+        const escapeCsv = (value) => {
+          const text = String(value ?? "");
+          if (/[",\n\r]/.test(text)) {
+            return `"${text.replaceAll('"', '""')}"`;
+          }
+          return text;
+        };
+
+        return [
+          headers.join(","),
+          ...rows.map((row) => {
+            const normalised = {
+              ...row,
+              topic: row.topic || row.subject || "",
+            };
+
+            return headers
+              .map((key) => escapeCsv(normalised[key]))
+              .join(",");
+          }),
+        ].join("\n");
+      }
+
+      function exportCsv() {
+        if (loadedRows.length === 0) return;
+
+        const blob = new Blob([toCsv(loadedRows)], {
+          type: "text/csv;charset=utf-8",
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `relayhub-contact-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      loadButton?.addEventListener("click", () => loadMessages({ useServerSearch: false }));
+      searchServerButton?.addEventListener("click", () => loadMessages({ useServerSearch: true }));
+      exportButton?.addEventListener("click", exportCsv);
+      searchInput?.addEventListener("input", renderRows);
+
+      clearTokenButton?.addEventListener("click", () => {
+        sessionStorage.removeItem("relayhub_admin_token");
+        if (tokenInput) tokenInput.value = "";
+        if (summary) summary.textContent = "Admin token cleared.";
+        loadedRows = [];
+        serverTotal = 0;
+        if (table) table.innerHTML = `<tr><td colspan="6">No records loaded.</td></tr>`;
+        if (exportButton) exportButton.disabled = true;
       });
-
-      if (!response.ok) {
-        summary.textContent = `Request failed: ${response.status}`;
-        return;
-      }
-
-      const data = await response.json();
-
-      summary.textContent =
-        `${data.total} total contact message(s). Showing ${data.messages.length}.`;
-
-      table.innerHTML = "";
-
-      if (!data.messages.length) {
-        table.innerHTML = `<tr><td colspan="6">No records found.</td></tr>`;
-        return;
-      }
-
-      for (const message of data.messages) {
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-          <td>${escapeHtml(String(message.id ?? ""))}</td>
-          <td>${escapeHtml(message.created_at ?? "")}</td>
-          <td>${escapeHtml(message.name ?? "")}</td>
-          <td>${escapeHtml(message.email ?? "")}</td>
-          <td>${escapeHtml(message.topic ?? "")}</td>
-          <td>${escapeHtml(message.message ?? "")}</td>
-        `;
-
-        table.appendChild(row);
-      }
-    }
-
-    function exportCsv() {
-      if (!tokenInput || !searchInput || !summary) {
-        return;
-      }
-
-      const token = tokenInput.value.trim();
-      const q = searchInput.value.trim();
-
-      if (!token) {
-        summary.textContent = "Admin token is required.";
-        return;
-      }
-
-      const params = new URLSearchParams();
-
-      if (q) {
-        params.set("q", q);
-      }
-
-      params.set("token", token);
-
-      window.location.href = `/api/admin/contact.csv?${params.toString()}`;
-    }
-
-    function escapeHtml(value: string): string {
-      const replacements: Record<string, string> = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;",
-      };
-
-      return value.replace(
-        /[&<>"']/g,
-        (char: string) => replacements[char] ?? char
-      );
-    }
-
-    loadButton?.addEventListener("click", loadMessages);
-    exportButton?.addEventListener("click", exportCsv);
+    })();
   </script>
+
+  <style is:global>
+    .rh-admin-controls {
+      margin-top: var(--space-8);
+    }
+
+    .rh-admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    .rh-admin-table th,
+    .rh-admin-table td {
+      border-bottom: 1px solid var(--color-border);
+      padding: 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .rh-admin-table th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-muted);
+      background: var(--color-surface-soft);
+    }
+
+    .rh-admin-table td {
+      font-size: 0.92rem;
+    }
+
+    .rh-admin-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .rh-actions {
+      margin-top: var(--space-6);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+  </style>
 </BaseLayout>

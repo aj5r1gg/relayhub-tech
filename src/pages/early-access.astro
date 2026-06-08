@@ -14,7 +14,8 @@ const errorMessages = {
 const errorMessage =
   error && Object.prototype.hasOwnProperty.call(errorMessages, error)
     ? errorMessages[error as keyof typeof errorMessages]
-    : null;---
+    : null;
+---
 
 <BaseLayout
   title="Early Access | RelayHub"
@@ -205,7 +206,14 @@ const errorMessage =
         </div>
       </div>
 
-      <form class="rh-card" name="early-access" method="POST" action="/api/early-access">
+      <form
+        id="early-access-form"
+        class="rh-card"
+        name="early-access"
+        method="POST"
+        action="/api/early-access"
+        novalidate
+      >
         {
           submitted && (
             <div class="rh-form-message rh-form-message-success">
@@ -224,6 +232,20 @@ const errorMessage =
           )
         }
 
+        <div
+          id="early-access-status"
+          class="rh-form-status"
+          aria-live="polite"
+          role="status"
+        ></div>
+
+        <input
+          id="startedAt"
+          name="startedAt"
+          type="hidden"
+          value=""
+        />
+
         <div class="honeypot" aria-hidden="true">
           <label for="website">Website</label>
           <input
@@ -236,12 +258,26 @@ const errorMessage =
         </div>
 
         <label class="rh-label" for="name">Name</label>
-        <input class="rh-input" id="name" name="name" type="text" autocomplete="name" required />
+        <input
+          class="rh-input"
+          id="name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          required
+        />
 
         <div style="height: var(--space-5);"></div>
 
         <label class="rh-label" for="email">Email</label>
-        <input class="rh-input" id="email" name="email" type="email" autocomplete="email" required />
+        <input
+          class="rh-input"
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+        />
 
         <div style="height: var(--space-5);"></div>
 
@@ -256,6 +292,20 @@ const errorMessage =
 
         <div style="height: var(--space-5);"></div>
 
+        <label class="rh-label" for="role">How would you describe your interest?</label>
+        <select class="rh-input" id="role" name="role">
+          <option value="">Select one if relevant</option>
+          <option value="Household user">Household user</option>
+          <option value="Community organiser">Community organiser</option>
+          <option value="Developer">Developer</option>
+          <option value="Infrastructure operator">Infrastructure operator</option>
+          <option value="Partner organisation">Partner organisation</option>
+          <option value="Media / researcher">Media / researcher</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <div style="height: var(--space-5);"></div>
+
         <label class="rh-label" for="message">What would you use RelayHub for?</label>
         <textarea
           class="rh-textarea"
@@ -267,7 +317,7 @@ const errorMessage =
 
         <div style="height: var(--space-6);"></div>
 
-        <button class="rh-button rh-button-accent" type="submit">
+        <button id="early-access-submit" class="rh-button rh-button-accent" type="submit">
           Register interest
         </button>
 
@@ -275,10 +325,17 @@ const errorMessage =
           By submitting this form, you agree to be contacted about RelayHub updates.
           Personal information is handled according to the <a href="/privacy">Privacy Policy</a>.
         </p>
+
         <div
           class="cf-turnstile"
           data-sitekey="0x4AAAAAADdzV1P6vMlkCRfJ"
-          ></div>
+        ></div>
+
+        <noscript>
+          <p class="rh-help">
+            JavaScript is disabled, so this form will submit directly to the RelayHub API.
+          </p>
+        </noscript>
       </form>
     </div>
   </section>
@@ -318,4 +375,155 @@ const errorMessage =
       </div>
     </div>
   </section>
+
+  <script is:inline>
+  (() => {
+    const form = document.getElementById("early-access-form");
+    const status = document.getElementById("early-access-status");
+    const startedAt = document.getElementById("startedAt");
+
+    const messages = {
+      "invalid-email": "Please enter a valid email address and try again.",
+      "rate-limited": "Too many requests have been sent from your connection. Please try again later.",
+      "submission-failed": "Something went wrong while sending your request. Please try again shortly.",
+      "email-failed": "Your request could not be emailed. Please try again shortly.",
+    };
+
+    function resetStartedAt() {
+      if (startedAt) {
+        startedAt.value = String(Date.now());
+      }
+    }
+
+    function isEarlyAccessPath(pathname) {
+      return pathname === "/early-access" || pathname === "/early-access/";
+    }
+
+    resetStartedAt();
+
+    if (!form || !status) return;
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const submitButton = form.querySelector('button[type="submit"]');
+
+      status.textContent = "Submitting your request...";
+      status.className = "rh-form-status is-loading";
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.setAttribute("aria-busy", "true");
+      }
+
+      try {
+        const formData = new FormData(form);
+
+        const response = await fetch("/api/early-access", {
+          method: "POST",
+          body: formData,
+          headers: {
+            Accept: "application/json, text/html",
+          },
+        });
+
+        const finalUrl = new URL(response.url || window.location.href, window.location.origin);
+        const contentType = response.headers.get("content-type") || "";
+
+        const redirectedToSuccess =
+          isEarlyAccessPath(finalUrl.pathname) &&
+          finalUrl.searchParams.get("submitted") === "true";
+
+        const redirectedToError =
+          isEarlyAccessPath(finalUrl.pathname) &&
+          finalUrl.searchParams.has("error");
+
+        let result = null;
+
+        if (contentType.includes("application/json")) {
+          result = await response.json().catch(() => null);
+        }
+
+        if (redirectedToError) {
+          const errorCode = finalUrl.searchParams.get("error") || "submission-failed";
+          throw new Error(messages[errorCode] || "Your request could not be submitted. Please try again.");
+        }
+
+        if (!response.ok) {
+          throw new Error("Your request could not be submitted. Please try again.");
+        }
+
+        if (result && result.ok !== true) {
+          const message =
+            result.error ||
+            result.message ||
+            "Your request could not be submitted. Please try again.";
+          throw new Error(message);
+        }
+
+        if (!result && !redirectedToSuccess && contentType.includes("text/html")) {
+          throw new Error("Your request could not be submitted. Please try again.");
+        }
+
+        status.textContent =
+          "Thank you. Your early access request has been received.";
+        status.className = "rh-form-status is-success";
+
+        form.reset();
+        resetStartedAt();
+
+        if (window.turnstile && typeof window.turnstile.reset === "function") {
+          window.turnstile.reset();
+        }
+
+        const registerSection = document.getElementById("register");
+        if (registerSection) {
+          registerSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      } catch (error) {
+        status.textContent =
+          error instanceof Error && error.message
+            ? error.message
+            : "Something went wrong. Please try again.";
+        status.className = "rh-form-status is-error";
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.removeAttribute("aria-busy");
+        }
+      }
+    });
+  })();
+</script>
+
+  <style is:global>
+    .rh-form-status {
+      min-height: 1.5rem;
+      margin-bottom: var(--space-5);
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .rh-form-status:empty {
+      display: none;
+    }
+
+    .rh-form-status.is-loading {
+      color: var(--rh-muted, #5b6472);
+    }
+
+    .rh-form-status.is-success {
+      color: #166534;
+    }
+
+    .rh-form-status.is-error {
+      color: #b91c1c;
+    }
+
+    .rh-form button[disabled],
+    #early-access-form button[disabled] {
+      opacity: 0.65;
+      cursor: wait;
+    }
+  </style>
 </BaseLayout>

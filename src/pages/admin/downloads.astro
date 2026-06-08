@@ -4,7 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="Download Analytics | RelayHub Admin"
-  description="RelayHub private download analytics dashboard."
+  description="RelayHub private download analytics dashboard and personalised download registry."
 >
   <section class="rh-section rh-admin-downloads">
     <div class="rh-container">
@@ -15,7 +15,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
           <h1 class="rh-title">Download Analytics</h1>
           <p class="rh-section-lead">
             Private dashboard for tracked RelayHub document downloads, broken
-            links, campaign performance, bandwidth, and operational health.
+            links, campaign performance, bandwidth, personalised download
+            records, generated PDF cache status, and operational health.
           </p>
         </div>
 
@@ -40,11 +41,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         </label>
 
         <label>
-          <span>Filter documents</span>
+          <span>Filter documents / registry</span>
           <input
             id="document-filter"
             type="search"
-            placeholder="Search filename..."
+            placeholder="Search filename, email, name, download ID..."
             autocomplete="off"
           />
         </label>
@@ -194,6 +195,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       width: 100%;
       border-collapse: collapse;
       min-width: 760px;
+    }
+
+    .rh-table-wide {
+      min-width: 1120px;
     }
 
     .rh-table th,
@@ -370,6 +375,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       return `${(value / 1024 / 1024 / 1024).toFixed(1)} GB`;
     };
 
+    const formatDate = (value) => {
+      if (!value) return "—";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) return String(value);
+
+      return date.toLocaleString();
+    };
+
     const filenameOnly = (value) => {
       const text = String(value || "");
       return text.split("/").pop() || text;
@@ -382,8 +397,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
     const safeRows = (rows) => (Array.isArray(rows) ? rows : []);
 
-    const table = (rows, columns) => {
+    const table = (rows, columns, options = {}) => {
       const safe = safeRows(rows);
+      const tableClass = options.wide ? "rh-table rh-table-wide" : "rh-table";
 
       if (safe.length === 0) {
         return `<p class="rh-admin-note">No data yet.</p>`;
@@ -391,7 +407,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
       return `
         <div class="rh-table-wrap">
-          <table class="rh-table">
+          <table class="${tableClass}">
             <thead>
               <tr>
                 ${columns
@@ -442,6 +458,14 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       printReportButton.disabled = !enabled;
     };
 
+    const matchesFilter = (row, filter) => {
+      if (!filter) return true;
+
+      return Object.values(row).some((value) =>
+        String(value ?? "").toLowerCase().includes(filter)
+      );
+    };
+
     const filteredDocuments = (documents) => {
       const filter = filterInput.value.trim().toLowerCase();
 
@@ -450,6 +474,14 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       return safeRows(documents).filter((row) =>
         String(row.document || "").toLowerCase().includes(filter)
       );
+    };
+
+    const filteredRegistry = (records) => {
+      const filter = filterInput.value.trim().toLowerCase();
+
+      if (!filter) return safeRows(records);
+
+      return safeRows(records).filter((row) => matchesFilter(row, filter));
     };
 
     const getFailureRate = (summary) => {
@@ -470,7 +502,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       return (downloads / requests) * 100;
     };
 
-    const buildAlerts = (data, documents) => {
+    const buildAlerts = (data, documents, registryRecords) => {
       const summary = data.summary || {};
       const alerts = [];
       const failureRate = getFailureRate(summary);
@@ -510,6 +542,18 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
           level: "error",
           title: "Broken document links likely",
           text: `${noDownloadRows.length} document key(s) produced failures but no successful downloads.`,
+        });
+      }
+
+      const pendingGenerated = safeRows(registryRecords).filter(
+        (record) => !record.generatedObjectKey && Number(record.downloadCount || 0) === 0
+      );
+
+      if (pendingGenerated.length > 0) {
+        alerts.push({
+          level: "warning",
+          title: "Undownloaded personalised records",
+          text: `${pendingGenerated.length} personalised request(s) were created but have not yet generated cached PDFs.`,
         });
       }
 
@@ -557,7 +601,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         return;
       }
 
-      const data = latestData;
+      const data = latestData.analytics || {};
+      const registry = latestData.registry || { total: 0, records: [] };
 
       const summary = data.summary || {
         requests: 0,
@@ -569,7 +614,17 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
       const documents = filteredDocuments(data.documents);
       const allDocuments = safeRows(data.documents);
-      const alerts = buildAlerts(data, allDocuments);
+      const registryRecords = filteredRegistry(registry.records);
+      const allRegistryRecords = safeRows(registry.records);
+      const alerts = buildAlerts(data, allDocuments, allRegistryRecords);
+
+      const generatedCount = allRegistryRecords.filter(
+        (record) => record.generatedObjectKey
+      ).length;
+
+      const successfulRegistryDownloads = allRegistryRecords.filter(
+        (record) => Number(record.downloadCount || 0) > 0
+      ).length;
 
       const topDocument = documents?.[0]?.document
         ? filenameOnly(documents[0].document)
@@ -584,8 +639,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
             ${metricCard("Requests", formatNumber(summary.requests), "All tracked download requests")}
             ${metricCard("Downloads", formatNumber(summary.downloads), "Successful R2 responses")}
             ${metricCard("Failures", formatNumber(summary.failures), `${formatPercent(failureRate)} failure rate`)}
-            ${metricCard("Bandwidth", formatBytes(summary.bytes), "Successful file bytes served")}
-            ${metricCard("Avg response", formatMs(summary.avg_duration_ms), `${formatPercent(successRate)} success rate`)}
+            ${metricCard("Registry records", formatNumber(registry.total), "Personalised download requests")}
+            ${metricCard("Cached PDFs", formatNumber(generatedCount), `${formatNumber(successfulRegistryDownloads)} request(s) downloaded`)}
           </div>
         </section>
 
@@ -594,9 +649,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
             <div class="rh-admin-section-header">
               <div>
                 <h2>Operational alerts</h2>
-                <p>Broken links, 404s, invalid paths, and response warnings.</p>
+                <p>Broken links, 404s, invalid paths, response warnings, and personalised cache state.</p>
               </div>
-              <span class="rh-admin-pill">${escapeHtml(data.days)} days</span>
+              <span class="rh-admin-pill">${escapeHtml(data.days || daysInput.value)} days</span>
             </div>
             ${renderAlerts(alerts)}
           </article>
@@ -610,12 +665,48 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
             </div>
 
             <ul class="rh-admin-mini-list">
-              <li>Tracks document key, country, referrer, campaign, status, content type, size, and response time.</li>
-              <li>Does not intentionally store names, email addresses, message contents, account identities, or file contents.</li>
-              <li>Uses coarse request metadata for operational observability and campaign measurement.</li>
-              <li>Failed downloads are recorded so broken links can be fixed quickly.</li>
+              <li>Analytics tracks document key, country, referrer, campaign, status, content type, size, and response time.</li>
+              <li>Personalised registry records include names, email addresses, download IDs, expiry dates, and generated object keys.</li>
+              <li>Registry records are licence/audit records and should be treated as private operational data.</li>
+              <li>Use this page only over HTTPS and only with the admin token.</li>
             </ul>
           </article>
+        </section>
+
+        <section class="rh-card rh-admin-section">
+          <div class="rh-admin-section-header">
+            <div>
+              <h2>Personalised Download Registry</h2>
+              <p>${registryRecords.length} registry rows shown from ${formatNumber(registry.total)} total personalised records.</p>
+            </div>
+            <span class="rh-admin-pill">${formatNumber(generatedCount)} cached PDF(s)</span>
+          </div>
+
+          ${table(registryRecords, [
+            { key: "createdAt", label: "Created", render: formatDate },
+            { key: "downloadId", label: "Download ID" },
+            { key: "documentId", label: "Document" },
+            { key: "documentVersion", label: "Version" },
+            { key: "type", label: "Type" },
+            {
+              key: "firstName",
+              label: "Name",
+              render: (_value, row) => `${row.firstName || ""} ${row.lastName || ""}`.trim(),
+            },
+            { key: "email", label: "Email" },
+            {
+              key: "downloadCount",
+              label: "Count",
+              render: (value, row) => `${Number(value || 0)}/${Number(row.maxDownloads || 0)}`,
+            },
+            { key: "lastDownloadedAt", label: "Last downloaded", render: formatDate },
+            { key: "expiresAt", label: "Expires", render: formatDate },
+            {
+              key: "generatedObjectKey",
+              label: "Generated PDF",
+              render: (value) => value ? filenameOnly(value) : "Not generated",
+            },
+          ], { wide: true })}
         </section>
 
         <section class="rh-card rh-admin-section">
@@ -624,7 +715,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
               <h2>Document catalogue</h2>
               <p>${documents.length} document rows shown. Top document: ${escapeHtml(topDocument)}.</p>
             </div>
-            <span class="rh-admin-pill">${escapeHtml(data.days)} days</span>
+            <span class="rh-admin-pill">${escapeHtml(data.days || daysInput.value)} days</span>
           </div>
 
           ${table(documents, [
@@ -775,33 +866,48 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       setStatus("Loading");
       output.innerHTML = `
         <article class="rh-card">
-          <p>Loading download analytics…</p>
+          <p>Loading download analytics and personalised registry…</p>
         </article>
       `;
 
       try {
-        const response = await fetch(`/api/admin/downloads?days=${encodeURIComponent(days)}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
 
-        if (!response.ok) {
+        const [analyticsResponse, registryResponse] = await Promise.all([
+          fetch(`/api/admin/downloads?days=${encodeURIComponent(days)}`, {
+            headers,
+          }),
+          fetch(`/api/admin/download-registry?limit=500`, {
+            headers,
+          }),
+        ]);
+
+        if (!analyticsResponse.ok || !registryResponse.ok) {
           output.innerHTML = `
             <article class="rh-card rh-admin-error">
               <h2>Failed to load analytics</h2>
-              <p>Status: ${escapeHtml(response.status)}</p>
+              <p>Analytics status: ${escapeHtml(analyticsResponse.status)}</p>
+              <p>Registry status: ${escapeHtml(registryResponse.status)}</p>
               <p class="rh-admin-note">
-                Check the admin token, Analytics Engine API token, Worker logs, and Analytics Engine dataset name.
+                Check the admin token, Analytics Engine API token, Worker logs, R2 binding, and Analytics Engine dataset name.
               </p>
             </article>
           `;
-          setStatus(`Error ${response.status}`);
+          setStatus("Error");
           enableActions(false);
           return;
         }
 
-        latestData = await response.json();
+        const analytics = await analyticsResponse.json();
+        const registry = await registryResponse.json();
+
+        latestData = {
+          analytics,
+          registry,
+        };
+
         setStatus(`Loaded ${new Date().toLocaleTimeString()}`);
         renderDashboard();
       } catch (error) {
@@ -861,14 +967,15 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       if (!latestData) return;
 
       const sections = [
-        ["documents", latestData.documents],
-        ["daily", latestData.daily],
-        ["countries", latestData.countries],
-        ["sources", latestData.sources],
-        ["referrers", latestData.referrers],
-        ["errors", latestData.errors],
-        ["contentTypes", latestData.contentTypes],
-        ["outcomes", latestData.outcomes],
+        ["registry", latestData.registry.records],
+        ["documents", latestData.analytics.documents],
+        ["daily", latestData.analytics.daily],
+        ["countries", latestData.analytics.countries],
+        ["sources", latestData.analytics.sources],
+        ["referrers", latestData.analytics.referrers],
+        ["errors", latestData.analytics.errors],
+        ["contentTypes", latestData.analytics.contentTypes],
+        ["outcomes", latestData.analytics.outcomes],
       ];
 
       const combined = sections
@@ -879,7 +986,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         .join("\r\n\r\n");
 
       downloadTextFile(
-        `relayhub-download-analytics-${latestData.days || "period"}-days.csv`,
+        `relayhub-download-analytics-${latestData.analytics.days || "period"}-days.csv`,
         combined,
         "text/csv"
       );
@@ -888,15 +995,21 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     copySummaryButton.addEventListener("click", async () => {
       if (!latestData) return;
 
-      const summary = latestData.summary || {};
+      const summary = latestData.analytics.summary || {};
+      const registry = latestData.registry || {};
+      const registryRecords = safeRows(registry.records);
+      const generatedCount = registryRecords.filter((record) => record.generatedObjectKey).length;
+
       const text = [
         "RelayHub Download Analytics",
-        `Period: ${latestData.days} days`,
+        `Period: ${latestData.analytics.days} days`,
         `Requests: ${formatNumber(summary.requests)}`,
         `Downloads: ${formatNumber(summary.downloads)}`,
         `Failures: ${formatNumber(summary.failures)}`,
         `Bandwidth: ${formatBytes(summary.bytes)}`,
         `Average response: ${formatMs(summary.avg_duration_ms)}`,
+        `Registry records: ${formatNumber(registry.total)}`,
+        `Cached PDFs: ${formatNumber(generatedCount)}`,
       ].join("\n");
 
       await navigator.clipboard.writeText(text);

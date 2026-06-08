@@ -58,7 +58,14 @@ const errorMessage =
         </div>
       </div>
 
-      <form class="rh-card" name="contact" method="POST" action="/api/contact">
+      <form
+        id="contact-form"
+        class="rh-card"
+        name="contact"
+        method="POST"
+        action="/api/contact"
+        novalidate
+      >
         {
           submitted && (
             <div class="rh-form-message rh-form-message-success">
@@ -77,6 +84,13 @@ const errorMessage =
           )
         }
 
+        <div
+          id="contact-status"
+          class="rh-form-status"
+          aria-live="polite"
+          role="status"
+        ></div>
+
         <input id="started-at" name="startedAt" type="hidden" value="" />
 
         <div class="honeypot" aria-hidden="true">
@@ -91,12 +105,26 @@ const errorMessage =
         </div>
 
         <label class="rh-label" for="name">Name</label>
-        <input class="rh-input" id="name" name="name" type="text" autocomplete="name" required />
+        <input
+          class="rh-input"
+          id="name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          required
+        />
 
         <div style="height: var(--space-5);"></div>
 
         <label class="rh-label" for="email">Email</label>
-        <input class="rh-input" id="email" name="email" type="email" autocomplete="email" required />
+        <input
+          class="rh-input"
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+        />
 
         <div style="height: var(--space-5);"></div>
 
@@ -125,7 +153,11 @@ const errorMessage =
 
         <div style="height: var(--space-6);"></div>
 
-        <button class="rh-button rh-button-accent" type="submit">
+        <button
+          id="contact-submit"
+          class="rh-button rh-button-accent"
+          type="submit"
+        >
           Send message
         </button>
 
@@ -134,19 +166,162 @@ const errorMessage =
           emergency channel. Personal information is handled according to the
           <a href="/privacy">Privacy Policy</a>.
         </p>
+
         <div
           class="cf-turnstile"
           data-sitekey="0x4AAAAAADdzV1P6vMlkCRfJ"
         ></div>
+
+        <noscript>
+          <p class="rh-help">
+            JavaScript is disabled, so this form will submit directly to the RelayHub API.
+          </p>
+        </noscript>
       </form>
     </div>
   </section>
 
-  <script>
-    const startedAtInput = document.querySelector<HTMLInputElement>("#started-at");
+  <script is:inline>
+    (() => {
+      const form = document.getElementById("contact-form");
+      const status = document.getElementById("contact-status");
+      const startedAtInput = document.getElementById("started-at");
 
-    if (startedAtInput) {
-      startedAtInput.value = String(Date.now());
-    }
+      const messages = {
+        "invalid-email": "Please enter a valid email address and try again.",
+        "rate-limited": "Too many requests have been sent from your connection. Please try again later.",
+        "submission-failed": "Something went wrong while sending your message. Please try again shortly.",
+      };
+
+      function resetStartedAt() {
+        if (startedAtInput) {
+          startedAtInput.value = String(Date.now());
+        }
+      }
+
+      function isContactPath(pathname) {
+        return pathname === "/contact" || pathname === "/contact/";
+      }
+
+      resetStartedAt();
+
+      if (!form || !status) return;
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        status.textContent = "Sending your message...";
+        status.className = "rh-form-status is-loading";
+
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.setAttribute("aria-busy", "true");
+        }
+
+        try {
+          const formData = new FormData(form);
+
+          const response = await fetch("/api/contact", {
+            method: "POST",
+            body: formData,
+            headers: {
+              Accept: "application/json, text/html",
+            },
+          });
+
+          const finalUrl = new URL(response.url || window.location.href, window.location.origin);
+          const contentType = response.headers.get("content-type") || "";
+
+          const redirectedToSuccess =
+            isContactPath(finalUrl.pathname) &&
+            finalUrl.searchParams.get("submitted") === "true";
+
+          const redirectedToError =
+            isContactPath(finalUrl.pathname) &&
+            finalUrl.searchParams.has("error");
+
+          let result = null;
+
+          if (contentType.includes("application/json")) {
+            result = await response.json().catch(() => null);
+          }
+
+          if (redirectedToError) {
+            const errorCode = finalUrl.searchParams.get("error") || "submission-failed";
+            throw new Error(messages[errorCode] || "Your message could not be sent. Please try again.");
+          }
+
+          if (!response.ok) {
+            throw new Error("Your message could not be sent. Please try again.");
+          }
+
+          if (result && result.ok !== true) {
+            const message =
+              result.error ||
+              result.message ||
+              "Your message could not be sent. Please try again.";
+            throw new Error(message);
+          }
+
+          if (!result && !redirectedToSuccess && contentType.includes("text/html")) {
+            throw new Error("Your message could not be sent. Please try again.");
+          }
+
+          status.textContent = "Thank you. Your message has been sent.";
+          status.className = "rh-form-status is-success";
+
+          form.reset();
+          resetStartedAt();
+
+          if (window.turnstile && typeof window.turnstile.reset === "function") {
+            window.turnstile.reset();
+          }
+        } catch (error) {
+          status.textContent =
+            error instanceof Error && error.message
+              ? error.message
+              : "Something went wrong. Please try again.";
+          status.className = "rh-form-status is-error";
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.removeAttribute("aria-busy");
+          }
+        }
+      });
+    })();
   </script>
+
+  <style is:global>
+    .rh-form-status {
+      min-height: 1.5rem;
+      margin-bottom: var(--space-5);
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .rh-form-status:empty {
+      display: none;
+    }
+
+    .rh-form-status.is-loading {
+      color: var(--rh-muted, #5b6472);
+    }
+
+    .rh-form-status.is-success {
+      color: #166534;
+    }
+
+    .rh-form-status.is-error {
+      color: #b91c1c;
+    }
+
+    .rh-form button[disabled],
+    #contact-form button[disabled] {
+      opacity: 0.65;
+      cursor: wait;
+    }
+  </style>
 </BaseLayout>
