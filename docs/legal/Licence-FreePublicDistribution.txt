@@ -1,0 +1,145 @@
+FREE PUBLIC DISTRIBUTION LICENCE
+
+Document Title: {{DOCUMENT_TITLE}}
+
+Version: {{DOCUMENT_VERSION}}
+
+Copyright © {{YEAR}} {{COPYRIGHT_HOLDER}}
+
+All rights reserved.
+
+LICENCE TYPE
+
+Free Public Distribution Licence
+
+This document is provided free of charge to support learning, community development, discussion, research, and participation within the RelayHub ecosystem.
+
+The copyright holder grants permission to download, store, read, print, and redistribute this document subject to the conditions below.
+
+PURPOSE
+
+This document exists to help people understand, evaluate, discuss, and participate in the ideas, projects, communities, and technologies described within it.
+
+Sharing is encouraged.
+
+Attribution is required.
+
+OWNERSHIP
+
+Ownership of this document and all associated intellectual property remains with the copyright holder.
+
+Downloading, receiving, or sharing this document does not transfer ownership of any intellectual property rights.
+
+PERMITTED USES
+
+You may:
+• Download this document.
+• Store this document.
+• Print this document.
+• Share this document with others.
+• Email this document to others.
+• Provide copies to friends, family, colleagues, communities, organisations, schools, clubs, and associations.
+• Host copies for redistribution provided the document remains complete and unmodified.
+• Use the document for educational purposes.
+• Quote reasonable excerpts with attribution.
+• Reference the document in articles, presentations, reports, videos, podcasts, and other publications.
+
+REDISTRIBUTION RIGHTS
+
+Redistribution is expressly permitted provided that:
+• the document remains complete,
+• the document remains unmodified,
+• attribution remains intact,
+• copyright notices remain intact,
+• licence notices remain intact,
+• branding remains intact where applicable,
+• version information remains intact.
+
+Redistribution should include a reference to the official source where practical.
+
+ATTRIBUTION REQUIREMENT
+
+Any redistribution should identify the original source as:
+
+{{COPYRIGHT_HOLDER}}
+
+and where applicable:
+
+{{OFFICIAL_WEBSITE}}
+
+ATTRIBUTION MUST NOT BE REMOVED.
+
+PROHIBITED USES
+
+You may not:
+• Claim authorship of the document.
+• Remove copyright notices.
+• Remove attribution notices.
+• Remove licence notices.
+• Remove branding where applicable.
+• Remove identifying metadata.
+• Sell the document by itself.
+• Misrepresent the document as your own work.
+• Publish modified versions as if they were the original document.
+• Create confusion regarding authorship, ownership, endorsement, or official status.
+
+MODIFIED VERSIONS
+
+You may create notes, commentary, reviews, analyses, summaries, or derivative works based upon the ideas contained within the document.
+
+However:
+• modified versions must be clearly identified as modified,
+• modified versions must not be presented as official versions,
+• modified versions must not imply endorsement by the copyright holder.
+
+PERSONALISED COPY INFORMATION
+
+This copy may contain identifying information relating to the person who downloaded it.
+
+Such information may include:
+• recipient name,
+• recipient email address,
+• download identifier,
+• download date,
+• watermark information,
+• embedded metadata.
+
+These identifiers support ecosystem analytics, document improvement, intellectual property protection, and operational administration.
+
+LATEST VERSION
+The latest official version of this document may be available from:
+
+{{OFFICIAL_WEBSITE}}
+
+Readers are encouraged to obtain current versions directly from the official source.
+
+NO WARRANTY
+
+This document is provided for informational and educational purposes.
+
+While reasonable efforts have been made to ensure accuracy, no warranty is provided regarding:
+• completeness,
+• accuracy,
+• suitability,
+• future availability,
+• fitness for a particular purpose.
+
+LIMITATION OF LIABILITY
+
+To the maximum extent permitted by law, the copyright holder shall not be liable for any loss, damage, cost, or consequence arising from the use of this document.
+
+CONTACT
+
+Questions regarding attribution, redistribution, licensing, translations, derivative works, or official versions may be directed to:
+
+{{CONTACT_EMAIL}}
+
+FINAL NOTE
+
+Please share this document.
+
+RelayHub grows through voluntary participation, learning, cooperation, and community building.
+
+Help others discover the ideas, tools, and communities that can strengthen local resilience and human flourishing.
+
+END OF FREE PUBLIC DISTRIBUTION LICENCE
