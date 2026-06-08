@@ -1,0 +1,94 @@
+PERSONAL USE LICENCE
+
+Document Title: {{DOCUMENT_TITLE}}
+
+Version: {{DOCUMENT_VERSION}}
+
+Copyright © {{YEAR}} {{COPYRIGHT_HOLDER}}
+
+All rights reserved.
+
+LICENCE TYPE
+
+Personal Use Licence
+
+This document is licensed to the individual identified below.
+
+The licence is personal, non-exclusive, non-transferable, revocable for breach, and subject to the terms of this licence.
+
+LICENCE HOLDER
+
+Licensed To:
+{{LICENSED_NAME}}
+
+Email:
+{{LICENSED_EMAIL}}
+
+Download ID:
+{{DOWNLOAD_ID}}
+
+Order Number:
+{{ORDER_NUMBER}}
+
+Licence Date:
+{{LICENCE_DATE}}
+
+PERMITTED USES
+
+The licence holder may:
+
+• Download and store copies of this document for personal use.
+• Print copies for personal use.
+• Use the information contained within the document for personal study, education, research, planning, and implementation.
+• Use the information contained within the document within their own household or for their own personal projects.
+• Retain archival copies for backup purposes.
+
+PROHIBITED USES
+
+The licence holder may not:
+
+• Share this document with any other person.
+• Provide copies to family members, friends, colleagues, clients, contractors, employees, organisations, or communities.
+• Upload the document to any website, repository, cloud service, forum, messaging platform, or file sharing service.
+• Redistribute the document in whole or in part.
+• Sell, rent, lease, sublicense, or otherwise transfer the document.
+• Include substantial portions of the document within another publication.
+• Remove copyright notices, watermarks, attribution notices, metadata, download identifiers, or licence information.
+• Use the document as part of a commercial training programme.
+• Use the document within a consulting engagement where the document itself is provided to a client.
+• Represent the document as their own work.
+
+PERSONALISED COPY NOTICE
+
+This copy contains identifying information associated with the licence holder.
+
+The document may contain visible and invisible identifiers including:
+
+• name,
+• email address,
+• download identifier,
+• order identifier,
+• transaction references,
+• watermark information,
+• embedded metadata.
+
+UNAUTHORISED DISTRIBUTION
+
+Unauthorised redistribution may result in:
+
+• licence termination,
+• loss of update eligibility,
+• denial of future purchases,
+• copyright enforcement action,
+• recovery of damages where permitted by law.
+
+NO TRANSFER OF OWNERSHIP
+
+Purchase grants a licence to use the document.
+
+Purchase does not transfer ownership of the intellectual property.
+
+All copyright, moral rights, and associated intellectual property remain the property of the copyright holder.
+
+END OF PERSONAL USE LICENCE
+

@@ -1,0 +1,88 @@
+COMMERCIAL USE LICENCE
+
+Document Title: {{DOCUMENT_TITLE}}
+
+Version: {{DOCUMENT_VERSION}}
+
+Copyright © {{YEAR}} {{COPYRIGHT_HOLDER}}
+
+All rights reserved.
+
+LICENCE TYPE
+
+Commercial Use Licence
+
+This licence grants expanded commercial rights to the organisation or individual identified below.
+
+LICENCE HOLDER
+
+Licensed Organisation:
+{{LICENSED_ORGANISATION}}
+
+Authorised Contact:
+{{LICENSED_NAME}}
+
+Email:
+{{LICENSED_EMAIL}}
+
+Download ID:
+{{DOWNLOAD_ID}}
+
+Order Number:
+{{ORDER_NUMBER}}
+
+Licence Date:
+{{LICENCE_DATE}}
+
+PERMITTED USES
+
+The licence holder may:
+
+• Download, store, and print copies of the document.
+• Use the document internally within their organisation.
+• Share the document with employees, officers, contractors, directors, and consultants working for the licensed organisation.
+• Use the document within commercial operations.
+• Use the document as a reference when delivering services to clients.
+• Use concepts, methods, frameworks, templates, and processes described within the document.
+• Produce internal derivative works based upon the information contained within the document.
+• Retain archival copies for backup and compliance purposes.
+
+RESTRICTIONS
+
+The licence holder may not:
+
+• Redistribute the original document publicly.
+• Publish the document online.
+• Sell copies of the document.
+• Offer the document for download.
+• Remove copyright notices, watermarks, attribution notices, licence information, or identifying metadata.
+• Claim authorship of the original document.
+• Represent the document itself as a product created by the licence holder.
+
+CLIENT DISTRIBUTION
+
+Unless explicitly authorised in writing, this licence does not permit distribution of the original document to clients, customers, students, members, or third parties.
+
+Where client distribution rights are required, an Enterprise Redistribution Licence must be obtained.
+
+PERSONALISED COPY NOTICE
+
+This copy contains identifying information associated with the licence holder and may contain:
+
+• organisation name,
+• authorised contact details,
+• licence identifiers,
+• transaction identifiers,
+• watermark information,
+• embedded metadata.
+
+NO TRANSFER OF OWNERSHIP
+
+Purchase grants a licence to use the document.
+
+Purchase does not transfer ownership of the intellectual property.
+
+All copyright, moral rights, and associated intellectual property remain the property of the copyright holder.
+
+END OF COMMERCIAL USE LICENCE
+

@@ -1,0 +1,174 @@
+ENTERPRISE REDISTRIBUTION LICENCE
+
+Document Title: {{DOCUMENT_TITLE}}
+
+Version: {{DOCUMENT_VERSION}}
+
+Copyright © {{YEAR}} {{COPYRIGHT_HOLDER}}
+
+All rights reserved.
+
+LICENCE TYPE
+
+Enterprise Redistribution Licence
+
+This licence grants expanded rights to reproduce and distribute the licensed document within the scope defined below.
+
+LICENCE HOLDER
+
+Licensed Organisation:
+{{LICENSED_ORGANISATION}}
+
+Authorised Representative:
+{{LICENSED_NAME}}
+
+Email:
+{{LICENSED_EMAIL}}
+
+Licence Number:
+{{LICENCE_NUMBER}}
+
+Download ID:
+{{DOWNLOAD_ID}}
+
+Order Number:
+{{ORDER_NUMBER}}
+
+Licence Date:
+{{LICENCE_DATE}}
+
+LICENCE PURPOSE
+
+This licence is intended for organisations that require the ability to distribute copies of the licensed document to employees, members, students, clients, customers, participants, affiliates, contractors, or other authorised recipients.
+
+This licence expands redistribution rights beyond those available under Personal Use and Commercial Use licences.
+
+PERMITTED USES
+
+The licence holder may:
+
+• Download, store, print, and archive copies of the document.
+• Use the document internally within the organisation.
+• Provide copies of the document to employees, officers, directors, contractors, consultants, and authorised representatives.
+• Distribute copies to students, trainees, members, clients, customers, programme participants, and other authorised recipients.
+• Include the document within internal training programmes.
+• Include the document within paid training programmes.
+• Use the document as supporting material within consulting engagements.
+• Provide copies to project stakeholders where relevant to the organisation's activities.
+• Store the document within internal document management systems.
+• Store the document within internal learning management systems.
+• Create reasonable backup copies for continuity, recovery, and compliance purposes.
+
+REDISTRIBUTION RIGHTS
+
+The licence holder may redistribute the document in its complete and unmodified form to authorised recipients.
+
+Recipients do not obtain ownership of the intellectual property.
+
+Recipients receive only a limited right to use the distributed copy under the authority of the licence holder.
+
+INTELLECTUAL PROPERTY OWNERSHIP
+
+All copyright, moral rights, trademarks, branding, and intellectual property remain the sole property of the copyright holder.
+
+Nothing in this licence transfers ownership of intellectual property.
+
+ATTRIBUTION REQUIREMENTS
+
+All distributed copies must retain:
+
+• copyright notices,
+• attribution statements,
+• licence notices,
+• branding elements where applicable,
+• watermark information where applicable,
+• version information.
+
+Attribution may not be removed, obscured, altered, or replaced.
+
+PROHIBITED USES
+
+The licence holder may not:
+
+• Claim authorship of the original document.
+• Remove copyright notices.
+• Remove attribution notices.
+• Remove identifying metadata.
+• Sell ownership of the document.
+• Transfer intellectual property rights.
+• Publish the document as the licence holder's own work.
+• Remove licence notices from distributed copies.
+• Misrepresent the relationship between the licence holder and the copyright holder.
+
+DOCUMENT MODIFICATION
+
+Unless explicitly authorised in writing, this licence does not permit:
+
+• modification of the original document,
+• publication of modified versions,
+• creation of derivative commercial publications,
+• rebranding of the original document.
+
+Authorised excerpts may be used for educational, training, reporting, and consulting purposes provided attribution is maintained.
+
+PERSONALISED IDENTIFIERS
+
+Distributed copies may contain:
+
+• licence identifiers,
+• organisation identifiers,
+• distribution identifiers,
+• watermark information,
+• embedded metadata,
+• transaction references.
+
+These identifiers exist to support licence administration, version management, intellectual property protection, and auditability.
+
+AUDIT RIGHTS
+
+The copyright holder may request reasonable evidence demonstrating compliance with the terms of this licence.
+
+Such evidence may include:
+
+• approximate distribution numbers,
+• recipient categories,
+• deployment scope,
+• current licence status.
+
+CONFIDENTIALITY
+
+Where the document contains confidential, proprietary, restricted, or non-public information, the licence holder remains responsible for ensuring distribution only to authorised recipients.
+
+NO WARRANTY
+
+This document is provided "as is".
+
+No warranty is provided regarding:
+
+• completeness,
+• suitability,
+• legal compliance,
+• commercial outcomes,
+• fitness for a particular purpose.
+
+LIMITATION OF LIABILITY
+
+To the maximum extent permitted by law, the copyright holder shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from the use of this document.
+
+LICENCE TERMINATION
+
+This licence may be terminated if the licence holder materially breaches the terms of this agreement.
+
+Upon termination:
+
+• redistribution rights cease,
+• future distributions must stop,
+• existing lawful recipients may continue using previously distributed copies unless otherwise required by law.
+
+CONTACT
+
+Licensing Enquiries:
+{{CONTACT_EMAIL}}
+
+END OF ENTERPRISE REDISTRIBUTION LICENCE
+
