@@ -1,0 +1,75 @@
+# CDAS Phase 3A — Public Access Request Intake Proof
+
+Date: 2026-06-08T23:10:37Z
+
+## API Test
+{
+    "ok": true,
+    "request_id": "dar_mq5tqqka_53d5492a12f1225a",
+    "document_id": "relayhub-overview",
+    "document_title": "RelayHub Overview",
+    "document_version": "0.2",
+    "access_class": "licensed_public",
+    "classification": "public_licensed",
+    "status": "email_pending",
+    "terms_version": "FREE-PUBLIC-DISTRIBUTION-v0.1",
+    "terms_accepted_at": "2026-06-08T23:10:38.074Z",
+    "requested_at": "2026-06-08T23:10:38.074Z",
+    "risk_score": 0,
+    "risk_flags": [],
+    "message": "Document access request was recorded. Email verification and download issuance are not active yet."
+}
+
+## D1 Verification
+
+ ⛅️ wrangler 4.98.0
+───────────────────
+Resource location: remote 
+
+🌀 Executing on remote database RELAYHUB_DB (3d056ea7-e390-42d2-874e-38a797655484):
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+🚣 Executed 1 command in 0.20ms
+[
+  {
+    "results": [
+      {
+        "id": "dar_mq5tqqka_53d5492a12f1225a",
+        "document_id": "relayhub-overview",
+        "document_version": "0.2",
+        "email_normalised": "test@example.com",
+        "status": "email_pending",
+        "access_class": "licensed_public",
+        "terms_version": "FREE-PUBLIC-DISTRIBUTION-v0.1",
+        "requested_at": "2026-06-08T23:10:38.074Z"
+      },
+      {
+        "id": "dar_mq5tq3xu_8c8867c5ae0d461a",
+        "document_id": "relayhub-overview",
+        "document_version": "0.2",
+        "email_normalised": "test@example.com",
+        "status": "email_pending",
+        "access_class": "licensed_public",
+        "terms_version": "FREE-PUBLIC-DISTRIBUTION-v0.1",
+        "requested_at": "2026-06-08T23:10:08.754Z"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "OC",
+      "served_by_colo": "MEL",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.2041
+      },
+      "duration": 0.2041,
+      "changes": 0,
+      "last_row_id": 2,
+      "changed_db": false,
+      "size_after": 499712,
+      "rows_read": 2,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

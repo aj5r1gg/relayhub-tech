@@ -5,6 +5,7 @@ import {
   getCdasLicenceTerms,
 } from "./terms.js";
 import { importCdasDocumentsFromCatalogue } from "./import.js";
+import { renderCdasDocumentLicence } from "./render.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -18,6 +19,7 @@ function isCdasAdminAuthorized(request, env) {
 
   if (authHeader.startsWith(bearerPrefix)) {
     const supplied = authHeader.slice(bearerPrefix.length).trim();
+
     if (supplied && supplied === expected) {
       return true;
     }
@@ -61,6 +63,21 @@ export async function handleCdasAdminRequest(request, env) {
 
   if (pathname === "/api/admin/cdas/documents/import") {
     return importCdasDocumentsFromCatalogue(request, env);
+  }
+
+  /*
+   * Must appear before the generic /documents/:id route.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/documents/") &&
+    pathname.endsWith("/rendered-licence")
+  ) {
+    const withoutPrefix = pathname.slice("/api/admin/cdas/documents/".length);
+    const documentId = decodeURIComponent(
+      withoutPrefix.slice(0, -"/rendered-licence".length)
+    );
+
+    return renderCdasDocumentLicence(request, env, documentId);
   }
 
   if (pathname === "/api/admin/cdas/documents") {

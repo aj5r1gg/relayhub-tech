@@ -1,0 +1,999 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const pageTitle = "CDAS Licence Terms Admin";
+const pageDescription =
+  "Read-only admin view for RelayHub Controlled Document Access System licence terms.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="rh-admin-page">
+    <section class="rh-admin-hero">
+      <p class="rh-eyebrow">RelayHub Admin</p>
+      <h1>CDAS Licence Terms</h1>
+      <p>
+        Read-only view of the Controlled Document Access System licence terms registry.
+        Terms are versioned and must not be silently overwritten. This page only displays
+        records already stored in the CDAS database.
+      </p>
+    </section>
+
+    <section class="rh-admin-card rh-admin-auth-card" id="auth-card">
+      <div>
+        <h2>Admin access</h2>
+        <p>
+          Enter your RelayHub admin token. It is stored only in this browser session.
+        </p>
+      </div>
+
+      <form class="rh-admin-token-form" id="token-form">
+        <label for="admin-token">Admin token</label>
+        <div class="rh-admin-token-row">
+          <input
+            id="admin-token"
+            name="admin-token"
+            type="password"
+            autocomplete="off"
+            placeholder="Paste admin token"
+          />
+          <button class="rh-button rh-button-primary" type="submit">
+            Save token
+          </button>
+          <button class="rh-button rh-button-secondary" id="clear-token" type="button">
+            Clear
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="rh-admin-grid rh-admin-summary-grid" aria-label="CDAS licence terms summary">
+      <article class="rh-admin-metric">
+        <span>Total records</span>
+        <strong id="metric-total">—</strong>
+      </article>
+
+      <article class="rh-admin-metric">
+        <span>Active</span>
+        <strong id="metric-active">—</strong>
+      </article>
+
+      <article class="rh-admin-metric">
+        <span>Superseded</span>
+        <strong id="metric-superseded">—</strong>
+      </article>
+
+      <article class="rh-admin-metric">
+        <span>Retired / withdrawn</span>
+        <strong id="metric-retired">—</strong>
+      </article>
+    </section>
+
+    <section class="rh-admin-card">
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Licence terms registry</h2>
+          <p>
+            Search and inspect CDAS licence terms. Full body text can be loaded from
+            the API for admin review.
+          </p>
+        </div>
+
+        <div class="rh-admin-actions">
+          <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <form class="rh-admin-filters" id="filters-form">
+        <label>
+          Search
+          <input id="filter-q" name="q" type="search" placeholder="Version, title, notes…" />
+        </label>
+
+        <label>
+          Status
+          <select id="filter-status" name="status">
+            <option value="">All statuses</option>
+            <option value="draft">draft</option>
+            <option value="active">active</option>
+            <option value="superseded">superseded</option>
+            <option value="retired">retired</option>
+            <option value="withdrawn">withdrawn</option>
+          </select>
+        </label>
+
+        <label>
+          Access class
+          <select id="filter-access-class" name="access_class">
+            <option value="">All access classes</option>
+            <option value="direct_public">direct_public</option>
+            <option value="verified_public">verified_public</option>
+            <option value="licensed_public">licensed_public</option>
+            <option value="controlled_verified">controlled_verified</option>
+            <option value="approval_required">approval_required</option>
+            <option value="invite_only">invite_only</option>
+            <option value="paid_verified">paid_verified</option>
+            <option value="disabled">disabled</option>
+          </select>
+        </label>
+
+        <label>
+          Body
+          <select id="filter-include-body" name="include_body">
+            <option value="0">Preview only</option>
+            <option value="1">Include full body</option>
+          </select>
+        </label>
+
+        <div class="rh-admin-filter-actions">
+          <button class="rh-button rh-button-primary" type="submit">
+            Apply filters
+          </button>
+          <button class="rh-button rh-button-secondary" id="reset-filters" type="button">
+            Reset
+          </button>
+        </div>
+      </form>
+
+      <div class="rh-admin-status" id="status-message" role="status" aria-live="polite">
+        Ready.
+      </div>
+
+      <div class="rh-admin-table-wrap">
+        <table class="rh-admin-table">
+          <thead>
+            <tr>
+              <th>Terms</th>
+              <th>Version</th>
+              <th>Status</th>
+              <th>Access class</th>
+              <th>Effective</th>
+              <th>Body</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="terms-body">
+            <tr>
+              <td colspan="8" class="rh-admin-empty">
+                No records loaded yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rh-admin-card rh-admin-detail-card" id="detail-card" hidden>
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Licence terms detail</h2>
+          <p id="detail-subtitle">
+            Selected CDAS licence terms record.
+          </p>
+        </div>
+
+        <button class="rh-button rh-button-secondary" id="close-detail" type="button">
+          Close
+        </button>
+      </div>
+
+      <div class="rh-admin-detail-grid" id="detail-grid"></div>
+
+      <article class="rh-admin-body-panel">
+        <h3>Terms body</h3>
+        <pre id="terms-body-full"></pre>
+      </article>
+    </section>
+  </main>
+
+  <style>
+    .rh-admin-page {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0 5rem;
+    }
+
+    .rh-admin-hero {
+      margin-bottom: 1.5rem;
+      padding: 2rem;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.5rem;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 36rem),
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .rh-admin-hero h1 {
+      margin: 0.35rem 0 0.75rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .rh-admin-hero p {
+      max-width: 760px;
+      margin: 0;
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .rh-eyebrow {
+      margin: 0;
+      color: #2563eb;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-card,
+    .rh-admin-metric {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+    }
+
+    .rh-admin-card {
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .rh-admin-auth-card,
+    .rh-admin-section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .rh-admin-card h2,
+    .rh-admin-section-heading h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .rh-admin-card p,
+    .rh-admin-section-heading p {
+      margin: 0.35rem 0 0;
+      color: rgba(15, 23, 42, 0.67);
+      line-height: 1.6;
+    }
+
+    .rh-admin-token-form {
+      width: min(520px, 100%);
+    }
+
+    .rh-admin-token-form label,
+    .rh-admin-filters label {
+      display: grid;
+      gap: 0.35rem;
+      color: rgba(15, 23, 42, 0.8);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .rh-admin-token-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .rh-admin-token-row input,
+    .rh-admin-filters input,
+    .rh-admin-filters select {
+      width: 100%;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      border-radius: 0.8rem;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .rh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+      white-space: nowrap;
+    }
+
+    .rh-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .rh-button-primary {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    .rh-button-primary:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .rh-button-secondary {
+      background: #fff;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.18);
+    }
+
+    .rh-button-secondary:hover {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.34);
+    }
+
+    .rh-admin-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .rh-admin-summary-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 1rem 0;
+    }
+
+    .rh-admin-metric {
+      padding: 1rem;
+    }
+
+    .rh-admin-metric span {
+      display: block;
+      color: rgba(15, 23, 42, 0.62);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-metric strong {
+      display: block;
+      margin-top: 0.4rem;
+      color: #0f172a;
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .rh-admin-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .rh-admin-filters {
+      display: grid;
+      grid-template-columns: 1.4fr repeat(3, minmax(160px, 1fr));
+      gap: 0.85rem;
+      align-items: end;
+      margin: 1.25rem 0 1rem;
+    }
+
+    .rh-admin-filter-actions {
+      display: flex;
+      gap: 0.5rem;
+      grid-column: 1 / -1;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .rh-admin-status {
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      border-radius: 0.9rem;
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.75);
+      font-size: 0.95rem;
+    }
+
+    .rh-admin-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-admin-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-admin-table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+    }
+
+    .rh-admin-table {
+      width: 100%;
+      min-width: 1000px;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 0.92rem;
+    }
+
+    .rh-admin-table th,
+    .rh-admin-table td {
+      padding: 0.85rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .rh-admin-table th {
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .rh-admin-empty {
+      text-align: center;
+      color: rgba(15, 23, 42, 0.58);
+    }
+
+    .rh-admin-title-stack {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    .rh-admin-title-stack strong {
+      color: #0f172a;
+    }
+
+    .rh-admin-title-stack span {
+      color: rgba(15, 23, 42, 0.58);
+      font-size: 0.82rem;
+      word-break: break-word;
+    }
+
+    .rh-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .rh-badge-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .rh-badge-retired,
+    .rh-badge-withdrawn {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .rh-badge-superseded,
+    .rh-badge-draft {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .rh-admin-body-preview {
+      max-width: 360px;
+      color: rgba(15, 23, 42, 0.72);
+      line-height: 1.55;
+    }
+
+    .rh-admin-detail-card {
+      margin-top: 1rem;
+    }
+
+    .rh-admin-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .rh-admin-detail-item {
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 0.9rem;
+      padding: 0.85rem;
+      background: #f8fafc;
+    }
+
+    .rh-admin-detail-item dt {
+      color: rgba(15, 23, 42, 0.56);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-detail-item dd {
+      margin: 0.3rem 0 0;
+      color: #0f172a;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .rh-admin-body-panel {
+      margin-top: 1rem;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+      background: #f8fafc;
+      padding: 1rem;
+    }
+
+    .rh-admin-body-panel h3 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+    }
+
+    .rh-admin-body-panel pre {
+      margin: 0;
+      padding: 1rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      border-radius: 0.85rem;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 960px) {
+      .rh-admin-auth-card,
+      .rh-admin-section-heading {
+        display: grid;
+      }
+
+      .rh-admin-token-row {
+        display: grid;
+      }
+
+      .rh-admin-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .rh-admin-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .rh-admin-detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .rh-admin-page {
+        width: min(100% - 1rem, 1180px);
+        padding-top: 1rem;
+      }
+
+      .rh-admin-hero,
+      .rh-admin-card {
+        padding: 1rem;
+        border-radius: 1rem;
+      }
+
+      .rh-admin-summary-grid,
+      .rh-admin-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .rh-admin-filter-actions {
+        justify-content: stretch;
+      }
+
+      .rh-admin-filter-actions .rh-button,
+      .rh-admin-actions .rh-button {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const TOKEN_STORAGE_KEY = "relayhub_admin_token";
+
+    const state = {
+      terms: [],
+      total: 0,
+      limit: 100,
+      offset: 0,
+    };
+
+    const tokenForm = document.getElementById("token-form");
+    const tokenInput = document.getElementById("admin-token");
+    const clearTokenButton = document.getElementById("clear-token");
+    const filtersForm = document.getElementById("filters-form");
+    const resetFiltersButton = document.getElementById("reset-filters");
+    const refreshButton = document.getElementById("refresh-button");
+    const statusMessage = document.getElementById("status-message");
+    const termsBody = document.getElementById("terms-body");
+
+    const metricTotal = document.getElementById("metric-total");
+    const metricActive = document.getElementById("metric-active");
+    const metricSuperseded = document.getElementById("metric-superseded");
+    const metricRetired = document.getElementById("metric-retired");
+
+    const detailCard = document.getElementById("detail-card");
+    const detailSubtitle = document.getElementById("detail-subtitle");
+    const detailGrid = document.getElementById("detail-grid");
+    const termsBodyFull = document.getElementById("terms-body-full");
+    const closeDetailButton = document.getElementById("close-detail");
+
+    function getStoredToken() {
+      return sessionStorage.getItem(TOKEN_STORAGE_KEY) || "";
+    }
+
+    function setStoredToken(token) {
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+    }
+
+    function clearStoredToken() {
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+
+    function setStatus(message, mode = "neutral") {
+      statusMessage.textContent = message;
+      statusMessage.dataset.state = mode;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatValue(value) {
+      if (value === null || value === undefined || value === "") {
+        return "—";
+      }
+
+      return String(value);
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return "—";
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    function badgeClass(value) {
+      const text = String(value || "").toLowerCase();
+
+      if (text === "active") return "rh-badge rh-badge-active";
+      if (text === "superseded") return "rh-badge rh-badge-superseded";
+      if (text === "draft") return "rh-badge rh-badge-draft";
+      if (text === "retired") return "rh-badge rh-badge-retired";
+      if (text === "withdrawn") return "rh-badge rh-badge-withdrawn";
+
+      return "rh-badge";
+    }
+
+    function getFilters() {
+      const formData = new FormData(filtersForm);
+      const params = new URLSearchParams();
+
+      for (const [key, value] of formData.entries()) {
+        const clean = String(value || "").trim();
+
+        if (clean) {
+          params.set(key, clean);
+        }
+      }
+
+      params.set("limit", String(state.limit));
+      params.set("offset", String(state.offset));
+
+      return params;
+    }
+
+    async function fetchTerms() {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Enter and save your admin token to load CDAS licence terms.", "error");
+        renderTerms([]);
+        updateMetrics([]);
+        return;
+      }
+
+      const params = getFilters();
+      const endpoint = `/api/admin/cdas/licence-terms?${params.toString()}`;
+
+      setStatus("Loading CDAS licence terms…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(endpoint, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not load CDAS licence terms: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "CDAS licence terms could not be loaded.",
+          "error"
+        );
+
+        renderTerms([]);
+        updateMetrics([]);
+        return;
+      }
+
+      state.terms = Array.isArray(data.rows) ? data.rows : [];
+      state.total = Number(data.total || state.terms.length || 0);
+
+      renderTerms(state.terms);
+      updateMetrics(state.terms);
+
+      setStatus(
+        `Loaded ${state.terms.length} CDAS licence terms record(s). Total matching records: ${state.total}.`,
+        "success"
+      );
+    }
+
+    function updateMetrics(terms) {
+      const active = terms.filter((row) => row.status === "active").length;
+      const superseded = terms.filter((row) => row.status === "superseded").length;
+      const retired = terms.filter(
+        (row) => row.status === "retired" || row.status === "withdrawn"
+      ).length;
+
+      metricTotal.textContent = String(state.total || terms.length || 0);
+      metricActive.textContent = String(active);
+      metricSuperseded.textContent = String(superseded);
+      metricRetired.textContent = String(retired);
+    }
+
+    function renderTerms(terms) {
+      if (!terms.length) {
+        termsBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="rh-admin-empty">
+              No CDAS licence terms records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      termsBody.innerHTML = terms
+        .map((row) => {
+          const bodyPreview = row.body_preview || row.body || "—";
+          const effective = `${formatValue(row.effective_from)} → ${formatValue(row.effective_to)}`;
+
+          return `
+            <tr>
+              <td>
+                <div class="rh-admin-title-stack">
+                  <strong>${escapeHtml(row.title)}</strong>
+                  <span>${escapeHtml(row.id)}</span>
+                  <span>${escapeHtml(row.notes || "")}</span>
+                </div>
+              </td>
+              <td>${escapeHtml(formatValue(row.version))}</td>
+              <td>
+                <span class="${badgeClass(row.status)}">
+                  ${escapeHtml(formatValue(row.status))}
+                </span>
+              </td>
+              <td>
+                <span class="rh-badge">
+                  ${escapeHtml(formatValue(row.applies_to_access_class))}
+                </span>
+              </td>
+              <td>${escapeHtml(effective)}</td>
+              <td>
+                <div class="rh-admin-body-preview">
+                  ${escapeHtml(bodyPreview)}
+                </div>
+              </td>
+              <td>${escapeHtml(formatDate(row.created_at))}</td>
+              <td>
+                <button
+                  class="rh-button rh-button-secondary"
+                  type="button"
+                  data-view-terms="${escapeHtml(row.id)}"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    async function renderDetail(termsId) {
+      let row = state.terms.find((item) => item.id === termsId);
+
+      if (!row || !row.body) {
+        const token = getStoredToken();
+
+        try {
+          const response = await fetch(
+            `/api/admin/cdas/licence-terms/${encodeURIComponent(termsId)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (response.ok && data.ok && data.terms) {
+            row = data.terms;
+          }
+        } catch (error) {
+          setStatus(`Could not load full terms record: ${error.message}`, "error");
+          return;
+        }
+      }
+
+      if (!row) {
+        setStatus("Selected licence terms record was not found.", "error");
+        return;
+      }
+
+      detailSubtitle.textContent = `${row.title} — ${row.version}`;
+
+      const fields = [
+        ["ID", row.id],
+        ["Version", row.version],
+        ["Title", row.title],
+        ["Status", row.status],
+        ["Applies to access class", row.applies_to_access_class],
+        ["Body SHA-256", row.body_sha256],
+        ["Effective from", row.effective_from],
+        ["Effective to", row.effective_to],
+        ["Created at", formatDate(row.created_at)],
+        ["Retired at", formatDate(row.retired_at)],
+        ["Notes", row.notes],
+        ["Body length", row.body_length || (row.body ? row.body.length : null)],
+      ];
+
+      detailGrid.innerHTML = fields
+        .map(([label, value]) => {
+          return `
+            <dl class="rh-admin-detail-item">
+              <dt>${escapeHtml(label)}</dt>
+              <dd>${escapeHtml(formatValue(value))}</dd>
+            </dl>
+          `;
+        })
+        .join("");
+
+      termsBodyFull.textContent = row.body || row.body_preview || "No body text available.";
+
+      detailCard.hidden = false;
+      detailCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    tokenForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const token = tokenInput.value.trim();
+
+      if (!token) {
+        setStatus("Paste an admin token before saving.", "error");
+        return;
+      }
+
+      setStoredToken(token);
+      tokenInput.value = "";
+      setStatus("Admin token saved for this browser session.", "success");
+      fetchTerms();
+    });
+
+    clearTokenButton.addEventListener("click", () => {
+      clearStoredToken();
+      tokenInput.value = "";
+      setStatus("Admin token cleared from this browser session.");
+      renderTerms([]);
+      updateMetrics([]);
+    });
+
+    filtersForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      state.offset = 0;
+      fetchTerms();
+    });
+
+    resetFiltersButton.addEventListener("click", () => {
+      filtersForm.reset();
+      state.offset = 0;
+      fetchTerms();
+    });
+
+    refreshButton.addEventListener("click", () => {
+      fetchTerms();
+    });
+
+    termsBody.addEventListener("click", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const button = target.closest("[data-view-terms]");
+
+      if (!(button instanceof HTMLElement)) {
+        return;
+      }
+
+      const termsId = button.dataset.viewTerms;
+
+      if (termsId) {
+        renderDetail(termsId);
+      }
+    });
+
+    closeDetailButton.addEventListener("click", () => {
+      detailCard.hidden = true;
+    });
+
+    const existingToken = getStoredToken();
+
+    if (existingToken) {
+      setStatus("Admin token found in this browser session. Loading CDAS licence terms…");
+      fetchTerms();
+    } else {
+      setStatus("Enter and save your admin token to load CDAS licence terms.");
+    }
+  </script>
+</BaseLayout>

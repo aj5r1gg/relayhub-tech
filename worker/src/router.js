@@ -27,6 +27,10 @@ import {
   handleCdasAdminRequest,
 } from "./cdas/admin.js";
 
+import {
+  handleDocumentAccessRequest,
+} from "./cdas/request.js";
+
 export async function routeRequest(request, env) {
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
@@ -92,19 +96,27 @@ export async function routeRequest(request, env) {
   }
 
   /*
-   * CDAS Phase 2A/2B.
+   * CDAS Phase 3A — public access request intake.
    *
-   * Admin-only CDAS endpoints.
+   * This route records an access request only.
    *
-   * Phase 2A:
-   * - Read documents
-   * - Read licence terms
-   *
-   * Phase 2B:
-   * - Import existing R2 document catalogue into CDAS documents table
-   *
-   * No public CDAS request, verification, licence issue, download, reissue,
-   * revocation, or PDF generation behaviour is activated here.
+   * It does not:
+   * - verify email,
+   * - issue a licence,
+   * - generate a PDF,
+   * - create a download link,
+   * - serve a controlled download.
+   */
+  if (pathname === "/api/document-access/request") {
+    if (request.method === "POST") {
+      return handleDocumentAccessRequest(request, env);
+    }
+
+    return methodNotAllowed("POST");
+  }
+
+  /*
+   * CDAS admin routes.
    */
   if (
     pathname === "/api/admin/cdas/documents" ||
