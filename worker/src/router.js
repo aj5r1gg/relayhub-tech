@@ -23,10 +23,15 @@ import {
   handleDownloadAnalyticsAdminJson,
 } from "./admin.js";
 
+import {
+  handleCdasAdminRequest,
+} from "./cdas/admin.js";
+
 export async function routeRequest(request, env) {
   const url = new URL(request.url);
+  const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-  if (url.pathname.startsWith("/download/")) {
+  if (pathname.startsWith("/download/")) {
     if (request.method !== "GET" && request.method !== "HEAD") {
       return methodNotAllowed("GET, HEAD");
     }
@@ -34,7 +39,7 @@ export async function routeRequest(request, env) {
     return handleDownload(request, env, url);
   }
 
-  if (url.pathname === "/api/free-download") {
+  if (pathname === "/api/free-download") {
     if (request.method === "GET") {
       return textResponse("Free download endpoint is live. Submit the form with POST.");
     }
@@ -46,7 +51,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET, POST");
   }
 
-  if (url.pathname.startsWith("/api/download/")) {
+  if (pathname.startsWith("/api/download/")) {
     if (request.method !== "GET" && request.method !== "HEAD") {
       return methodNotAllowed("GET, HEAD");
     }
@@ -54,7 +59,7 @@ export async function routeRequest(request, env) {
     return handlePersonalisedDownload(request, env, url);
   }
 
-  if (url.pathname === "/api/admin/download-registry") {
+  if (pathname === "/api/admin/download-registry") {
     if (request.method === "GET") {
       return handleDownloadRegistryAdminJson(request, env, url);
     }
@@ -62,7 +67,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET");
   }
 
-  if (url.pathname === "/api/early-access") {
+  if (pathname === "/api/early-access") {
     if (request.method === "GET") {
       return textResponse("Early access endpoint is live. Submit the form with POST.");
     }
@@ -74,7 +79,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET, POST");
   }
 
-  if (url.pathname === "/api/contact") {
+  if (pathname === "/api/contact") {
     if (request.method === "GET") {
       return textResponse("Contact endpoint is live. Submit the form with POST.");
     }
@@ -86,7 +91,31 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET, POST");
   }
 
-  if (url.pathname === "/api/admin/newsletter") {
+  /*
+   * CDAS Phase 2A/2B.
+   *
+   * Admin-only CDAS endpoints.
+   *
+   * Phase 2A:
+   * - Read documents
+   * - Read licence terms
+   *
+   * Phase 2B:
+   * - Import existing R2 document catalogue into CDAS documents table
+   *
+   * No public CDAS request, verification, licence issue, download, reissue,
+   * revocation, or PDF generation behaviour is activated here.
+   */
+  if (
+    pathname === "/api/admin/cdas/documents" ||
+    pathname.startsWith("/api/admin/cdas/documents/") ||
+    pathname === "/api/admin/cdas/licence-terms" ||
+    pathname.startsWith("/api/admin/cdas/licence-terms/")
+  ) {
+    return handleCdasAdminRequest(request, env);
+  }
+
+  if (pathname === "/api/admin/newsletter") {
     if (request.method === "GET") {
       return handleNewsletterAdminJson(request, env, url);
     }
@@ -94,7 +123,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET");
   }
 
-  if (url.pathname === "/api/admin/newsletter.csv") {
+  if (pathname === "/api/admin/newsletter.csv") {
     if (request.method === "GET") {
       return handleNewsletterAdminCsv(request, env, url);
     }
@@ -102,7 +131,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET");
   }
 
-  if (url.pathname === "/api/admin/contact") {
+  if (pathname === "/api/admin/contact") {
     if (request.method === "GET") {
       return handleContactAdminJson(request, env, url);
     }
@@ -110,7 +139,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET");
   }
 
-  if (url.pathname === "/api/admin/contact.csv") {
+  if (pathname === "/api/admin/contact.csv") {
     if (request.method === "GET") {
       return handleContactAdminCsv(request, env, url);
     }
@@ -118,7 +147,7 @@ export async function routeRequest(request, env) {
     return methodNotAllowed("GET");
   }
 
-  if (url.pathname === "/api/admin/downloads") {
+  if (pathname === "/api/admin/downloads") {
     if (request.method === "GET") {
       return handleDownloadAnalyticsAdminJson(request, env, url);
     }

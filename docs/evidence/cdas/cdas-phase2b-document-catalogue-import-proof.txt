@@ -1,0 +1,161 @@
+# CDAS Phase 2B — Document Catalogue Import Proof
+
+Date: 2026-06-08T22:07:44Z
+
+## Import Result
+{
+    "ok": true,
+    "dry_run": true,
+    "catalogue_key": "docs/catalogue/documents.json",
+    "total_catalogue_items": 3,
+    "imported_count": 3,
+    "skipped_count": 0,
+    "imported": [
+        {
+            "id": "relayhub-overview",
+            "slug": "relayhub-overview",
+            "title": "RelayHub Overview",
+            "version": "0.2",
+            "status": "active",
+            "classification": "public_licensed",
+            "access_class": "licensed_public",
+            "source_object": "docs/originals/relayhub/RelayHub-Overview-v0.2.pdf",
+            "source_sha256": "",
+            "generated_prefix": "docs/generated/free/",
+            "licence_terms_version": "CDAS-LICENCE-v0.1",
+            "is_listed": 1,
+            "allow_redownload": 1,
+            "max_redownloads": 3,
+            "requires_approval": 0,
+            "current_version_of": null,
+            "supersedes_document_id": null,
+            "superseded_by_document_id": null
+        },
+        {
+            "id": "example-relayhub-paid-document",
+            "slug": "example-relayhub-paid-document",
+            "title": "Example RelayHub Paid Document",
+            "version": "0.1",
+            "status": "disabled",
+            "classification": "controlled",
+            "access_class": "paid_verified",
+            "source_object": "docs/originals/relayhub/example-relayhub-paid-document-v0.1.pdf",
+            "source_sha256": "",
+            "generated_prefix": "docs/generated/paid/",
+            "licence_terms_version": "CDAS-LICENCE-v0.1",
+            "is_listed": 0,
+            "allow_redownload": 0,
+            "max_redownloads": 3,
+            "requires_approval": 0,
+            "current_version_of": null,
+            "supersedes_document_id": null,
+            "superseded_by_document_id": null
+        },
+        {
+            "id": "example-private-paid-document",
+            "slug": "example-private-paid-document",
+            "title": "Example Private Paid Document",
+            "version": "0.1",
+            "status": "disabled",
+            "classification": "restricted",
+            "access_class": "paid_verified",
+            "source_object": "docs/originals/private/example-private-paid-document-v0.1.pdf",
+            "source_sha256": "",
+            "generated_prefix": "docs/generated/paid/",
+            "licence_terms_version": "CDAS-LICENCE-v0.1",
+            "is_listed": 0,
+            "allow_redownload": 0,
+            "max_redownloads": 3,
+            "requires_approval": 1,
+            "current_version_of": null,
+            "supersedes_document_id": null,
+            "superseded_by_document_id": null
+        }
+    ],
+    "skipped": []
+}
+
+## Documents Endpoint Result
+{
+    "ok": true,
+    "total": 3,
+    "limit": 25,
+    "offset": 0,
+    "sort": "updated_at",
+    "direction": "desc",
+    "filters": {
+        "q": null,
+        "status": null,
+        "classification": null,
+        "access_class": null,
+        "listed": null
+    },
+    "rows": [
+        {
+            "id": "relayhub-overview",
+            "slug": "relayhub-overview",
+            "title": "RelayHub Overview",
+            "version": "0.2",
+            "status": "active",
+            "classification": "public_licensed",
+            "access_class": "licensed_public",
+            "source_object": "docs/originals/relayhub/RelayHub-Overview-v0.2.pdf",
+            "source_sha256": null,
+            "generated_prefix": "docs/generated/free/",
+            "licence_terms_version": "CDAS-LICENCE-v0.1",
+            "is_listed": 1,
+            "allow_redownload": 1,
+            "max_redownloads": 3,
+            "requires_approval": 0,
+            "current_version_of": null,
+            "supersedes_document_id": null,
+            "superseded_by_document_id": null,
+            "created_at": "2026-06-08T22:06:39.081Z",
+            "updated_at": "2026-06-08T22:06:39.081Z"
+        },
+        {
+            "id": "example-relayhub-paid-document",
+            "slug": "example-relayhub-paid-document",
+            "title": "Example RelayHub Paid Document",
+            "version": "0.1",
+            "status": "disabled",
+            "classification": "controlled",
+            "access_class": "paid_verified",
+            "source_object": "docs/originals/relayhub/example-relayhub-paid-document-v0.1.pdf",
+            "source_sha256": null,
+            "generated_prefix": "docs/generated/paid/",
+            "licence_terms_version": "CDAS-LICENCE-v0.1",
+            "is_listed": 0,
+            "allow_redownload": 0,
+            "max_redownloads": 3,
+            "requires_approval": 0,
+            "current_version_of": null,
+            "supersedes_document_id": null,
+            "superseded_by_document_id": null,
+            "created_at": "2026-06-08T22:06:39.081Z",
+            "updated_at": "2026-06-08T22:06:39.081Z"
+        },
+        {
+            "id": "example-private-paid-document",
+            "slug": "example-private-paid-document",
+            "title": "Example Private Paid Document",
+            "version": "0.1",
+            "status": "disabled",
+            "classification": "restricted",
+            "access_class": "paid_verified",
+            "source_object": "docs/originals/private/example-private-paid-document-v0.1.pdf",
+            "source_sha256": null,
+            "generated_prefix": "docs/generated/paid/",
+            "licence_terms_version": "CDAS-LICENCE-v0.1",
+            "is_listed": 0,
+            "allow_redownload": 0,
+            "max_redownloads": 3,
+            "requires_approval": 1,
+            "current_version_of": null,
+            "supersedes_document_id": null,
+            "superseded_by_document_id": null,
+            "created_at": "2026-06-08T22:06:39.081Z",
+            "updated_at": "2026-06-08T22:06:39.081Z"
+        }
+    ]
+}
