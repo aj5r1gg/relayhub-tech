@@ -22,3 +22,4 @@ export * from "./download-link-revoke.js";
 export * from "./download-metadata.js";
 export * from "./email.js";
 export * from "./email-test.js";
+export * from "./invitations.js";

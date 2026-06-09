@@ -39,6 +39,11 @@ import {
 import {
   sendCdasVerificationEmailTest,
 } from "./email-test.js";
+import {
+  createCdasAccessInvitation,
+  listCdasAccessInvitations,
+  getCdasAccessInvitation,
+} from "./invitations.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -118,6 +123,33 @@ export async function handleCdasAdminRequest(request, env) {
    */
   if (pathname === "/api/admin/cdas/documents/import") {
     return importCdasDocumentsFromCatalogue(request, env);
+  }
+
+  /*
+   * CDAS access invitation registry.
+   *
+   * Invitation tokens start controlled access workflows.
+   * They are not verification tokens and they are not download tokens.
+   *
+   * Important: this route block must appear before any broader generic
+   * CDAS route matching. Raw invitation tokens are returned only at
+   * creation time by the POST handler.
+   */
+  if (pathname === "/api/admin/cdas/invitations") {
+    if (request.method === "POST") {
+      return createCdasAccessInvitation(request, env);
+    }
+
+    return listCdasAccessInvitations(request, env);
+  }
+
+  if (pathname.startsWith("/api/admin/cdas/invitations/")) {
+    const invitationId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/invitations/"
+    );
+
+    return getCdasAccessInvitation(request, env, invitationId);
   }
 
   /*

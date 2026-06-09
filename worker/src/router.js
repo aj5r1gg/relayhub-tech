@@ -229,6 +229,8 @@ export async function routeRequest(request, env) {
     pathname.startsWith("/api/admin/cdas/licences/") ||
     pathname === "/api/admin/cdas/download-links" ||
     pathname.startsWith("/api/admin/cdas/download-links/") ||
+    pathname === "/api/admin/cdas/invitations" ||
+    pathname.startsWith("/api/admin/cdas/invitations/") ||
     pathname === "/api/admin/cdas/email/test-verification"
   ) {
     return handleCdasAdminRequest(request, env);

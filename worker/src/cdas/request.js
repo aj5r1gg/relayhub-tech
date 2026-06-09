@@ -1,3 +1,5 @@
+import { sendCdasVerificationEmail } from "./email.js";
+
 const JSON_HEADERS = {
   "content-type": "application/json; charset=UTF-8",
   "cache-control": "no-store",
@@ -90,7 +92,11 @@ function shouldExposeDebugVerificationToken(env) {
 }
 
 function getPublicBaseUrl(env) {
-  return cleanText(env.RELAYHUB_PUBLIC_BASE_URL) || "https://www.relayhub.tech";
+  return (
+    cleanText(env.CDAS_PUBLIC_BASE_URL) ||
+    cleanText(env.RELAYHUB_PUBLIC_BASE_URL) ||
+    "https://www.relayhub.tech"
+  );
 }
 
 function makeVerificationUrl(env, requestId, token) {
@@ -421,6 +427,97 @@ async function insertAccessRequest({
   };
 }
 
+function getEmailDeliveryStatus(emailResult) {
+  if (emailResult?.sent) {
+    return "verification_email_sent";
+  }
+
+  if (emailResult?.skipped) {
+    return "verification_email_disabled";
+  }
+
+  return "verification_email_failed";
+}
+
+async function updateVerificationEmailDelivery({
+  env,
+  requestId,
+  emailResult,
+}) {
+  const emailDeliveryStatus = getEmailDeliveryStatus(emailResult);
+  const verificationSentAt = emailResult?.sent ? nowIso() : null;
+
+  await env.RELAYHUB_DB.prepare(
+    `UPDATE document_access_requests
+     SET
+       email_delivery_status = ?,
+       verification_sent_at = COALESCE(?, verification_sent_at)
+     WHERE id = ?`
+  )
+    .bind(emailDeliveryStatus, verificationSentAt, requestId)
+    .run();
+
+  return {
+    email_delivery_status: emailDeliveryStatus,
+    verification_sent_at: verificationSentAt,
+  };
+}
+
+async function safelySendVerificationEmail({
+  env,
+  requestId,
+  verificationToken,
+  verificationUrl,
+  recipientEmail,
+  document,
+}) {
+  try {
+    const result = await sendCdasVerificationEmail(env, {
+      requestId,
+      verificationToken,
+      verificationUrl,
+      recipientEmail,
+      documentTitle: document.title,
+      documentId: document.id,
+    });
+
+    const recorded = await updateVerificationEmailDelivery({
+      env,
+      requestId,
+      emailResult: result,
+    });
+
+    return {
+      ok: true,
+      result,
+      recorded,
+    };
+  } catch (error) {
+    const result = {
+      ok: false,
+      sent: false,
+      provider: "resend",
+      error: "verification_email_exception",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Verification email delivery failed unexpectedly.",
+    };
+
+    const recorded = await updateVerificationEmailDelivery({
+      env,
+      requestId,
+      emailResult: result,
+    });
+
+    return {
+      ok: false,
+      result,
+      recorded,
+    };
+  }
+}
+
 export async function handleDocumentAccessRequest(request, env) {
   if (request.method !== "POST") {
     return jsonResponse(
@@ -530,6 +627,7 @@ export async function handleDocumentAccessRequest(request, env) {
   const verificationToken = makeVerificationToken();
   const verificationTokenHash = await sha256Hex(verificationToken);
   const verificationExpiresAt = hoursFromNowIso(getVerificationExpiryHours(env));
+  const verificationUrl = makeVerificationUrl(env, requestId, verificationToken);
 
   const status = determineRequestStatus(document);
   const risk = calculateRisk({
@@ -555,6 +653,15 @@ export async function handleDocumentAccessRequest(request, env) {
     verificationExpiresAt,
   });
 
+  const emailDelivery = await safelySendVerificationEmail({
+    env,
+    requestId,
+    verificationToken,
+    verificationUrl,
+    recipientEmail: emailNormalised,
+    document,
+  });
+
   const responsePayload = {
     ok: true,
     request_id: requestId,
@@ -568,23 +675,29 @@ export async function handleDocumentAccessRequest(request, env) {
     terms_accepted_at: inserted.terms_accepted_at,
     requested_at: inserted.requested_at,
     expires_at: inserted.expires_at,
-    email_delivery_status: inserted.email_delivery_status,
+    email_delivery_status:
+      emailDelivery.recorded?.email_delivery_status ||
+      inserted.email_delivery_status,
+    verification_sent_at: emailDelivery.recorded?.verification_sent_at || null,
     risk_score: risk.score,
     risk_flags: risk.flags,
-    message:
-      "Document access request was recorded. A verification token was generated, but email sending and download issuance are not active yet.",
+    message: emailDelivery.result?.sent
+      ? "Document access request was recorded. A verification email has been sent."
+      : emailDelivery.result?.skipped
+        ? "Document access request was recorded. Verification email sending is currently disabled."
+        : "Document access request was recorded, but the verification email could not be sent. The request has been preserved for follow-up.",
   };
 
   /*
    * Development-only escape hatch.
    *
-   * Do not enable this in normal production use. It exists only so the next
-   * verification phase can be tested before email delivery is connected.
+   * Do not enable this in normal production use. It exists only so the
+   * verification flow can be tested without relying on inbox delivery.
    */
   if (shouldExposeDebugVerificationToken(env)) {
     responsePayload.debug_verification = {
       token: verificationToken,
-      verification_url: makeVerificationUrl(env, requestId, verificationToken),
+      verification_url: verificationUrl,
     };
   }
 
