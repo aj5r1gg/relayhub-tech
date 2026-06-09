@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
 
 const pageTitle = "CDAS Documents Admin";
 const pageDescription =
@@ -17,6 +18,8 @@ const pageDescription =
         alter the legacy download system.
       </p>
     </section>
+
+    <AdminTokenPanel />
 
     <section class="rh-admin-grid rh-admin-summary-grid" aria-label="CDAS document summary">
       <article class="rh-admin-metric">
@@ -1077,5 +1080,43 @@ const pageDescription =
     } else {
       setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
     }
+    
+    window.relayhubAdminTokenUpdated = () => {
+      if (typeof fetchDownloadLinks === "function") {
+        fetchDownloadLinks();
+      }
+
+      if (typeof fetchLicences === "function") {
+        fetchLicences();
+      }
+
+      if (typeof fetchDocuments === "function") {
+        fetchDocuments();
+      }
+
+      if (typeof fetchLicenceTerms === "function") {
+        fetchLicenceTerms();
+      }
+
+      if (typeof fetchAccessRequests === "function") {
+        fetchAccessRequests();
+      }
+
+      if (typeof loadDownloads === "function") {
+        loadDownloads();
+      }
+
+      if (typeof loadContacts === "function") {
+        loadContacts();
+      }
+
+      if (typeof loadNewsletter === "function") {
+        loadNewsletter();
+      }
+    };
+
+    window.relayhubAdminTokenCleared = () => {
+      location.reload();
+    };
   </script>
 </BaseLayout>

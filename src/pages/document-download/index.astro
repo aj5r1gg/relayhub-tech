@@ -1,0 +1,519 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const pageTitle = "RelayHub Document Download";
+const pageDescription =
+  "Controlled RelayHub document download landing page.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="rh-download-page">
+    <section class="rh-download-shell">
+      <div class="rh-download-hero">
+        <p class="rh-eyebrow">RelayHub Document Access</p>
+        <h1>Controlled document download</h1>
+        <p>
+          This page lets you review the document, licence, and single-use
+          download notice before the file is downloaded.
+        </p>
+      </div>
+
+      <section class="rh-download-status" id="download-status" role="status" aria-live="polite">
+        Checking this controlled download link…
+      </section>
+
+      <section class="rh-download-card" id="available-card" hidden>
+        <div class="rh-card-heading">
+          <p class="rh-eyebrow">Download ready</p>
+          <h2 id="document-title">Document</h2>
+          <p id="document-summary">
+            This controlled document is available for download.
+          </p>
+        </div>
+
+        <div class="rh-detail-grid" id="detail-grid"></div>
+
+        <section class="rh-warning-card">
+          <h3>Before you continue</h3>
+          <p>
+            This is a single-use controlled download link. Pressing the download
+            button will consume the link. Do not press the button until you are
+            ready to save the file.
+          </p>
+          <p>
+            The document may include licence evidence or recipient-specific
+            marking. Redistribution must follow the licence terms shown for this
+            document.
+          </p>
+        </section>
+
+        <div class="rh-download-actions">
+          <a class="rh-button rh-button-primary" id="download-button" href="#" rel="nofollow">
+            Download document
+          </a>
+        </div>
+
+        <p class="rh-download-note">
+          RelayHub does not expose a private storage URL. The file is served
+          through a controlled Worker endpoint after final verification.
+        </p>
+      </section>
+
+      <section class="rh-download-card rh-unavailable-card" id="unavailable-card" hidden>
+        <div class="rh-card-heading">
+          <p class="rh-eyebrow">Download unavailable</p>
+          <h2>This link cannot be used</h2>
+          <p id="unavailable-message">
+            This controlled download link is unavailable, expired, already used,
+            revoked, or invalid.
+          </p>
+        </div>
+
+        <div class="rh-detail-grid" id="unavailable-grid"></div>
+
+        <section class="rh-warning-card">
+          <h3>What this means</h3>
+          <p>
+            Controlled download links are intentionally limited. A link may stop
+            working after it is used once, revoked, superseded, expired, or if
+            the associated licence is no longer valid.
+          </p>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <style>
+    .rh-download-page {
+      width: min(980px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 7rem 0 5rem;
+    }
+
+    .rh-download-shell {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .rh-download-hero,
+    .rh-download-card,
+    .rh-download-status {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.35rem;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .rh-download-hero {
+      padding: 2rem;
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 34rem),
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
+    }
+
+    .rh-download-hero h1 {
+      margin: 0.35rem 0 0.75rem;
+      color: #0f172a;
+      font-size: clamp(2rem, 5vw, 3.45rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .rh-download-hero p {
+      max-width: 780px;
+      margin: 0;
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .rh-eyebrow {
+      margin: 0;
+      color: #0284c7;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .rh-download-status {
+      padding: 0.9rem 1rem;
+      color: rgba(15, 23, 42, 0.75);
+      background: #f8fafc;
+      line-height: 1.55;
+    }
+
+    .rh-download-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-download-status[data-state="warning"] {
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .rh-download-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-download-card {
+      padding: 1.25rem;
+    }
+
+    .rh-card-heading h2 {
+      margin: 0.25rem 0 0;
+      color: #0f172a;
+      font-size: clamp(1.45rem, 3vw, 2.15rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .rh-card-heading p:last-child {
+      margin: 0.45rem 0 0;
+      color: rgba(15, 23, 42, 0.7);
+      line-height: 1.65;
+    }
+
+    .rh-detail-grid {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .rh-detail-row {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+      padding: 0.85rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 0.85rem;
+      background: #f8fafc;
+    }
+
+    .rh-detail-row dt {
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .rh-detail-row dd {
+      margin: 0;
+      color: #0f172a;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .rh-warning-card {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 1rem;
+      background: #fffbeb;
+    }
+
+    .rh-warning-card h3 {
+      margin: 0 0 0.45rem;
+      color: #78350f;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .rh-warning-card p {
+      margin: 0.45rem 0 0;
+      color: #92400e;
+      line-height: 1.65;
+    }
+
+    .rh-download-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .rh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.9rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.75rem 1.15rem;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .rh-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .rh-button-primary {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    .rh-button-primary:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .rh-download-note {
+      margin: 1rem 0 0;
+      color: rgba(15, 23, 42, 0.62);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .rh-unavailable-card {
+      background:
+        radial-gradient(circle at top left, rgba(239, 68, 68, 0.08), transparent 30rem),
+        rgba(255, 255, 255, 0.96);
+    }
+
+    @media (max-width: 760px) {
+      .rh-download-page {
+        width: min(100% - 1rem, 980px);
+        padding-top: 5.5rem;
+      }
+
+      .rh-download-hero,
+      .rh-download-card {
+        padding: 1rem;
+        border-radius: 1rem;
+      }
+
+      .rh-detail-row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+      }
+
+      .rh-button {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const statusBox = document.getElementById("download-status");
+    const availableCard = document.getElementById("available-card");
+    const unavailableCard = document.getElementById("unavailable-card");
+    const unavailableMessage = document.getElementById("unavailable-message");
+    const detailGrid = document.getElementById("detail-grid");
+    const unavailableGrid = document.getElementById("unavailable-grid");
+    const documentTitle = document.getElementById("document-title");
+    const documentSummary = document.getElementById("document-summary");
+    const downloadButton = document.getElementById("download-button");
+
+    function setStatus(message, state = "neutral") {
+      statusBox.textContent = message;
+      statusBox.dataset.state = state;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatValue(value) {
+      if (value === null || value === undefined || value === "") {
+        return "—";
+      }
+
+      return String(value);
+    }
+
+    function formatBytes(value) {
+      const size = Number(value || 0);
+
+      if (!Number.isFinite(size) || size <= 0) {
+        return "—";
+      }
+
+      if (size < 1024) {
+        return `${size} B`;
+      }
+
+      if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KB`;
+      }
+
+      return `${(size / 1024 / 1024).toFixed(2)} MB`;
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    function detailRow(label, value) {
+      return `
+        <dl class="rh-detail-row">
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(formatValue(value))}</dd>
+        </dl>
+      `;
+    }
+
+    function getTokenFromPath() {
+      const prefix = "/document-download/";
+      const pathname = window.location.pathname;
+
+      if (!pathname.startsWith(prefix)) {
+        return "";
+      }
+
+      return decodeURIComponent(pathname.slice(prefix.length).replace(/\/+$/, ""));
+    }
+
+    async function loadMetadata() {
+      const token = getTokenFromPath();
+
+      if (!token || token.length < 32) {
+        setStatus("This download link is invalid.", "error");
+        unavailableCard.hidden = false;
+        availableCard.hidden = true;
+        return;
+      }
+
+      setStatus("Checking this controlled download link…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/document-download-metadata/${encodeURIComponent(token)}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not check this download link: ${error.message}`, "error");
+        unavailableCard.hidden = false;
+        availableCard.hidden = true;
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "This download link could not be checked.",
+          "error"
+        );
+        unavailableCard.hidden = false;
+        availableCard.hidden = true;
+        return;
+      }
+
+      if (!data.download_available) {
+        setStatus("This controlled download link is not available.", "warning");
+        availableCard.hidden = true;
+        unavailableCard.hidden = false;
+
+        unavailableMessage.textContent =
+          data.message ||
+          "This controlled download link is unavailable, expired, already used, revoked, or invalid.";
+
+        unavailableGrid.innerHTML = [
+          detailRow("Reason", data.unavailable_reason || "download_unavailable"),
+          detailRow("Consumes link", "No"),
+          detailRow("Serves download", "No"),
+          detailRow("Raw token returned", "No"),
+          detailRow("Token hash returned", "No"),
+        ].join("");
+
+        return;
+      }
+
+      const documentData = data.document || {};
+      const licenceData = data.licence || {};
+      const linkData = data.download_link || {};
+      const pdfData = data.generated_pdf || {};
+
+      documentTitle.textContent = documentData.title || "RelayHub document";
+
+      documentSummary.textContent =
+        documentData.description ||
+        "This controlled document is available for download under the licence shown below.";
+
+      detailGrid.innerHTML = [
+        detailRow("Document", documentData.title || documentData.id),
+        detailRow("Document version", documentData.version),
+        detailRow("Classification", documentData.classification),
+        detailRow("Access class", documentData.access_class),
+        detailRow("Licence number", licenceData.licence_number),
+        detailRow("Licence holder", licenceData.holder_name),
+        detailRow("Organisation", licenceData.organisation_name),
+        detailRow("Recipient email", licenceData.recipient_email),
+        detailRow("Terms version", licenceData.terms_version),
+        detailRow("Link status", linkData.status),
+        detailRow("Single use", linkData.single_use ? "Yes" : "No"),
+        detailRow("Created at", formatDate(linkData.created_at)),
+        detailRow("Expires at", formatDate(linkData.expires_at)),
+        detailRow("File size", formatBytes(pdfData.size_bytes)),
+        detailRow("PDF evidence", pdfData.sha256_present ? "SHA-256 present" : "Missing"),
+      ].join("");
+
+      downloadButton.href = `/api/document-download/${encodeURIComponent(token)}`;
+
+      downloadButton.addEventListener(
+        "click",
+        () => {
+          setStatus(
+            "Download requested. This link will be consumed if the download succeeds.",
+            "warning"
+          );
+        },
+        { once: true }
+      );
+
+      unavailableCard.hidden = true;
+      availableCard.hidden = false;
+
+      setStatus(
+        "This controlled document is ready. Pressing Download will consume the link.",
+        "success"
+      );
+    }
+
+    loadMetadata();
+  </script>
+</BaseLayout>

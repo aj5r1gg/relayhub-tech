@@ -31,6 +31,22 @@ import {
   handleDocumentAccessRequest,
 } from "./cdas/request.js";
 
+import {
+  handlePublicRenderedLicencePreview,
+} from "./cdas/public-render.js";
+
+import {
+  handleDocumentAccessVerify,
+} from "./cdas/verify.js";
+
+import {
+  handleCdasDocumentDownload,
+} from "./cdas/download.js";
+
+import {
+  handleCdasDocumentDownloadMetadata,
+} from "./cdas/download-metadata.js";
+
 export async function routeRequest(request, env) {
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
@@ -89,10 +105,40 @@ export async function routeRequest(request, env) {
     }
 
     if (request.method === "POST") {
-      return handleContactPost(request, env, url);
+      return handleContactPost(request, env);
     }
 
     return methodNotAllowed("GET, POST");
+  }
+
+  /*
+   * CDAS Phase 3D — public rendered licence preview.
+   *
+   * This route renders the assigned licence template for the selected document
+   * so the requester can review the terms before ticking acceptance.
+   *
+   * It does not:
+   * - record an access request,
+   * - verify email,
+   * - issue a licence,
+   * - generate a PDF,
+   * - create a download link,
+   * - serve a controlled download.
+   */
+  if (pathname === "/api/document-access/rendered-licence") {
+    if (request.method === "POST") {
+      return handlePublicRenderedLicencePreview(request, env);
+    }
+
+    return methodNotAllowed("POST");
+  }
+
+  if (pathname === "/api/document-access/verify") {
+    if (request.method === "POST") {
+      return handleDocumentAccessVerify(request, env);
+    }
+
+    return methodNotAllowed("POST");
   }
 
   /*
@@ -116,13 +162,74 @@ export async function routeRequest(request, env) {
   }
 
   /*
+   * CDAS Phase 3X-A — public controlled download metadata.
+   *
+   * This route checks an issued download token and returns safe display
+   * metadata for the recipient landing page.
+   *
+   * It does not:
+   * - consume the link,
+   * - mark the link used,
+   * - serve the PDF,
+   * - expose the raw token,
+   * - expose the token hash,
+   * - expose a private R2 URL,
+   * - mutate the database.
+   */
+  if (pathname.startsWith("/api/document-download-metadata/")) {
+    if (request.method !== "GET") {
+      return methodNotAllowed("GET");
+    }
+
+    const token = decodeURIComponent(
+      pathname.slice("/api/document-download-metadata/".length)
+    );
+
+    return handleCdasDocumentDownloadMetadata(request, env, token);
+  }
+
+  /*
+   * CDAS Phase 3T — controlled public document download.
+   *
+   * This route consumes an issued download token through the Worker gate.
+   *
+   * It:
+   * - hashes the incoming token,
+   * - checks the download-link record,
+   * - verifies link status, expiry, used/revoked/superseded state,
+   * - verifies the active licence,
+   * - verifies generated PDF evidence,
+   * - streams the private R2 PDF through the Worker,
+   * - records a download event,
+   * - never exposes a raw R2 URL.
+   */
+  if (pathname.startsWith("/api/document-download/")) {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return methodNotAllowed("GET, HEAD");
+    }
+
+    const token = decodeURIComponent(
+      pathname.slice("/api/document-download/".length)
+    );
+
+    return handleCdasDocumentDownload(request, env, token);
+  }
+
+  /*
    * CDAS admin routes.
    */
   if (
     pathname === "/api/admin/cdas/documents" ||
     pathname.startsWith("/api/admin/cdas/documents/") ||
     pathname === "/api/admin/cdas/licence-terms" ||
-    pathname.startsWith("/api/admin/cdas/licence-terms/")
+    pathname.startsWith("/api/admin/cdas/licence-terms/") ||
+    pathname === "/api/admin/cdas/access-requests" ||
+    pathname.startsWith("/api/admin/cdas/access-requests/") ||
+    pathname === "/api/admin/cdas/licences" ||
+    pathname.startsWith("/api/admin/cdas/licences/") ||
+    pathname === "/api/admin/cdas/download-links" ||
+    pathname.startsWith("/api/admin/cdas/download-links/") ||
+    pathname === "/api/admin/cdas/email/test-verification"
   ) {
     return handleCdasAdminRequest(request, env);
   }
@@ -165,6 +272,38 @@ export async function routeRequest(request, env) {
     }
 
     return methodNotAllowed("GET");
+  }
+
+  /*
+   * CDAS Phase 3X-B — public recipient landing page.
+   *
+   * The Astro site is statically generated, so arbitrary token paths such as
+   * /document-download/rh_dl_... cannot be pre-rendered.
+   *
+   * This rewrites recipient-facing token URLs to the static landing page while
+   * preserving the browser URL. The page JavaScript reads the token from
+   * window.location.pathname.
+   *
+   * This route does not:
+   * - consume the link,
+   * - serve the PDF,
+   * - expose the token hash,
+   * - expose a private R2 URL,
+   * - mutate the database.
+   */
+  if (pathname.startsWith("/document-download/")) {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return methodNotAllowed("GET, HEAD");
+    }
+
+    const landingUrl = new URL("/document-download/", url.origin);
+
+    const landingRequest = new Request(landingUrl.toString(), {
+      method: request.method,
+      headers: request.headers,
+    });
+
+    return env.ASSETS.fetch(landingRequest);
   }
 
   return env.ASSETS.fetch(request);

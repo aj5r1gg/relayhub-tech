@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
 ---
 
 <BaseLayout
@@ -17,6 +18,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         Private admin page for checking contact form messages, searching records,
         and exporting CSV data.
       </p>
+
+      <AdminTokenPanel />
 
       <div class="rh-card rh-admin-controls">
         <label class="rh-label" for="admin-token">Admin token</label>
@@ -303,6 +306,44 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         if (exportButton) exportButton.disabled = true;
       });
     })();
+    
+    window.relayhubAdminTokenUpdated = () => {
+      if (typeof fetchDownloadLinks === "function") {
+        fetchDownloadLinks();
+      }
+
+      if (typeof fetchLicences === "function") {
+        fetchLicences();
+      }
+
+      if (typeof fetchDocuments === "function") {
+        fetchDocuments();
+      }
+
+      if (typeof fetchLicenceTerms === "function") {
+        fetchLicenceTerms();
+      }
+
+      if (typeof fetchAccessRequests === "function") {
+        fetchAccessRequests();
+      }
+
+      if (typeof loadDownloads === "function") {
+        loadDownloads();
+      }
+
+      if (typeof loadContacts === "function") {
+        loadContacts();
+      }
+
+      if (typeof loadNewsletter === "function") {
+        loadNewsletter();
+      }
+    };
+
+    window.relayhubAdminTokenCleared = () => {
+      location.reload();
+    };
   </script>
 
   <style is:global>

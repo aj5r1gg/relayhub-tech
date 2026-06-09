@@ -6,6 +6,39 @@ import {
 } from "./terms.js";
 import { importCdasDocumentsFromCatalogue } from "./import.js";
 import { renderCdasDocumentLicence } from "./render.js";
+import {
+  listCdasAccessRequests,
+  getCdasAccessRequest,
+} from "./access-requests.js";
+import {
+  listCdasLicences,
+  getCdasLicence,
+} from "./licences.js";
+import {
+  getCdasLicenceGenerationPreview,
+} from "./generation-preview.js";
+import {
+  captureCdasDocumentSourceSha256,
+} from "./source-hash.js";
+import {
+  generateCdasLicencePdf,
+} from "./generate-pdf.js";
+import {
+  inspectCdasGeneratedPdf,
+} from "./generated-pdf.js";
+import {
+  issueCdasDownloadLink,
+} from "./download-link-issue.js";
+import {
+  listCdasDownloadLinks,
+  getCdasDownloadLink,
+} from "./download-links.js";
+import {
+  revokeCdasDownloadLink,
+} from "./download-link-revoke.js";
+import {
+  sendCdasVerificationEmailTest,
+} from "./email-test.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -38,7 +71,7 @@ function adminAuthFailed() {
       error: "admin_auth_failed",
       message: "Admin access is not available.",
     },
-    { status: 401 }
+    401
   );
 }
 
@@ -49,8 +82,18 @@ function notFound() {
       error: "cdas_admin_route_not_found",
       message: "CDAS admin route was not found.",
     },
-    { status: 404 }
+    404
   );
+}
+
+function extractTrailingRouteParam(pathname, prefix, suffix = "") {
+  let value = pathname.slice(prefix.length);
+
+  if (suffix && value.endsWith(suffix)) {
+    value = value.slice(0, -suffix.length);
+  }
+
+  return decodeURIComponent(value);
 }
 
 export async function handleCdasAdminRequest(request, env) {
@@ -61,44 +104,212 @@ export async function handleCdasAdminRequest(request, env) {
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
+  /*
+   * CDAS email test endpoint.
+   *
+   * Admin-only. Does not mutate CDAS workflow records.
+   */
+  if (pathname === "/api/admin/cdas/email/test-verification") {
+    return sendCdasVerificationEmailTest(request, env);
+  }
+
+  /*
+   * CDAS document catalogue import.
+   */
   if (pathname === "/api/admin/cdas/documents/import") {
     return importCdasDocumentsFromCatalogue(request, env);
   }
 
   /*
-   * Must appear before the generic /documents/:id route.
+   * CDAS access request registry.
+   */
+  if (pathname === "/api/admin/cdas/access-requests") {
+    return listCdasAccessRequests(request, env);
+  }
+
+  if (pathname.startsWith("/api/admin/cdas/access-requests/")) {
+    const requestId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/access-requests/"
+    );
+
+    return getCdasAccessRequest(request, env, requestId);
+  }
+
+  /*
+   * CDAS controlled download-link registry.
+   *
+   * Important: the special revoke route must appear before the generic
+   * /download-links/:id route, otherwise the generic detail handler will
+   * swallow it.
+   *
+   * These endpoints never return raw tokens. They expose only token-hash
+   * presence and audit metadata.
+   */
+  if (pathname === "/api/admin/cdas/download-links") {
+    return listCdasDownloadLinks(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/revoke")
+  ) {
+    const downloadId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/revoke"
+    );
+
+    return revokeCdasDownloadLink(request, env, downloadId);
+  }
+
+  if (pathname.startsWith("/api/admin/cdas/download-links/")) {
+    const downloadId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/"
+    );
+
+    return getCdasDownloadLink(request, env, downloadId);
+  }
+
+  /*
+   * CDAS issued licence registry.
+   *
+   * Important: special licence subroutes must appear before the generic
+   * /licences/:id route, otherwise the generic licence detail route will
+   * swallow them.
+   */
+  if (pathname === "/api/admin/cdas/licences") {
+    return listCdasLicences(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/generation-preview")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/generation-preview"
+    );
+
+    return getCdasLicenceGenerationPreview(request, env, licenceIdOrNumber);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/generate-pdf")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/generate-pdf"
+    );
+
+    return generateCdasLicencePdf(request, env, licenceIdOrNumber);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/generated-pdf")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/generated-pdf"
+    );
+
+    return inspectCdasGeneratedPdf(request, env, licenceIdOrNumber);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/issue-download-link")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/issue-download-link"
+    );
+
+    return issueCdasDownloadLink(request, env, licenceIdOrNumber);
+  }
+
+  if (pathname.startsWith("/api/admin/cdas/licences/")) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/"
+    );
+
+    return getCdasLicence(request, env, licenceIdOrNumber);
+  }
+
+  /*
+   * CDAS document rendered licence preview.
+   *
+   * Important: special document subroutes must appear before the generic
+   * /documents/:id route.
    */
   if (
     pathname.startsWith("/api/admin/cdas/documents/") &&
     pathname.endsWith("/rendered-licence")
   ) {
-    const withoutPrefix = pathname.slice("/api/admin/cdas/documents/".length);
-    const documentId = decodeURIComponent(
-      withoutPrefix.slice(0, -"/rendered-licence".length)
+    const documentId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/documents/",
+      "/rendered-licence"
     );
 
     return renderCdasDocumentLicence(request, env, documentId);
   }
 
+  /*
+   * CDAS document source SHA-256 capture.
+   *
+   * This reads the private R2 source object, hashes it, and stores the
+   * result in documents.source_sha256. It does not generate a PDF, write
+   * to R2, create a download link, or serve the document.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/documents/") &&
+    pathname.endsWith("/capture-source-sha256")
+  ) {
+    const documentId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/documents/",
+      "/capture-source-sha256"
+    );
+
+    return captureCdasDocumentSourceSha256(request, env, documentId);
+  }
+
+  /*
+   * CDAS document registry.
+   */
   if (pathname === "/api/admin/cdas/documents") {
     return listCdasDocuments(request, env);
   }
 
   if (pathname.startsWith("/api/admin/cdas/documents/")) {
-    const documentId = decodeURIComponent(
-      pathname.slice("/api/admin/cdas/documents/".length)
+    const documentId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/documents/"
     );
 
     return getCdasDocument(request, env, documentId);
   }
 
+  /*
+   * CDAS licence terms registry.
+   */
   if (pathname === "/api/admin/cdas/licence-terms") {
     return listCdasLicenceTerms(request, env);
   }
 
   if (pathname.startsWith("/api/admin/cdas/licence-terms/")) {
-    const termsIdOrVersion = decodeURIComponent(
-      pathname.slice("/api/admin/cdas/licence-terms/".length)
+    const termsIdOrVersion = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licence-terms/"
     );
 
     return getCdasLicenceTerms(request, env, termsIdOrVersion);

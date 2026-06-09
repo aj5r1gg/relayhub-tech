@@ -14,7 +14,13 @@
   },
 
   "vars": {
-    "CLOUDFLARE_ACCOUNT_ID": "352103b7d81e95afd64f6bd38d129ef6"
+    "CLOUDFLARE_ACCOUNT_ID": "352103b7d81e95afd64f6bd38d129ef6",
+
+    "CDAS_EMAIL_ENABLED": "true",
+    "CDAS_EMAIL_PROVIDER": "resend",
+    "CDAS_EMAIL_FROM": "RelayHub Documents <documents@relayhub.tech>",
+    "CDAS_EMAIL_REPLY_TO": "hello@relayhub.tech",
+    "CDAS_PUBLIC_BASE_URL": "https://www.relayhub.tech"
   },
 
   "send_email": [

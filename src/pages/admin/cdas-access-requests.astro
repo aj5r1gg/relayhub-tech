@@ -2,82 +2,53 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
 
-const pageTitle = "CDAS Licence Terms Admin";
+const pageTitle = "CDAS Access Requests Admin";
 const pageDescription =
-  "Read-only admin view for RelayHub Controlled Document Access System licence terms.";
+  "Read-only admin view for RelayHub Controlled Document Access System document access requests.";
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <main class="rh-admin-page">
     <section class="rh-admin-hero">
       <p class="rh-eyebrow">RelayHub Admin</p>
-      <h1>CDAS Licence Terms</h1>
+      <h1>CDAS Access Requests</h1>
       <p>
-        Read-only view of the Controlled Document Access System licence terms registry.
-        Terms are versioned and must not be silently overwritten. This page only displays
-        records already stored in the CDAS database.
+        Read-only view of document access requests recorded through the CDAS intake API.
+        This page does not approve requests, verify email addresses, issue licences,
+        generate PDFs, or create download links.
       </p>
     </section>
 
     <AdminTokenPanel />
 
-    <section class="rh-admin-card rh-admin-auth-card" id="auth-card">
-      <div>
-        <h2>Admin access</h2>
-        <p>
-          Enter your RelayHub admin token. It is stored only in this browser session.
-        </p>
-      </div>
-
-      <form class="rh-admin-token-form" id="token-form">
-        <label for="admin-token">Admin token</label>
-        <div class="rh-admin-token-row">
-          <input
-            id="admin-token"
-            name="admin-token"
-            type="password"
-            autocomplete="off"
-            placeholder="Paste admin token"
-          />
-          <button class="rh-button rh-button-primary" type="submit">
-            Save token
-          </button>
-          <button class="rh-button rh-button-secondary" id="clear-token" type="button">
-            Clear
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <section class="rh-admin-grid rh-admin-summary-grid" aria-label="CDAS licence terms summary">
+    <section class="rh-admin-grid rh-admin-summary-grid" aria-label="CDAS access request summary">
       <article class="rh-admin-metric">
-        <span>Total records</span>
+        <span>Total requests</span>
         <strong id="metric-total">—</strong>
       </article>
 
       <article class="rh-admin-metric">
-        <span>Active</span>
-        <strong id="metric-active">—</strong>
+        <span>Email pending</span>
+        <strong id="metric-email-pending">—</strong>
       </article>
 
       <article class="rh-admin-metric">
-        <span>Superseded</span>
-        <strong id="metric-superseded">—</strong>
+        <span>Approval pending</span>
+        <strong id="metric-approval-pending">—</strong>
       </article>
 
       <article class="rh-admin-metric">
-        <span>Retired / withdrawn</span>
-        <strong id="metric-retired">—</strong>
+        <span>Risk flagged</span>
+        <strong id="metric-risk">—</strong>
       </article>
     </section>
 
     <section class="rh-admin-card">
       <div class="rh-admin-section-heading">
         <div>
-          <h2>Licence terms registry</h2>
+          <h2>Access request registry</h2>
           <p>
-            Search and inspect CDAS licence terms. Full body text can be loaded from
-            the API for admin review.
+            Search and filter recorded CDAS access requests.
           </p>
         </div>
 
@@ -91,18 +62,25 @@ const pageDescription =
       <form class="rh-admin-filters" id="filters-form">
         <label>
           Search
-          <input id="filter-q" name="q" type="search" placeholder="Version, title, notes…" />
+          <input id="filter-q" name="q" type="search" placeholder="Name, email, document, organisation…" />
+        </label>
+
+        <label>
+          Document
+          <input id="filter-document" name="document_id" type="search" placeholder="relayhub-overview" />
         </label>
 
         <label>
           Status
           <select id="filter-status" name="status">
             <option value="">All statuses</option>
-            <option value="draft">draft</option>
-            <option value="active">active</option>
-            <option value="superseded">superseded</option>
-            <option value="retired">retired</option>
-            <option value="withdrawn">withdrawn</option>
+            <option value="email_pending">email_pending</option>
+            <option value="approval_pending">approval_pending</option>
+            <option value="email_verified">email_verified</option>
+            <option value="approved">approved</option>
+            <option value="denied">denied</option>
+            <option value="expired">expired</option>
+            <option value="cancelled">cancelled</option>
           </select>
         </label>
 
@@ -118,14 +96,6 @@ const pageDescription =
             <option value="invite_only">invite_only</option>
             <option value="paid_verified">paid_verified</option>
             <option value="disabled">disabled</option>
-          </select>
-        </label>
-
-        <label>
-          Body
-          <select id="filter-include-body" name="include_body">
-            <option value="0">Preview only</option>
-            <option value="1">Include full body</option>
           </select>
         </label>
 
@@ -147,17 +117,17 @@ const pageDescription =
         <table class="rh-admin-table">
           <thead>
             <tr>
-              <th>Terms</th>
-              <th>Version</th>
+              <th>Requester</th>
+              <th>Document</th>
               <th>Status</th>
               <th>Access class</th>
-              <th>Effective</th>
-              <th>Body</th>
-              <th>Created</th>
+              <th>Terms</th>
+              <th>Risk</th>
+              <th>Requested</th>
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="terms-body">
+          <tbody id="requests-body">
             <tr>
               <td colspan="8" class="rh-admin-empty">
                 No records loaded yet.
@@ -171,9 +141,9 @@ const pageDescription =
     <section class="rh-admin-card rh-admin-detail-card" id="detail-card" hidden>
       <div class="rh-admin-section-heading">
         <div>
-          <h2>Licence terms detail</h2>
+          <h2>Access request detail</h2>
           <p id="detail-subtitle">
-            Selected CDAS licence terms record.
+            Selected CDAS access request record.
           </p>
         </div>
 
@@ -183,11 +153,6 @@ const pageDescription =
       </div>
 
       <div class="rh-admin-detail-grid" id="detail-grid"></div>
-
-      <article class="rh-admin-body-panel">
-        <h3>Terms body</h3>
-        <pre id="terms-body-full"></pre>
-      </article>
     </section>
   </main>
 
@@ -217,7 +182,7 @@ const pageDescription =
     }
 
     .rh-admin-hero p {
-      max-width: 760px;
+      max-width: 800px;
       margin: 0;
       color: rgba(15, 23, 42, 0.74);
       font-size: 1.05rem;
@@ -246,7 +211,6 @@ const pageDescription =
       margin-top: 1rem;
     }
 
-    .rh-admin-auth-card,
     .rh-admin-section-heading {
       display: flex;
       align-items: flex-start;
@@ -268,11 +232,58 @@ const pageDescription =
       line-height: 1.6;
     }
 
-    .rh-admin-token-form {
-      width: min(520px, 100%);
+    .rh-admin-grid {
+      display: grid;
+      gap: 1rem;
     }
 
-    .rh-admin-token-form label,
+    .rh-admin-summary-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 1rem 0;
+    }
+
+    .rh-admin-metric {
+      padding: 1rem;
+    }
+
+    .rh-admin-metric span {
+      display: block;
+      color: rgba(15, 23, 42, 0.62);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-metric strong {
+      display: block;
+      margin-top: 0.4rem;
+      color: #0f172a;
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .rh-admin-actions,
+    .rh-admin-filter-actions,
+    .rh-admin-row-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .rh-admin-actions,
+    .rh-admin-filter-actions {
+      justify-content: flex-end;
+    }
+
+    .rh-admin-filters {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 0.85rem;
+      align-items: end;
+      margin: 1.25rem 0 1rem;
+    }
+
     .rh-admin-filters label {
       display: grid;
       gap: 0.35rem;
@@ -281,13 +292,6 @@ const pageDescription =
       font-weight: 700;
     }
 
-    .rh-admin-token-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.25rem;
-    }
-
-    .rh-admin-token-row input,
     .rh-admin-filters input,
     .rh-admin-filters select {
       width: 100%;
@@ -297,6 +301,10 @@ const pageDescription =
       background: #fff;
       color: #0f172a;
       font: inherit;
+    }
+
+    .rh-admin-filter-actions {
+      grid-column: 1 / -1;
     }
 
     .rh-button {
@@ -345,60 +353,6 @@ const pageDescription =
       border-color: rgba(15, 23, 42, 0.34);
     }
 
-    .rh-admin-grid {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .rh-admin-summary-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      margin: 1rem 0;
-    }
-
-    .rh-admin-metric {
-      padding: 1rem;
-    }
-
-    .rh-admin-metric span {
-      display: block;
-      color: rgba(15, 23, 42, 0.62);
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .rh-admin-metric strong {
-      display: block;
-      margin-top: 0.4rem;
-      color: #0f172a;
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    .rh-admin-actions {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .rh-admin-filters {
-      display: grid;
-      grid-template-columns: 1.4fr repeat(3, minmax(160px, 1fr));
-      gap: 0.85rem;
-      align-items: end;
-      margin: 1.25rem 0 1rem;
-    }
-
-    .rh-admin-filter-actions {
-      display: flex;
-      gap: 0.5rem;
-      grid-column: 1 / -1;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-    }
-
     .rh-admin-status {
       margin: 1rem 0;
       padding: 0.85rem 1rem;
@@ -426,7 +380,7 @@ const pageDescription =
 
     .rh-admin-table {
       width: 100%;
-      min-width: 1000px;
+      min-width: 1040px;
       border-collapse: collapse;
       background: #fff;
       font-size: 0.92rem;
@@ -458,17 +412,19 @@ const pageDescription =
       color: rgba(15, 23, 42, 0.58);
     }
 
-    .rh-admin-title-stack {
+    .rh-admin-title-stack,
+    .rh-policy-stack {
       display: grid;
-      gap: 0.15rem;
+      gap: 0.18rem;
     }
 
     .rh-admin-title-stack strong {
       color: #0f172a;
     }
 
-    .rh-admin-title-stack span {
-      color: rgba(15, 23, 42, 0.58);
+    .rh-admin-title-stack span,
+    .rh-policy-stack span {
+      color: rgba(15, 23, 42, 0.64);
       font-size: 0.82rem;
       word-break: break-word;
     }
@@ -486,27 +442,23 @@ const pageDescription =
       white-space: nowrap;
     }
 
-    .rh-badge-active {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .rh-badge-retired,
-    .rh-badge-withdrawn {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .rh-badge-superseded,
-    .rh-badge-draft {
+    .rh-badge-email_pending,
+    .rh-badge-approval_pending {
       background: #fef3c7;
       color: #92400e;
     }
 
-    .rh-admin-body-preview {
-      max-width: 360px;
-      color: rgba(15, 23, 42, 0.72);
-      line-height: 1.55;
+    .rh-badge-approved,
+    .rh-badge-email_verified {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .rh-badge-denied,
+    .rh-badge-expired,
+    .rh-badge-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     .rh-admin-detail-card {
@@ -542,38 +494,8 @@ const pageDescription =
       line-height: 1.5;
     }
 
-    .rh-admin-body-panel {
-      margin-top: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.1);
-      border-radius: 1rem;
-      background: #f8fafc;
-      padding: 1rem;
-    }
-
-    .rh-admin-body-panel h3 {
-      margin: 0 0 0.75rem;
-      font-size: 1rem;
-    }
-
-    .rh-admin-body-panel pre {
-      margin: 0;
-      padding: 1rem;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      border-radius: 0.85rem;
-      background: #0f172a;
-      color: #e2e8f0;
-      line-height: 1.6;
-      font-size: 0.9rem;
-    }
-
     @media (max-width: 960px) {
-      .rh-admin-auth-card,
       .rh-admin-section-heading {
-        display: grid;
-      }
-
-      .rh-admin-token-row {
         display: grid;
       }
 
@@ -607,12 +529,9 @@ const pageDescription =
         grid-template-columns: 1fr;
       }
 
-      .rh-admin-filter-actions {
-        justify-content: stretch;
-      }
-
       .rh-admin-filter-actions .rh-button,
-      .rh-admin-actions .rh-button {
+      .rh-admin-actions .rh-button,
+      .rh-admin-row-actions .rh-button {
         width: 100%;
       }
     }
@@ -624,42 +543,30 @@ const pageDescription =
     const TOKEN_STORAGE_KEY = "relayhub_admin_token";
 
     const state = {
-      terms: [],
+      requests: [],
       total: 0,
       limit: 100,
       offset: 0,
     };
 
-    const tokenForm = document.getElementById("token-form");
-    const tokenInput = document.getElementById("admin-token");
-    const clearTokenButton = document.getElementById("clear-token");
     const filtersForm = document.getElementById("filters-form");
     const resetFiltersButton = document.getElementById("reset-filters");
     const refreshButton = document.getElementById("refresh-button");
     const statusMessage = document.getElementById("status-message");
-    const termsBody = document.getElementById("terms-body");
+    const requestsBody = document.getElementById("requests-body");
 
     const metricTotal = document.getElementById("metric-total");
-    const metricActive = document.getElementById("metric-active");
-    const metricSuperseded = document.getElementById("metric-superseded");
-    const metricRetired = document.getElementById("metric-retired");
+    const metricEmailPending = document.getElementById("metric-email-pending");
+    const metricApprovalPending = document.getElementById("metric-approval-pending");
+    const metricRisk = document.getElementById("metric-risk");
 
     const detailCard = document.getElementById("detail-card");
     const detailSubtitle = document.getElementById("detail-subtitle");
     const detailGrid = document.getElementById("detail-grid");
-    const termsBodyFull = document.getElementById("terms-body-full");
     const closeDetailButton = document.getElementById("close-detail");
 
     function getStoredToken() {
       return sessionStorage.getItem(TOKEN_STORAGE_KEY) || "";
-    }
-
-    function setStoredToken(token) {
-      sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
-    }
-
-    function clearStoredToken() {
-      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     }
 
     function setStatus(message, mode = "neutral") {
@@ -685,9 +592,7 @@ const pageDescription =
     }
 
     function formatDate(value) {
-      if (!value) {
-        return "—";
-      }
+      if (!value) return "—";
 
       const date = new Date(value);
 
@@ -707,13 +612,9 @@ const pageDescription =
     function badgeClass(value) {
       const text = String(value || "").toLowerCase();
 
-      if (text === "active") return "rh-badge rh-badge-active";
-      if (text === "superseded") return "rh-badge rh-badge-superseded";
-      if (text === "draft") return "rh-badge rh-badge-draft";
-      if (text === "retired") return "rh-badge rh-badge-retired";
-      if (text === "withdrawn") return "rh-badge rh-badge-withdrawn";
+      if (!text) return "rh-badge";
 
-      return "rh-badge";
+      return `rh-badge rh-badge-${text}`;
     }
 
     function getFilters() {
@@ -734,20 +635,20 @@ const pageDescription =
       return params;
     }
 
-    async function fetchTerms() {
+    async function fetchRequests() {
       const token = getStoredToken();
 
       if (!token) {
-        setStatus("Enter and save your admin token to load CDAS licence terms.", "error");
-        renderTerms([]);
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
+        renderRequests([]);
         updateMetrics([]);
         return;
       }
 
       const params = getFilters();
-      const endpoint = `/api/admin/cdas/licence-terms?${params.toString()}`;
+      const endpoint = `/api/admin/cdas/access-requests?${params.toString()}`;
 
-      setStatus("Loading CDAS licence terms…");
+      setStatus("Loading CDAS access requests…");
 
       let response;
       let data;
@@ -761,73 +662,77 @@ const pageDescription =
 
         data = await response.json();
       } catch (error) {
-        setStatus(`Could not load CDAS licence terms: ${error.message}`, "error");
+        setStatus(`Could not load CDAS access requests: ${error.message}`, "error");
         return;
       }
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "CDAS licence terms could not be loaded.",
+          data?.message || data?.error || "CDAS access requests could not be loaded.",
           "error"
         );
 
-        renderTerms([]);
+        renderRequests([]);
         updateMetrics([]);
         return;
       }
 
-      state.terms = Array.isArray(data.rows) ? data.rows : [];
-      state.total = Number(data.total || state.terms.length || 0);
+      state.requests = Array.isArray(data.rows) ? data.rows : [];
+      state.total = Number(data.total || state.requests.length || 0);
 
-      renderTerms(state.terms);
-      updateMetrics(state.terms);
+      renderRequests(state.requests);
+      updateMetrics(state.requests);
 
       setStatus(
-        `Loaded ${state.terms.length} CDAS licence terms record(s). Total matching records: ${state.total}.`,
+        `Loaded ${state.requests.length} CDAS access request record(s). Total matching records: ${state.total}.`,
         "success"
       );
     }
 
-    function updateMetrics(terms) {
-      const active = terms.filter((row) => row.status === "active").length;
-      const superseded = terms.filter((row) => row.status === "superseded").length;
-      const retired = terms.filter(
-        (row) => row.status === "retired" || row.status === "withdrawn"
-      ).length;
+    function updateMetrics(requests) {
+      const emailPending = requests.filter((row) => row.status === "email_pending").length;
+      const approvalPending = requests.filter((row) => row.status === "approval_pending").length;
+      const risk = requests.filter((row) => Number(row.risk_score) > 0).length;
 
-      metricTotal.textContent = String(state.total || terms.length || 0);
-      metricActive.textContent = String(active);
-      metricSuperseded.textContent = String(superseded);
-      metricRetired.textContent = String(retired);
+      metricTotal.textContent = String(state.total || requests.length || 0);
+      metricEmailPending.textContent = String(emailPending);
+      metricApprovalPending.textContent = String(approvalPending);
+      metricRisk.textContent = String(risk);
     }
 
-    function renderTerms(terms) {
-      if (!terms.length) {
-        termsBody.innerHTML = `
+    function renderRequests(requests) {
+      if (!requests.length) {
+        requestsBody.innerHTML = `
           <tr>
             <td colspan="8" class="rh-admin-empty">
-              No CDAS licence terms records found.
+              No CDAS access request records found.
             </td>
           </tr>
         `;
         return;
       }
 
-      termsBody.innerHTML = terms
+      requestsBody.innerHTML = requests
         .map((row) => {
-          const bodyPreview = row.body_preview || row.body || "—";
-          const effective = `${formatValue(row.effective_from)} → ${formatValue(row.effective_to)}`;
+          const riskFlags = Array.isArray(row.risk_flags) && row.risk_flags.length
+            ? row.risk_flags.join(", ")
+            : "None";
 
           return `
             <tr>
               <td>
                 <div class="rh-admin-title-stack">
-                  <strong>${escapeHtml(row.title)}</strong>
-                  <span>${escapeHtml(row.id)}</span>
-                  <span>${escapeHtml(row.notes || "")}</span>
+                  <strong>${escapeHtml(row.name)}</strong>
+                  <span>${escapeHtml(row.email_normalised)}</span>
+                  <span>${escapeHtml(row.organisation_name || "")}</span>
                 </div>
               </td>
-              <td>${escapeHtml(formatValue(row.version))}</td>
+              <td>
+                <div class="rh-policy-stack">
+                  <span>${escapeHtml(row.document_id)}</span>
+                  <span>Version: ${escapeHtml(formatValue(row.document_version))}</span>
+                </div>
+              </td>
               <td>
                 <span class="${badgeClass(row.status)}">
                   ${escapeHtml(formatValue(row.status))}
@@ -835,24 +740,32 @@ const pageDescription =
               </td>
               <td>
                 <span class="rh-badge">
-                  ${escapeHtml(formatValue(row.applies_to_access_class))}
+                  ${escapeHtml(formatValue(row.access_class))}
                 </span>
               </td>
-              <td>${escapeHtml(effective)}</td>
               <td>
-                <div class="rh-admin-body-preview">
-                  ${escapeHtml(bodyPreview)}
+                <div class="rh-policy-stack">
+                  <span>${escapeHtml(formatValue(row.terms_version))}</span>
+                  <span>Accepted: ${escapeHtml(formatDate(row.terms_accepted_at))}</span>
                 </div>
               </td>
-              <td>${escapeHtml(formatDate(row.created_at))}</td>
               <td>
-                <button
-                  class="rh-button rh-button-secondary"
-                  type="button"
-                  data-view-terms="${escapeHtml(row.id)}"
-                >
-                  View
-                </button>
+                <div class="rh-policy-stack">
+                  <span>Score: ${escapeHtml(formatValue(row.risk_score))}</span>
+                  <span>${escapeHtml(riskFlags)}</span>
+                </div>
+              </td>
+              <td>${escapeHtml(formatDate(row.requested_at))}</td>
+              <td>
+                <div class="rh-admin-row-actions">
+                  <button
+                    class="rh-button rh-button-secondary"
+                    type="button"
+                    data-view-request="${escapeHtml(row.id)}"
+                  >
+                    View
+                  </button>
+                </div>
               </td>
             </tr>
           `;
@@ -860,53 +773,85 @@ const pageDescription =
         .join("");
     }
 
-    async function renderDetail(termsId) {
-      let row = state.terms.find((item) => item.id === termsId);
+    async function renderDetail(requestId) {
+      const token = getStoredToken();
 
-      if (!row || !row.body) {
-        const token = getStoredToken();
-
-        try {
-          const response = await fetch(
-            `/api/admin/cdas/licence-terms/${encodeURIComponent(termsId)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          const data = await response.json();
-
-          if (response.ok && data.ok && data.terms) {
-            row = data.terms;
-          }
-        } catch (error) {
-          setStatus(`Could not load full terms record: ${error.message}`, "error");
-          return;
-        }
-      }
-
-      if (!row) {
-        setStatus("Selected licence terms record was not found.", "error");
+      if (!token) {
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
         return;
       }
 
-      detailSubtitle.textContent = `${row.title} — ${row.version}`;
+      setStatus("Loading access request detail…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/access-requests/${encodeURIComponent(requestId)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not load access request detail: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok || !data.request) {
+        setStatus(
+          data?.message || data?.error || "Access request detail could not be loaded.",
+          "error"
+        );
+        return;
+      }
+
+      const row = data.request;
+
+      detailSubtitle.textContent = `${row.document_id} — ${row.email_normalised}`;
+
+      const riskFlags = Array.isArray(row.risk_flags) && row.risk_flags.length
+        ? row.risk_flags.join(", ")
+        : "None";
 
       const fields = [
         ["ID", row.id],
-        ["Version", row.version],
-        ["Title", row.title],
+        ["Document ID", row.document_id],
+        ["Document version", row.document_version],
+        ["Name", row.name],
+        ["Email", row.email],
+        ["Email normalised", row.email_normalised],
+        ["Licence holder type", row.licence_holder_type],
+        ["Organisation name", row.organisation_name],
+        ["Contact name", row.contact_name],
+        ["Contact email", row.contact_email],
+        ["Role title", row.role_title],
+        ["Recipient category", row.recipient_category],
         ["Status", row.status],
-        ["Applies to access class", row.applies_to_access_class],
-        ["Body SHA-256", row.body_sha256],
-        ["Effective from", row.effective_from],
-        ["Effective to", row.effective_to],
-        ["Created at", formatDate(row.created_at)],
-        ["Retired at", formatDate(row.retired_at)],
-        ["Notes", row.notes],
-        ["Body length", row.body_length || (row.body ? row.body.length : null)],
+        ["Access class", row.access_class],
+        ["Verification sent at", formatDate(row.verification_sent_at)],
+        ["Email verified at", formatDate(row.email_verified_at)],
+        ["Email delivery status", row.email_delivery_status],
+        ["Requested at", formatDate(row.requested_at)],
+        ["Expires at", formatDate(row.expires_at)],
+        ["Approved at", formatDate(row.approved_at)],
+        ["Approved by", row.approved_by],
+        ["Approval role", row.approval_role],
+        ["Approval policy version", row.approval_policy_version],
+        ["Approval note", row.approval_note],
+        ["Denied at", formatDate(row.denied_at)],
+        ["Denied by", row.denied_by],
+        ["Denial reason", row.denial_reason],
+        ["Terms version", row.terms_version],
+        ["Terms accepted at", formatDate(row.terms_accepted_at)],
+        ["Terms acceptance user agent", row.terms_acceptance_user_agent],
+        ["User agent", row.user_agent],
+        ["Risk score", row.risk_score],
+        ["Risk flags", riskFlags],
       ];
 
       detailGrid.innerHTML = fields
@@ -920,69 +865,43 @@ const pageDescription =
         })
         .join("");
 
-      termsBodyFull.textContent = row.body || row.body_preview || "No body text available.";
-
       detailCard.hidden = false;
       detailCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      setStatus("Access request detail loaded.", "success");
     }
-
-    tokenForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      const token = tokenInput.value.trim();
-
-      if (!token) {
-        setStatus("Paste an admin token before saving.", "error");
-        return;
-      }
-
-      setStoredToken(token);
-      tokenInput.value = "";
-      setStatus("Admin token saved for this browser session.", "success");
-      fetchTerms();
-    });
-
-    clearTokenButton.addEventListener("click", () => {
-      clearStoredToken();
-      tokenInput.value = "";
-      setStatus("Admin token cleared from this browser session.");
-      renderTerms([]);
-      updateMetrics([]);
-    });
 
     filtersForm.addEventListener("submit", (event) => {
       event.preventDefault();
       state.offset = 0;
-      fetchTerms();
+      fetchRequests();
     });
 
     resetFiltersButton.addEventListener("click", () => {
       filtersForm.reset();
       state.offset = 0;
-      fetchTerms();
+      fetchRequests();
     });
 
     refreshButton.addEventListener("click", () => {
-      fetchTerms();
+      fetchRequests();
     });
 
-    termsBody.addEventListener("click", (event) => {
+    requestsBody.addEventListener("click", (event) => {
       const target = event.target;
 
       if (!(target instanceof HTMLElement)) {
         return;
       }
 
-      const button = target.closest("[data-view-terms]");
+      const viewButton = target.closest("[data-view-request]");
 
-      if (!(button instanceof HTMLElement)) {
-        return;
-      }
+      if (viewButton instanceof HTMLElement) {
+        const requestId = viewButton.dataset.viewRequest;
 
-      const termsId = button.dataset.viewTerms;
-
-      if (termsId) {
-        renderDetail(termsId);
+        if (requestId) {
+          renderDetail(requestId);
+        }
       }
     });
 
@@ -993,12 +912,12 @@ const pageDescription =
     const existingToken = getStoredToken();
 
     if (existingToken) {
-      setStatus("Admin token found in this browser session. Loading CDAS licence terms…");
-      fetchTerms();
+      setStatus("Admin token found in this browser session. Loading CDAS access requests…");
+      fetchRequests();
     } else {
-      setStatus("Enter and save your admin token to load CDAS licence terms.");
+      setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
     }
-    
+
     window.relayhubAdminTokenUpdated = () => {
       if (typeof fetchDownloadLinks === "function") {
         fetchDownloadLinks();

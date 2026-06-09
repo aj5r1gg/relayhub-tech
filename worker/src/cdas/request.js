@@ -3,6 +3,8 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
 };
 
+const DEFAULT_VERIFICATION_EXPIRY_HOURS = 24;
+
 function jsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -20,12 +22,30 @@ function normaliseEmail(value) {
 
 function isValidEmail(value) {
   const email = normaliseEmail(value);
-
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function hoursFromNowIso(hours) {
+  const date = new Date();
+  date.setUTCHours(date.getUTCHours() + hours);
+  return date.toISOString();
+}
+
+function getVerificationExpiryHours(env) {
+  const parsed = Number.parseInt(
+    String(env.CDAS_VERIFICATION_EXPIRY_HOURS || ""),
+    10
+  );
+
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 168) {
+    return DEFAULT_VERIFICATION_EXPIRY_HOURS;
+  }
+
+  return parsed;
 }
 
 function getClientIp(request) {
@@ -57,6 +77,30 @@ function randomHex(bytes = 16) {
 
 function makeRequestId() {
   return `dar_${Date.now().toString(36)}_${randomHex(8)}`;
+}
+
+function makeVerificationToken() {
+  return randomHex(32);
+}
+
+function shouldExposeDebugVerificationToken(env) {
+  return String(env.CDAS_DEBUG_RETURN_VERIFICATION_TOKEN || "")
+    .trim()
+    .toLowerCase() === "true";
+}
+
+function getPublicBaseUrl(env) {
+  return cleanText(env.RELAYHUB_PUBLIC_BASE_URL) || "https://www.relayhub.tech";
+}
+
+function makeVerificationUrl(env, requestId, token) {
+  const base = getPublicBaseUrl(env).replace(/\/+$/, "");
+  const url = new URL(`${base}/document-access/verify`);
+
+  url.searchParams.set("request_id", requestId);
+  url.searchParams.set("token", token);
+
+  return url.toString();
 }
 
 async function readRequestBody(request) {
@@ -188,14 +232,6 @@ function isDocumentRequestable(document) {
 }
 
 function determineRequestStatus(document) {
-  /*
-   * Email verification is not active yet.
-   *
-   * Public/licensed/paid documents go to email_pending.
-   * Approval-required/invite-only documents go to approval_pending.
-   *
-   * Neither status grants download access.
-   */
   if (
     document.access_class === "approval_required" ||
     document.access_class === "invite_only" ||
@@ -263,14 +299,15 @@ async function insertAccessRequest({
   ipHash,
   termsAccepted,
   risk,
+  verificationTokenHash,
+  verificationExpiresAt,
 }) {
   const timestamp = nowIso();
 
   const name = cleanText(getBodyValue(body, "name", "full_name", "fullName"));
   const licenceHolderType =
-    cleanText(
-      getBodyValue(body, "licence_holder_type", "licenceHolderType")
-    ) || "individual";
+    cleanText(getBodyValue(body, "licence_holder_type", "licenceHolderType")) ||
+    "individual";
 
   const organisationName = cleanText(
     getBodyValue(body, "organisation_name", "organisationName", "organisation")
@@ -286,15 +323,16 @@ async function insertAccessRequest({
   const roleTitle = cleanText(getBodyValue(body, "role_title", "roleTitle"));
 
   const recipientCategory =
-    cleanText(
-      getBodyValue(body, "recipient_category", "recipientCategory")
-    ) || "unknown";
+    cleanText(getBodyValue(body, "recipient_category", "recipientCategory")) ||
+    "unknown";
 
   const userAgent = request.headers.get("user-agent") || "";
 
   const termsAcceptedAt = termsAccepted ? timestamp : null;
   const termsAcceptanceIpHash = termsAccepted ? ipHash : null;
   const termsAcceptanceUserAgent = termsAccepted ? userAgent : null;
+
+  const emailDeliveryStatus = "verification_token_generated_email_not_sent";
 
   await env.RELAYHUB_DB.prepare(
     `INSERT INTO document_access_requests (
@@ -337,8 +375,8 @@ async function insertAccessRequest({
      )
      VALUES (
        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-       NULL, NULL, NULL, NULL,
-       ?, NULL,
+       ?, NULL, NULL, ?,
+       ?, ?,
        NULL, NULL, NULL, NULL, NULL,
        NULL, NULL, NULL,
        ?, ?, ?, ?,
@@ -360,7 +398,10 @@ async function insertAccessRequest({
       recipientCategory,
       status,
       document.access_class,
+      verificationTokenHash,
+      emailDeliveryStatus,
       timestamp,
+      verificationExpiresAt,
       document.licence_terms_version,
       termsAcceptedAt,
       termsAcceptanceIpHash,
@@ -375,6 +416,8 @@ async function insertAccessRequest({
   return {
     requested_at: timestamp,
     terms_accepted_at: termsAcceptedAt,
+    expires_at: verificationExpiresAt,
+    email_delivery_status: emailDeliveryStatus,
   };
 }
 
@@ -484,6 +527,10 @@ export async function handleDocumentAccessRequest(request, env) {
   const clientIp = getClientIp(request);
   const ipHash = clientIp ? await sha256Hex(clientIp) : null;
   const requestId = makeRequestId();
+  const verificationToken = makeVerificationToken();
+  const verificationTokenHash = await sha256Hex(verificationToken);
+  const verificationExpiresAt = hoursFromNowIso(getVerificationExpiryHours(env));
+
   const status = determineRequestStatus(document);
   const risk = calculateRisk({
     email: emailNormalised,
@@ -504,26 +551,42 @@ export async function handleDocumentAccessRequest(request, env) {
     ipHash,
     termsAccepted,
     risk,
+    verificationTokenHash,
+    verificationExpiresAt,
   });
 
-  return jsonResponse(
-    {
-      ok: true,
-      request_id: requestId,
-      document_id: document.id,
-      document_title: document.title,
-      document_version: document.version,
-      access_class: document.access_class,
-      classification: document.classification,
-      status,
-      terms_version: document.licence_terms_version,
-      terms_accepted_at: inserted.terms_accepted_at,
-      requested_at: inserted.requested_at,
-      risk_score: risk.score,
-      risk_flags: risk.flags,
-      message:
-        "Document access request was recorded. Email verification and download issuance are not active yet.",
-    },
-    201
-  );
+  const responsePayload = {
+    ok: true,
+    request_id: requestId,
+    document_id: document.id,
+    document_title: document.title,
+    document_version: document.version,
+    access_class: document.access_class,
+    classification: document.classification,
+    status,
+    terms_version: document.licence_terms_version,
+    terms_accepted_at: inserted.terms_accepted_at,
+    requested_at: inserted.requested_at,
+    expires_at: inserted.expires_at,
+    email_delivery_status: inserted.email_delivery_status,
+    risk_score: risk.score,
+    risk_flags: risk.flags,
+    message:
+      "Document access request was recorded. A verification token was generated, but email sending and download issuance are not active yet.",
+  };
+
+  /*
+   * Development-only escape hatch.
+   *
+   * Do not enable this in normal production use. It exists only so the next
+   * verification phase can be tested before email delivery is connected.
+   */
+  if (shouldExposeDebugVerificationToken(env)) {
+    responsePayload.debug_verification = {
+      token: verificationToken,
+      verification_url: makeVerificationUrl(env, requestId, verificationToken),
+    };
+  }
+
+  return jsonResponse(responsePayload, 201);
 }

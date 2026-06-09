@@ -1,0 +1,1324 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
+
+const pageTitle = "CDAS Download Links Admin";
+const pageDescription =
+  "Admin registry and audit view for RelayHub CDAS controlled download links.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="rh-admin-page">
+    <section class="rh-admin-hero">
+      <p class="rh-eyebrow">RelayHub Admin</p>
+      <h1>CDAS Download Links</h1>
+      <p>
+        Registry and audit view for controlled CDAS download links. This page
+        never displays raw tokens, token hashes, private R2 URLs, or public
+        download URLs. It only shows lifecycle state, evidence metadata, and
+        audit history.
+      </p>
+    </section>
+
+    <AdminTokenPanel />
+
+    <section class="rh-admin-grid rh-admin-summary-grid" aria-label="CDAS download link summary">
+      <article class="rh-admin-metric">
+        <span>Total links</span>
+        <strong id="metric-total">—</strong>
+      </article>
+
+      <article class="rh-admin-metric">
+        <span>Created</span>
+        <strong id="metric-created">—</strong>
+      </article>
+
+      <article class="rh-admin-metric">
+        <span>Used</span>
+        <strong id="metric-used">—</strong>
+      </article>
+
+      <article class="rh-admin-metric">
+        <span>Failures</span>
+        <strong id="metric-failures">—</strong>
+      </article>
+    </section>
+
+    <section class="rh-admin-card">
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Download link registry</h2>
+          <p>
+            Search and filter controlled download links. Raw tokens are not
+            stored and cannot be recovered from this page.
+          </p>
+        </div>
+
+        <div class="rh-admin-actions">
+          <a class="rh-button rh-button-secondary" href="/admin/cdas-licences">
+            Licences
+          </a>
+          <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <form class="rh-admin-filters" id="filters-form">
+        <label>
+          Search
+          <input
+            id="filter-q"
+            name="q"
+            type="search"
+            placeholder="Link ID, licence, email, document…"
+          />
+        </label>
+
+        <label>
+          Document
+          <input
+            id="filter-document"
+            name="document_id"
+            type="search"
+            placeholder="relayhub-overview"
+          />
+        </label>
+
+        <label>
+          Status
+          <select id="filter-status" name="status">
+            <option value="">All statuses</option>
+            <option value="created">created</option>
+            <option value="used">used</option>
+            <option value="revoked">revoked</option>
+            <option value="superseded">superseded</option>
+            <option value="expired">expired</option>
+            <option value="failed">failed</option>
+          </select>
+        </label>
+
+        <div class="rh-admin-filter-actions">
+          <button class="rh-button rh-button-primary" type="submit">
+            Apply filters
+          </button>
+          <button class="rh-button rh-button-secondary" id="reset-filters" type="button">
+            Reset
+          </button>
+        </div>
+      </form>
+
+      <div class="rh-admin-status" id="status-message" role="status" aria-live="polite">
+        Ready.
+      </div>
+
+      <div class="rh-admin-table-wrap">
+        <table class="rh-admin-table">
+          <thead>
+            <tr>
+              <th>Download link</th>
+              <th>Licence</th>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Lifecycle</th>
+              <th>Events</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="links-body">
+            <tr>
+              <td colspan="7" class="rh-admin-empty">
+                No records loaded yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rh-admin-card rh-admin-detail-card" id="detail-card" hidden>
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Download link detail</h2>
+          <p id="detail-subtitle">
+            Selected controlled download link.
+          </p>
+        </div>
+
+        <button class="rh-button rh-button-secondary" id="close-detail" type="button">
+          Close
+        </button>
+      </div>
+
+      <div class="rh-detail-grid-wrap" id="detail-grid"></div>
+
+      <section class="rh-admin-subcard">
+        <div class="rh-subcard-heading">
+          <p class="rh-eyebrow">Generated PDF evidence</p>
+          <h3>Bound generated document</h3>
+          <p>
+            Evidence recorded against the licence. This does not expose the
+            private R2 object as a public URL.
+          </p>
+        </div>
+
+        <div class="rh-detail-grid-wrap" id="pdf-grid"></div>
+      </section>
+
+      <section class="rh-admin-subcard">
+        <div class="rh-subcard-heading">
+          <p class="rh-eyebrow">Audit trail</p>
+          <h3>Download link events</h3>
+          <p>
+            Lifecycle events for this link. IP and user-agent values are shown
+            only as presence indicators.
+          </p>
+        </div>
+
+        <div class="rh-event-list" id="event-list"></div>
+      </section>
+
+      <section class="rh-admin-subcard">
+        <div class="rh-subcard-heading">
+          <p class="rh-eyebrow">Control proof</p>
+          <h3>Privacy and exposure controls</h3>
+          <p>
+            Proof returned by the Worker for this admin-only audit endpoint.
+          </p>
+        </div>
+
+        <div class="rh-detail-grid-wrap" id="controls-grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <style>
+    .rh-admin-page {
+      width: min(1240px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 7rem 0 5rem;
+    }
+
+    .rh-admin-hero {
+      margin-bottom: 1.5rem;
+      padding: 2rem;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.5rem;
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 36rem),
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .rh-admin-hero h1 {
+      margin: 0.35rem 0 0.75rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: #0f172a;
+    }
+
+    .rh-admin-hero p {
+      max-width: 900px;
+      margin: 0;
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .rh-eyebrow {
+      margin: 0;
+      color: #0284c7;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-card,
+    .rh-admin-metric,
+    .rh-admin-subcard {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+    }
+
+    .rh-admin-card {
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .rh-admin-subcard {
+      margin-top: 1rem;
+      padding: 1rem;
+      box-shadow: none;
+    }
+
+    .rh-admin-section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .rh-admin-card h2,
+    .rh-admin-section-heading h2,
+    .rh-subcard-heading h3 {
+      margin: 0;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+    }
+
+    .rh-admin-card h2,
+    .rh-admin-section-heading h2 {
+      font-size: 1.25rem;
+    }
+
+    .rh-subcard-heading h3 {
+      margin-top: 0.25rem;
+      font-size: 1.15rem;
+    }
+
+    .rh-admin-card p,
+    .rh-admin-section-heading p,
+    .rh-subcard-heading p {
+      margin: 0.35rem 0 0;
+      color: rgba(15, 23, 42, 0.67);
+      line-height: 1.6;
+    }
+
+    .rh-admin-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .rh-admin-summary-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 1rem 0;
+    }
+
+    .rh-admin-metric {
+      padding: 1rem;
+    }
+
+    .rh-admin-metric span {
+      display: block;
+      color: rgba(15, 23, 42, 0.62);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-metric strong {
+      display: block;
+      margin-top: 0.4rem;
+      color: #0f172a;
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .rh-admin-actions,
+    .rh-admin-filter-actions,
+    .rh-admin-row-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .rh-admin-actions,
+    .rh-admin-filter-actions {
+      justify-content: flex-end;
+    }
+
+    .rh-admin-filters {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 0.85rem;
+      align-items: end;
+      margin: 1.25rem 0 1rem;
+    }
+
+    .rh-admin-filters label {
+      display: grid;
+      gap: 0.35rem;
+      color: rgba(15, 23, 42, 0.8);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .rh-admin-filters input,
+    .rh-admin-filters select {
+      width: 100%;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      border-radius: 0.8rem;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .rh-admin-filter-actions {
+      grid-column: 1 / -1;
+    }
+
+    .rh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .rh-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .rh-button-primary {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    .rh-button-primary:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .rh-button-secondary {
+      background: #fff;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.18);
+    }
+
+    .rh-button-secondary:hover {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.34);
+    }
+
+    .rh-button-danger {
+      background: #991b1b;
+      color: #fff;
+      border-color: #991b1b;
+    }
+
+    .rh-button-danger:hover {
+      background: #7f1d1d;
+      color: #fff;
+      border-color: #7f1d1d;
+    }
+
+    .rh-button[disabled],
+    .rh-button[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.54;
+      transform: none;
+    }
+
+    .rh-button[disabled]:hover,
+    .rh-button[aria-disabled="true"]:hover {
+      transform: none;
+    }
+
+    .rh-admin-status {
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      border-radius: 0.9rem;
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.75);
+      font-size: 0.95rem;
+    }
+
+    .rh-admin-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-admin-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-admin-table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+    }
+
+    .rh-admin-table {
+      width: 100%;
+      min-width: 1180px;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 0.92rem;
+    }
+
+    .rh-admin-table th,
+    .rh-admin-table td {
+      padding: 0.85rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .rh-admin-table th {
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .rh-admin-empty {
+      text-align: center;
+      color: rgba(15, 23, 42, 0.58);
+    }
+
+    .rh-stack {
+      display: grid;
+      gap: 0.18rem;
+    }
+
+    .rh-stack strong {
+      color: #0f172a;
+    }
+
+    .rh-stack span {
+      color: rgba(15, 23, 42, 0.64);
+      font-size: 0.82rem;
+      word-break: break-word;
+    }
+
+    .rh-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .rh-badge-created {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .rh-badge-used {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .rh-badge-revoked,
+    .rh-badge-expired,
+    .rh-badge-failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .rh-badge-superseded {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .rh-code {
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+      font-size: 0.82rem;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .rh-admin-detail-card {
+      margin-top: 1rem;
+    }
+
+    .rh-detail-grid-wrap {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .rh-detail-row {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+      padding: 0.85rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 0.85rem;
+      background: #f8fafc;
+    }
+
+    .rh-detail-row dt {
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .rh-detail-row dd {
+      margin: 0;
+      color: #0f172a;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    .rh-event-list {
+      display: grid;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .rh-event-card {
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .rh-event-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      background: #f8fafc;
+    }
+
+    .rh-event-card-header strong {
+      color: #0f172a;
+    }
+
+    .rh-event-card-header span {
+      color: rgba(15, 23, 42, 0.62);
+      font-size: 0.84rem;
+    }
+
+    .rh-event-card-body {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .rh-event-field {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .rh-event-field:nth-child(odd) {
+      border-right: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .rh-event-field dt {
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-event-field dd {
+      margin: 0.25rem 0 0;
+      color: #0f172a;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    @media (max-width: 960px) {
+      .rh-admin-page {
+        padding-top: 6rem;
+      }
+
+      .rh-admin-section-heading {
+        display: grid;
+      }
+
+      .rh-admin-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .rh-admin-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .rh-detail-row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+      }
+
+      .rh-event-card-body {
+        grid-template-columns: 1fr;
+      }
+
+      .rh-event-field:nth-child(odd) {
+        border-right: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .rh-admin-page {
+        width: min(100% - 1rem, 1240px);
+        padding-top: 5.5rem;
+      }
+
+      .rh-admin-hero,
+      .rh-admin-card {
+        padding: 1rem;
+        border-radius: 1rem;
+      }
+
+      .rh-admin-summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .rh-admin-filter-actions .rh-button,
+      .rh-admin-actions .rh-button,
+      .rh-admin-row-actions .rh-button {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const TOKEN_STORAGE_KEY = "relayhub_admin_token";
+
+    const state = {
+      rows: [],
+      total: 0,
+      limit: 100,
+      offset: 0,
+    };
+
+    const filtersForm = document.getElementById("filters-form");
+    const resetFiltersButton = document.getElementById("reset-filters");
+    const refreshButton = document.getElementById("refresh-button");
+    const statusMessage = document.getElementById("status-message");
+    const linksBody = document.getElementById("links-body");
+
+    const metricTotal = document.getElementById("metric-total");
+    const metricCreated = document.getElementById("metric-created");
+    const metricUsed = document.getElementById("metric-used");
+    const metricFailures = document.getElementById("metric-failures");
+
+    const detailCard = document.getElementById("detail-card");
+    const detailSubtitle = document.getElementById("detail-subtitle");
+    const closeDetailButton = document.getElementById("close-detail");
+    const detailGrid = document.getElementById("detail-grid");
+    const pdfGrid = document.getElementById("pdf-grid");
+    const eventList = document.getElementById("event-list");
+    const controlsGrid = document.getElementById("controls-grid");
+
+    function getStoredToken() {
+      return sessionStorage.getItem(TOKEN_STORAGE_KEY) || "";
+    }
+
+    function setStatus(message, mode = "neutral") {
+      statusMessage.textContent = message;
+      statusMessage.dataset.state = mode;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatValue(value) {
+      if (value === null || value === undefined || value === "") {
+        return "—";
+      }
+
+      return String(value);
+    }
+
+    function booleanText(value) {
+      return value ? "Yes" : "No";
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    function badgeClass(value) {
+      const text = String(value || "").toLowerCase();
+
+      if (!text) {
+        return "rh-badge";
+      }
+
+      return `rh-badge rh-badge-${text}`;
+    }
+
+    function canRevokeLink(row) {
+      return (
+        row &&
+        row.status === "created" &&
+        !row.used_at &&
+        !row.revoked_at &&
+        !row.superseded_at
+      );
+    }
+
+    function getFilters() {
+      const formData = new FormData(filtersForm);
+      const params = new URLSearchParams();
+
+      for (const [key, value] of formData.entries()) {
+        const clean = String(value || "").trim();
+
+        if (clean) {
+          params.set(key, clean);
+        }
+      }
+
+      params.set("limit", String(state.limit));
+      params.set("offset", String(state.offset));
+
+      return params;
+    }
+
+    async function fetchDownloadLinks() {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+        renderLinks([]);
+        updateMetrics([]);
+        return;
+      }
+
+      const params = getFilters();
+
+      setStatus("Loading CDAS download links…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(`/api/admin/cdas/download-links?${params.toString()}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not load CDAS download links: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "CDAS download links could not be loaded.",
+          "error"
+        );
+
+        renderLinks([]);
+        updateMetrics([]);
+        return;
+      }
+
+      state.rows = Array.isArray(data.rows) ? data.rows : [];
+      state.total = Number(data.total || state.rows.length || 0);
+
+      renderLinks(state.rows);
+      updateMetrics(state.rows);
+
+      setStatus(
+        `Loaded ${state.rows.length} CDAS download link record(s). Total matching records: ${state.total}.`,
+        "success"
+      );
+    }
+
+    function updateMetrics(rows) {
+      const created = rows.filter((row) => row.status === "created").length;
+      const used = rows.filter((row) => row.status === "used").length;
+      const failures = rows.reduce((total, row) => {
+        return total + Number(row.events?.failure_count || 0);
+      }, 0);
+
+      metricTotal.textContent = String(state.total || rows.length || 0);
+      metricCreated.textContent = String(created);
+      metricUsed.textContent = String(used);
+      metricFailures.textContent = String(failures);
+    }
+
+    function renderLinks(rows) {
+      if (!rows.length) {
+        linksBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="rh-admin-empty">
+              No CDAS download links found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      linksBody.innerHTML = rows
+        .map((row) => {
+          return `
+            <tr>
+              <td>
+                <div class="rh-stack">
+                  <strong class="rh-code">${escapeHtml(row.id)}</strong>
+                  <span>Token hash present: ${escapeHtml(booleanText(row.token_hash_present))}</span>
+                  <span>Hash length: ${escapeHtml(formatValue(row.token_hash_length))}</span>
+                </div>
+              </td>
+
+              <td>
+                <div class="rh-stack">
+                  <strong>${escapeHtml(formatValue(row.licence_number))}</strong>
+                  <span class="rh-code">${escapeHtml(formatValue(row.licence_id))}</span>
+                  <span>${escapeHtml(formatValue(row.document_id))} v${escapeHtml(formatValue(row.document_version))}</span>
+                </div>
+              </td>
+
+              <td>
+                <div class="rh-stack">
+                  <strong>${escapeHtml(formatValue(row.licence_holder_name))}</strong>
+                  <span>${escapeHtml(formatValue(row.recipient_email))}</span>
+                  <span>${escapeHtml(formatValue(row.organisation_name))}</span>
+                </div>
+              </td>
+
+              <td>
+                <span class="${badgeClass(row.status)}">
+                  ${escapeHtml(formatValue(row.status))}
+                </span>
+              </td>
+
+              <td>
+                <div class="rh-stack">
+                  <span>Created: ${escapeHtml(formatDate(row.created_at))}</span>
+                  <span>Expires: ${escapeHtml(formatDate(row.expires_at))}</span>
+                  <span>Used: ${escapeHtml(formatDate(row.used_at))}</span>
+                  <span>Failure: ${escapeHtml(formatValue(row.failure_reason))}</span>
+                </div>
+              </td>
+
+              <td>
+                <div class="rh-stack">
+                  <strong>${escapeHtml(formatValue(row.events?.event_count))} event(s)</strong>
+                  <span>Success: ${escapeHtml(formatValue(row.events?.success_count))}</span>
+                  <span>Failure: ${escapeHtml(formatValue(row.events?.failure_count))}</span>
+                  <span>Last: ${escapeHtml(formatDate(row.events?.last_event_at))}</span>
+                </div>
+              </td>
+
+              <td>
+                <div class="rh-admin-row-actions">
+                  <button
+                    class="rh-button rh-button-secondary"
+                    type="button"
+                    data-view-download-link="${escapeHtml(row.id)}"
+                  >
+                    View
+                  </button>
+
+                  ${
+                    canRevokeLink(row)
+                      ? `
+                        <button
+                          class="rh-button rh-button-danger"
+                          type="button"
+                          data-revoke-download-link="${escapeHtml(row.id)}"
+                        >
+                          Revoke
+                        </button>
+                      `
+                      : `
+                        <button
+                          class="rh-button rh-button-secondary"
+                          type="button"
+                          disabled
+                          aria-disabled="true"
+                          title="Only unused created links can be revoked."
+                        >
+                          Revoke
+                        </button>
+                      `
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function detailRow(label, value, options = {}) {
+      const codeClass = options.code ? "rh-code" : "";
+
+      return `
+        <dl class="rh-detail-row">
+          <dt>${escapeHtml(label)}</dt>
+          <dd class="${codeClass}">
+            ${escapeHtml(formatValue(value))}
+          </dd>
+        </dl>
+      `;
+    }
+
+    function renderDetail(data) {
+      const link = data.download_link || {};
+      const pdf = link.generated_pdf || {};
+      const controls = data.controls || {};
+      const events = Array.isArray(data.events) ? data.events : [];
+
+      detailSubtitle.textContent = `${formatValue(link.id)} — ${formatValue(link.status)}`;
+
+      detailGrid.innerHTML = [
+        detailRow("Download link ID", link.id, { code: true }),
+        detailRow("Status", link.status),
+        detailRow("Licence number", link.licence_number),
+        detailRow("Licence ID", link.licence_id, { code: true }),
+        detailRow("Licence status", link.licence_status),
+        detailRow("Document ID", link.document_id),
+        detailRow("Document version", link.document_version),
+        detailRow("Recipient email", link.recipient_email),
+        detailRow("Licence holder", link.licence_holder_name),
+        detailRow("Organisation", link.organisation_name),
+        detailRow("Created at", formatDate(link.created_at)),
+        detailRow("Expires at", formatDate(link.expires_at)),
+        detailRow("Used at", formatDate(link.used_at)),
+        detailRow("Revoked at", formatDate(link.revoked_at)),
+        detailRow("Superseded at", formatDate(link.superseded_at)),
+        detailRow("Failure reason", link.failure_reason),
+        detailRow("Token hash present", booleanText(link.token_hash_present)),
+        detailRow("Token hash length", link.token_hash_length),
+        detailRow("IP hash present", booleanText(link.ip_hash_present)),
+        detailRow("User-agent present", booleanText(link.user_agent_present)),
+      ].join("");
+
+      pdfGrid.innerHTML = [
+        detailRow("Generated PDF status", pdf.status),
+        detailRow("Generated PDF object key", pdf.object_key, { code: true }),
+        detailRow("Generated PDF SHA-256", pdf.sha256, { code: true }),
+        detailRow("Generated PDF size", pdf.size_bytes),
+        detailRow("Generated PDF content type", pdf.content_type),
+        detailRow("Generated PDF created at", formatDate(pdf.created_at)),
+      ].join("");
+
+      controlsGrid.innerHTML = [
+        detailRow("Raw token returned", booleanText(controls.raw_token_returned)),
+        detailRow("Token hash returned", booleanText(controls.token_hash_returned)),
+        detailRow("Token hash presence only", booleanText(controls.token_hash_presence_only)),
+        detailRow("Serves download", booleanText(controls.serves_download)),
+        detailRow("Public access", booleanText(controls.public_access)),
+        detailRow("Mutates database", booleanText(controls.mutates_database)),
+        detailRow("Audit view only", booleanText(controls.audit_view_only)),
+      ].join("");
+
+      renderEvents(events);
+
+      detailCard.hidden = false;
+      detailCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function eventField(label, value, options = {}) {
+      const codeClass = options.code ? "rh-code" : "";
+
+      return `
+        <dl class="rh-event-field">
+          <dt>${escapeHtml(label)}</dt>
+          <dd class="${codeClass}">
+            ${escapeHtml(formatValue(value))}
+          </dd>
+        </dl>
+      `;
+    }
+
+    function renderEvents(events) {
+      if (!events.length) {
+        eventList.innerHTML = `
+          <div class="rh-admin-empty">
+            No events recorded for this download link.
+          </div>
+        `;
+        return;
+      }
+
+      eventList.innerHTML = events
+        .map((event) => {
+          return `
+            <article class="rh-event-card">
+              <div class="rh-event-card-header">
+                <div>
+                  <strong>${escapeHtml(event.event_type)}</strong>
+                  <span>${escapeHtml(formatDate(event.event_at))}</span>
+                </div>
+
+                <span class="${event.success ? "rh-badge rh-badge-used" : "rh-badge rh-badge-failed"}">
+                  ${event.success ? "success" : "failure"}
+                </span>
+              </div>
+
+              <div class="rh-event-card-body">
+                ${eventField("Event ID", event.id, { code: true })}
+                ${eventField("Download ID", event.download_id, { code: true })}
+                ${eventField("Licence number", event.licence_number)}
+                ${eventField("Document ID", event.document_id)}
+                ${eventField("Document version", event.document_version)}
+                ${eventField("Holder email", event.licence_holder_email)}
+                ${eventField("IP hash present", booleanText(event.ip_hash_present))}
+                ${eventField("User-agent present", booleanText(event.user_agent_present))}
+                ${eventField("Source object", event.source_object, { code: true })}
+                ${eventField("Source SHA-256", event.source_sha256, { code: true })}
+                ${eventField("Generated object", event.generated_object, { code: true })}
+                ${eventField("Generated SHA-256", event.generated_sha256, { code: true })}
+                ${eventField("Template SHA-256", event.template_sha256, { code: true })}
+                ${eventField("Terms version", event.terms_version)}
+                ${eventField("Failure reason", event.failure_reason)}
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    async function fetchDownloadLinkDetail(downloadId) {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+        return;
+      }
+
+      setStatus("Loading download link detail…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/download-links/${encodeURIComponent(downloadId)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not load download link detail: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "Download link detail could not be loaded.",
+          "error"
+        );
+        return;
+      }
+
+      renderDetail(data);
+      setStatus("Download link detail loaded.", "success");
+    }
+
+    async function revokeDownloadLink(downloadId) {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+        return;
+      }
+
+      const firstConfirm = window.confirm(
+        "Revoke this controlled download link?\n\n" +
+          "Only unused created links can be revoked. This will not expose the raw token or public URL."
+      );
+
+      if (!firstConfirm) {
+        return;
+      }
+
+      const reasonInput = window.prompt(
+        "Enter a revocation reason for the audit trail:",
+        "Admin revoked controlled download link."
+      );
+
+      if (reasonInput === null) {
+        return;
+      }
+
+      const reason = String(reasonInput || "").trim();
+
+      if (!reason) {
+        setStatus("Revocation cancelled. A revocation reason is required.", "error");
+        return;
+      }
+
+      setStatus("Revoking controlled download link…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/download-links/${encodeURIComponent(downloadId)}/revoke`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ reason }),
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not revoke controlled download link: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "Controlled download link could not be revoked.",
+          "error"
+        );
+
+        return;
+      }
+
+      setStatus("Controlled download link revoked. Registry refreshed.", "success");
+
+      await fetchDownloadLinks();
+
+      try {
+        await fetchDownloadLinkDetail(downloadId);
+      } catch {
+        // The registry refresh is the important part. Detail reload failure is non-fatal.
+      }
+    }
+
+    filtersForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      state.offset = 0;
+      fetchDownloadLinks();
+    });
+
+    resetFiltersButton.addEventListener("click", () => {
+      filtersForm.reset();
+      state.offset = 0;
+      fetchDownloadLinks();
+    });
+
+    refreshButton.addEventListener("click", () => {
+      fetchDownloadLinks();
+    });
+
+    linksBody.addEventListener("click", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      const viewButton = target.closest("[data-view-download-link]");
+
+      if (viewButton instanceof HTMLElement) {
+        const downloadId = viewButton.dataset.viewDownloadLink;
+
+        if (downloadId) {
+          fetchDownloadLinkDetail(downloadId);
+        }
+
+        return;
+      }
+
+      const revokeButton = target.closest("[data-revoke-download-link]");
+
+      if (revokeButton instanceof HTMLElement) {
+        const downloadId = revokeButton.dataset.revokeDownloadLink;
+
+        if (downloadId) {
+          revokeDownloadLink(downloadId);
+        }
+      }
+    });
+
+    closeDetailButton.addEventListener("click", () => {
+      detailCard.hidden = true;
+      detailGrid.innerHTML = "";
+      pdfGrid.innerHTML = "";
+      eventList.innerHTML = "";
+      controlsGrid.innerHTML = "";
+    });
+
+    const existingToken = getStoredToken();
+
+    if (existingToken) {
+      setStatus("Admin token found in this browser session. Loading CDAS download links…");
+      fetchDownloadLinks();
+    } else {
+      setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+    }
+
+    window.relayhubAdminTokenUpdated = () => {
+      if (typeof fetchDownloadLinks === "function") {
+        fetchDownloadLinks();
+      }
+    };
+
+    window.relayhubAdminTokenCleared = () => {
+      location.reload();
+    };
+  </script>
+</BaseLayout>

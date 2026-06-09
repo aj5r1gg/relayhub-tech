@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
 
 const adminCards = [
   {
@@ -37,6 +38,20 @@ const adminCards = [
     description:
       "View versioned CDAS licence templates, including public distribution, personal use, commercial use, and enterprise redistribution templates.",
   },
+  {
+    href: "/admin/cdas-access-requests",
+    title: "CDAS Access Requests",
+    eyebrow: "Controlled Document Access",
+    description:
+      "View recorded CDAS document access requests before email verification, approvals, licence issue, or download-link creation.",
+  },
+  {
+    href: "/admin/cdas-licences",
+    title: "CDAS Licences",
+    eyebrow: "Controlled Document Access",
+    description:
+      "View issued CDAS licence records before PDF generation, download-link creation, revocation, or reissue workflows are added.",
+  },
 ];
 ---
 
@@ -55,6 +70,8 @@ const adminCards = [
         public functionality, issue licences, approve downloads, or alter records.
       </p>
     </section>
+
+    <AdminTokenPanel />
 
     <section class="rh-admin-card rh-admin-token-card">
       <div>
@@ -301,5 +318,43 @@ const adminCards = [
     });
 
     updateTokenStatus();
+    
+    window.relayhubAdminTokenUpdated = () => {
+      if (typeof fetchDownloadLinks === "function") {
+        fetchDownloadLinks();
+      }
+
+      if (typeof fetchLicences === "function") {
+        fetchLicences();
+      }
+
+      if (typeof fetchDocuments === "function") {
+        fetchDocuments();
+      }
+
+      if (typeof fetchLicenceTerms === "function") {
+        fetchLicenceTerms();
+      }
+
+      if (typeof fetchAccessRequests === "function") {
+        fetchAccessRequests();
+      }
+
+      if (typeof loadDownloads === "function") {
+        loadDownloads();
+      }
+
+      if (typeof loadContacts === "function") {
+        loadContacts();
+      }
+
+      if (typeof loadNewsletter === "function") {
+        loadNewsletter();
+      }
+    };
+
+    window.relayhubAdminTokenCleared = () => {
+      location.reload();
+    };
   </script>
 </BaseLayout>

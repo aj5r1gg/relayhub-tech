@@ -1,0 +1,358 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const pageTitle = "Verify Document Access Request | RelayHub";
+const pageDescription =
+  "Verify the email address attached to a RelayHub document access request.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="rh-verify-page">
+    <section class="rh-verify-card">
+      <p class="rh-eyebrow">RelayHub Documents</p>
+      <h1>Verify document access request</h1>
+      <p>
+        This page verifies the email address attached to a document access request.
+        It does not issue a licence, generate a PDF, or create a download link.
+      </p>
+
+      <div class="rh-verify-status" id="verify-status" role="status" aria-live="polite">
+        Preparing verification…
+      </div>
+
+      <form class="rh-verify-form" id="verify-form">
+        <label>
+          Request ID
+          <input id="request-id" name="request_id" type="text" required />
+        </label>
+
+        <label>
+          Verification token
+          <input id="token" name="token" type="text" required />
+        </label>
+
+        <button class="rh-button rh-button-primary" type="submit">
+          Verify email
+        </button>
+      </form>
+
+      <div class="rh-result-card" id="result-card" hidden>
+        <h2>Verification result</h2>
+        <dl id="result-grid"></dl>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .rh-verify-page {
+      width: min(820px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0 5rem;
+    }
+
+    .rh-verify-card {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.5rem;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 36rem),
+        linear-gradient(135deg, rgba(255,255,255,0.97), rgba(248,250,252,0.97));
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+      padding: 2rem;
+    }
+
+    .rh-eyebrow {
+      margin: 0;
+      color: #2563eb;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .rh-verify-card h1 {
+      margin: 0.35rem 0 0.75rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .rh-verify-card p {
+      max-width: 680px;
+      margin: 0;
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .rh-verify-status {
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      border-radius: 0.9rem;
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.75);
+      line-height: 1.6;
+    }
+
+    .rh-verify-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-verify-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-verify-form {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .rh-verify-form label {
+      display: grid;
+      gap: 0.35rem;
+      color: rgba(15, 23, 42, 0.82);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .rh-verify-form input {
+      width: 100%;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      border-radius: 0.85rem;
+      padding: 0.8rem 0.9rem;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .rh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      width: fit-content;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+      white-space: nowrap;
+    }
+
+    .rh-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .rh-button-primary {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    .rh-button-primary:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .rh-button[disabled] {
+      cursor: not-allowed;
+      opacity: 0.65;
+      transform: none;
+    }
+
+    .rh-result-card {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+      background: #fff;
+    }
+
+    .rh-result-card h2 {
+      margin: 0 0 0.75rem;
+      color: #0f172a;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .rh-result-card dl {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 0.5rem 1rem;
+      margin: 0;
+    }
+
+    .rh-result-card dt {
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-result-card dd {
+      margin: 0;
+      color: #0f172a;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 640px) {
+      .rh-verify-page {
+        width: min(100% - 1rem, 820px);
+        padding-top: 1rem;
+      }
+
+      .rh-verify-card {
+        padding: 1rem;
+        border-radius: 1rem;
+      }
+
+      .rh-button {
+        width: 100%;
+      }
+
+      .rh-result-card dl {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const form = document.getElementById("verify-form");
+    const requestIdInput = document.getElementById("request-id");
+    const tokenInput = document.getElementById("token");
+    const verifyStatus = document.getElementById("verify-status");
+    const resultCard = document.getElementById("result-card");
+    const resultGrid = document.getElementById("result-grid");
+
+    function setStatus(message, mode = "neutral") {
+      verifyStatus.textContent = message;
+      verifyStatus.dataset.state = mode;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function fillFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const requestId = params.get("request_id") || params.get("requestId") || "";
+      const token = params.get("token") || "";
+
+      requestIdInput.value = requestId;
+      tokenInput.value = token;
+
+      if (requestId && token) {
+        setStatus("Verification link loaded. Verifying now…");
+        verifyRequest();
+      } else {
+        setStatus("Enter the request ID and verification token to continue.");
+      }
+    }
+
+    function renderResult(data) {
+      const fields = [
+        ["OK", data.ok],
+        ["Already verified", data.already_verified],
+        ["Request ID", data.request_id],
+        ["Document ID", data.document_id],
+        ["Document version", data.document_version],
+        ["Email", data.email_normalised],
+        ["Previous status", data.previous_status],
+        ["Current status", data.status],
+        ["Email verified at", data.email_verified_at],
+        ["Message", data.message],
+      ];
+
+      resultGrid.innerHTML = fields
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(([label, value]) => {
+          return `
+            <dt>${escapeHtml(label)}</dt>
+            <dd>${escapeHtml(String(value))}</dd>
+          `;
+        })
+        .join("");
+
+      resultCard.hidden = false;
+    }
+
+    async function verifyRequest() {
+      const requestId = requestIdInput.value.trim();
+      const token = tokenInput.value.trim();
+
+      if (!requestId || !token) {
+        setStatus("Request ID and verification token are required.", "error");
+        return;
+      }
+
+      const button = form.querySelector("button[type='submit']");
+      button.disabled = true;
+      setStatus("Verifying document access request…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch("/api/document-access/verify", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            request_id: requestId,
+            token,
+          }),
+        });
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Verification failed: ${error.message}`, "error");
+        button.disabled = false;
+        return;
+      }
+
+      renderResult(data || {});
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "Verification could not be completed.",
+          "error"
+        );
+        button.disabled = false;
+        return;
+      }
+
+      setStatus(
+        data.message ||
+          "Email verification succeeded. Licence issuing and downloads are not active yet.",
+        "success"
+      );
+
+      button.disabled = false;
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      verifyRequest();
+    });
+
+    fillFromQuery();
+  </script>
+</BaseLayout>

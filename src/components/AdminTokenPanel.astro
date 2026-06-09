@@ -1,0 +1,224 @@
+<section class="rh-admin-token-panel" aria-label="Admin token panel">
+  <div class="rh-admin-token-copy">
+    <p class="rh-eyebrow">Admin session</p>
+    <h2>Admin token</h2>
+    <p>
+      Enter your admin token once for this browser session. The token is stored
+      only in sessionStorage and is used by admin pages when calling protected
+      Worker endpoints.
+    </p>
+  </div>
+
+  <form class="rh-admin-token-form" id="admin-token-form">
+    <label for="admin-token-input">
+      Admin token
+    </label>
+
+    <div class="rh-admin-token-row">
+      <input
+        id="admin-token-input"
+        type="password"
+        autocomplete="off"
+        placeholder="Paste admin token…"
+      />
+
+      <button class="rh-button rh-button-primary" type="submit">
+        Save token
+      </button>
+
+      <button class="rh-button rh-button-secondary" id="admin-token-clear" type="button">
+        Clear
+      </button>
+    </div>
+
+    <p class="rh-admin-token-status" id="admin-token-status" role="status" aria-live="polite">
+      Checking admin token state…
+    </p>
+  </form>
+</section>
+
+<style>
+  .rh-admin-token-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1rem;
+    align-items: start;
+    margin: 1rem 0;
+    padding: 1.25rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 1.25rem;
+    background:
+      radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30rem),
+      rgba(255, 255, 255, 0.96);
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+  }
+
+  .rh-admin-token-copy h2 {
+    margin: 0.25rem 0 0.35rem;
+    color: #0f172a;
+    font-size: 1.2rem;
+    letter-spacing: -0.03em;
+  }
+
+  .rh-admin-token-copy p:last-child {
+    margin: 0;
+    color: rgba(15, 23, 42, 0.68);
+    line-height: 1.6;
+  }
+
+  .rh-admin-token-form {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .rh-admin-token-form label {
+    color: rgba(15, 23, 42, 0.72);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .rh-admin-token-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .rh-admin-token-row input {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid rgba(15, 23, 42, 0.18);
+    border-radius: 0.85rem;
+    padding: 0.75rem 0.85rem;
+    background: #fff;
+    color: #0f172a;
+    font: inherit;
+  }
+
+  .rh-admin-token-row input:focus {
+    outline: 3px solid rgba(37, 99, 235, 0.18);
+    border-color: rgba(37, 99, 235, 0.55);
+  }
+
+  .rh-admin-token-status {
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.85rem;
+    background: #f8fafc;
+    color: rgba(15, 23, 42, 0.72);
+    line-height: 1.5;
+  }
+
+  .rh-admin-token-status[data-state="success"] {
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .rh-admin-token-status[data-state="warning"] {
+    background: #fffbeb;
+    color: #92400e;
+  }
+
+  .rh-admin-token-status[data-state="error"] {
+    background: #fef2f2;
+    color: #991b1b;
+  }
+
+  @media (max-width: 860px) {
+    .rh-admin-token-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .rh-admin-token-row {
+      grid-template-columns: 1fr;
+    }
+
+    .rh-admin-token-row .rh-button {
+      width: 100%;
+    }
+  }
+</style>
+
+<script is:inline>
+  // @ts-nocheck
+
+  const ADMIN_TOKEN_STORAGE_KEY = "relayhub_admin_token";
+
+  const adminTokenForm = document.getElementById("admin-token-form");
+  const adminTokenInput = document.getElementById("admin-token-input");
+  const adminTokenClear = document.getElementById("admin-token-clear");
+  const adminTokenStatus = document.getElementById("admin-token-status");
+
+  function setAdminTokenStatus(message, state = "warning") {
+    if (!adminTokenStatus) return;
+
+    adminTokenStatus.textContent = message;
+    adminTokenStatus.dataset.state = state;
+  }
+
+  function hasStoredAdminToken() {
+    return Boolean(sessionStorage.getItem(ADMIN_TOKEN_STORAGE_KEY));
+  }
+
+  function refreshAdminTokenPanel() {
+    if (hasStoredAdminToken()) {
+      setAdminTokenStatus(
+        "Admin token is stored for this browser session. Protected admin pages can now load.",
+        "success"
+      );
+    } else {
+      setAdminTokenStatus(
+        "No admin token is stored for this browser session.",
+        "warning"
+      );
+    }
+  }
+
+  adminTokenForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const token = String(adminTokenInput?.value || "").trim();
+
+    if (!token) {
+      setAdminTokenStatus("Paste an admin token before saving.", "error");
+      return;
+    }
+
+    sessionStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, token);
+
+    if (adminTokenInput) {
+      adminTokenInput.value = "";
+    }
+
+    setAdminTokenStatus(
+      "Admin token saved for this browser session. Refreshing page data…",
+      "success"
+    );
+
+    window.dispatchEvent(new CustomEvent("relayhub-admin-token-updated"));
+
+    if (typeof window.relayhubAdminTokenUpdated === "function") {
+      window.relayhubAdminTokenUpdated();
+    }
+  });
+
+  adminTokenClear?.addEventListener("click", () => {
+    sessionStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+
+    if (adminTokenInput) {
+      adminTokenInput.value = "";
+    }
+
+    setAdminTokenStatus("Admin token cleared from this browser session.", "warning");
+
+    window.dispatchEvent(new CustomEvent("relayhub-admin-token-cleared"));
+
+    if (typeof window.relayhubAdminTokenCleared === "function") {
+      window.relayhubAdminTokenCleared();
+    }
+  });
+
+  refreshAdminTokenPanel();
+</script>
