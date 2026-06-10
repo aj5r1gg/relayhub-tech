@@ -1,4 +1,5 @@
 import { sendCdasVerificationEmail } from "./email.js";
+import { recordCdasEmailEvent } from "./email-events.js";
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=UTF-8",
@@ -681,6 +682,20 @@ async function safelySendVerificationEmail({
       result,
       recorded,
     };
+    
+    await recordCdasEmailEvent(env, {
+      relatedType: "access_request",
+      relatedId: requestId,
+      emailType: "verification_email",
+      recipientEmail: emailNormalised,
+      subject: `Verify your email for ${document.title}`,
+      emailResult: emailDelivery.result,
+      metadata: {
+        document_id: document.id,
+        document_version: document.version,
+        request_status: status,
+      },
+    });
   }
 }
 

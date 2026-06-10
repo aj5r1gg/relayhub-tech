@@ -1,5 +1,6 @@
 import { jsonResponse } from "../shared.js";
 import { sendCdasVerificationEmail } from "./email.js";
+import { recordCdasEmailEvent } from "./email-events.js";
 
 const DEFAULT_VERIFICATION_EXPIRY_HOURS = 24;
 
@@ -173,11 +174,13 @@ export async function resendCdasAccessRequestVerification(
     );
   }
 
+  const previousEmailDeliveryStatus = row.email_delivery_status;
   const verificationToken = makeVerificationToken();
   const verificationTokenHash = await sha256Hex(verificationToken);
   const expiresAt = hoursFromNowIso(getVerificationExpiryHours(env));
   const verificationUrl = makeVerificationUrl(env, row.id, verificationToken);
   const recipientEmail = normaliseEmail(row.email_normalised || row.email);
+  const documentTitle = row.document_title || row.document_id;
 
   await env.RELAYHUB_DB.prepare(
     `UPDATE document_access_requests
@@ -203,7 +206,7 @@ export async function resendCdasAccessRequestVerification(
       verificationToken,
       verificationUrl,
       recipientEmail,
-      documentTitle: row.document_title || row.document_id,
+      documentTitle,
       documentId: row.document_id,
     });
   } catch (error) {
@@ -231,6 +234,21 @@ export async function resendCdasAccessRequestVerification(
   )
     .bind(emailDeliveryStatus, verificationSentAt, row.id)
     .run();
+
+  await recordCdasEmailEvent(env, {
+    relatedType: "access_request",
+    relatedId: row.id,
+    emailType: "verification_email_resend",
+    recipientEmail,
+    subject: `Verify your email for ${documentTitle}`,
+    emailResult,
+    metadata: {
+      document_id: row.document_id,
+      document_version: row.document_version,
+      previous_email_delivery_status: previousEmailDeliveryStatus,
+      expires_at: expiresAt,
+    },
+  });
 
   return jsonResponse({
     ok: true,

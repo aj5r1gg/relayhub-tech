@@ -1,6 +1,7 @@
 import { jsonResponse } from "../shared.js";
 import { issueCdasDownloadLink } from "./download-link-issue.js";
 import { sendCdasDownloadLinkEmail } from "./email.js";
+import { recordCdasEmailEvent } from "./email-events.js";
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -84,13 +85,36 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
     issuePayload.licence?.document_id ||
     "RelayHub document";
 
+  const landingUrl =
+    issuePayload.download_link?.landing_url || issuePayload.download_link?.url;
+
   const emailResult = await sendCdasDownloadLinkEmail(env, {
     recipientEmail,
     documentTitle,
     documentId: issuePayload.licence?.document_id,
     licenceNumber: issuePayload.licence?.licence_number,
-    downloadUrl: issuePayload.download_link?.landing_url || issuePayload.download_link?.url,
+    downloadUrl: landingUrl,
     expiresAt: issuePayload.download_link?.expires_at,
+  });
+
+  await recordCdasEmailEvent(env, {
+    relatedType: "licence",
+    relatedId:
+      issuePayload.licence?.id ||
+      issuePayload.licence?.licence_id ||
+      licenceIdOrNumber,
+    emailType: "download_link_email",
+    recipientEmail,
+    subject: `Your RelayHub download is ready: ${documentTitle}`,
+    emailResult,
+    metadata: {
+      document_id: issuePayload.licence?.document_id,
+      licence_number: issuePayload.licence?.licence_number,
+      download_link_id: issuePayload.download_link?.id,
+      download_link_expires_at: issuePayload.download_link?.expires_at,
+      landing_url_emailed: true,
+      raw_r2_url_exposed: false,
+    },
   });
 
   return jsonResponse({
@@ -100,7 +124,7 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
     download_link: {
       id: issuePayload.download_link?.id,
       status: issuePayload.download_link?.status,
-      landing_url: issuePayload.download_link?.landing_url || issuePayload.download_link?.url,
+      landing_url: landingUrl,
       expires_at: issuePayload.download_link?.expires_at,
       token_visible_once: issuePayload.download_link?.token_visible_once,
     },
