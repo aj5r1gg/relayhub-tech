@@ -41,6 +41,11 @@ const pageDescription =
         <span>Risk flagged</span>
         <strong id="metric-risk">—</strong>
       </article>
+
+      <article class="rh-admin-metric">
+        <span>Invitation linked</span>
+        <strong id="metric-invitation-linked">—</strong>
+      </article>
     </section>
 
     <section class="rh-admin-card">
@@ -53,6 +58,9 @@ const pageDescription =
         </div>
 
         <div class="rh-admin-actions">
+          <a class="rh-button rh-button-secondary" href="/admin/cdas-invitations">
+            Invitations
+          </a>
           <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
             Refresh
           </button>
@@ -62,7 +70,7 @@ const pageDescription =
       <form class="rh-admin-filters" id="filters-form">
         <label>
           Search
-          <input id="filter-q" name="q" type="search" placeholder="Name, email, document, organisation…" />
+          <input id="filter-q" name="q" type="search" placeholder="Name, email, document, organisation, invitation…" />
         </label>
 
         <label>
@@ -78,6 +86,7 @@ const pageDescription =
             <option value="approval_pending">approval_pending</option>
             <option value="email_verified">email_verified</option>
             <option value="approved">approved</option>
+            <option value="licence_issued">licence_issued</option>
             <option value="denied">denied</option>
             <option value="expired">expired</option>
             <option value="cancelled">cancelled</option>
@@ -122,6 +131,7 @@ const pageDescription =
               <th>Status</th>
               <th>Access class</th>
               <th>Terms</th>
+              <th>Invitation</th>
               <th>Risk</th>
               <th>Requested</th>
               <th>Action</th>
@@ -129,7 +139,7 @@ const pageDescription =
           </thead>
           <tbody id="requests-body">
             <tr>
-              <td colspan="8" class="rh-admin-empty">
+              <td colspan="9" class="rh-admin-empty">
                 No records loaded yet.
               </td>
             </tr>
@@ -238,7 +248,7 @@ const pageDescription =
     }
 
     .rh-admin-summary-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       margin: 1rem 0;
     }
 
@@ -324,6 +334,7 @@ const pageDescription =
         border-color 150ms ease,
         color 150ms ease;
       white-space: nowrap;
+      text-decoration: none;
     }
 
     .rh-button:hover {
@@ -380,7 +391,7 @@ const pageDescription =
 
     .rh-admin-table {
       width: 100%;
-      min-width: 1040px;
+      min-width: 1180px;
       border-collapse: collapse;
       background: #fff;
       font-size: 0.92rem;
@@ -449,7 +460,8 @@ const pageDescription =
     }
 
     .rh-badge-approved,
-    .rh-badge-email_verified {
+    .rh-badge-email_verified,
+    .rh-badge-licence_issued {
       background: #dcfce7;
       color: #166534;
     }
@@ -457,6 +469,16 @@ const pageDescription =
     .rh-badge-denied,
     .rh-badge-expired,
     .rh-badge-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .rh-badge-used {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .rh-badge-revoked {
       background: #fee2e2;
       color: #991b1b;
     }
@@ -492,6 +514,12 @@ const pageDescription =
       color: #0f172a;
       word-break: break-word;
       line-height: 1.5;
+    }
+
+    @media (max-width: 1100px) {
+      .rh-admin-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 960px) {
@@ -559,6 +587,7 @@ const pageDescription =
     const metricEmailPending = document.getElementById("metric-email-pending");
     const metricApprovalPending = document.getElementById("metric-approval-pending");
     const metricRisk = document.getElementById("metric-risk");
+    const metricInvitationLinked = document.getElementById("metric-invitation-linked");
 
     const detailCard = document.getElementById("detail-card");
     const detailSubtitle = document.getElementById("detail-subtitle");
@@ -693,18 +722,20 @@ const pageDescription =
       const emailPending = requests.filter((row) => row.status === "email_pending").length;
       const approvalPending = requests.filter((row) => row.status === "approval_pending").length;
       const risk = requests.filter((row) => Number(row.risk_score) > 0).length;
+      const invitationLinked = requests.filter((row) => row.invitation_id).length;
 
       metricTotal.textContent = String(state.total || requests.length || 0);
       metricEmailPending.textContent = String(emailPending);
       metricApprovalPending.textContent = String(approvalPending);
       metricRisk.textContent = String(risk);
+      metricInvitationLinked.textContent = String(invitationLinked);
     }
 
     function renderRequests(requests) {
       if (!requests.length) {
         requestsBody.innerHTML = `
           <tr>
-            <td colspan="8" class="rh-admin-empty">
+            <td colspan="9" class="rh-admin-empty">
               No CDAS access request records found.
             </td>
           </tr>
@@ -747,6 +778,13 @@ const pageDescription =
                 <div class="rh-policy-stack">
                   <span>${escapeHtml(formatValue(row.terms_version))}</span>
                   <span>Accepted: ${escapeHtml(formatDate(row.terms_accepted_at))}</span>
+                </div>
+              </td>
+              <td>
+                <div class="rh-policy-stack">
+                  <span>${escapeHtml(formatValue(row.invitation_id))}</span>
+                  <span>Status: ${escapeHtml(formatValue(row.invitation_status))}</span>
+                  <span>Used: ${escapeHtml(formatValue(row.invitation_use_count))} / ${escapeHtml(formatValue(row.invitation_max_uses))}</span>
                 </div>
               </td>
               <td>
@@ -836,6 +874,20 @@ const pageDescription =
         ["Verification sent at", formatDate(row.verification_sent_at)],
         ["Email verified at", formatDate(row.email_verified_at)],
         ["Email delivery status", row.email_delivery_status],
+        ["Invitation ID", row.invitation_id],
+        ["Invitation used at", formatDate(row.invitation_used_at)],
+        ["Invitation type", row.invitation_type],
+        ["Invitation status", row.invitation_status],
+        ["Invitation use count", row.invitation_use_count],
+        ["Invitation max uses", row.invitation_max_uses],
+        ["Invitation created at", formatDate(row.invitation_created_at)],
+        ["Invitation created by", row.invitation_created_by],
+        ["Invitation expires at", formatDate(row.invitation_expires_at)],
+        ["Invitation last used at", formatDate(row.invitation_last_used_at)],
+        ["Invitation revoked at", formatDate(row.invitation_revoked_at)],
+        ["Invitation revoked by", row.invitation_revoked_by],
+        ["Invitation revocation reason", row.invitation_revocation_reason],
+        ["Invitation notes", row.invitation_notes],
         ["Requested at", formatDate(row.requested_at)],
         ["Expires at", formatDate(row.expires_at)],
         ["Approved at", formatDate(row.approved_at)],
@@ -919,37 +971,7 @@ const pageDescription =
     }
 
     window.relayhubAdminTokenUpdated = () => {
-      if (typeof fetchDownloadLinks === "function") {
-        fetchDownloadLinks();
-      }
-
-      if (typeof fetchLicences === "function") {
-        fetchLicences();
-      }
-
-      if (typeof fetchDocuments === "function") {
-        fetchDocuments();
-      }
-
-      if (typeof fetchLicenceTerms === "function") {
-        fetchLicenceTerms();
-      }
-
-      if (typeof fetchAccessRequests === "function") {
-        fetchAccessRequests();
-      }
-
-      if (typeof loadDownloads === "function") {
-        loadDownloads();
-      }
-
-      if (typeof loadContacts === "function") {
-        loadContacts();
-      }
-
-      if (typeof loadNewsletter === "function") {
-        loadNewsletter();
-      }
+      fetchRequests();
     };
 
     window.relayhubAdminTokenCleared = () => {

@@ -63,7 +63,7 @@ export async function listCdasAccessRequests(request, env) {
         error: "method_not_allowed",
         message: "Use GET to list CDAS access requests.",
       },
-      { status: 405, headers: { allow: "GET" } }
+      405
     );
   }
 
@@ -83,25 +83,25 @@ export async function listCdasAccessRequests(request, env) {
 
   if (q) {
     where.push(
-      `(id LIKE ? OR document_id LIKE ? OR name LIKE ? OR email_normalised LIKE ? OR organisation_name LIKE ? OR recipient_category LIKE ?)`
+      `(r.id LIKE ? OR r.document_id LIKE ? OR r.name LIKE ? OR r.email_normalised LIKE ? OR r.organisation_name LIKE ? OR r.recipient_category LIKE ? OR r.invitation_id LIKE ?)`
     );
 
     const like = `%${q}%`;
-    bindings.push(like, like, like, like, like, like);
+    bindings.push(like, like, like, like, like, like, like);
   }
 
   if (documentId) {
-    where.push("document_id = ?");
+    where.push("r.document_id = ?");
     bindings.push(documentId);
   }
 
   if (status) {
-    where.push("status = ?");
+    where.push("r.status = ?");
     bindings.push(status);
   }
 
   if (accessClass) {
-    where.push("access_class = ?");
+    where.push("r.access_class = ?");
     bindings.push(accessClass);
   }
 
@@ -109,7 +109,7 @@ export async function listCdasAccessRequests(request, env) {
 
   const totalResult = await env.RELAYHUB_DB.prepare(
     `SELECT COUNT(*) AS total
-     FROM document_access_requests
+     FROM document_access_requests r
      ${whereSql}`
   )
     .bind(...bindings)
@@ -117,41 +117,57 @@ export async function listCdasAccessRequests(request, env) {
 
   const rowsResult = await env.RELAYHUB_DB.prepare(
     `SELECT
-       id,
-       document_id,
-       document_version,
-       name,
-       email_normalised,
-       licence_holder_type,
-       organisation_name,
-       contact_name,
-       contact_email,
-       role_title,
-       recipient_category,
-       status,
-       access_class,
-       verification_sent_at,
-       email_verified_at,
-       email_delivery_status,
-       requested_at,
-       expires_at,
-       approved_at,
-       approved_by,
-       approval_role,
-       approval_policy_version,
-       approval_note,
-       denied_at,
-       denied_by,
-       denial_reason,
-       terms_version,
-       terms_accepted_at,
-       terms_acceptance_user_agent,
-       user_agent,
-       risk_score,
-       risk_flags
-     FROM document_access_requests
+       r.id,
+       r.document_id,
+       r.document_version,
+       r.name,
+       r.email_normalised,
+       r.licence_holder_type,
+       r.organisation_name,
+       r.contact_name,
+       r.contact_email,
+       r.role_title,
+       r.recipient_category,
+       r.status,
+       r.access_class,
+       r.verification_sent_at,
+       r.email_verified_at,
+       r.email_delivery_status,
+       r.requested_at,
+       r.expires_at,
+       r.approved_at,
+       r.approved_by,
+       r.approval_role,
+       r.approval_policy_version,
+       r.approval_note,
+       r.denied_at,
+       r.denied_by,
+       r.denial_reason,
+       r.terms_version,
+       r.terms_accepted_at,
+       r.terms_acceptance_user_agent,
+       r.user_agent,
+       r.risk_score,
+       r.risk_flags,
+       r.invitation_id,
+       r.invitation_used_at,
+       i.invitation_type,
+       i.status AS invitation_status,
+       i.max_uses AS invitation_max_uses,
+       i.use_count AS invitation_use_count,
+       i.created_at AS invitation_created_at,
+       i.created_by AS invitation_created_by,
+       i.expires_at AS invitation_expires_at,
+       i.last_used_at AS invitation_last_used_at,
+       i.revoked_at AS invitation_revoked_at,
+       i.revoked_by AS invitation_revoked_by,
+       i.revocation_reason AS invitation_revocation_reason,
+       i.notes AS invitation_notes
+     FROM document_access_requests r
+     LEFT JOIN document_access_invitations i
+       ON i.id = r.invitation_id
      ${whereSql}
-     ORDER BY ${sort} ${direction}
+     ORDER BY r.${sort} ${direction}
      LIMIT ?
      OFFSET ?`
   )
@@ -185,7 +201,7 @@ export async function getCdasAccessRequest(request, env, requestId) {
         error: "method_not_allowed",
         message: "Use GET to read a CDAS access request.",
       },
-      { status: 405, headers: { allow: "GET" } }
+      405
     );
   }
 
@@ -198,15 +214,29 @@ export async function getCdasAccessRequest(request, env, requestId) {
         error: "missing_request_id",
         message: "Access request ID is required.",
       },
-      { status: 400 }
+      400
     );
   }
 
   const row = await env.RELAYHUB_DB.prepare(
     `SELECT
-       *
-     FROM document_access_requests
-     WHERE id = ?
+       r.*,
+       i.invitation_type,
+       i.status AS invitation_status,
+       i.max_uses AS invitation_max_uses,
+       i.use_count AS invitation_use_count,
+       i.created_at AS invitation_created_at,
+       i.created_by AS invitation_created_by,
+       i.expires_at AS invitation_expires_at,
+       i.last_used_at AS invitation_last_used_at,
+       i.revoked_at AS invitation_revoked_at,
+       i.revoked_by AS invitation_revoked_by,
+       i.revocation_reason AS invitation_revocation_reason,
+       i.notes AS invitation_notes
+     FROM document_access_requests r
+     LEFT JOIN document_access_invitations i
+       ON i.id = r.invitation_id
+     WHERE r.id = ?
      LIMIT 1`
   )
     .bind(id)
@@ -219,7 +249,7 @@ export async function getCdasAccessRequest(request, env, requestId) {
         error: "access_request_not_found",
         message: "CDAS access request was not found.",
       },
-      { status: 404 }
+      404
     );
   }
 
