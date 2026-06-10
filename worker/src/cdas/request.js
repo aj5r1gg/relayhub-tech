@@ -37,6 +37,14 @@ function hoursFromNowIso(hours) {
   return date.toISOString();
 }
 
+function isExpiredIso(expiresAt) {
+  if (!expiresAt) return false;
+
+  const expiry = Date.parse(expiresAt);
+
+  return !Number.isFinite(expiry) || expiry <= Date.now();
+}
+
 function getVerificationExpiryHours(env) {
   const parsed = Number.parseInt(
     String(env.CDAS_VERIFICATION_EXPIRY_HOURS || ""),
@@ -293,6 +301,155 @@ function calculateRisk({ email, body, document, request }) {
   };
 }
 
+async function getAccessInvitationForRequest(env, token) {
+  const rawToken = cleanText(token);
+
+  if (!rawToken) {
+    return {
+      ok: true,
+      invitation: null,
+    };
+  }
+
+  if (!rawToken.startsWith("rh_inv_")) {
+    return {
+      ok: false,
+      status: 400,
+      error: "invalid_invitation_token",
+      message: "The invitation token is not valid.",
+    };
+  }
+
+  const tokenHash = await sha256Hex(rawToken);
+
+  const row = await env.RELAYHUB_DB.prepare(
+    `SELECT *
+     FROM document_access_invitations
+     WHERE token_hash = ?
+     LIMIT 1`
+  )
+    .bind(tokenHash)
+    .first();
+
+  if (!row) {
+    return {
+      ok: false,
+      status: 404,
+      error: "invitation_unavailable",
+      message: "This invitation is invalid, expired, or no longer available.",
+    };
+  }
+
+  if (row.status !== "active" || row.revoked_at || row.superseded_at) {
+    return {
+      ok: false,
+      status: 404,
+      error: "invitation_unavailable",
+      message: "This invitation is invalid, expired, or no longer available.",
+    };
+  }
+
+  if (isExpiredIso(row.expires_at)) {
+    return {
+      ok: false,
+      status: 404,
+      error: "invitation_unavailable",
+      message: "This invitation is invalid, expired, or no longer available.",
+    };
+  }
+
+  if (Number(row.use_count || 0) >= Number(row.max_uses || 0)) {
+    return {
+      ok: false,
+      status: 404,
+      error: "invitation_unavailable",
+      message: "This invitation is invalid, expired, or no longer available.",
+    };
+  }
+
+  return {
+    ok: true,
+    invitation: row,
+  };
+}
+
+function validateInvitationAgainstRequest({
+  invitation,
+  document,
+  emailNormalised,
+}) {
+  if (!invitation) {
+    return { ok: true };
+  }
+
+  if (invitation.document_id !== document.id) {
+    return {
+      ok: false,
+      status: 409,
+      error: "invitation_document_mismatch",
+      message: "This invitation is not valid for the selected document.",
+    };
+  }
+
+  if (invitation.document_version !== document.version) {
+    return {
+      ok: false,
+      status: 409,
+      error: "invitation_document_version_mismatch",
+      message: "This invitation is not valid for this document version.",
+    };
+  }
+
+  const invitationType = cleanText(invitation.invitation_type).toLowerCase();
+
+  if (
+    (invitationType === "named" || invitationType === "purchase") &&
+    invitation.recipient_email &&
+    normaliseEmail(invitation.recipient_email) !== emailNormalised
+  ) {
+    return {
+      ok: false,
+      status: 403,
+      error: "invitation_recipient_mismatch",
+      message: "This invitation is restricted to a different recipient email.",
+    };
+  }
+
+  return { ok: true };
+}
+
+async function consumeAccessInvitation(env, invitationId) {
+  if (!invitationId) {
+    return null;
+  }
+
+  const consumedAt = nowIso();
+
+  const result = await env.RELAYHUB_DB.prepare(
+    `UPDATE document_access_invitations
+     SET
+       use_count = use_count + 1,
+       last_used_at = ?,
+       status = CASE
+         WHEN use_count + 1 >= max_uses THEN 'used'
+         ELSE status
+       END
+     WHERE id = ?
+       AND status = 'active'
+       AND revoked_at IS NULL
+       AND superseded_at IS NULL
+       AND (expires_at IS NULL OR expires_at > ?)
+       AND use_count < max_uses`
+  )
+    .bind(consumedAt, invitationId, consumedAt)
+    .run();
+
+  return {
+    consumed_at: consumedAt,
+    changes: result?.meta?.changes ?? 0,
+  };
+}
+
 async function insertAccessRequest({
   env,
   requestId,
@@ -307,6 +464,8 @@ async function insertAccessRequest({
   risk,
   verificationTokenHash,
   verificationExpiresAt,
+  invitation,
+  invitationUse,
 }) {
   const timestamp = nowIso();
 
@@ -377,7 +536,9 @@ async function insertAccessRequest({
        ip_hash,
        user_agent,
        risk_score,
-       risk_flags
+       risk_flags,
+       invitation_id,
+       invitation_used_at
      )
      VALUES (
        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
@@ -386,7 +547,8 @@ async function insertAccessRequest({
        NULL, NULL, NULL, NULL, NULL,
        NULL, NULL, NULL,
        ?, ?, ?, ?,
-       ?, ?, ?, ?
+       ?, ?, ?, ?,
+       ?, ?
      )`
   )
     .bind(
@@ -415,7 +577,9 @@ async function insertAccessRequest({
       ipHash,
       userAgent,
       risk.score,
-      JSON.stringify(risk.flags)
+      JSON.stringify(risk.flags),
+      invitation?.id || null,
+      invitationUse?.consumed_at || null
     )
     .run();
 
@@ -424,6 +588,8 @@ async function insertAccessRequest({
     terms_accepted_at: termsAcceptedAt,
     expires_at: verificationExpiresAt,
     email_delivery_status: emailDeliveryStatus,
+    invitation_id: invitation?.id || null,
+    invitation_used_at: invitationUse?.consumed_at || null,
   };
 }
 
@@ -549,6 +715,10 @@ export async function handleDocumentAccessRequest(request, env) {
     getBodyValue(body, "document_id", "documentId", "document", "slug")
   );
 
+  const invitationToken = cleanText(
+    getBodyValue(body, "invitation_token", "invitationToken")
+  );
+
   const email = cleanText(getBodyValue(body, "email", "recipient_email"));
   const emailNormalised = normaliseEmail(email);
   const name = cleanText(getBodyValue(body, "name", "full_name", "fullName"));
@@ -603,6 +773,45 @@ export async function handleDocumentAccessRequest(request, env) {
     );
   }
 
+  let invitation = null;
+
+  if (invitationToken) {
+    const invitationLookup = await getAccessInvitationForRequest(
+      env,
+      invitationToken
+    );
+
+    if (!invitationLookup.ok) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: invitationLookup.error,
+          message: invitationLookup.message,
+        },
+        invitationLookup.status
+      );
+    }
+
+    invitation = invitationLookup.invitation;
+
+    const invitationValidation = validateInvitationAgainstRequest({
+      invitation,
+      document,
+      emailNormalised,
+    });
+
+    if (!invitationValidation.ok) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: invitationValidation.error,
+          message: invitationValidation.message,
+        },
+        invitationValidation.status
+      );
+    }
+  }
+
   if (!termsAccepted) {
     return jsonResponse(
       {
@@ -619,6 +828,24 @@ export async function handleDocumentAccessRequest(request, env) {
       },
       400
     );
+  }
+
+  let invitationUse = null;
+
+  if (invitation) {
+    invitationUse = await consumeAccessInvitation(env, invitation.id);
+
+    if (!invitationUse || invitationUse.changes < 1) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: "invitation_consumption_failed",
+          message:
+            "The invitation could not be consumed. It may have expired or already been used.",
+        },
+        409
+      );
+    }
   }
 
   const clientIp = getClientIp(request);
@@ -651,6 +878,8 @@ export async function handleDocumentAccessRequest(request, env) {
     risk,
     verificationTokenHash,
     verificationExpiresAt,
+    invitation,
+    invitationUse,
   });
 
   const emailDelivery = await safelySendVerificationEmail({
@@ -675,6 +904,8 @@ export async function handleDocumentAccessRequest(request, env) {
     terms_accepted_at: inserted.terms_accepted_at,
     requested_at: inserted.requested_at,
     expires_at: inserted.expires_at,
+    invitation_id: inserted.invitation_id,
+    invitation_used_at: inserted.invitation_used_at,
     email_delivery_status:
       emailDelivery.recorded?.email_delivery_status ||
       inserted.email_delivery_status,

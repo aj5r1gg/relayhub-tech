@@ -33,6 +33,8 @@ const pageDescription =
               <option value="relayhub-overview">RelayHub Overview v0.2</option>
             </select>
           </label>
+
+          <input id="invitation-token" name="invitation_token" type="hidden" />
         </div>
 
         <div class="rh-form-section">
@@ -150,9 +152,10 @@ const pageDescription =
         <pre class="rh-licence-preview" id="licence-body">Loading…</pre>
 
         <div class="rh-note">
-          <strong>Current phase:</strong>
-          Request intake only. This page does not issue a download link, create a
-          licence record, verify email, or generate a personalised PDF yet.
+          <strong>Controlled access workflow:</strong>
+          This page records your request, captures your licence acknowledgement,
+          and sends an email verification link. A controlled download is only
+          issued after the required CDAS gates pass.
         </div>
       </aside>
     </section>
@@ -445,6 +448,7 @@ const pageDescription =
     const form = document.getElementById("document-request-form");
     const statusBox = document.getElementById("form-status");
     const documentSelect = document.getElementById("document-id");
+    const invitationTokenInput = document.getElementById("invitation-token");
     const licenceStatus = document.getElementById("licence-status");
     const licenceBody = document.getElementById("licence-body");
     const licenceVersion = document.getElementById("licence-version");
@@ -468,6 +472,11 @@ const pageDescription =
     function applyDocumentFromQuery() {
       const params = new URLSearchParams(window.location.search);
       const documentId = params.get("document_id") || params.get("document");
+      const invitationToken = params.get("invitation_token") || "";
+
+      if (invitationTokenInput) {
+        invitationTokenInput.value = invitationToken;
+      }
 
       if (!documentId) {
         return;
@@ -656,7 +665,7 @@ const pageDescription =
       }
 
       setStatus(
-        `Request recorded. Request ID: ${data.request_id}. Email verification and download issuing are not active yet.`,
+        `Request recorded. Request ID: ${data.request_id}. Please check your email to verify access.`,
         "success"
       );
 
