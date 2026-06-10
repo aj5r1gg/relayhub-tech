@@ -1,0 +1,369 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
+
+const pageTitle = "CDAS Health Admin";
+const pageDescription =
+  "Read-only operational health dashboard for RelayHub CDAS.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} noindex={true}>
+  <main class="rh-admin-page">
+    <section class="rh-admin-hero">
+      <p class="rh-eyebrow">RelayHub Admin</p>
+      <h1>CDAS Health</h1>
+      <p>
+        Read-only operational health summary for the Controlled Document Access
+        System, including schema, configuration, workflow backlog, evidence
+        integrity, retry state, and freshness metrics.
+      </p>
+    </section>
+
+    <AdminTokenPanel />
+
+    <section class="rh-admin-card">
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Operational health</h2>
+          <p id="health-summary">Waiting for health check…</p>
+        </div>
+
+        <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
+          Refresh
+        </button>
+      </div>
+
+      <div class="rh-admin-status" id="status-message" role="status" aria-live="polite">
+        Ready.
+      </div>
+
+      <div class="rh-health-banner" id="health-banner">
+        <strong id="system-status">Unknown</strong>
+        <span id="checked-at">Not checked yet.</span>
+      </div>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Core metrics</h2>
+      <div class="rh-admin-grid" id="core-metrics-grid"></div>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Workflow backlog</h2>
+      <div class="rh-admin-grid" id="backlog-grid"></div>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Evidence integrity</h2>
+      <div class="rh-admin-grid" id="evidence-grid"></div>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Freshness</h2>
+      <div class="rh-admin-grid" id="freshness-grid"></div>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Warnings</h2>
+      <ul class="rh-warning-list" id="warnings-list">
+        <li>No health data loaded yet.</li>
+      </ul>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Configuration visibility</h2>
+      <div class="rh-admin-grid" id="config-grid"></div>
+    </section>
+
+    <section class="rh-admin-card">
+      <h2>Schema health</h2>
+      <div id="schema-health"></div>
+    </section>
+
+    <section class="rh-admin-card">
+      <details>
+        <summary>Raw health payload</summary>
+        <pre id="raw-payload">{}</pre>
+      </details>
+    </section>
+  </main>
+
+  <style>
+    .rh-admin-page{width:min(1180px,calc(100% - 2rem));margin:0 auto;padding:3rem 0 5rem}
+    .rh-admin-hero,.rh-admin-card{border:1px solid rgba(15,23,42,.12);border-radius:1.25rem;background:rgba(255,255,255,.96);box-shadow:0 18px 50px rgba(15,23,42,.07)}
+    .rh-admin-hero{margin-bottom:1.5rem;padding:2rem}
+    .rh-admin-hero h1{margin:.35rem 0 .75rem;font-size:clamp(2rem,5vw,3.5rem);line-height:1;letter-spacing:-.05em}
+    .rh-admin-hero p,.rh-admin-section-heading p{max-width:820px;margin:0;color:rgba(15,23,42,.74);line-height:1.7}
+    .rh-eyebrow{margin:0;color:#2563eb;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .rh-admin-card{margin-top:1rem;padding:1.25rem}
+    .rh-admin-card h2{margin:0 0 .85rem;color:#0f172a;letter-spacing:-.03em}
+    .rh-admin-section-heading{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}
+    .rh-button{display:inline-flex;align-items:center;justify-content:center;min-height:2.5rem;border:1px solid rgba(15,23,42,.18);border-radius:999px;padding:.55rem .9rem;background:#fff;color:#0f172a;font:inherit;font-weight:800;cursor:pointer}
+    .rh-admin-status{margin:1rem 0;padding:.85rem 1rem;border-radius:.9rem;background:#f8fafc;color:rgba(15,23,42,.75)}
+    .rh-admin-status[data-state="error"]{background:#fef2f2;color:#991b1b}
+    .rh-admin-status[data-state="success"]{background:#f0fdf4;color:#166534}
+    .rh-health-banner{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin:1rem 0;padding:1rem;border-radius:1rem;background:#f8fafc;border:1px solid rgba(15,23,42,.1)}
+    .rh-health-banner[data-state="healthy"]{background:#f0fdf4;color:#166534}
+    .rh-health-banner[data-state="attention_required"]{background:#fef3c7;color:#92400e}
+    .rh-health-banner strong{text-transform:uppercase;letter-spacing:.08em}
+    .rh-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.85rem}
+    .rh-metric{border:1px solid rgba(15,23,42,.1);border-radius:1rem;padding:1rem;background:#fff}
+    .rh-metric span{display:block;color:rgba(15,23,42,.58);font-size:.75rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+    .rh-metric strong{display:block;margin-top:.35rem;font-size:1.55rem;color:#0f172a;word-break:break-word}
+    .rh-metric[data-state="warning"]{background:#fffbeb;border-color:#f59e0b}
+    .rh-metric[data-state="bad"]{background:#fef2f2;border-color:#ef4444}
+    .rh-metric[data-state="good"]{background:#f0fdf4;border-color:#22c55e}
+    .rh-warning-list{margin:.5rem 0 0;padding-left:1.25rem;color:rgba(15,23,42,.74);line-height:1.7}
+    .rh-warning-list[data-state="good"]{color:#166534}
+    .rh-schema-table{width:100%;border-collapse:collapse;font-size:.92rem}
+    .rh-schema-table th,.rh-schema-table td{padding:.75rem;border-bottom:1px solid rgba(15,23,42,.08);text-align:left;vertical-align:top}
+    .rh-schema-table th{color:rgba(15,23,42,.62);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+    .rh-badge{display:inline-flex;width:fit-content;border-radius:999px;padding:.2rem .55rem;background:#f1f5f9;color:#334155;font-size:.78rem;font-weight:900;text-transform:uppercase}
+    .rh-badge-good{background:#dcfce7;color:#166534}
+    .rh-badge-bad{background:#fee2e2;color:#991b1b}
+    pre{overflow:auto;max-height:520px;border-radius:1rem;background:#0f172a;color:#e2e8f0;padding:1rem;line-height:1.5}
+    summary{cursor:pointer;font-weight:800;color:#0f172a}
+    @media(max-width:720px){.rh-admin-page{width:min(100% - 1rem,1180px)}.rh-admin-hero,.rh-admin-card{padding:1rem}.rh-admin-section-heading,.rh-health-banner{display:grid}}
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const ADMIN_TOKEN_KEY = "relayhub_admin_token";
+    const statusMessage = document.getElementById("status-message");
+    const refreshButton = document.getElementById("refresh-button");
+    const healthBanner = document.getElementById("health-banner");
+    const systemStatus = document.getElementById("system-status");
+    const checkedAt = document.getElementById("checked-at");
+    const healthSummary = document.getElementById("health-summary");
+    const coreMetricsGrid = document.getElementById("core-metrics-grid");
+    const backlogGrid = document.getElementById("backlog-grid");
+    const evidenceGrid = document.getElementById("evidence-grid");
+    const freshnessGrid = document.getElementById("freshness-grid");
+    const warningsList = document.getElementById("warnings-list");
+    const configGrid = document.getElementById("config-grid");
+    const schemaHealth = document.getElementById("schema-health");
+    const rawPayload = document.getElementById("raw-payload");
+
+    const CORE_KEYS = [
+      "documents_total",
+      "active_documents",
+      "access_requests_total",
+      "licences_total",
+      "download_links_total",
+      "email_events_total",
+      "failed_unresolved_email_events",
+      "retryable_unresolved_email_events",
+    ];
+
+    const BACKLOG_KEYS = [
+      "pending_email_verification_requests",
+      "verified_unlicensed_requests",
+      "licences_missing_generated_pdfs",
+      "generated_pdfs_without_download_links",
+      "expired_active_invitations",
+      "expired_active_download_links",
+      "used_download_links_still_active",
+      "revoked_download_links_still_active",
+    ];
+
+    const EVIDENCE_KEYS = [
+      "download_links_without_licence",
+      "download_events_without_licence",
+      "email_events_without_related_record",
+    ];
+
+    const FRESHNESS_KEYS = [
+      "latest_email_event_at",
+      "latest_download_event_at",
+      "latest_access_request_at",
+      "latest_licence_issued_at",
+      "latest_pdf_generated_at",
+      "latest_invitation_created_at",
+    ];
+
+    function token() {
+      return sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+    }
+
+    function setStatus(message, mode = "neutral") {
+      statusMessage.textContent = message;
+      statusMessage.dataset.state = mode;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+    }
+
+    function labelise(key) {
+      return String(key || "").replaceAll("_", " ");
+    }
+
+    function isDateKey(key) {
+      return String(key || "").endsWith("_at");
+    }
+
+    function formatValue(key, value) {
+      if (value === null || value === undefined || value === "") return "—";
+      if (isDateKey(key)) return formatDate(value);
+      if (typeof value === "boolean") return value ? "yes" : "no";
+      return String(value);
+    }
+
+    function metricState(key, value) {
+      const warningWhenPositive = new Set([
+        "failed_unresolved_email_events",
+        "retryable_unresolved_email_events",
+        "pending_email_verification_requests",
+        "verified_unlicensed_requests",
+        "licences_missing_generated_pdfs",
+        "generated_pdfs_without_download_links",
+        "expired_active_invitations",
+        "expired_active_download_links",
+        "used_download_links_still_active",
+        "revoked_download_links_still_active",
+        "download_links_without_licence",
+        "download_events_without_licence",
+        "email_events_without_related_record",
+      ]);
+
+      if (warningWhenPositive.has(key) && Number(value || 0) > 0) return "warning";
+      if (key === "active_documents" && Number(value || 0) < 1) return "bad";
+      return "neutral";
+    }
+
+    function renderMetrics(target, metrics, keys) {
+      target.innerHTML = keys.map((key) => `
+        <article class="rh-metric" data-state="${escapeHtml(metricState(key, metrics[key]))}">
+          <span>${escapeHtml(labelise(key))}</span>
+          <strong>${escapeHtml(formatValue(key, metrics[key]))}</strong>
+        </article>
+      `).join("");
+    }
+
+    function renderConfig(config) {
+      const entries = Object.entries(config || {});
+      configGrid.innerHTML = entries.length
+        ? entries.map(([key, value]) => `
+            <article class="rh-metric" data-state="${value ? "good" : "warning"}">
+              <span>${escapeHtml(labelise(key))}</span>
+              <strong>${escapeHtml(formatValue(key, value))}</strong>
+            </article>
+          `).join("")
+        : `<article class="rh-metric"><span>config</span><strong>—</strong></article>`;
+    }
+
+    function renderSchema(schema) {
+      const tables = schema?.tables || {};
+      const rows = Object.entries(tables);
+
+      if (!rows.length) {
+        schemaHealth.innerHTML = "<p>No schema data returned.</p>";
+        return;
+      }
+
+      schemaHealth.innerHTML = `
+        <p>
+          <span class="rh-badge ${schema.ok ? "rh-badge-good" : "rh-badge-bad"}">
+            ${schema.ok ? "schema ok" : "schema attention required"}
+          </span>
+        </p>
+
+        <div style="overflow-x:auto">
+          <table class="rh-schema-table">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Status</th>
+                <th>Columns checked</th>
+                <th>Missing columns</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(([table, info]) => `
+                <tr>
+                  <td><code>${escapeHtml(table)}</code></td>
+                  <td>
+                    <span class="rh-badge ${info.exists && !info.missing_columns?.length ? "rh-badge-good" : "rh-badge-bad"}">
+                      ${info.exists ? "present" : "missing"}
+                    </span>
+                  </td>
+                  <td>${escapeHtml(info.columns_checked ?? "—")}</td>
+                  <td>${escapeHtml((info.missing_columns || []).join(", ") || "—")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function loadHealth() {
+      const adminToken = token();
+
+      if (!adminToken) {
+        setStatus("Admin token is missing. Use the token panel first.", "error");
+        return;
+      }
+
+      setStatus("Loading CDAS health…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch("/api/admin/cdas/health", {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        });
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not load CDAS health: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(data.message || data.error || "Could not load CDAS health.", "error");
+        rawPayload.textContent = JSON.stringify(data || {}, null, 2);
+        return;
+      }
+
+      const metrics = data.metrics || {};
+      healthBanner.dataset.state = data.system_status || "unknown";
+      systemStatus.textContent = data.system_status || "unknown";
+      checkedAt.textContent = `Checked: ${formatDate(data.checked_at)}`;
+      healthSummary.textContent = data.warnings?.length
+        ? `${data.warnings.length} warning(s) require attention.`
+        : "CDAS health currently reports no warnings.";
+
+      renderMetrics(coreMetricsGrid, metrics, CORE_KEYS);
+      renderMetrics(backlogGrid, metrics, BACKLOG_KEYS);
+      renderMetrics(evidenceGrid, metrics, EVIDENCE_KEYS);
+      renderMetrics(freshnessGrid, metrics, FRESHNESS_KEYS);
+      renderConfig(data.config || {});
+      renderSchema(data.schema || {});
+
+      warningsList.dataset.state = data.warnings?.length ? "warning" : "good";
+      warningsList.innerHTML = data.warnings?.length
+        ? data.warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")
+        : "<li>No warnings.</li>";
+
+      rawPayload.textContent = JSON.stringify(data, null, 2);
+      setStatus("CDAS health loaded.", "success");
+    }
+
+    refreshButton.addEventListener("click", loadHealth);
+    loadHealth();
+  </script>
+</BaseLayout>

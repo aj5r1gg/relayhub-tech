@@ -57,6 +57,7 @@ import {
   retryCdasEmailEvent,
 } from "./email-events-admin.js";
 import { getCdasHealth } from "./health.js";
+import { handleCdasOperationsJson } from "./operations.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -129,6 +130,10 @@ export async function handleCdasAdminRequest(request, env) {
    */
   if (pathname === "/api/admin/cdas/health") {
     return getCdasHealth(request, env);
+  }
+
+  if (pathname === "/api/admin/cdas/operations") {
+    return handleCdasOperationsJson(request, env);
   }
 
   /*

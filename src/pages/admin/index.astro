@@ -4,6 +4,13 @@ import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
 
 const adminCards = [
   {
+    href: "/admin/cdas-operations/",
+    title: "CDAS Operations Centre",
+    eyebrow: "CDAS",
+    description:
+      "View the operational status of CDAS, including document access workflow health, email delivery state, licence activity, download link status, evidence integrity, warnings, notices, and recent operational records.",
+  },
+  {
     href: "/admin/downloads",
     title: "Download Analytics",
     eyebrow: "Downloads",
@@ -72,6 +79,13 @@ const adminCards = [
     eyebrow: "Controlled Document Access",
     description:
       "View the CDAS email audit trail, including verification emails, resend events, download-link emails, provider message IDs, and delivery status.",
+  },
+    {
+    href: "/admin/cdas-health",
+    title: "CDAS Health",
+    eyebrow: "Controlled Document Access",
+    description:
+      "View operational CDAS health, including document, licence, download-link, email-event, retry, and warning metrics.",
   },
 ];
 ---

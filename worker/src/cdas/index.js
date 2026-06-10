@@ -28,3 +28,4 @@ export * from "./email-events.js";
 export * from "./email-events-admin.js";
 export * from "./email-event-retry.js";
 export * from "./health.js";
+export * from "./operations.js";
