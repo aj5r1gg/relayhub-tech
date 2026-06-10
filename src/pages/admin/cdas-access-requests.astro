@@ -157,9 +157,14 @@ const pageDescription =
           </p>
         </div>
 
-        <button class="rh-button rh-button-secondary" id="close-detail" type="button">
-          Close
-        </button>
+        <div class="rh-admin-actions">
+          <button class="rh-button rh-button-primary" id="resend-verification" type="button">
+            Resend verification email
+          </button>
+          <button class="rh-button rh-button-secondary" id="close-detail" type="button">
+            Close
+          </button>
+        </div>
       </div>
 
       <div class="rh-admin-detail-grid" id="detail-grid"></div>
@@ -362,6 +367,12 @@ const pageDescription =
       background: #f8fafc;
       color: #0f172a;
       border-color: rgba(15, 23, 42, 0.34);
+    }
+
+    .rh-button[disabled] {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
     }
 
     .rh-admin-status {
@@ -592,7 +603,11 @@ const pageDescription =
     const detailCard = document.getElementById("detail-card");
     const detailSubtitle = document.getElementById("detail-subtitle");
     const detailGrid = document.getElementById("detail-grid");
+    const resendVerificationButton = document.getElementById("resend-verification");
     const closeDetailButton = document.getElementById("close-detail");
+
+    let currentDetailRequestId = "";
+    let currentDetailRequest = null;
 
     function getStoredToken() {
       return sessionStorage.getItem(TOKEN_STORAGE_KEY) || "";
@@ -644,6 +659,34 @@ const pageDescription =
       if (!text) return "rh-badge";
 
       return `rh-badge rh-badge-${text}`;
+    }
+
+    function isVerificationResendAllowed(row) {
+      if (!row) {
+        return false;
+      }
+
+      if (row.email_verified_at) {
+        return false;
+      }
+
+      const blockedStatuses = new Set([
+        "licence_issued",
+        "denied",
+        "expired",
+        "cancelled",
+      ]);
+
+      return !blockedStatuses.has(row.status);
+    }
+
+    function updateResendButton(row) {
+      const allowed = isVerificationResendAllowed(row);
+
+      resendVerificationButton.disabled = !allowed;
+      resendVerificationButton.title = allowed
+        ? "Generate a fresh verification token and send another verification email."
+        : "Verification resend is not available for this request state.";
     }
 
     function getFilters() {
@@ -850,6 +893,10 @@ const pageDescription =
 
       const row = data.request;
 
+      currentDetailRequestId = row.id;
+      currentDetailRequest = row;
+      updateResendButton(row);
+
       detailSubtitle.textContent = `${row.document_id} — ${row.email_normalised}`;
 
       const riskFlags = Array.isArray(row.risk_flags) && row.risk_flags.length
@@ -923,6 +970,75 @@ const pageDescription =
       setStatus("Access request detail loaded.", "success");
     }
 
+    async function resendVerificationEmail() {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
+        return;
+      }
+
+      if (!currentDetailRequestId) {
+        setStatus("Open an access request detail record before resending verification.", "error");
+        return;
+      }
+
+      if (!isVerificationResendAllowed(currentDetailRequest)) {
+        setStatus("Verification resend is not available for this request state.", "error");
+        updateResendButton(currentDetailRequest);
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Resend verification email for ${currentDetailRequest.email_normalised || currentDetailRequest.email || currentDetailRequestId}?`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      resendVerificationButton.disabled = true;
+      setStatus("Resending verification email…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/access-requests/${encodeURIComponent(currentDetailRequestId)}/resend-verification`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(`Could not resend verification email: ${error.message}`, "error");
+        updateResendButton(currentDetailRequest);
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(
+          data?.message || data?.error || "Verification email could not be resent.",
+          "error"
+        );
+        updateResendButton(currentDetailRequest);
+        return;
+      }
+
+      setStatus(
+        data.message || `Verification email resent to ${data.recipient_email || "recipient"}.`,
+        "success"
+      );
+
+      await renderDetail(currentDetailRequestId);
+      await fetchRequests();
+    }
+
     filtersForm.addEventListener("submit", (event) => {
       event.preventDefault();
       state.offset = 0;
@@ -957,9 +1073,18 @@ const pageDescription =
       }
     });
 
+    resendVerificationButton.addEventListener("click", () => {
+      resendVerificationEmail();
+    });
+
     closeDetailButton.addEventListener("click", () => {
       detailCard.hidden = true;
+      currentDetailRequestId = "";
+      currentDetailRequest = null;
+      updateResendButton(null);
     });
+
+    updateResendButton(null);
 
     const existingToken = getStoredToken();
 
