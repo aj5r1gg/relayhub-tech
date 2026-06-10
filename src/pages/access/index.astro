@@ -1,0 +1,381 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const pageTitle = "RelayHub Access Invitation";
+const pageDescription =
+  "RelayHub controlled document access invitation landing page.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <main class="rh-access-page">
+    <section class="rh-access-shell">
+      <section class="rh-access-hero">
+        <p class="rh-eyebrow">RelayHub Document Access</p>
+        <h1>Document access invitation</h1>
+        <p>
+          Review this invitation before continuing to the controlled document
+          access request workflow.
+        </p>
+      </section>
+
+      <section class="rh-access-status" id="access-status" role="status" aria-live="polite">
+        Checking invitation…
+      </section>
+
+      <section class="rh-access-card" id="available-card" hidden>
+        <p class="rh-eyebrow">Invitation available</p>
+        <h2 id="document-title">Document</h2>
+        <p id="document-summary">
+          This invitation can be used to request controlled document access.
+        </p>
+
+        <div class="rh-detail-grid" id="detail-grid"></div>
+
+        <section class="rh-warning-card">
+          <h3>Before you continue</h3>
+          <p>
+            This invitation does not directly download the document. You must
+            still complete the RelayHub document access workflow, accept the
+            licence terms, and verify your email address.
+          </p>
+          <p>
+            RelayHub documents may be individually licensed and auditable. This
+            helps preserve attribution and protect RelayHub’s work.
+          </p>
+        </section>
+
+        <div class="rh-access-actions">
+          <a class="rh-button rh-button-primary" id="continue-button" href="/document-access">
+            Continue to access request
+          </a>
+        </div>
+      </section>
+
+      <section class="rh-access-card rh-unavailable-card" id="unavailable-card" hidden>
+        <p class="rh-eyebrow">Invitation unavailable</p>
+        <h2>This invitation cannot be used</h2>
+        <p id="unavailable-message">
+          This invitation is invalid, expired, already used, revoked, or no
+          longer available.
+        </p>
+      </section>
+    </section>
+  </main>
+
+  <style>
+    .rh-access-page {
+      width: min(980px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 7rem 0 5rem;
+    }
+
+    .rh-access-shell {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .rh-access-hero,
+    .rh-access-card,
+    .rh-access-status {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.35rem;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+    }
+
+    .rh-access-hero {
+      padding: 2rem;
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 34rem),
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
+    }
+
+    .rh-access-hero h1 {
+      margin: 0.35rem 0 0.75rem;
+      color: #0f172a;
+      font-size: clamp(2rem, 5vw, 3.45rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .rh-access-hero p,
+    .rh-access-card p {
+      color: rgba(15, 23, 42, 0.74);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .rh-eyebrow {
+      margin: 0;
+      color: #2563eb;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .rh-access-status {
+      padding: 1rem;
+      color: rgba(15, 23, 42, 0.74);
+      line-height: 1.6;
+    }
+
+    .rh-access-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-access-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-access-card {
+      padding: 2rem;
+    }
+
+    .rh-access-card h2 {
+      margin: 0.35rem 0 0.75rem;
+      color: #0f172a;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      letter-spacing: -0.04em;
+    }
+
+    .rh-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+    }
+
+    .rh-detail-item {
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+      background: #f8fafc;
+      padding: 1rem;
+    }
+
+    .rh-detail-item dt {
+      margin: 0 0 0.25rem;
+      color: rgba(15, 23, 42, 0.56);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rh-detail-item dd {
+      margin: 0;
+      color: #0f172a;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .rh-warning-card {
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      border-radius: 1rem;
+      background: #fffbeb;
+      padding: 1rem;
+    }
+
+    .rh-warning-card h3 {
+      margin: 0 0 0.4rem;
+      color: #92400e;
+    }
+
+    .rh-warning-card p {
+      margin: 0.4rem 0 0;
+      color: #78350f;
+      font-size: 0.98rem;
+    }
+
+    .rh-access-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .rh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+      white-space: nowrap;
+    }
+
+    .rh-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .rh-button-primary {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    .rh-button-primary:hover {
+      background: #1e293b;
+    }
+
+    .rh-unavailable-card {
+      border-color: rgba(239, 68, 68, 0.18);
+      background: #fff7f7;
+    }
+
+    @media (max-width: 720px) {
+      .rh-access-page {
+        width: min(100% - 1rem, 980px);
+        padding-top: 5.5rem;
+      }
+
+      .rh-access-hero,
+      .rh-access-card {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const statusBox = document.getElementById("access-status");
+    const availableCard = document.getElementById("available-card");
+    const unavailableCard = document.getElementById("unavailable-card");
+    const unavailableMessage = document.getElementById("unavailable-message");
+    const documentTitle = document.getElementById("document-title");
+    const documentSummary = document.getElementById("document-summary");
+    const detailGrid = document.getElementById("detail-grid");
+    const continueButton = document.getElementById("continue-button");
+
+    function setStatus(message, mode = "neutral") {
+      statusBox.textContent = message;
+      statusBox.dataset.state = mode;
+    }
+
+    function getInvitationTokenFromPath() {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+
+      if (parts[0] !== "access") {
+        return "";
+      }
+
+      return parts[1] || "";
+    }
+
+    function addDetail(label, value) {
+      const item = document.createElement("dl");
+      item.className = "rh-detail-item";
+
+      const dt = document.createElement("dt");
+      dt.textContent = label;
+
+      const dd = document.createElement("dd");
+      dd.textContent = value || "—";
+
+      item.append(dt, dd);
+      detailGrid.appendChild(item);
+    }
+
+    function showUnavailable(message) {
+      availableCard.hidden = true;
+      unavailableCard.hidden = false;
+      unavailableMessage.textContent =
+        message || "This invitation is invalid, expired, or no longer available.";
+      setStatus("Invitation unavailable.", "error");
+    }
+
+    function showAvailable(data, token) {
+      const invitation = data.invitation || {};
+      const documentInfo = data.document || {};
+      const recipient = data.recipient || {};
+
+      documentTitle.textContent = documentInfo.title || "RelayHub document";
+      documentSummary.textContent =
+        `You have been invited to request access to ${documentInfo.title || "this RelayHub document"}.`;
+
+      detailGrid.innerHTML = "";
+
+      addDetail("Document", documentInfo.title);
+      addDetail("Version", documentInfo.version);
+      addDetail("Classification", documentInfo.classification);
+      addDetail("Access class", documentInfo.access_class);
+      addDetail("Terms version", documentInfo.licence_terms_version);
+      addDetail("Invitation type", invitation.invitation_type);
+      addDetail("Remaining uses", String(invitation.remaining_uses ?? "—"));
+      addDetail("Expires", invitation.expires_at);
+
+      const params = new URLSearchParams();
+
+      if (documentInfo.id) {
+        params.set("document_id", documentInfo.id);
+      }
+
+      if (token) {
+        params.set("invitation_token", token);
+      }
+
+      if (recipient.recipient_locked) {
+        params.set("recipient_locked", "1");
+      }
+
+      continueButton.href = `/document-access?${params.toString()}`;
+
+      unavailableCard.hidden = true;
+      availableCard.hidden = false;
+      setStatus("Invitation available.", "success");
+    }
+
+    async function loadInvitation() {
+      const token = getInvitationTokenFromPath();
+
+      if (!token || !token.startsWith("rh_inv_")) {
+        showUnavailable("This invitation link is not valid.");
+        return;
+      }
+
+      setStatus("Checking invitation…");
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(`/api/access-invitation/${encodeURIComponent(token)}`, {
+          method: "GET",
+          headers: {
+            "accept": "application/json",
+          },
+        });
+
+        data = await response.json();
+      } catch (error) {
+        showUnavailable(`The invitation could not be checked: ${error.message}`);
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        showUnavailable(
+          data?.message ||
+            "This invitation is invalid, expired, or no longer available."
+        );
+        return;
+      }
+
+      showAvailable(data, token);
+    }
+
+    loadInvitation();
+  </script>
+</BaseLayout>
