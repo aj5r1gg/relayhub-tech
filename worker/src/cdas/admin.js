@@ -48,6 +48,9 @@ import {
   getCdasAccessInvitation,
   revokeCdasAccessInvitation,
 } from "./invitations.js";
+import {
+  emailCdasDownloadLink,
+} from "./email-download-link.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -210,6 +213,8 @@ export async function handleCdasAdminRequest(request, env) {
     return getCdasAccessRequest(request, env, requestId);
   }
 
+
+
   /*
    * CDAS controlled download-link registry.
    *
@@ -294,6 +299,25 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return inspectCdasGeneratedPdf(request, env, licenceIdOrNumber);
+  }
+
+    /*
+   * CDAS email controlled download-link delivery.
+   *
+   * Important: this route must appear before /issue-download-link and before
+   * the generic /licences/:id route.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/email-download-link")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/email-download-link"
+    );
+
+    return emailCdasDownloadLink(request, env, licenceIdOrNumber);
   }
 
   if (
