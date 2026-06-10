@@ -25,15 +25,49 @@ function statusFromEmailResult(result) {
   return "failed";
 }
 
-export async function recordCdasEmailEvent(env, {
-  relatedType,
-  relatedId,
-  emailType,
-  recipientEmail,
-  subject = null,
-  emailResult,
-  metadata = null,
-}) {
+function retryableFromEmailResult(result) {
+  if (result?.sent) return 0;
+
+  const error = cleanText(result?.error).toLowerCase();
+  const reason = cleanText(result?.reason).toLowerCase();
+
+  if (result?.skipped) {
+    return reason === "cdas_email_disabled" ? 0 : 1;
+  }
+
+  const nonRetryableErrors = new Set([
+    "recipient_email_missing",
+    "download_url_missing",
+    "cdas_email_from_missing",
+    "resend_api_key_missing",
+  ]);
+
+  return nonRetryableErrors.has(error) ? 0 : 1;
+}
+
+function nextRetryAfterFromEmailResult(result) {
+  if (!retryableFromEmailResult(result)) {
+    return null;
+  }
+
+  const date = new Date();
+  date.setUTCMinutes(date.getUTCMinutes() + 15);
+
+  return date.toISOString();
+}
+
+export async function recordCdasEmailEvent(
+  env,
+  {
+    relatedType,
+    relatedId,
+    emailType,
+    recipientEmail,
+    subject = null,
+    emailResult,
+    metadata = null,
+  }
+) {
   try {
     await env.RELAYHUB_DB.prepare(
       `INSERT INTO cdas_email_events (
@@ -49,9 +83,16 @@ export async function recordCdasEmailEvent(env, {
          message,
          subject,
          created_at,
-         metadata_json
+         metadata_json,
+         retry_of_event_id,
+         retry_count,
+         retryable,
+         next_retry_after,
+         resolved_at,
+         resolved_by,
+         resolution_note
        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL)`
     )
       .bind(
         makeEmailEventId(),
@@ -66,7 +107,11 @@ export async function recordCdasEmailEvent(env, {
         cleanText(emailResult?.message || ""),
         subject ? cleanText(subject) : null,
         nowIso(),
-        metadata ? JSON.stringify(metadata) : null
+        metadata ? JSON.stringify(metadata) : null,
+        cleanText(metadata?.retry_of_event_id || ""),
+        Number(metadata?.retry_count || 0),
+        retryableFromEmailResult(emailResult),
+        nextRetryAfterFromEmailResult(emailResult)
       )
       .run();
   } catch {
