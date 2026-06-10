@@ -43,6 +43,7 @@ import {
   createCdasAccessInvitation,
   listCdasAccessInvitations,
   getCdasAccessInvitation,
+  revokeCdasAccessInvitation,
 } from "./invitations.js";
 
 function isCdasAdminAuthorized(request, env) {
@@ -131,9 +132,11 @@ export async function handleCdasAdminRequest(request, env) {
    * Invitation tokens start controlled access workflows.
    * They are not verification tokens and they are not download tokens.
    *
-   * Important: this route block must appear before any broader generic
-   * CDAS route matching. Raw invitation tokens are returned only at
-   * creation time by the POST handler.
+   * Important: special invitation subroutes must appear before the generic
+   * /invitations/:id route.
+   *
+   * Raw invitation tokens are returned only at creation time by the POST
+   * create handler.
    */
   if (pathname === "/api/admin/cdas/invitations") {
     if (request.method === "POST") {
@@ -141,6 +144,19 @@ export async function handleCdasAdminRequest(request, env) {
     }
 
     return listCdasAccessInvitations(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/invitations/") &&
+    pathname.endsWith("/revoke")
+  ) {
+    const invitationId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/invitations/",
+      "/revoke"
+    );
+
+    return revokeCdasAccessInvitation(request, env, invitationId);
   }
 
   if (pathname.startsWith("/api/admin/cdas/invitations/")) {

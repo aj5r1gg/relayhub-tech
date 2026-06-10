@@ -305,12 +305,16 @@ export async function createCdasAccessInvitation(request, env) {
     body.recipient_name || body.recipientName || ""
   );
 
-  if ((invitationType === "named" || invitationType === "purchase") && !recipientEmail) {
+  if (
+    (invitationType === "named" || invitationType === "purchase") &&
+    !recipientEmail
+  ) {
     return jsonResponse(
       {
         ok: false,
         error: "recipient_email_required",
-        message: "A recipient email is required for named or purchase invitations.",
+        message:
+          "A recipient email is required for named or purchase invitations.",
       },
       400
     );
@@ -333,7 +337,8 @@ export async function createCdasAccessInvitation(request, env) {
     MAX_INVITATION_USES
   );
 
-  const expiresAt = cleanText(body.expires_at || body.expiresAt) ||
+  const expiresAt =
+    cleanText(body.expires_at || body.expiresAt) ||
     hoursFromNowIso(
       parsePositiveInteger(
         body.expires_in_hours || body.expiresInHours,
@@ -555,5 +560,157 @@ export async function getCdasAccessInvitation(request, env, invitationId) {
   return jsonResponse({
     ok: true,
     invitation: publicInvitationRow(row),
+  });
+}
+
+export async function revokeCdasAccessInvitation(request, env, invitationId) {
+  if (request.method !== "POST") {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "method_not_allowed",
+        message: "Use POST to revoke an access invitation.",
+      },
+      405
+    );
+  }
+
+  const id = cleanText(invitationId);
+  const body = await readJsonBody(request);
+
+  const revokedBy = cleanText(body.revoked_by || body.revokedBy) || "admin";
+  const reason =
+    cleanText(body.reason || body.revocation_reason || body.revocationReason) ||
+    "Revoked by admin.";
+
+  const existing = await env.RELAYHUB_DB.prepare(
+    `SELECT
+       i.*,
+       d.title AS document_title,
+       d.slug AS document_slug,
+       d.status AS document_status,
+       d.classification,
+       d.access_class
+     FROM document_access_invitations i
+     LEFT JOIN documents d
+       ON d.id = i.document_id
+     WHERE i.id = ?
+     LIMIT 1`
+  )
+    .bind(id)
+    .first();
+
+  if (!existing) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "invitation_not_found",
+        message: "Access invitation was not found.",
+      },
+      404
+    );
+  }
+
+  if (existing.status === "revoked" || existing.revoked_at) {
+    return jsonResponse({
+      ok: true,
+      invitation: publicInvitationRow(existing),
+      changed: false,
+      message: "Access invitation was already revoked.",
+    });
+  }
+
+  if (existing.status === "used" || Number(existing.use_count || 0) > 0) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "invitation_already_used",
+        message:
+          "This invitation has already been used and was not mutated. Review the linked access request instead.",
+        invitation: publicInvitationRow(existing),
+        changed: false,
+      },
+      409
+    );
+  }
+
+  if (existing.status === "superseded" || existing.superseded_at) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "invitation_superseded",
+        message: "This invitation has been superseded and was not mutated.",
+        invitation: publicInvitationRow(existing),
+        changed: false,
+      },
+      409
+    );
+  }
+
+  if (existing.status !== "active") {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "invitation_not_revokable",
+        message: "Only active unused invitations can be revoked.",
+        invitation: publicInvitationRow(existing),
+        changed: false,
+      },
+      409
+    );
+  }
+
+  const revokedAt = nowIso();
+
+  await env.RELAYHUB_DB.prepare(
+    `UPDATE document_access_invitations
+     SET
+       status = 'revoked',
+       revoked_at = ?,
+       revoked_by = ?,
+       revocation_reason = ?
+     WHERE id = ?
+       AND status = 'active'
+       AND use_count = 0
+       AND revoked_at IS NULL
+       AND superseded_at IS NULL`
+  )
+    .bind(revokedAt, revokedBy, reason, id)
+    .run();
+
+  const updated = await env.RELAYHUB_DB.prepare(
+    `SELECT
+       i.*,
+       d.title AS document_title,
+       d.slug AS document_slug,
+       d.status AS document_status,
+       d.classification,
+       d.access_class
+     FROM document_access_invitations i
+     LEFT JOIN documents d
+       ON d.id = i.document_id
+     WHERE i.id = ?
+     LIMIT 1`
+  )
+    .bind(id)
+    .first();
+
+  await recordAdminAuditEvent({
+    request,
+    env,
+    action: "invitation_revoked",
+    targetType: "document_access_invitation",
+    targetId: id,
+    beforeJson: publicInvitationRow(existing),
+    afterJson: publicInvitationRow(updated),
+    reason,
+    adminIdentity: revokedBy,
+  });
+
+  return jsonResponse({
+    ok: true,
+    invitation: publicInvitationRow(updated),
+    changed: true,
+    message: "Access invitation was revoked.",
   });
 }
