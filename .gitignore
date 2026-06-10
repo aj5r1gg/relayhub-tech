@@ -28,3 +28,4 @@ private-r2-seed/documents/public/**/*.pdf
 private-r2-seed/documents/originals/**/*.pdf
 private-r2-seed/documents/generated/**
 private-r2-seed/documents/audit/**
+.secrets/

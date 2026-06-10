@@ -56,6 +56,7 @@ import {
   getCdasEmailEvent,
   retryCdasEmailEvent,
 } from "./email-events-admin.js";
+import { getCdasHealth } from "./health.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -116,6 +117,15 @@ function extractTrailingRouteParam(pathname, prefix, suffix = "") {
 export async function handleCdasAdminRequest(request, env) {
   if (!isCdasAdminAuthorized(request, env)) {
     return adminAuthFailed();
+  }
+
+    /*
+   * CDAS operational health.
+   *
+   * Read-only. No mutation.
+   */
+  if (pathname === "/api/admin/cdas/health") {
+    return getCdasHealth(request, env);
   }
 
   const url = new URL(request.url);
