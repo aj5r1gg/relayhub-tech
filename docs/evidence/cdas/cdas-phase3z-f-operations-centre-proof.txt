@@ -1,0 +1,324 @@
+CDAS Phase 3Z-F — Operations Centre Proof
+
+Date: 2026-06-10
+System: RelayHub Controlled Document Access System
+Phase: 3Z-F
+Scope: Read-only CDAS Operations Centre
+Evidence file: docs/evidence/cdas/cdas-phase3z-f-operations-centre-proof.txt
+
+1. Purpose
+
+This evidence artefact records validation of the CDAS Operations Centre introduced in Phase 3Z-F.
+
+The Operations Centre is intended to provide a single-pane, read-only operational view of the Controlled Document Access System, including:
+
+- core CDAS metrics
+- email delivery state
+- document access workflow backlog
+- licence activity
+- download link state
+- evidence integrity checks
+- recent failed emails
+- recent pending requests
+- recent licences
+- recent downloads
+- raw operations payload inspection
+
+This validation confirms that the Operations Centre backend endpoint and deployed admin page are present, authenticated, schema-safe, and operationally useful.
+
+2. Implemented Components
+
+Backend:
+
+- worker/src/cdas/operations.js
+- GET /api/admin/cdas/operations
+- CDAS admin route wiring
+- CDAS barrel export wiring
+- router recognition for /api/admin/cdas/operations
+
+Frontend:
+
+- src/pages/admin/cdas-operations.astro
+- Admin dashboard card in src/pages/admin/index.astro
+- Browser-side authenticated fetch using saved admin token
+- Admin styling aligned with the existing admin hub style
+- Read-only operational dashboard
+- Raw payload inspection panel
+
+3. Validation Commands
+
+The following validation commands were run.
+
+Authenticated operations endpoint:
+
+curl -sS "https://relayhub-tech.aj5rigg.workers.dev/api/admin/cdas/operations" \
+  -H "Authorization: Bearer $(cat .secrets/relayhub_admin_token.txt)" \
+  | python3 -m json.tool
+
+Status summary:
+
+curl -sS "https://relayhub-tech.aj5rigg.workers.dev/api/admin/cdas/operations" \
+  -H "Authorization: Bearer $(cat .secrets/relayhub_admin_token.txt)" \
+  | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get("status"), d.get("warnings"), d.get("notices"), d.get("query_failures"))'
+
+Deployed page marker check:
+
+curl -sSL "https://relayhub-tech.aj5rigg.workers.dev/admin/cdas-operations/?bust=$(date +%s)" \
+  | grep -o "rh-admin-page\|TOKEN_STORAGE_KEY\|authorization: \`Bearer" \
+  | sort -u
+
+4. Observed Results
+
+4.1 Operations endpoint result
+
+The authenticated operations endpoint returned:
+
+- ok: true
+- system: cdas
+- endpoint: /api/admin/cdas/operations
+- status: notice
+- warnings: none
+- notices:
+  - pending_verification_backlog
+  - historical_failed_email_events_present
+- query_failures: none
+
+4.2 Core metrics
+
+Observed:
+
+- documents: 3
+- active_documents: 1
+- access_requests: 15
+- licences: 3
+- download_links: 9
+- download_events: 18
+- email_events: 4
+
+4.3 Email operations
+
+Observed:
+
+- failed_events: 1
+- retryable_events: 0
+- unresolved_failed_events: 0
+- sent_today: 3
+
+The failed email event was historical and resolved by successful manual retry.
+
+4.4 Workflow backlog
+
+Observed:
+
+- pending_verification: 12
+- verified_unlicensed: 0
+- pending_approval: 0
+- generated_pdfs_without_links: 0
+
+The pending verification backlog reflects access requests where recipients have not completed email verification.
+
+4.5 Licence operations
+
+Observed:
+
+- issued_today: 1
+- issued_last_7_days: 3
+- active: 3
+- revoked: 0
+- generated_missing_hash: 0
+
+4.6 Download link operations
+
+Observed:
+
+- active_links: 1
+- expired_links: 0
+- used_links: 6
+- revoked_links: 2
+- downloads_today: 1
+
+4.7 Evidence integrity
+
+Observed:
+
+- download_links_without_licence: 0
+- download_events_without_licence: 0
+- email_events_with_unknown_related_type: 0
+
+This indicates no current evidence-integrity faults were detected by the Operations Centre endpoint.
+
+4.8 Recent records
+
+The endpoint returned recent operational records for:
+
+- failed emails
+- pending access requests
+- recent licences
+- recent downloads
+
+The failed email record showed:
+
+- related_type: access_request
+- email_type: verification_email_resend
+- status: failed
+- provider: resend
+- error: validation_error
+- resolved_at: 2026-06-10T05:26:12.474Z
+- resolved_by: admin_retry
+- resolution_note: Resolved by successful manual retry.
+
+4.9 Deployed page validation
+
+The deployed admin page check returned:
+
+- authorization: `Bearer
+- rh-admin-page
+- TOKEN_STORAGE_KEY
+
+This confirms that the deployed page includes:
+
+- the new admin page styling marker
+- the admin-token storage logic
+- bearer-token authenticated request logic
+
+5. Validation Assessment
+
+Result: PASS WITH NOTICES
+
+The Phase 3Z-F Operations Centre is functioning as intended for its first read-only slice.
+
+Confirmed:
+
+- Backend endpoint is live.
+- Endpoint requires admin authentication.
+- Endpoint returns ok=true.
+- Endpoint returns no query failures.
+- Endpoint uses the verified cdas_email_events schema.
+- Endpoint reports operational notices rather than false faults.
+- No evidence-integrity faults are currently reported.
+- Frontend page is deployed.
+- Frontend page contains bearer-token request logic.
+- Frontend page uses the updated admin-card visual style.
+- The Operations Centre is read-only and non-destructive.
+
+6. Known Notices
+
+6.1 pending_verification_backlog
+
+There are pending document access requests that have not completed email verification.
+
+This is an operational backlog notice, not a system fault.
+
+6.2 historical_failed_email_events_present
+
+There is at least one historical failed email event.
+
+The observed failed event was resolved by successful manual retry. Because unresolved_failed_events is 0 and retryable_events is 0, this is not currently a delivery fault.
+
+7. Known Non-Goals for This Slice
+
+This slice does not implement:
+
+- document upload
+- private file upload
+- licence correction
+- licence supersession
+- destructive operations
+- revoke from Operations Centre
+- regenerate PDF from Operations Centre
+- payment integration
+- automated remediation
+- direct mutation from the Operations Centre
+
+Those are future governed workflows and should be implemented separately with validation evidence.
+
+8. Release Position
+
+Phase 3Z-F Slice 1 is complete.
+
+Current maturity:
+
+- CDAS operational visibility: implemented
+- CDAS Operations Centre backend: validated
+- CDAS Operations Centre frontend: deployed
+- Query failure state: resolved
+- Read-only safety posture: preserved
+- Evidence capture: complete
+
+Recommended next phases:
+
+1. Phase 3Z-F Slice 2 — Safe quick links/actions
+   - open failed email detail
+   - open access request detail
+   - open licence detail
+   - open download link detail
+   - retry failed email from Operations Centre where already validated
+
+2. CDAS document upload, draft-only by default
+
+3. Private File Delivery facility, separate from RelayHub-controlled documents
+
+4. Licence correction / supersession workflow
+
+5. Later payment integration after controlled access and recovery paths remain stable
+
+9. Raw Evidence Log
+
+The following raw command output was supplied as validation evidence.
+
+Authenticated operations endpoint returned ok=true, status=notice, warnings=[], notices=[
+  pending_verification_backlog,
+  historical_failed_email_events_present
+], query_failures=[].
+
+Core metrics:
+
+- documents: 3
+- active_documents: 1
+- access_requests: 15
+- licences: 3
+- download_links: 9
+- download_events: 18
+- email_events: 4
+
+Email metrics:
+
+- failed_events: 1
+- retryable_events: 0
+- unresolved_failed_events: 0
+- sent_today: 3
+
+Workflow metrics:
+
+- pending_verification: 12
+- verified_unlicensed: 0
+- pending_approval: 0
+- generated_pdfs_without_links: 0
+
+Licence metrics:
+
+- issued_today: 1
+- issued_last_7_days: 3
+- active: 3
+- revoked: 0
+- generated_missing_hash: 0
+
+Download metrics:
+
+- active_links: 1
+- expired_links: 0
+- used_links: 6
+- revoked_links: 2
+- downloads_today: 1
+
+Integrity metrics:
+
+- download_links_without_licence: 0
+- download_events_without_licence: 0
+- email_events_with_unknown_related_type: 0
+
+Deployed page marker check returned:
+
+- authorization: `Bearer
+- rh-admin-page
+- TOKEN_STORAGE_KEY

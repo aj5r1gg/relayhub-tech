@@ -25,9 +25,7 @@ const description =
     <section class="rh-admin-card rh-admin-token-card">
       <div>
         <h2>Operations status</h2>
-        <p id="token-status">
-          Checking browser session…
-        </p>
+        <p id="token-status">Checking browser session…</p>
       </div>
 
       <div class="rh-admin-token-actions">
@@ -38,12 +36,14 @@ const description =
     </section>
 
     <nav class="rh-admin-linkbar" aria-label="CDAS admin links">
-      <a href="/admin">Admin hub</a>
-      <a href="/admin/cdas-health">Full health dashboard</a>
-      <a href="/admin/cdas-email-events">Email events</a>
-      <a href="/admin/cdas-access-requests">Access requests</a>
-      <a href="/admin/cdas-licences">Licences</a>
-      <a href="/admin/cdas-download-links">Download links</a>
+      <a href="/admin/">Admin hub</a>
+      <a href="/admin/cdas-health/">Full health dashboard</a>
+      <a href="/admin/cdas-email-events/">Email events</a>
+      <a href="/admin/cdas-access-requests/">Access requests</a>
+      <a href="/admin/cdas-licences/">Licences</a>
+      <a href="/admin/cdas-download-links/">Download links</a>
+      <a href="/admin/cdas-documents/">Documents</a>
+      <a href="/admin/downloads/">Download analytics</a>
     </nav>
 
     <section id="statusPanel" class="rh-admin-status-card" data-status="loading">
@@ -52,7 +52,10 @@ const description =
       <p>Fetching the latest operational state.</p>
     </section>
 
-    <section class="rh-admin-grid rh-admin-metrics-grid" aria-label="CDAS operational metrics">
+    <section
+      class="rh-admin-grid rh-admin-metrics-grid"
+      aria-label="CDAS operational metrics"
+    >
       <article class="rh-admin-card">
         <div class="rh-card-heading">
           <p class="rh-eyebrow">System</p>
@@ -102,7 +105,10 @@ const description =
       </article>
     </section>
 
-    <section class="rh-admin-grid rh-admin-tables-grid" aria-label="Recent CDAS operational records">
+    <section
+      class="rh-admin-grid rh-admin-tables-grid"
+      aria-label="Recent CDAS operational records"
+    >
       <article class="rh-admin-card">
         <div class="rh-card-heading">
           <p class="rh-eyebrow">Email</p>
@@ -211,6 +217,13 @@ const description =
       color: #0f172a;
       font-size: 1.25rem;
       letter-spacing: -0.03em;
+    }
+
+    .rh-admin-status-card h3 {
+      margin: 1rem 0 0;
+      color: #0f172a;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
     }
 
     .rh-admin-status-card p:not(.rh-eyebrow),
@@ -437,6 +450,34 @@ const description =
       white-space: normal;
     }
 
+    .rh-row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      min-width: 150px;
+    }
+
+    .rh-table-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(37, 99, 235, 0.22);
+      border-radius: 999px;
+      padding: 0.35rem 0.55rem;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.78rem;
+      font-weight: 900;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .rh-table-action:hover {
+      border-color: rgba(37, 99, 235, 0.42);
+      background: #dbeafe;
+    }
+
     .rh-muted {
       margin: 0;
       color: rgba(15, 23, 42, 0.62);
@@ -576,6 +617,40 @@ const description =
       return `<p class="rh-muted">${escapeHtml(message)}</p>`;
     }
 
+    function adminUrl(path, params = {}) {
+      const query = Object.entries(params)
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(
+          ([key, value]) =>
+            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+        )
+        .join("&");
+
+      return query ? `${path}?${query}` : path;
+    }
+
+    function adminActionLinks(links) {
+      const safeLinks = Array.isArray(links) ? links : [];
+
+      if (!safeLinks.length) {
+        return "";
+      }
+
+      return `
+        <div class="rh-row-actions">
+          ${safeLinks
+            .filter((link) => link && link.href && link.label)
+            .map(
+              (link) =>
+                `<a class="rh-table-action" href="${escapeHtml(link.href)}">${escapeHtml(
+                  link.label,
+                )}</a>`,
+            )
+            .join("")}
+        </div>
+      `;
+    }
+
     function table(targetId, rows, columns, emptyText) {
       const target = document.getElementById(targetId);
       if (!target) return;
@@ -602,11 +677,15 @@ const description =
                     <tr>
                       ${columns
                         .map((column) => {
+                          const wrapClass = column.wrap ? "rh-wrap" : "";
+
+                          if (column.renderHtml) {
+                            return `<td class="${wrapClass}">${column.renderHtml(row)}</td>`;
+                          }
+
                           const value = column.render
                             ? column.render(row)
                             : row[column.key];
-
-                          const wrapClass = column.wrap ? "rh-wrap" : "";
 
                           return `<td class="${wrapClass}">${escapeHtml(value ?? "")}</td>`;
                         })
@@ -719,8 +798,8 @@ const description =
       try {
         const response = await fetch(API_URL, {
           headers: {
-            accept: "application/json",
-            authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -754,6 +833,27 @@ const description =
               label: "Resolved",
               render: (row) => (row.resolved_at ? "Yes" : "No"),
             },
+            {
+              key: "actions",
+              label: "Actions",
+              renderHtml: (row) =>
+                adminActionLinks([
+                  {
+                    label: "Email event",
+                    href: adminUrl("/admin/cdas-email-events/", {
+                      id: row.id,
+                    }),
+                  },
+                  row.related_type === "access_request"
+                    ? {
+                        label: "Request",
+                        href: adminUrl("/admin/cdas-access-requests/", {
+                          id: row.related_id,
+                        }),
+                      }
+                    : null,
+                ]),
+            },
           ],
           "No recent failed emails.",
         );
@@ -771,6 +871,26 @@ const description =
               key: "verified",
               label: "Verified",
               render: (row) => (row.email_verified_at ? "Yes" : "No"),
+            },
+            {
+              key: "actions",
+              label: "Actions",
+              renderHtml: (row) =>
+                adminActionLinks([
+                  {
+                    label: "Request",
+                    href: adminUrl("/admin/cdas-access-requests/", {
+                      id: row.id,
+                    }),
+                  },
+                  {
+                    label: "Document",
+                    href: adminUrl("/admin/cdas-documents/", {
+                      document_id: row.document_id,
+                      version: row.document_version,
+                    }),
+                  },
+                ]),
             },
           ],
           "No recent pending requests.",
@@ -791,6 +911,33 @@ const description =
             { key: "document_id", label: "Document" },
             { key: "document_version", label: "Version" },
             { key: "status", label: "Status" },
+            {
+              key: "actions",
+              label: "Actions",
+              renderHtml: (row) =>
+                adminActionLinks([
+                  {
+                    label: "Licence",
+                    href: adminUrl("/admin/cdas-licences/", {
+                      id: row.id,
+                      licence_number: row.licence_number,
+                    }),
+                  },
+                  {
+                    label: "Document",
+                    href: adminUrl("/admin/cdas-documents/", {
+                      document_id: row.document_id,
+                      version: row.document_version,
+                    }),
+                  },
+                  {
+                    label: "Links",
+                    href: adminUrl("/admin/cdas-download-links/", {
+                      licence_number: row.licence_number,
+                    }),
+                  },
+                ]),
+            },
           ],
           "No recent licences.",
         );
@@ -812,6 +959,33 @@ const description =
                   ? "Success"
                   : row.failure_reason || "Failed",
             },
+            {
+              key: "actions",
+              label: "Actions",
+              renderHtml: (row) =>
+                adminActionLinks([
+                  {
+                    label: "Download links",
+                    href: adminUrl("/admin/cdas-download-links/", {
+                      id: row.download_id,
+                      licence_number: row.licence_number,
+                    }),
+                  },
+                  {
+                    label: "Licence",
+                    href: adminUrl("/admin/cdas-licences/", {
+                      licence_number: row.licence_number,
+                    }),
+                  },
+                  {
+                    label: "Analytics",
+                    href: adminUrl("/admin/downloads/", {
+                      event_id: row.id,
+                      download_id: row.download_id,
+                    }),
+                  },
+                ]),
+            },
           ],
           "No recent downloads.",
         );
@@ -824,8 +998,7 @@ const description =
       } catch (error) {
         clearRenderedData();
 
-        const message =
-          error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
 
         setStatusPanel(
           "fault",
@@ -843,7 +1016,9 @@ const description =
     });
 
     window.relayhubAdminTokenUpdated = () => {
-      updateTokenStatus("Admin token saved for this browser session. Refreshing operations data…");
+      updateTokenStatus(
+        "Admin token saved for this browser session. Refreshing operations data…",
+      );
       loadOperations();
     };
 
