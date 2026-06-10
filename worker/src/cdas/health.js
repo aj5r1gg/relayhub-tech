@@ -49,7 +49,7 @@ export async function getCdasHealth(request, env) {
       "SELECT COUNT(*) AS total FROM cdas_email_events WHERE retryable = 1 AND resolved_at IS NULL"
     ),
     latest(env, "SELECT MAX(created_at) AS latest_at FROM cdas_email_events"),
-    latest(env, "SELECT MAX(created_at) AS latest_at FROM document_download_events"),
+    latest(env, "SELECT MAX(event_at) AS latest_at FROM document_download_events"),
   ]);
 
   const warnings = [];

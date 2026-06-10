@@ -119,7 +119,10 @@ export async function handleCdasAdminRequest(request, env) {
     return adminAuthFailed();
   }
 
-    /*
+  const url = new URL(request.url);
+  const pathname = url.pathname.replace(/\/+$/, "") || "/";
+
+  /*
    * CDAS operational health.
    *
    * Read-only. No mutation.
@@ -127,9 +130,6 @@ export async function handleCdasAdminRequest(request, env) {
   if (pathname === "/api/admin/cdas/health") {
     return getCdasHealth(request, env);
   }
-
-  const url = new URL(request.url);
-  const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
   /*
    * CDAS email event audit registry.
@@ -183,15 +183,6 @@ export async function handleCdasAdminRequest(request, env) {
 
   /*
    * CDAS access invitation registry.
-   *
-   * Invitation tokens start controlled access workflows.
-   * They are not verification tokens and they are not download tokens.
-   *
-   * Important: special invitation subroutes must appear before the generic
-   * /invitations/:id route.
-   *
-   * Raw invitation tokens are returned only at creation time by the POST
-   * create handler.
    */
   if (pathname === "/api/admin/cdas/invitations") {
     if (request.method === "POST") {
@@ -230,16 +221,6 @@ export async function handleCdasAdminRequest(request, env) {
     return listCdasAccessRequests(request, env);
   }
 
-  /*
-   * Manual verification-email resend.
-   *
-   * This route generates a fresh verification token/hash for an existing
-   * unverified access request, then sends a new verification email.
-   *
-   * Important: this special route must appear before the generic
-   * /access-requests/:id route, otherwise the generic detail handler will
-   * swallow it.
-   */
   if (
     pathname.startsWith("/api/admin/cdas/access-requests/") &&
     pathname.endsWith("/resend-verification")
@@ -264,13 +245,6 @@ export async function handleCdasAdminRequest(request, env) {
 
   /*
    * CDAS controlled download-link registry.
-   *
-   * Important: the special revoke route must appear before the generic
-   * /download-links/:id route, otherwise the generic detail handler will
-   * swallow it.
-   *
-   * These endpoints never return raw tokens. They expose only token-hash
-   * presence and audit metadata.
    */
   if (pathname === "/api/admin/cdas/download-links") {
     return listCdasDownloadLinks(request, env);
@@ -300,10 +274,6 @@ export async function handleCdasAdminRequest(request, env) {
 
   /*
    * CDAS issued licence registry.
-   *
-   * Important: special licence subroutes must appear before the generic
-   * /licences/:id route, otherwise the generic licence detail route will
-   * swallow them.
    */
   if (pathname === "/api/admin/cdas/licences") {
     return listCdasLicences(request, env);
@@ -348,12 +318,6 @@ export async function handleCdasAdminRequest(request, env) {
     return inspectCdasGeneratedPdf(request, env, licenceIdOrNumber);
   }
 
-  /*
-   * CDAS email controlled download-link delivery.
-   *
-   * Important: this route must appear before /issue-download-link and before
-   * the generic /licences/:id route.
-   */
   if (
     pathname.startsWith("/api/admin/cdas/licences/") &&
     pathname.endsWith("/email-download-link")
@@ -391,9 +355,6 @@ export async function handleCdasAdminRequest(request, env) {
 
   /*
    * CDAS document rendered licence preview.
-   *
-   * Important: special document subroutes must appear before the generic
-   * /documents/:id route.
    */
   if (
     pathname.startsWith("/api/admin/cdas/documents/") &&
@@ -410,10 +371,6 @@ export async function handleCdasAdminRequest(request, env) {
 
   /*
    * CDAS document source SHA-256 capture.
-   *
-   * This reads the private R2 source object, hashes it, and stores the
-   * result in documents.source_sha256. It does not generate a PDF, write
-   * to R2, create a download link, or serve the document.
    */
   if (
     pathname.startsWith("/api/admin/cdas/documents/") &&
