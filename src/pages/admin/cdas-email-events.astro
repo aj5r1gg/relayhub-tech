@@ -1,0 +1,348 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
+
+const pageTitle = "CDAS Email Events Admin";
+const pageDescription =
+  "Read-only admin view for RelayHub CDAS email delivery audit events.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} noindex={true}>
+  <main class="rh-admin-page">
+    <section class="rh-admin-hero">
+      <p class="rh-eyebrow">RelayHub Admin</p>
+      <h1>CDAS Email Events</h1>
+      <p>
+        Read-only audit trail for CDAS email delivery events, including
+        verification emails, resend events, download-link emails, provider
+        message IDs, and safe metadata.
+      </p>
+    </section>
+
+    <AdminTokenPanel />
+
+    <section class="rh-admin-card">
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Email event registry</h2>
+          <p>This page does not send, resend, retry, verify, issue, or revoke anything.</p>
+        </div>
+
+        <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
+          Refresh
+        </button>
+      </div>
+
+      <form class="rh-admin-filters" id="filters-form">
+        <label>
+          Search
+          <input name="q" type="search" placeholder="Event ID, related ID, recipient, provider message ID…" />
+        </label>
+
+        <label>
+          Email type
+          <select name="email_type">
+            <option value="">All</option>
+            <option value="verification_email">verification_email</option>
+            <option value="verification_email_resend">verification_email_resend</option>
+            <option value="download_link_email">download_link_email</option>
+          </select>
+        </label>
+
+        <label>
+          Status
+          <select name="status">
+            <option value="">All</option>
+            <option value="sent">sent</option>
+            <option value="failed">failed</option>
+            <option value="skipped">skipped</option>
+          </select>
+        </label>
+
+        <label>
+          Related type
+          <select name="related_type">
+            <option value="">All</option>
+            <option value="access_request">access_request</option>
+            <option value="licence">licence</option>
+          </select>
+        </label>
+
+        <div class="rh-admin-filter-actions">
+          <button class="rh-button rh-button-primary" type="submit">Apply filters</button>
+          <button class="rh-button rh-button-secondary" id="reset-filters" type="button">Reset</button>
+        </div>
+      </form>
+
+      <div class="rh-admin-status" id="status-message" role="status" aria-live="polite">
+        Ready.
+      </div>
+
+      <div class="rh-admin-table-wrap">
+        <table class="rh-admin-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Type</th>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Provider</th>
+              <th>Related</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="events-body">
+            <tr>
+              <td colspan="8" class="rh-admin-empty">No records loaded yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rh-admin-card" id="detail-card" hidden>
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Email event detail</h2>
+          <p id="detail-subtitle">Selected email event.</p>
+        </div>
+
+        <button class="rh-button rh-button-secondary" id="close-detail" type="button">
+          Close
+        </button>
+      </div>
+
+      <div class="rh-admin-detail-grid" id="detail-grid"></div>
+    </section>
+  </main>
+
+  <style>
+    .rh-admin-page{width:min(1180px,calc(100% - 2rem));margin:0 auto;padding:3rem 0 5rem}
+    .rh-admin-hero,.rh-admin-card{border:1px solid rgba(15,23,42,.12);border-radius:1.25rem;background:rgba(255,255,255,.96);box-shadow:0 18px 50px rgba(15,23,42,.07)}
+    .rh-admin-hero{margin-bottom:1.5rem;padding:2rem;background:radial-gradient(circle at top left,rgba(59,130,246,.12),transparent 36rem),linear-gradient(135deg,rgba(255,255,255,.96),rgba(248,250,252,.96))}
+    .rh-admin-hero h1{margin:.35rem 0 .75rem;font-size:clamp(2rem,5vw,3.5rem);line-height:1;letter-spacing:-.05em}
+    .rh-admin-hero p,.rh-admin-section-heading p{max-width:780px;margin:0;color:rgba(15,23,42,.74);line-height:1.7}
+    .rh-eyebrow{margin:0;color:#2563eb;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .rh-admin-card{margin-top:1rem;padding:1.25rem}
+    .rh-admin-section-heading{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1rem}
+    .rh-admin-section-heading h2{margin:0 0 .35rem;color:#0f172a;letter-spacing:-.03em}
+    .rh-admin-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;align-items:end;margin:1rem 0}
+    .rh-admin-filters label{display:grid;gap:.35rem;color:rgba(15,23,42,.78);font-size:.9rem;font-weight:800}
+    .rh-admin-filters input,.rh-admin-filters select{width:100%;border:1px solid rgba(15,23,42,.16);border-radius:.85rem;padding:.75rem .85rem;background:#fff;color:#0f172a;font:inherit}
+    .rh-admin-filter-actions{display:flex;gap:.6rem;flex-wrap:wrap;align-items:end}
+    .rh-button{display:inline-flex;align-items:center;justify-content:center;min-height:2.5rem;border:1px solid transparent;border-radius:999px;padding:.55rem .9rem;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;white-space:nowrap}
+    .rh-button-primary{background:#0f172a;border-color:#0f172a;color:#fff}
+    .rh-button-secondary{background:#fff;border-color:rgba(15,23,42,.18);color:#0f172a}
+    .rh-admin-status{margin:1rem 0;padding:.85rem 1rem;border-radius:.9rem;background:#f8fafc;color:rgba(15,23,42,.75);line-height:1.55}
+    .rh-admin-status[data-state="error"]{background:#fef2f2;color:#991b1b}
+    .rh-admin-status[data-state="success"]{background:#f0fdf4;color:#166534}
+    .rh-admin-table-wrap{overflow-x:auto}
+    .rh-admin-table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:1050px}
+    .rh-admin-table th,.rh-admin-table td{padding:.85rem;border-bottom:1px solid rgba(15,23,42,.08);text-align:left;vertical-align:top}
+    .rh-admin-table th{color:rgba(15,23,42,.62);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+    .rh-admin-empty{text-align:center!important;color:rgba(15,23,42,.55)}
+    .rh-badge{display:inline-flex;border-radius:999px;padding:.2rem .55rem;background:#f1f5f9;color:#334155;font-size:.78rem;font-weight:900;text-transform:uppercase}
+    .rh-badge-sent{background:#dcfce7;color:#166534}
+    .rh-badge-failed{background:#fee2e2;color:#991b1b}
+    .rh-badge-skipped{background:#fef3c7;color:#92400e}
+    .rh-muted{color:rgba(15,23,42,.58)}
+    .rh-detail-stack{display:grid;gap:.2rem}
+    .rh-detail-stack code{word-break:break-word}
+    .rh-admin-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;margin-top:1rem}
+    .rh-admin-detail-item{border:1px solid rgba(15,23,42,.1);border-radius:.9rem;padding:.85rem;background:#f8fafc}
+    .rh-admin-detail-item dt{color:rgba(15,23,42,.56);font-size:.76rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+    .rh-admin-detail-item dd{margin:.3rem 0 0;color:#0f172a;word-break:break-word;line-height:1.5;white-space:pre-wrap}
+    @media(max-width:720px){.rh-admin-page{width:min(100% - 1rem,1180px)}.rh-admin-hero,.rh-admin-card{padding:1rem}.rh-admin-section-heading{display:grid}.rh-admin-detail-grid{grid-template-columns:1fr}}
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const ADMIN_TOKEN_KEY = "relayhub_admin_token";
+    const filtersForm = document.getElementById("filters-form");
+    const resetFilters = document.getElementById("reset-filters");
+    const refreshButton = document.getElementById("refresh-button");
+    const statusMessage = document.getElementById("status-message");
+    const eventsBody = document.getElementById("events-body");
+    const detailCard = document.getElementById("detail-card");
+    const detailSubtitle = document.getElementById("detail-subtitle");
+    const detailGrid = document.getElementById("detail-grid");
+    const closeDetail = document.getElementById("close-detail");
+
+    function token() {
+      return sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+    }
+
+    function setStatus(message, mode = "neutral") {
+      statusMessage.textContent = message;
+      statusMessage.dataset.state = mode;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function fmt(value) {
+      return value === null || value === undefined || value === "" ? "—" : String(value);
+    }
+
+    function fmtDate(value) {
+      if (!value) return "—";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+    }
+
+    function badge(status) {
+      const value = fmt(status);
+      return `<span class="rh-badge rh-badge-${escapeHtml(value)}">${escapeHtml(value)}</span>`;
+    }
+
+    function getParams() {
+      const params = new URLSearchParams(new FormData(filtersForm));
+      for (const [key, value] of [...params.entries()]) {
+        if (!value) params.delete(key);
+      }
+      params.set("limit", "100");
+      return params;
+    }
+
+    async function loadEvents() {
+      const adminToken = token();
+      if (!adminToken) {
+        setStatus("Admin token is missing. Use the token panel first.", "error");
+        return;
+      }
+
+      setStatus("Loading email events…");
+
+      const response = await fetch(`/api/admin/cdas/email-events?${getParams().toString()}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        setStatus(data.message || data.error || "Could not load email events.", "error");
+        return;
+      }
+
+      const rows = data.rows || [];
+
+      eventsBody.innerHTML = rows.length
+        ? rows.map((row) => `
+            <tr>
+              <td>
+                <div class="rh-detail-stack">
+                  <code>${escapeHtml(row.id)}</code>
+                  <span class="rh-muted">${escapeHtml(fmt(row.subject))}</span>
+                </div>
+              </td>
+              <td>${escapeHtml(fmt(row.email_type))}</td>
+              <td>${escapeHtml(fmt(row.recipient_email))}</td>
+              <td>${badge(row.status)}</td>
+              <td>
+                <div class="rh-detail-stack">
+                  <span>${escapeHtml(fmt(row.provider))}</span>
+                  <code>${escapeHtml(fmt(row.provider_message_id))}</code>
+                </div>
+              </td>
+              <td>
+                <div class="rh-detail-stack">
+                  <span>${escapeHtml(fmt(row.related_type))}</span>
+                  <code>${escapeHtml(fmt(row.related_id))}</code>
+                </div>
+              </td>
+              <td>${escapeHtml(fmtDate(row.created_at))}</td>
+              <td>
+                <button class="rh-button rh-button-secondary" type="button" data-event-id="${escapeHtml(row.id)}">
+                  View
+                </button>
+              </td>
+            </tr>
+          `).join("")
+        : `<tr><td colspan="8" class="rh-admin-empty">No email events found.</td></tr>`;
+
+      setStatus(`Loaded ${rows.length} email event(s). Total matching records: ${data.total}.`, "success");
+    }
+
+    async function loadDetail(id) {
+      const adminToken = token();
+      if (!adminToken) {
+        setStatus("Admin token is missing. Use the token panel first.", "error");
+        return;
+      }
+
+      setStatus("Loading email event detail…");
+
+      const response = await fetch(`/api/admin/cdas/email-events/${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        setStatus(data.message || data.error || "Could not load email event detail.", "error");
+        return;
+      }
+
+      const event = data.event;
+      detailSubtitle.textContent = `${event.email_type} — ${event.recipient_email}`;
+
+      const fields = [
+        ["ID", event.id],
+        ["Related type", event.related_type],
+        ["Related ID", event.related_id],
+        ["Email type", event.email_type],
+        ["Recipient", event.recipient_email],
+        ["Provider", event.provider],
+        ["Provider message ID", event.provider_message_id],
+        ["Status", event.status],
+        ["Error", event.error],
+        ["Message", event.message],
+        ["Subject", event.subject],
+        ["Created at", fmtDate(event.created_at)],
+        ["Metadata", JSON.stringify(event.metadata || {}, null, 2)],
+      ];
+
+      detailGrid.innerHTML = fields.map(([label, value]) => `
+        <dl class="rh-admin-detail-item">
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(fmt(value))}</dd>
+        </dl>
+      `).join("");
+
+      detailCard.hidden = false;
+      detailCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      setStatus("Email event detail loaded.", "success");
+    }
+
+    filtersForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      loadEvents();
+    });
+
+    resetFilters.addEventListener("click", () => {
+      filtersForm.reset();
+      loadEvents();
+    });
+
+    refreshButton.addEventListener("click", loadEvents);
+
+    eventsBody.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-event-id]");
+      if (button) loadDetail(button.dataset.eventId);
+    });
+
+    closeDetail.addEventListener("click", () => {
+      detailCard.hidden = true;
+    });
+
+    loadEvents();
+  </script>
+</BaseLayout>

@@ -33,6 +33,9 @@ import {
   issueCdasDownloadLink,
 } from "./download-link-issue.js";
 import {
+  emailCdasDownloadLink,
+} from "./email-download-link.js";
+import {
   listCdasDownloadLinks,
   getCdasDownloadLink,
 } from "./download-links.js";
@@ -49,8 +52,9 @@ import {
   revokeCdasAccessInvitation,
 } from "./invitations.js";
 import {
-  emailCdasDownloadLink,
-} from "./email-download-link.js";
+  listCdasEmailEvents,
+  getCdasEmailEvent,
+} from "./email-events-admin.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -115,6 +119,27 @@ export async function handleCdasAdminRequest(request, env) {
 
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
+
+  /*
+   * CDAS email event audit registry.
+   *
+   * Read-only. Does not send, resend, retry, mutate, verify, issue, or revoke.
+   *
+   * Important: this route must appear before the email test endpoint and
+   * before any broader CDAS route matching.
+   */
+  if (pathname === "/api/admin/cdas/email-events") {
+    return listCdasEmailEvents(request, env);
+  }
+
+  if (pathname.startsWith("/api/admin/cdas/email-events/")) {
+    const emailEventId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/email-events/"
+    );
+
+    return getCdasEmailEvent(request, env, emailEventId);
+  }
 
   /*
    * CDAS email test endpoint.
@@ -213,8 +238,6 @@ export async function handleCdasAdminRequest(request, env) {
     return getCdasAccessRequest(request, env, requestId);
   }
 
-
-
   /*
    * CDAS controlled download-link registry.
    *
@@ -301,7 +324,7 @@ export async function handleCdasAdminRequest(request, env) {
     return inspectCdasGeneratedPdf(request, env, licenceIdOrNumber);
   }
 
-    /*
+  /*
    * CDAS email controlled download-link delivery.
    *
    * Important: this route must appear before /issue-download-link and before
