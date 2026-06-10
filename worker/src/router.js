@@ -47,6 +47,10 @@ import {
   handleCdasDocumentDownloadMetadata,
 } from "./cdas/download-metadata.js";
 
+import {
+  handleCdasAccessInvitationMetadata,
+} from "./cdas/invitation-metadata.js";
+
 export async function routeRequest(request, env) {
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
@@ -213,6 +217,37 @@ export async function routeRequest(request, env) {
     );
 
     return handleCdasDocumentDownload(request, env, token);
+  }
+
+  /*
+   * CDAS Phase 3Y-B6-D — public access invitation metadata.
+   *
+   * This route checks an invitation token and returns safe display metadata
+   * for an invitation landing page.
+   *
+   * It does not:
+   * - consume the invitation,
+   * - increment use_count,
+   * - create an access request,
+   * - verify email,
+   * - issue a licence,
+   * - generate a PDF,
+   * - create a download link,
+   * - expose the raw token,
+   * - expose the token hash,
+   * - expose recipient private details,
+   * - mutate the database.
+   */
+  if (pathname.startsWith("/api/access-invitation/")) {
+    if (request.method !== "GET") {
+      return methodNotAllowed("GET");
+    }
+
+    const token = decodeURIComponent(
+      pathname.slice("/api/access-invitation/".length)
+    );
+
+    return handleCdasAccessInvitationMetadata(request, env, token);
   }
 
   /*
