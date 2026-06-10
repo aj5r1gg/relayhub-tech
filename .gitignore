@@ -1,9 +1,29 @@
+# Dependencies
 node_modules/
+
+# Astro build/cache
 dist/
 .astro/
+
+# Environment secrets
 .env
 .env.*
+!.env.example
+.dev.vars
+
+# OS/editor noise
 .DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Cloudflare/Wrangler local state
+.wrangler/
+
+# Private/generated R2 seed material
 private-r2-seed/documents/public/**/*.pdf
 private-r2-seed/documents/originals/**/*.pdf
 private-r2-seed/documents/generated/**

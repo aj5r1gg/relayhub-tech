@@ -54,6 +54,7 @@ import {
 import {
   listCdasEmailEvents,
   getCdasEmailEvent,
+  retryCdasEmailEvent,
 } from "./email-events-admin.js";
 
 function isCdasAdminAuthorized(request, env) {
@@ -123,13 +124,26 @@ export async function handleCdasAdminRequest(request, env) {
   /*
    * CDAS email event audit registry.
    *
-   * Read-only. Does not send, resend, retry, mutate, verify, issue, or revoke.
+   * Read-only list/detail, plus manual retry for failed retryable events.
    *
-   * Important: this route must appear before the email test endpoint and
-   * before any broader CDAS route matching.
+   * Important: /email-events/:id/retry must appear before the generic
+   * /email-events/:id route.
    */
   if (pathname === "/api/admin/cdas/email-events") {
     return listCdasEmailEvents(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/email-events/") &&
+    pathname.endsWith("/retry")
+  ) {
+    const emailEventId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/email-events/",
+      "/retry"
+    );
+
+    return retryCdasEmailEvent(request, env, emailEventId);
   }
 
   if (pathname.startsWith("/api/admin/cdas/email-events/")) {

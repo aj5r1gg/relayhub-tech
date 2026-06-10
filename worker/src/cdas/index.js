@@ -26,3 +26,4 @@ export * from "./invitations.js";
 export * from "./invitation-metadata.js";
 export * from "./email-events.js";
 export * from "./email-events-admin.js";
+export * from "./email-event-retry.js";

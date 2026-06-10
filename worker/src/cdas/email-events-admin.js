@@ -1,4 +1,5 @@
 import { jsonResponse } from "../shared.js";
+import { retryCdasEmailEvent } from "./email-event-retry.js";
 
 const ALLOWED_SORT_FIELDS = new Set([
   "created_at",
@@ -14,13 +15,22 @@ function cleanText(value) {
 
 function parsePositiveInt(value, fallback, max) {
   const parsed = Number.parseInt(String(value ?? ""), 10);
-  if (!Number.isFinite(parsed) || parsed < 0) return fallback;
+
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+
   return Math.min(parsed, max);
 }
 
 function normaliseSort(value) {
   const sort = cleanText(value);
-  return ALLOWED_SORT_FIELDS.has(sort) ? sort : "created_at";
+
+  if (ALLOWED_SORT_FIELDS.has(sort)) {
+    return sort;
+  }
+
+  return "created_at";
 }
 
 function normaliseDirection(value) {
@@ -28,9 +38,13 @@ function normaliseDirection(value) {
 }
 
 function parseMetadata(value) {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
+
   try {
-    return JSON.parse(value);
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" ? parsed : null;
   } catch {
     return null;
   }
@@ -40,12 +54,21 @@ function normaliseRow(row) {
   return {
     ...row,
     metadata: parseMetadata(row.metadata_json),
+    retryable: Number(row.retryable || 0),
+    retry_count: Number(row.retry_count || 0),
   };
 }
 
 export async function listCdasEmailEvents(request, env) {
   if (request.method !== "GET") {
-    return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+    return jsonResponse(
+      {
+        ok: false,
+        error: "method_not_allowed",
+        message: "Use GET to list CDAS email events.",
+      },
+      405
+    );
   }
 
   const url = new URL(request.url);
@@ -55,7 +78,10 @@ export async function listCdasEmailEvents(request, env) {
   const relatedId = cleanText(url.searchParams.get("related_id"));
   const emailType = cleanText(url.searchParams.get("email_type"));
   const status = cleanText(url.searchParams.get("status"));
-  const recipientEmail = cleanText(url.searchParams.get("recipient_email")).toLowerCase();
+  const recipientEmail = cleanText(
+    url.searchParams.get("recipient_email")
+  ).toLowerCase();
+  const retryable = cleanText(url.searchParams.get("retryable"));
 
   const limit = parsePositiveInt(url.searchParams.get("limit"), 50, 200);
   const offset = parsePositiveInt(url.searchParams.get("offset"), 0, 100000);
@@ -69,6 +95,7 @@ export async function listCdasEmailEvents(request, env) {
     where.push(
       `(id LIKE ? OR related_id LIKE ? OR recipient_email LIKE ? OR provider_message_id LIKE ? OR subject LIKE ?)`
     );
+
     const like = `%${q}%`;
     bindings.push(like, like, like, like, like);
   }
@@ -98,10 +125,17 @@ export async function listCdasEmailEvents(request, env) {
     bindings.push(recipientEmail);
   }
 
+  if (retryable === "0" || retryable === "1") {
+    where.push("retryable = ?");
+    bindings.push(Number(retryable));
+  }
+
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
   const total = await env.RELAYHUB_DB.prepare(
-    `SELECT COUNT(*) AS total FROM cdas_email_events ${whereSql}`
+    `SELECT COUNT(*) AS total
+     FROM cdas_email_events
+     ${whereSql}`
   )
     .bind(...bindings)
     .first();
@@ -131,14 +165,24 @@ export async function listCdasEmailEvents(request, env) {
       email_type: emailType || null,
       status: status || null,
       recipient_email: recipientEmail || null,
+      retryable: retryable || null,
     },
-    rows: Array.isArray(rows?.results) ? rows.results.map(normaliseRow) : [],
+    rows: Array.isArray(rows?.results)
+      ? rows.results.map(normaliseRow)
+      : [],
   });
 }
 
 export async function getCdasEmailEvent(request, env, eventId) {
   if (request.method !== "GET") {
-    return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+    return jsonResponse(
+      {
+        ok: false,
+        error: "method_not_allowed",
+        message: "Use GET to inspect a CDAS email event.",
+      },
+      405
+    );
   }
 
   const id = cleanText(eventId);
@@ -179,3 +223,5 @@ export async function getCdasEmailEvent(request, env, eventId) {
     event: normaliseRow(row),
   });
 }
+
+export { retryCdasEmailEvent };
