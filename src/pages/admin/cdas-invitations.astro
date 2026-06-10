@@ -1,0 +1,741 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
+
+const pageTitle = "CDAS Invitations Admin";
+const pageDescription =
+  "Admin registry for RelayHub CDAS access invitations.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} noindex={true}>
+  <main class="rh-admin-page">
+    <section class="rh-admin-hero">
+      <p class="rh-eyebrow">RelayHub Admin</p>
+      <h1>CDAS Invitations</h1>
+      <p>
+        Create, inspect, and revoke CDAS access invitations. Invitation tokens
+        start controlled document access workflows; they are not verification
+        tokens and they are not download links.
+      </p>
+    </section>
+
+    <AdminTokenPanel />
+
+    <section class="rh-admin-grid rh-admin-summary-grid">
+      <article class="rh-admin-metric">
+        <span>Total</span>
+        <strong id="metric-total">—</strong>
+      </article>
+      <article class="rh-admin-metric">
+        <span>Active</span>
+        <strong id="metric-active">—</strong>
+      </article>
+      <article class="rh-admin-metric">
+        <span>Used</span>
+        <strong id="metric-used">—</strong>
+      </article>
+      <article class="rh-admin-metric">
+        <span>Revoked</span>
+        <strong id="metric-revoked">—</strong>
+      </article>
+    </section>
+
+    <section class="rh-admin-card">
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Create invitation</h2>
+          <p>
+            The raw invitation token is shown only once after creation. Store or
+            copy the invitation URL immediately.
+          </p>
+        </div>
+      </div>
+
+      <form class="rh-admin-filters" id="create-form">
+        <label>
+          Document ID
+          <input name="document_id" value="relayhub-overview" required />
+        </label>
+
+        <label>
+          Type
+          <select name="invitation_type">
+            <option value="public">public</option>
+            <option value="named">named</option>
+            <option value="partner">partner</option>
+            <option value="purchase">purchase</option>
+            <option value="admin">admin</option>
+          </select>
+        </label>
+
+        <label>
+          Max uses
+          <input name="max_uses" type="number" min="1" value="1" required />
+        </label>
+
+        <label>
+          Expires in hours
+          <input name="expires_in_hours" type="number" min="1" value="24" required />
+        </label>
+
+        <label>
+          Recipient email
+          <input name="recipient_email" type="email" placeholder="Optional unless named/purchase" />
+        </label>
+
+        <label>
+          Recipient name
+          <input name="recipient_name" placeholder="Optional" />
+        </label>
+
+        <label class="rh-admin-wide">
+          Notes
+          <input name="notes" placeholder="Reason or context" />
+        </label>
+
+        <div class="rh-admin-filter-actions">
+          <button class="rh-button rh-button-primary" type="submit">
+            Create invitation
+          </button>
+        </div>
+      </form>
+
+      <div class="rh-admin-status" id="create-status" role="status" aria-live="polite">
+        Ready.
+      </div>
+
+      <div class="rh-created-link" id="created-link" hidden>
+        <strong>Invitation URL</strong>
+        <code id="created-url"></code>
+        <button class="rh-button rh-button-secondary" id="copy-created-url" type="button">
+          Copy URL
+        </button>
+      </div>
+    </section>
+
+    <section class="rh-admin-card">
+      <div class="rh-admin-section-heading">
+        <div>
+          <h2>Invitation registry</h2>
+          <p>
+            Raw tokens and token hashes are not displayed. Revoke only affects
+            active unused invitations.
+          </p>
+        </div>
+
+        <div class="rh-admin-actions">
+          <a class="rh-button rh-button-secondary" href="/admin/cdas-download-links">
+            Download links
+          </a>
+          <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <form class="rh-admin-filters" id="filters-form">
+        <label>
+          Document
+          <input id="filter-document" name="document_id" type="search" placeholder="relayhub-overview" />
+        </label>
+
+        <label>
+          Status
+          <select id="filter-status" name="status">
+            <option value="">All statuses</option>
+            <option value="active">active</option>
+            <option value="used">used</option>
+            <option value="revoked">revoked</option>
+            <option value="superseded">superseded</option>
+          </select>
+        </label>
+
+        <div class="rh-admin-filter-actions">
+          <button class="rh-button rh-button-primary" type="submit">Apply filters</button>
+          <button class="rh-button rh-button-secondary" id="reset-filters" type="button">Reset</button>
+        </div>
+      </form>
+
+      <div class="rh-admin-status" id="status-message" role="status" aria-live="polite">
+        Ready.
+      </div>
+
+      <div class="rh-admin-table-wrap">
+        <table class="rh-admin-table">
+          <thead>
+            <tr>
+              <th>Invitation</th>
+              <th>Document</th>
+              <th>Status</th>
+              <th>Usage</th>
+              <th>Lifecycle</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="invitations-body">
+            <tr>
+              <td colspan="6" class="rh-admin-empty">Loading invitations…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .rh-admin-page {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0 5rem;
+    }
+
+    .rh-admin-hero,
+    .rh-admin-card,
+    .rh-admin-metric {
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 1.25rem;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+    }
+
+    .rh-admin-hero {
+      margin-bottom: 1.5rem;
+      padding: 2rem;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 36rem),
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
+    }
+
+    .rh-admin-hero h1 {
+      margin: 0.35rem 0 0.75rem;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .rh-admin-hero p,
+    .rh-admin-section-heading p {
+      max-width: 760px;
+      margin: 0;
+      color: rgba(15, 23, 42, 0.74);
+      line-height: 1.7;
+    }
+
+    .rh-eyebrow {
+      margin: 0;
+      color: #2563eb;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-grid {
+      display: grid;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .rh-admin-summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .rh-admin-metric {
+      padding: 1rem;
+    }
+
+    .rh-admin-metric span {
+      display: block;
+      color: rgba(15, 23, 42, 0.6);
+      font-weight: 800;
+    }
+
+    .rh-admin-metric strong {
+      display: block;
+      margin-top: 0.4rem;
+      color: #0f172a;
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .rh-admin-card {
+      margin-top: 1rem;
+      padding: 1.25rem;
+    }
+
+    .rh-admin-section-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .rh-admin-section-heading h2 {
+      margin: 0 0 0.35rem;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+    }
+
+    .rh-admin-actions,
+    .rh-admin-filter-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: end;
+    }
+
+    .rh-admin-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.8rem;
+      align-items: end;
+      margin: 1rem 0;
+    }
+
+    .rh-admin-wide {
+      grid-column: 1 / -1;
+    }
+
+    .rh-admin-filters label {
+      display: grid;
+      gap: 0.35rem;
+      color: rgba(15, 23, 42, 0.78);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .rh-admin-filters input,
+    .rh-admin-filters select {
+      width: 100%;
+      border: 1px solid rgba(15, 23, 42, 0.16);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .rh-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.5rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.55rem 0.9rem;
+      font: inherit;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .rh-button-primary {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #fff;
+    }
+
+    .rh-button-secondary {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.18);
+      color: #0f172a;
+    }
+
+    .rh-button-danger {
+      background: #991b1b;
+      border-color: #991b1b;
+      color: #fff;
+    }
+
+    .rh-button[disabled] {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .rh-admin-status {
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      border-radius: 0.9rem;
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.75);
+      line-height: 1.55;
+    }
+
+    .rh-admin-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-admin-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-created-link {
+      display: grid;
+      gap: 0.65rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: #f0fdf4;
+      color: #14532d;
+    }
+
+    .rh-created-link code {
+      overflow-wrap: anywhere;
+      font-size: 0.9rem;
+    }
+
+    .rh-admin-table-wrap {
+      overflow-x: auto;
+    }
+
+    .rh-admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    .rh-admin-table th,
+    .rh-admin-table td {
+      padding: 0.85rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .rh-admin-table th {
+      color: rgba(15, 23, 42, 0.62);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-table code {
+      word-break: break-word;
+    }
+
+    .rh-admin-empty {
+      color: rgba(15, 23, 42, 0.55);
+      text-align: center !important;
+    }
+
+    .rh-badge {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .rh-badge-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .rh-badge-used {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .rh-badge-revoked {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .rh-muted {
+      color: rgba(15, 23, 42, 0.58);
+    }
+
+    @media (max-width: 720px) {
+      .rh-admin-page {
+        width: min(100% - 1rem, 1180px);
+      }
+
+      .rh-admin-hero,
+      .rh-admin-card {
+        padding: 1rem;
+      }
+
+      .rh-admin-section-heading {
+        display: grid;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // @ts-nocheck
+
+    const ADMIN_TOKEN_KEY = "relayhub_admin_token";
+
+    const createForm = document.getElementById("create-form");
+    const createStatus = document.getElementById("create-status");
+    const createdLink = document.getElementById("created-link");
+    const createdUrl = document.getElementById("created-url");
+    const copyCreatedUrl = document.getElementById("copy-created-url");
+
+    const filtersForm = document.getElementById("filters-form");
+    const statusMessage = document.getElementById("status-message");
+    const invitationsBody = document.getElementById("invitations-body");
+    const refreshButton = document.getElementById("refresh-button");
+    const resetFilters = document.getElementById("reset-filters");
+
+    const metricTotal = document.getElementById("metric-total");
+    const metricActive = document.getElementById("metric-active");
+    const metricUsed = document.getElementById("metric-used");
+    const metricRevoked = document.getElementById("metric-revoked");
+
+    let lastCreatedUrl = "";
+
+    function getAdminToken() {
+      return sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+    }
+
+    function setStatus(el, message, mode = "neutral") {
+      el.textContent = message;
+      el.dataset.state = mode;
+    }
+
+    function authHeaders() {
+      const token = getAdminToken();
+
+      if (!token) {
+        throw new Error("Admin token is not set. Use the token panel first.");
+      }
+
+      return {
+        "Authorization": `Bearer ${token}`,
+      };
+    }
+
+    function jsonHeaders() {
+      return {
+        ...authHeaders(),
+        "content-type": "application/json",
+      };
+    }
+
+    function badge(status) {
+      const value = status || "unknown";
+      return `<span class="rh-badge rh-badge-${escapeHtml(value)}">${escapeHtml(value)}</span>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function fmt(value) {
+      return value ? escapeHtml(value) : "<span class='rh-muted'>—</span>";
+    }
+
+    function updateMetrics(rows) {
+      metricTotal.textContent = rows.length;
+      metricActive.textContent = rows.filter((item) => item.status === "active").length;
+      metricUsed.textContent = rows.filter((item) => item.status === "used").length;
+      metricRevoked.textContent = rows.filter((item) => item.status === "revoked").length;
+    }
+
+    function rowHtml(invitation) {
+      const canRevoke =
+        invitation.status === "active" && Number(invitation.use_count || 0) === 0;
+
+      return `
+        <tr>
+          <td>
+            <code>${escapeHtml(invitation.id)}</code><br />
+            <span class="rh-muted">${escapeHtml(invitation.invitation_type || "—")}</span>
+          </td>
+          <td>
+            <strong>${escapeHtml(invitation.document_title || invitation.document_id)}</strong><br />
+            <span class="rh-muted">${escapeHtml(invitation.document_id)} v${escapeHtml(invitation.document_version)}</span>
+          </td>
+          <td>${badge(invitation.status)}</td>
+          <td>
+            ${escapeHtml(invitation.use_count)} / ${escapeHtml(invitation.max_uses)}<br />
+            <span class="rh-muted">Last used: ${fmt(invitation.last_used_at)}</span>
+          </td>
+          <td>
+            Created: ${fmt(invitation.created_at)}<br />
+            Expires: ${fmt(invitation.expires_at)}<br />
+            Revoked: ${fmt(invitation.revoked_at)}
+          </td>
+          <td>
+            <button
+              class="rh-button rh-button-danger"
+              type="button"
+              data-action="revoke"
+              data-id="${escapeHtml(invitation.id)}"
+              ${canRevoke ? "" : "disabled"}
+            >
+              Revoke
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+
+    async function loadInvitations() {
+      setStatus(statusMessage, "Loading invitations…");
+
+      let url = "/api/admin/cdas/invitations";
+      const params = new URLSearchParams(new FormData(filtersForm));
+
+      for (const [key, value] of [...params.entries()]) {
+        if (!value) params.delete(key);
+      }
+
+      if ([...params.keys()].length) {
+        url += `?${params.toString()}`;
+      }
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(url, {
+          headers: authHeaders(),
+        });
+        data = await response.json();
+      } catch (error) {
+        setStatus(statusMessage, `Could not load invitations: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(statusMessage, data?.message || data?.error || "Could not load invitations.", "error");
+        return;
+      }
+
+      const rows = data.invitations || [];
+      updateMetrics(rows);
+
+      invitationsBody.innerHTML = rows.length
+        ? rows.map(rowHtml).join("")
+        : `<tr><td colspan="6" class="rh-admin-empty">No invitations found.</td></tr>`;
+
+      setStatus(statusMessage, `Loaded ${rows.length} invitation(s).`, "success");
+    }
+
+    async function createInvitation(event) {
+      event.preventDefault();
+
+      setStatus(createStatus, "Creating invitation…");
+      createdLink.hidden = true;
+      lastCreatedUrl = "";
+
+      const formData = new FormData(createForm);
+      const payload = Object.fromEntries(formData.entries());
+
+      payload.max_uses = Number(payload.max_uses || 1);
+      payload.expires_in_hours = Number(payload.expires_in_hours || 24);
+      payload.created_by = payload.created_by || "Admin";
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch("/api/admin/cdas/invitations", {
+          method: "POST",
+          headers: jsonHeaders(),
+          body: JSON.stringify(payload),
+        });
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(createStatus, `Could not create invitation: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(createStatus, data?.message || data?.error || "Could not create invitation.", "error");
+        return;
+      }
+
+      lastCreatedUrl = data.invitation_url || "";
+      createdUrl.textContent = lastCreatedUrl;
+      createdLink.hidden = false;
+
+      setStatus(createStatus, `Invitation created: ${data.invitation?.id || "unknown"}`, "success");
+      await loadInvitations();
+    }
+
+    async function revokeInvitation(invitationId) {
+      const reason = window.prompt(
+        "Reason for revoking this invitation:",
+        "Revoked from admin invitations page."
+      );
+
+      if (reason === null) return;
+
+      setStatus(statusMessage, `Revoking ${invitationId}…`);
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(`/api/admin/cdas/invitations/${encodeURIComponent(invitationId)}/revoke`, {
+          method: "POST",
+          headers: jsonHeaders(),
+          body: JSON.stringify({
+            revoked_by: "Admin UI",
+            reason,
+          }),
+        });
+
+        data = await response.json();
+      } catch (error) {
+        setStatus(statusMessage, `Could not revoke invitation: ${error.message}`, "error");
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        setStatus(statusMessage, data?.message || data?.error || "Could not revoke invitation.", "error");
+        return;
+      }
+
+      setStatus(statusMessage, data.message || "Invitation revoked.", "success");
+      await loadInvitations();
+    }
+
+    createForm.addEventListener("submit", createInvitation);
+
+    filtersForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      loadInvitations();
+    });
+
+    resetFilters.addEventListener("click", () => {
+      filtersForm.reset();
+      loadInvitations();
+    });
+
+    refreshButton.addEventListener("click", loadInvitations);
+
+    invitationsBody.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action='revoke']");
+
+      if (!button) return;
+
+      revokeInvitation(button.dataset.id);
+    });
+
+    copyCreatedUrl.addEventListener("click", async () => {
+      if (!lastCreatedUrl) return;
+
+      await navigator.clipboard.writeText(lastCreatedUrl);
+      setStatus(createStatus, "Invitation URL copied.", "success");
+    });
+
+    loadInvitations();
+  </script>
+</BaseLayout>
