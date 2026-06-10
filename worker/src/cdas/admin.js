@@ -11,6 +11,9 @@ import {
   getCdasAccessRequest,
 } from "./access-requests.js";
 import {
+  resendCdasAccessRequestVerification,
+} from "./resend-verification.js";
+import {
   listCdasLicences,
   getCdasLicence,
 } from "./licences.js";
@@ -173,6 +176,29 @@ export async function handleCdasAdminRequest(request, env) {
    */
   if (pathname === "/api/admin/cdas/access-requests") {
     return listCdasAccessRequests(request, env);
+  }
+
+  /*
+   * Manual verification-email resend.
+   *
+   * This route generates a fresh verification token/hash for an existing
+   * unverified access request, then sends a new verification email.
+   *
+   * Important: this special route must appear before the generic
+   * /access-requests/:id route, otherwise the generic detail handler will
+   * swallow it.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/access-requests/") &&
+    pathname.endsWith("/resend-verification")
+  ) {
+    const requestId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/access-requests/",
+      "/resend-verification"
+    );
+
+    return resendCdasAccessRequestVerification(request, env, requestId);
   }
 
   if (pathname.startsWith("/api/admin/cdas/access-requests/")) {
