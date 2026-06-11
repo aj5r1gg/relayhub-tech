@@ -36,6 +36,9 @@ import {
   emailCdasDownloadLink,
 } from "./email-download-link.js";
 import {
+  reissueCdasDownloadLink,
+} from "./reissue-download-link.js";
+import {
   listCdasDownloadLinks,
   getCdasDownloadLink,
 } from "./download-links.js";
@@ -334,6 +337,19 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return emailCdasDownloadLink(request, env, licenceIdOrNumber);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/reissue-download-link")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/reissue-download-link"
+    );
+
+    return reissueCdasDownloadLink(request, env, licenceIdOrNumber);
   }
 
   if (
