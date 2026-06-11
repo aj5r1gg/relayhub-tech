@@ -270,9 +270,40 @@ const pageDescription =
 
         <div class="rh-download-history-controls" id="download-history-controls"></div>
       </section>
+
+      <section class="rh-download-history" id="evidence-bundle-card" hidden>
+        <div class="rh-download-history-heading">
+          <div>
+            <p class="rh-eyebrow">Evidence export</p>
+            <h3>Licence evidence bundle</h3>
+            <p>
+              Read-only JSON evidence bundle for this licence. This exports the licence,
+              document, generated PDF evidence, download links, email events, download events,
+              dangerous-state summary, integrity summary, and timeline evidence. It does not
+              generate PDFs, create links, send email, serve downloads, expose raw tokens,
+              expose token hashes, or expose private R2 URLs.
+            </p>
+          </div>
+        </div>
+
+        <div class="rh-download-history-status" id="evidence-bundle-status"></div>
+
+        <div class="rh-download-history-grid" id="evidence-bundle-summary"></div>
+
+        <div class="rh-download-history-subsection">
+          <h4>Integrity summary</h4>
+          <div class="rh-download-history-grid" id="evidence-bundle-integrity"></div>
+        </div>
+
+        <div class="rh-download-history-subsection">
+          <h4>Export preview</h4>
+          <pre class="rh-rendered-body" id="evidence-bundle-preview"></pre>
+        </div>
+
+        <div class="rh-download-history-controls" id="evidence-bundle-controls"></div>
+      </section>
     </section>
   </main>
-
   <style>
     .rh-admin-page {
       width: min(1220px, calc(100% - 2rem));
@@ -328,25 +359,26 @@ const pageDescription =
       margin-top: 1rem;
     }
 
-        .rh-admin-section-heading {
+    .rh-admin-section-heading {
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 1rem;
-      align-items: flex-start;
-      margin-bottom: 1rem;
     }
 
+    .rh-admin-card h2,
     .rh-admin-section-heading h2 {
       margin: 0;
       color: #0f172a;
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       letter-spacing: -0.03em;
     }
 
+    .rh-admin-card p,
     .rh-admin-section-heading p {
       margin: 0.35rem 0 0;
-      color: rgba(15, 23, 42, 0.68);
-      line-height: 1.55;
+      color: rgba(15, 23, 42, 0.67);
+      line-height: 1.6;
     }
 
     .rh-admin-grid {
@@ -366,15 +398,15 @@ const pageDescription =
     .rh-admin-metric span {
       display: block;
       color: rgba(15, 23, 42, 0.62);
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 800;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
     }
 
     .rh-admin-metric strong {
       display: block;
-      margin-top: 0.35rem;
+      margin-top: 0.4rem;
       color: #0f172a;
       font-size: 2rem;
       line-height: 1;
@@ -383,31 +415,59 @@ const pageDescription =
     .rh-admin-actions,
     .rh-admin-filter-actions {
       display: flex;
-      gap: 0.65rem;
-      align-items: center;
+      gap: 0.5rem;
       flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .rh-admin-filters {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 0.85rem;
+      align-items: end;
+      margin: 1.25rem 0 1rem;
+    }
+
+    .rh-admin-filters label {
+      display: grid;
+      gap: 0.35rem;
+      color: rgba(15, 23, 42, 0.8);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .rh-admin-filters input,
+    .rh-admin-filters select {
+      width: 100%;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+      border-radius: 0.8rem;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .rh-admin-filter-actions {
+      grid-column: 1 / -1;
     }
 
     .rh-button {
       display: inline-flex;
-      justify-content: center;
       align-items: center;
-      gap: 0.45rem;
-      min-height: 2.45rem;
-      padding: 0.62rem 0.95rem;
+      justify-content: center;
+      min-height: 2.75rem;
       border: 1px solid transparent;
       border-radius: 999px;
+      padding: 0.65rem 1rem;
       font: inherit;
-      font-size: 0.88rem;
-      font-weight: 900;
-      line-height: 1;
+      font-weight: 800;
       cursor: pointer;
-      text-decoration: none;
       transition:
-        transform 0.16s ease,
-        box-shadow 0.16s ease,
-        background 0.16s ease,
-        border-color 0.16s ease;
+        transform 150ms ease,
+        background 150ms ease,
+        border-color 150ms ease,
+        color 150ms ease;
+      white-space: nowrap;
     }
 
     .rh-button:hover {
@@ -415,77 +475,57 @@ const pageDescription =
     }
 
     .rh-button-primary {
+      background: #0f172a;
       color: #fff;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.22);
+      border-color: #0f172a;
+    }
+
+    .rh-button-primary:hover {
+      background: #1e293b;
+      color: #fff;
     }
 
     .rh-button-secondary {
+      background: #fff;
       color: #0f172a;
-      background: rgba(248, 250, 252, 0.98);
-      border-color: rgba(15, 23, 42, 0.13);
+      border-color: rgba(15, 23, 42, 0.18);
+    }
+
+    .rh-button-secondary:hover {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.34);
     }
 
     .rh-button-warning {
-      color: #7c2d12;
-      background: linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(254, 215, 170, 0.92));
-      border-color: rgba(234, 88, 12, 0.35);
-      box-shadow: 0 12px 26px rgba(234, 88, 12, 0.12);
+      background: #92400e;
+      color: #fff;
+      border-color: #92400e;
     }
 
-    .rh-admin-filters {
-      display: grid;
-      grid-template-columns: 1.35fr 1fr 0.85fr auto;
-      gap: 0.9rem;
-      align-items: end;
-      padding: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.1);
-      border-radius: 1rem;
-      background: rgba(248, 250, 252, 0.72);
-    }
-
-    .rh-admin-filters label {
-      display: grid;
-      gap: 0.35rem;
-      color: rgba(15, 23, 42, 0.72);
-      font-size: 0.82rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .rh-admin-filters input,
-    .rh-admin-filters select,
-    .rh-download-link-url-card input {
-      width: 100%;
-      min-height: 2.65rem;
-      padding: 0.7rem 0.8rem;
-      border: 1px solid rgba(15, 23, 42, 0.14);
-      border-radius: 0.75rem;
-      background: #fff;
-      color: #0f172a;
-      font: inherit;
-      font-size: 0.95rem;
+    .rh-button-warning:hover {
+      background: #78350f;
+      color: #fff;
+      border-color: #78350f;
     }
 
     .rh-admin-status {
       margin: 1rem 0;
       padding: 0.85rem 1rem;
       border-radius: 0.9rem;
-      background: rgba(239, 246, 255, 0.9);
-      color: #1e3a8a;
-      font-weight: 800;
-      line-height: 1.45;
-    }
-
-    .rh-admin-status[data-state="success"] {
-      background: rgba(236, 253, 245, 0.95);
-      color: #065f46;
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.75);
+      font-size: 0.95rem;
     }
 
     .rh-admin-status[data-state="error"] {
-      background: rgba(254, 242, 242, 0.95);
+      background: #fef2f2;
       color: #991b1b;
+    }
+
+    .rh-admin-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
     }
 
     .rh-admin-table-wrap {
@@ -496,26 +536,53 @@ const pageDescription =
 
     .rh-admin-table {
       width: 100%;
-      min-width: 980px;
+      min-width: 1040px;
       border-collapse: collapse;
       background: #fff;
+      font-size: 0.92rem;
     }
 
     .rh-admin-table th,
     .rh-admin-table td {
-      padding: 0.9rem;
+      padding: 0.85rem;
       border-bottom: 1px solid rgba(15, 23, 42, 0.08);
       text-align: left;
       vertical-align: top;
     }
 
     .rh-admin-table th {
-      background: rgba(248, 250, 252, 0.98);
-      color: rgba(15, 23, 42, 0.68);
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.74);
       font-size: 0.76rem;
       font-weight: 900;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+    }
+
+    .rh-admin-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .rh-admin-empty {
+      text-align: center;
+      color: rgba(15, 23, 42, 0.58);
+    }
+
+    .rh-admin-title-stack,
+    .rh-policy-stack {
+      display: grid;
+      gap: 0.18rem;
+    }
+
+    .rh-admin-title-stack strong {
+      color: #0f172a;
+    }
+
+    .rh-admin-title-stack span,
+    .rh-policy-stack span {
+      color: rgba(15, 23, 42, 0.64);
+      font-size: 0.82rem;
+      word-break: break-word;
     }
 
     .rh-licence-main-row td {
@@ -524,163 +591,214 @@ const pageDescription =
 
     .rh-licence-actions-row td {
       padding-top: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.82));
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.52), rgba(255, 255, 255, 1));
       border-bottom: 1px solid rgba(15, 23, 42, 0.12);
     }
 
     .rh-admin-row-actions {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-start;
       gap: 0.55rem;
-      padding: 0.2rem 0 0.75rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0.65rem 0 0.2rem;
     }
 
     .rh-admin-row-actions .rh-button {
-      min-height: 2.2rem;
-      padding: 0.5rem 0.82rem;
-      font-size: 0.8rem;
+      min-height: 2.35rem;
+      padding: 0.52rem 0.85rem;
+      font-size: 0.86rem;
     }
 
     .rh-admin-row-actions-note {
       flex-basis: 100%;
-      margin: 0.1rem 0 0;
-      color: rgba(15, 23, 42, 0.58);
-      font-size: 0.8rem;
+      margin: 0.15rem 0 0;
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.82rem;
       line-height: 1.45;
     }
 
-    .rh-admin-empty {
-      padding: 2rem !important;
-      color: rgba(15, 23, 42, 0.58);
-      text-align: center !important;
+    .rh-badge,
+    .rh-evidence-pill {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      font-size: 0.78rem;
       font-weight: 800;
-    }
-
-    .rh-admin-title-stack,
-    .rh-policy-stack {
-      display: grid;
-      gap: 0.24rem;
-    }
-
-    .rh-admin-title-stack strong {
-      color: #0f172a;
-      font-weight: 900;
-    }
-
-    .rh-admin-title-stack span,
-    .rh-policy-stack span {
-      color: rgba(15, 23, 42, 0.62);
-      font-size: 0.84rem;
-      line-height: 1.35;
+      white-space: nowrap;
     }
 
     .rh-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.3rem 0.62rem;
-      border-radius: 999px;
-      background: rgba(226, 232, 240, 0.82);
+      background: #f1f5f9;
       color: #334155;
-      font-size: 0.74rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
     }
 
-    .rh-badge-active {
-      background: rgba(220, 252, 231, 0.95);
+    .rh-badge-active,
+    .rh-evidence-pill {
+      background: #dcfce7;
       color: #166534;
     }
 
     .rh-badge-revoked,
-    .rh-badge-failed {
-      background: rgba(254, 226, 226, 0.95);
+    .rh-badge-expired {
+      background: #fee2e2;
       color: #991b1b;
     }
 
     .rh-badge-superseded,
+        .rh-badge-superseded,
     .rh-badge-corrected,
-    .rh-badge-expired,
-    .rh-badge-used {
-      background: rgba(254, 249, 195, 0.95);
-      color: #854d0e;
-    }
-
-    .rh-evidence-pill {
-      display: inline-flex;
-      width: fit-content;
-      padding: 0.22rem 0.55rem;
-      border-radius: 999px;
-      background: rgba(220, 252, 231, 0.95);
-      color: #166534 !important;
-      font-size: 0.72rem !important;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
     .rh-evidence-pill-missing {
-      background: rgba(254, 226, 226, 0.95);
-      color: #991b1b !important;
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .rh-hash,
-    .rh-generation-code,
-    .rh-pdf-code,
-    .rh-download-link-code,
-    .rh-download-history-code {
+    .rh-hash {
+      display: block;
+      max-width: 36ch;
       overflow-wrap: anywhere;
-      word-break: break-word;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.78rem !important;
+      line-height: 1.45;
+      color: rgba(15, 23, 42, 0.72);
     }
 
     .rh-admin-detail-card {
-      scroll-margin-top: 5rem;
+      margin-top: 1rem;
     }
 
     .rh-detail-sections {
       display: grid;
       gap: 1rem;
+      margin-top: 1rem;
     }
 
-    .rh-detail-section,
+    .rh-detail-section {
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .rh-detail-section-header {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      background: #f8fafc;
+    }
+
+    .rh-detail-section-header h3 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .rh-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .rh-detail-item {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .rh-detail-item:nth-child(odd) {
+      border-right: 1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    .rh-detail-item dt {
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-detail-item dd {
+      margin: 0.28rem 0 0;
+      color: #0f172a;
+      word-break: break-word;
+      line-height: 1.55;
+    }
+
+    .rh-detail-item-wide {
+      grid-column: 1 / -1;
+      border-right: 0 !important;
+    }
+
     .rh-rendered-evidence,
     .rh-generation-preview,
     .rh-pdf-inspection,
     .rh-download-link-issue,
     .rh-download-history {
-      padding: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.1);
+      margin-top: 1.25rem;
+      border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 1rem;
-      background: rgba(248, 250, 252, 0.62);
+      padding: 1rem;
+      background: #fff;
     }
 
-    .rh-detail-section-header h3,
+    .rh-rendered-evidence {
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-generation-preview {
+      background:
+        radial-gradient(circle at top left, rgba(22, 163, 74, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-pdf-inspection {
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-download-link-issue {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.1), transparent 28rem),
+        #fff;
+    }
+
+    .rh-download-history {
+      background:
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.1), transparent 28rem),
+        #fff;
+    }
+
+    .rh-rendered-heading,
+    .rh-generation-heading,
+    .rh-pdf-inspection-heading,
+    .rh-download-link-heading,
+    .rh-download-history-heading {
+      margin-bottom: 1rem;
+    }
+
     .rh-rendered-heading h3,
     .rh-generation-heading h3,
     .rh-pdf-inspection-heading h3,
     .rh-download-link-heading h3,
     .rh-download-history-heading h3 {
-      margin: 0.2rem 0 0.4rem;
-      color: #0f172a;
-      font-size: 1.1rem;
-      letter-spacing: -0.02em;
-    }
-
-    .rh-rendered-heading p,
-    .rh-generation-heading p,
-    .rh-pdf-inspection-heading p,
-    .rh-download-link-heading p,
-    .rh-download-history-heading p {
       margin: 0.25rem 0 0;
-      color: rgba(15, 23, 42, 0.66);
-      line-height: 1.55;
+      color: #0f172a;
+      font-size: 1.3rem;
+      letter-spacing: -0.04em;
     }
 
-    .rh-detail-grid,
+    .rh-rendered-heading p:last-child,
+    .rh-generation-heading p:last-child,
+    .rh-pdf-inspection-heading p:last-child,
+    .rh-download-link-heading p:last-child,
+    .rh-download-history-heading p:last-child {
+      margin: 0.35rem 0 0;
+      color: rgba(15, 23, 42, 0.68);
+      line-height: 1.6;
+    }
+
     .rh-evidence-grid,
     .rh-generation-grid,
     .rh-generation-controls,
@@ -691,44 +809,51 @@ const pageDescription =
     .rh-download-history-grid,
     .rh-download-history-controls {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.75rem;
+    }
+
+    .rh-evidence-grid {
+      margin-bottom: 1rem;
+    }
+
+    .rh-generation-controls,
+    .rh-pdf-inspection-controls,
+    .rh-download-link-controls,
+    .rh-download-history-controls {
       margin-top: 1rem;
     }
 
-    .rh-detail-item,
     .rh-evidence-row,
     .rh-generation-row,
     .rh-pdf-row,
     .rh-download-link-row,
     .rh-download-history-row {
-      min-width: 0;
-      margin: 0;
-      padding: 0.75rem;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+      padding: 0.85rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
       border-radius: 0.85rem;
-      background: rgba(255, 255, 255, 0.9);
+      background: #f8fafc;
     }
 
-    .rh-detail-item-wide {
-      grid-column: 1 / -1;
+    .rh-evidence-row {
+      grid-template-columns: 220px minmax(0, 1fr);
     }
 
-    .rh-detail-item dt,
     .rh-evidence-row dt,
     .rh-generation-row dt,
     .rh-pdf-row dt,
     .rh-download-link-row dt,
     .rh-download-history-row dt {
-      margin-bottom: 0.32rem;
-      color: rgba(15, 23, 42, 0.58);
+      color: rgba(15, 23, 42, 0.55);
       font-size: 0.72rem;
       font-weight: 900;
       letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
-    .rh-detail-item dd,
     .rh-evidence-row dd,
     .rh-generation-row dd,
     .rh-pdf-row dd,
@@ -736,81 +861,93 @@ const pageDescription =
     .rh-download-history-row dd {
       margin: 0;
       color: #0f172a;
-      line-height: 1.45;
       overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.5;
     }
 
-    .rh-evidence-hash {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.78rem;
+    .rh-evidence-hash,
+    .rh-generation-code,
+    .rh-pdf-code,
+    .rh-download-link-code,
+    .rh-download-history-code {
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+      font-size: 0.86rem;
     }
 
     .rh-rendered-body-wrap {
-      margin-top: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.1);
+      border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 1rem;
       overflow: hidden;
       background: #0f172a;
     }
 
     .rh-rendered-body-heading {
-      padding: 0.75rem 1rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.12);
       background: rgba(15, 23, 42, 0.96);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .rh-rendered-body-heading h4 {
       margin: 0;
-      color: #fff;
-      font-size: 0.95rem;
+      color: #f8fafc;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
     }
 
     .rh-rendered-body {
-      max-height: 34rem;
       margin: 0;
-      padding: 1rem;
+      max-height: 720px;
       overflow: auto;
-      color: #e2e8f0;
       white-space: pre-wrap;
-      font-size: 0.82rem;
-      line-height: 1.55;
+      padding: 1.1rem;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.7;
+      font-size: 0.92rem;
     }
 
-        .rh-generation-status,
+    .rh-generation-status,
     .rh-pdf-inspection-status,
     .rh-download-link-status,
     .rh-download-history-status {
-      margin-top: 1rem;
-      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      padding: 0.9rem 1rem;
       border-radius: 0.9rem;
-      background: rgba(239, 246, 255, 0.95);
-      color: #1e3a8a;
-      font-weight: 850;
-      line-height: 1.45;
+      background: #f8fafc;
+      color: rgba(15, 23, 42, 0.78);
+      line-height: 1.6;
     }
 
     .rh-generation-status[data-state="ready"],
     .rh-pdf-inspection-status[data-state="passed"],
     .rh-download-link-status[data-state="success"],
-    .rh-download-history-status[data-state="safe"] {
-      background: rgba(236, 253, 245, 0.95);
-      color: #065f46;
+    .rh-download-history-status[data-state="success"] {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rh-generation-status[data-state="blocked"],
+    .rh-pdf-inspection-status[data-state="failed"],
+    .rh-download-link-status[data-state="error"],
+    .rh-download-history-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
     }
 
     .rh-generation-status[data-state="warning"],
     .rh-pdf-inspection-status[data-state="warning"],
     .rh-download-link-status[data-state="warning"],
     .rh-download-history-status[data-state="warning"] {
-      background: rgba(254, 249, 195, 0.95);
-      color: #854d0e;
-    }
-
-    .rh-generation-status[data-state="blocked"],
-    .rh-pdf-inspection-status[data-state="failed"],
-    .rh-download-link-status[data-state="error"],
-    .rh-download-history-status[data-state="danger"] {
-      background: rgba(254, 242, 242, 0.95);
-      color: #991b1b;
+      background: #fffbeb;
+      color: #92400e;
     }
 
     .rh-generation-list,
@@ -818,57 +955,63 @@ const pageDescription =
     .rh-download-link-list,
     .rh-download-history-list {
       margin: 0;
-      padding-left: 1.1rem;
+      padding-left: 1.2rem;
     }
 
     .rh-generation-list li,
     .rh-pdf-list li,
     .rh-download-link-list li,
     .rh-download-history-list li {
-      margin: 0.18rem 0;
-      line-height: 1.45;
+      margin: 0.15rem 0;
     }
 
     .rh-download-link-url-card {
-      margin-top: 1rem;
+      margin-bottom: 1rem;
       padding: 1rem;
-      border: 1px solid rgba(37, 99, 235, 0.18);
+      border: 1px solid rgba(14, 165, 233, 0.25);
       border-radius: 1rem;
-      background: rgba(239, 246, 255, 0.72);
+      background: #f0f9ff;
     }
 
     .rh-download-link-url-card label {
       display: block;
       margin-bottom: 0.45rem;
-      color: rgba(15, 23, 42, 0.7);
-      font-size: 0.76rem;
+      color: #075985;
+      font-size: 0.78rem;
       font-weight: 900;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
+    .rh-download-link-url-card input {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      border-radius: 0.75rem;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+    }
+
     .rh-download-link-url-card p {
-      margin: 0.55rem 0 0;
-      color: rgba(15, 23, 42, 0.66);
-      font-size: 0.88rem;
+      margin: 0.65rem 0 0;
+      color: rgba(12, 74, 110, 0.78);
+      font-size: 0.9rem;
       line-height: 1.55;
     }
 
     .rh-download-link-copy-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.65rem;
+      gap: 0.6rem;
       align-items: center;
     }
 
-    .rh-download-history {
-      margin-top: 1rem;
-    }
-
     .rh-download-history-subsection {
-      margin-top: 1rem;
+      margin-top: 1.15rem;
       padding-top: 1rem;
-      border-top: 1px solid rgba(15, 23, 42, 0.1);
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
     }
 
     .rh-download-history-subsection h4 {
@@ -881,114 +1024,66 @@ const pageDescription =
     .rh-download-history-timeline {
       display: grid;
       gap: 0.65rem;
-      margin-top: 0.75rem;
+      max-height: 680px;
+      overflow: auto;
+      padding-right: 0.2rem;
     }
 
-    .rh-timeline-item {
+    .rh-download-history-timeline-item {
       display: grid;
       gap: 0.25rem;
-      padding: 0.75rem;
+      padding: 0.85rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      border-left: 4px solid rgba(37, 99, 235, 0.55);
       border-radius: 0.85rem;
-      background: rgba(255, 255, 255, 0.92);
+      background: #f8fafc;
     }
 
-    .rh-timeline-item[data-state="failed"] {
-      border-left-color: rgba(220, 38, 38, 0.72);
-      background: rgba(254, 242, 242, 0.72);
-    }
-
-    .rh-timeline-item[data-state="warning"] {
-      border-left-color: rgba(202, 138, 4, 0.72);
-      background: rgba(254, 249, 195, 0.58);
-    }
-
-    .rh-timeline-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.75rem;
-      align-items: flex-start;
+    .rh-download-history-timeline-item strong {
       color: #0f172a;
-      font-weight: 900;
-      line-height: 1.35;
     }
 
-    .rh-timeline-title span {
-      color: rgba(15, 23, 42, 0.58);
-      font-size: 0.78rem;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .rh-timeline-meta {
-      color: rgba(15, 23, 42, 0.66);
+    .rh-download-history-timeline-item span {
+      color: rgba(15, 23, 42, 0.62);
       font-size: 0.84rem;
-      line-height: 1.45;
       overflow-wrap: anywhere;
     }
 
-    .rh-download-history-mini-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.55rem;
-      margin-top: 0.6rem;
-    }
-
-    .rh-download-history-mini {
-      padding: 0.6rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: 0.75rem;
-      background: rgba(248, 250, 252, 0.9);
-    }
-
-    .rh-download-history-mini span {
-      display: block;
-      color: rgba(15, 23, 42, 0.56);
-      font-size: 0.68rem;
-      font-weight: 900;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-
-    .rh-download-history-mini strong {
-      display: block;
-      margin-top: 0.2rem;
-      color: #0f172a;
-      font-size: 1rem;
-      overflow-wrap: anywhere;
-    }
-
-    @media (max-width: 980px) {
-      .rh-admin-summary-grid,
-      .rh-admin-filters,
-      .rh-detail-grid,
-      .rh-evidence-grid,
-      .rh-generation-grid,
-      .rh-generation-controls,
-      .rh-pdf-inspection-grid,
-      .rh-pdf-inspection-controls,
-      .rh-download-link-grid,
-      .rh-download-link-controls,
-      .rh-download-history-grid,
-      .rh-download-history-controls {
-        grid-template-columns: 1fr;
+    @media (max-width: 960px) {
+      .rh-admin-page {
+        padding-top: 6rem;
       }
 
       .rh-admin-section-heading {
-        flex-direction: column;
+        display: grid;
       }
 
-      .rh-download-link-copy-row {
+      .rh-admin-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .rh-admin-filters {
         grid-template-columns: 1fr;
       }
 
-      .rh-download-history-mini-grid {
+      .rh-detail-grid {
         grid-template-columns: 1fr;
+      }
+
+      .rh-detail-item:nth-child(odd) {
+        border-right: 0;
+      }
+
+      .rh-evidence-row,
+      .rh-generation-row,
+      .rh-pdf-row,
+      .rh-download-link-row,
+      .rh-download-history-row {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
       }
     }
 
-    @media (max-width: 680px) {
+    @media (max-width: 640px) {
       .rh-admin-page {
         width: min(100% - 1rem, 1220px);
         padding-top: 5.5rem;
@@ -1003,16 +1098,37 @@ const pageDescription =
       .rh-admin-summary-grid {
         grid-template-columns: 1fr;
       }
+
+      .rh-admin-filter-actions .rh-button,
+      .rh-admin-actions .rh-button,
+      .rh-admin-row-actions .rh-button,
+      .rh-download-link-copy-row .rh-button {
+        width: 100%;
+      }
+
+      .rh-download-link-copy-row {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 
-  <script>
-       // @ts-nocheck
-    const licencesBody = document.getElementById("licences-body");
-    const statusMessage = document.getElementById("status-message");
+  <script is:inline>
+    // @ts-nocheck
+
+    const TOKEN_STORAGE_KEY = "relayhub_admin_token";
+
+    const state = {
+      licences: [],
+      total: 0,
+      limit: 100,
+      offset: 0,
+    };
+
     const filtersForm = document.getElementById("filters-form");
     const resetFiltersButton = document.getElementById("reset-filters");
     const refreshButton = document.getElementById("refresh-button");
+    const statusMessage = document.getElementById("status-message");
+    const licencesBody = document.getElementById("licences-body");
 
     const metricTotal = document.getElementById("metric-total");
     const metricActive = document.getElementById("metric-active");
@@ -1055,19 +1171,22 @@ const pageDescription =
     const downloadHistoryTimeline = document.getElementById("download-history-timeline");
     const downloadHistoryControls = document.getElementById("download-history-controls");
 
-    const state = {
-      licences: [],
-      total: 0,
-      limit: 100,
-      offset: 0,
-    };
+    const evidenceBundleCard = document.getElementById("evidence-bundle-card");
+    const evidenceBundleStatus = document.getElementById("evidence-bundle-status");
+    const evidenceBundleSummary = document.getElementById("evidence-bundle-summary");
+    const evidenceBundleIntegrity = document.getElementById("evidence-bundle-integrity");
+    const evidenceBundlePreview = document.getElementById("evidence-bundle-preview");
+    const evidenceBundleControls = document.getElementById("evidence-bundle-controls");
+
+    let latestEvidenceBundle = null;
 
     function getStoredToken() {
-      return (
-        window.localStorage.getItem("relayhub_admin_token") ||
-        window.sessionStorage.getItem("relayhub_admin_token") ||
-        ""
-      );
+      return sessionStorage.getItem(TOKEN_STORAGE_KEY) || "";
+    }
+
+    function setStatus(message, mode = "neutral") {
+      statusMessage.textContent = message;
+      statusMessage.dataset.state = mode;
     }
 
     function escapeHtml(value) {
@@ -1091,11 +1210,6 @@ const pageDescription =
       return value ? "Yes" : "No";
     }
 
-    function setStatus(message, stateName = "neutral") {
-      statusMessage.textContent = message;
-      statusMessage.dataset.state = stateName;
-    }
-
     function formatDate(value) {
       if (!value) return "—";
 
@@ -1111,11 +1225,10 @@ const pageDescription =
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
       });
     }
 
-        function badgeClass(value) {
+    function badgeClass(value) {
       const text = String(value || "").toLowerCase();
 
       if (!text) return "rh-badge";
@@ -1316,6 +1429,14 @@ const pageDescription =
                   </button>
 
                   <button
+                    class="rh-button rh-button-secondary"
+                    type="button"
+                    data-evidence-bundle="${licenceId}"
+                  >
+                    Export Evidence
+                  </button>
+
+                  <button
                     class="rh-button rh-button-primary"
                     type="button"
                     data-prepare-email-download="${licenceId}"
@@ -1332,7 +1453,7 @@ const pageDescription =
                   </button>
 
                   <p class="rh-admin-row-actions-note">
-                    Download History is read-only. Reissue Download creates a new licensed copy with a new Download ID.
+                    Reissue Download creates a new licensed copy with a new Download ID.
                   </p>
                 </div>
               </td>
@@ -1438,7 +1559,7 @@ const pageDescription =
       `;
     }
 
-        function renderGenerationPreviewData(data) {
+    function renderGenerationPreviewData(data) {
       const ready = Boolean(data.ready_for_generation);
       const blockers = Array.isArray(data.blockers) ? data.blockers : [];
       const warnings = Array.isArray(data.warnings) ? data.warnings : [];
@@ -1711,7 +1832,7 @@ const pageDescription =
       `;
     }
 
-        function resetDownloadLinkPanel() {
+    function resetDownloadLinkPanel() {
       downloadLinkUrlCard.hidden = true;
       downloadLinkUrlInput.value = "";
       downloadLinkStatus.textContent = "";
@@ -1858,6 +1979,434 @@ const pageDescription =
       downloadLinkCard.hidden = false;
     }
 
+    function downloadHistoryRow(label, value, options = {}) {
+      const className = options.code ? "rh-download-history-code" : "";
+
+      return `
+        <dl class="rh-download-history-row">
+          <dt>${escapeHtml(label)}</dt>
+          <dd class="${className}">
+            ${options.html ? value : escapeHtml(formatValue(value))}
+          </dd>
+        </dl>
+      `;
+    }
+
+    function renderDownloadHistoryList(items) {
+      const values = Array.isArray(items) ? items : [];
+
+      if (!values.length) {
+        return "None";
+      }
+
+      return `
+        <ul class="rh-download-history-list">
+          ${values.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      `;
+    }
+
+    function resetDownloadHistoryPanel() {
+      downloadHistoryStatus.textContent = "";
+      downloadHistoryStatus.dataset.state = "neutral";
+      downloadHistorySummary.innerHTML = "";
+      downloadHistoryDangerousStates.innerHTML = "";
+      downloadHistoryLinks.innerHTML = "";
+      downloadHistoryEmailEvents.innerHTML = "";
+      downloadHistoryTimeline.innerHTML = "";
+      downloadHistoryControls.innerHTML = "";
+    }
+
+    function renderDangerousStates(states) {
+      const values = Array.isArray(states) ? states : [];
+
+      if (!values.length) {
+        return downloadHistoryRow("Dangerous states", "None detected");
+      }
+
+      return values
+        .map((state) => {
+          return downloadHistoryRow(
+            `${state.severity || "state"}: ${state.code || "unknown"}`,
+            state.message || JSON.stringify(state),
+            { code: false }
+          );
+        })
+        .join("");
+    }
+
+    function renderHistoryDownloadLinks(links) {
+      const values = Array.isArray(links) ? links : [];
+
+      if (!values.length) {
+        return downloadHistoryRow("Download links", "None recorded");
+      }
+
+      return values
+        .map((link) => {
+          const matchingEmails = Array.isArray(link.matching_email_events)
+            ? link.matching_email_events
+            : [];
+
+          return downloadHistoryRow(
+            link.download_reference || link.id,
+            `Status: ${formatValue(link.status)} | Classification: ${formatValue(link.classification)} | Created: ${formatDate(link.created_at)} | Activated: ${formatDate(link.activated_at)} | Used: ${formatDate(link.used_at)} | Expires: ${formatDate(link.expires_at)} | PDF evidence: ${link.has_generated_pdf_evidence ? "Yes" : "No"} | Email events: ${matchingEmails.length} | SHA-256: ${formatValue(link.generated_pdf_sha256)}`,
+            { code: true }
+          );
+        })
+        .join("");
+    }
+
+    function renderHistoryEmailEvents(events) {
+      const values = Array.isArray(events) ? events : [];
+
+      if (!values.length) {
+        return downloadHistoryRow("Email events", "None recorded");
+      }
+
+      return values
+        .map((event) => {
+          const metadata = event.metadata || event.metadata_json || {};
+          const downloadReference = metadata.download_reference || "—";
+
+          return downloadHistoryRow(
+            `${event.email_type || "email"} — ${event.status || "unknown"}`,
+            `Recipient: ${formatValue(event.recipient_email)} | Created: ${formatDate(event.created_at)} | Provider: ${formatValue(event.provider)} | Provider ID: ${formatValue(event.provider_message_id)} | Download ID: ${formatValue(downloadReference)} | Error: ${formatValue(event.error)}`,
+            { code: true }
+          );
+        })
+        .join("");
+    }
+
+    function renderHistoryTimeline(timeline) {
+      const values = Array.isArray(timeline) ? timeline : [];
+
+      if (!values.length) {
+        downloadHistoryTimeline.innerHTML = `
+          <div class="rh-download-history-timeline-item">
+            <strong>No timeline events recorded.</strong>
+          </div>
+        `;
+        return;
+      }
+
+      downloadHistoryTimeline.innerHTML = values
+        .map((item) => {
+          return `
+            <article class="rh-download-history-timeline-item">
+              <strong>${escapeHtml(item.label || item.type || "Timeline event")}</strong>
+              <span>${escapeHtml(formatDate(item.at))}</span>
+              <span>${escapeHtml(formatValue(item.type))}</span>
+              <span>${escapeHtml(formatValue(item.id || item.download_id || item.download_reference))}</span>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function renderDownloadHistoryData(data) {
+      const interpretation = data.operator_interpretation || {};
+      const summary = data.summary || {};
+      const linkSummary = summary.links || summary.download_links || {};
+      const emailSummary = summary.email_events || {};
+      const downloadEventSummary = summary.download_events || {};
+      const dangerousSummary = summary.dangerous_states || {};
+      const controls = data.controls || {};
+
+      if ((dangerousSummary.critical || 0) > 0) {
+        downloadHistoryStatus.dataset.state = "error";
+      } else if ((dangerousSummary.warning || 0) > 0) {
+        downloadHistoryStatus.dataset.state = "warning";
+      } else {
+        downloadHistoryStatus.dataset.state = "success";
+      }
+
+      downloadHistoryStatus.textContent =
+        interpretation.message || "CDAS licence download history loaded.";
+
+      downloadHistorySummary.innerHTML = [
+        downloadHistoryRow("Operator status", interpretation.status),
+        downloadHistoryRow("Recommended next action", interpretation.recommended_next_action),
+        downloadHistoryRow("Licence", `${data.licence?.licence_number || "—"} — ${data.licence?.status || "—"}`),
+        downloadHistoryRow("Document", `${data.document?.title || data.licence?.document_id || "—"} v${data.document?.version || data.licence?.document_version || "—"}`),
+        downloadHistoryRow("Dangerous states", `Total: ${dangerousSummary.total || 0} | Critical: ${dangerousSummary.critical || 0} | Warning: ${dangerousSummary.warning || 0}`),
+        downloadHistoryRow("Download links", `Total: ${linkSummary.total || 0} | Active unused: ${linkSummary.active_unused || 0} | Pending: ${linkSummary.pending_generation || 0} | Used: ${linkSummary.used || 0} | Failed: ${linkSummary.failed || 0}`),
+        downloadHistoryRow("Generated evidence", `With evidence: ${linkSummary.with_generated_pdf_evidence || 0} | Without evidence: ${linkSummary.without_generated_pdf_evidence || 0}`),
+        downloadHistoryRow("Email events", `Total: ${emailSummary.total || 0} | Sent: ${emailSummary.sent || 0} | Failed: ${emailSummary.failed || 0} | Retryable: ${emailSummary.retryable || 0}`),
+        downloadHistoryRow("Download events", `Total: ${downloadEventSummary.total || 0} | Successful: ${downloadEventSummary.successful || 0} | Failed: ${downloadEventSummary.failed || 0}`),
+        downloadHistoryRow("Latest Download ID", linkSummary.latest_download_reference, { code: true }),
+        downloadHistoryRow("Latest email provider ID", emailSummary.latest_provider_message_id, { code: true }),
+      ].join("");
+
+      downloadHistoryDangerousStates.innerHTML = renderDangerousStates(data.dangerous_states);
+      downloadHistoryLinks.innerHTML = renderHistoryDownloadLinks(data.download_links);
+      downloadHistoryEmailEvents.innerHTML = renderHistoryEmailEvents(data.email_events);
+      renderHistoryTimeline(data.timeline);
+
+      downloadHistoryControls.innerHTML = [
+        downloadHistoryRow("Read only", booleanText(controls.read_only)),
+        downloadHistoryRow("Mutates database", booleanText(controls.mutates_database)),
+        downloadHistoryRow("Writes to R2", booleanText(controls.writes_to_r2)),
+        downloadHistoryRow("Creates download link", booleanText(controls.creates_download_link)),
+        downloadHistoryRow("Sends email", booleanText(controls.sends_email)),
+        downloadHistoryRow("Serves download", booleanText(controls.serves_download)),
+        downloadHistoryRow("Exposes raw token", booleanText(controls.exposes_raw_token)),
+        downloadHistoryRow("Includes private R2 URL", booleanText(controls.includes_private_r2_url)),
+        downloadHistoryRow("Message", data.message),
+      ].join("");
+
+      downloadHistoryCard.hidden = false;
+    }
+
+    async function renderDownloadHistory(licenceId) {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
+        return;
+      }
+
+      detailCard.hidden = false;
+      downloadHistoryCard.hidden = false;
+      resetDownloadHistoryPanel();
+      downloadHistoryStatus.dataset.state = "neutral";
+      downloadHistoryStatus.textContent = "Loading CDAS licence download history…";
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/download-history`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        downloadHistoryStatus.dataset.state = "error";
+        downloadHistoryStatus.textContent = `Could not load download history: ${error.message}`;
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        downloadHistoryStatus.dataset.state = "error";
+        downloadHistoryStatus.textContent =
+          data?.message || data?.error || "Download history could not be loaded.";
+        return;
+      }
+
+      renderDownloadHistoryData(data);
+
+      downloadHistoryCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      setStatus("CDAS licence download history loaded.", "success");
+    }
+
+    function resetEvidenceBundlePanel() {
+      latestEvidenceBundle = null;
+      evidenceBundleStatus.textContent = "";
+      evidenceBundleStatus.dataset.state = "neutral";
+      evidenceBundleSummary.innerHTML = "";
+      evidenceBundleIntegrity.innerHTML = "";
+      evidenceBundlePreview.textContent = "";
+      evidenceBundleControls.innerHTML = "";
+    }
+
+    function evidenceBundleFileName(data) {
+      const licenceNumber = String(data?.licence?.licence_number || "cdas-licence")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      const bundleType = String(data?.bundle_type || "evidence-bundle")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      return `${licenceNumber}-${bundleType}-v${data?.bundle_version || 1}.json`;
+    }
+
+    function downloadJsonFile(fileName, data) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json;charset=utf-8",
+      });
+
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    }
+
+    function renderEvidenceBundleData(data) {
+      const summary = data.summary || {};
+      const downloadLinkSummary = summary.download_links || {};
+      const emailSummary = summary.email_events || {};
+      const downloadEventSummary = summary.download_events || {};
+      const dangerousSummary = summary.dangerous_states || {};
+      const timelineSummary = summary.timeline || {};
+      const integrity = data.integrity_summary || {};
+      const controls = data.controls || {};
+      const interpretation = data.operator_interpretation || {};
+
+      latestEvidenceBundle = data;
+
+      if ((dangerousSummary.critical || 0) > 0) {
+        evidenceBundleStatus.dataset.state = "error";
+      } else if ((dangerousSummary.warning || 0) > 0) {
+        evidenceBundleStatus.dataset.state = "warning";
+      } else {
+        evidenceBundleStatus.dataset.state = "success";
+      }
+
+      evidenceBundleStatus.textContent =
+        interpretation.message || "CDAS licence evidence bundle loaded.";
+
+      evidenceBundleSummary.innerHTML = [
+        downloadHistoryRow("Bundle type", data.bundle_type, { code: true }),
+        downloadHistoryRow("Bundle version", data.bundle_version),
+        downloadHistoryRow("Generated at", formatDate(data.generated_at)),
+        downloadHistoryRow(
+          "Licence",
+          `${data.licence?.licence_number || "—"} — ${data.licence?.status || "—"}`
+        ),
+        downloadHistoryRow(
+          "Document",
+          `${data.document?.title || data.licence?.document_id || "—"} v${data.document?.version || data.licence?.document_version || "—"}`
+        ),
+        downloadHistoryRow("Operator status", interpretation.status),
+        downloadHistoryRow("Recommended next action", interpretation.recommended_next_action),
+        downloadHistoryRow(
+          "Download links",
+          `Total: ${downloadLinkSummary.total || 0} | Active unused: ${downloadLinkSummary.active_unused || 0} | Pending: ${downloadLinkSummary.pending_generation || 0} | Used: ${downloadLinkSummary.used || 0} | Failed: ${downloadLinkSummary.failed || 0}`
+        ),
+        downloadHistoryRow(
+          "Email events",
+          `Total: ${emailSummary.total || 0} | Sent: ${emailSummary.sent || 0} | Failed: ${emailSummary.failed || 0} | Retryable: ${emailSummary.retryable || 0}`
+        ),
+        downloadHistoryRow(
+          "Download events",
+          `Total: ${downloadEventSummary.total || 0} | Successful: ${downloadEventSummary.successful || 0} | Failed: ${downloadEventSummary.failed || 0}`
+        ),
+        downloadHistoryRow(
+          "Dangerous states",
+          `Total: ${dangerousSummary.total || 0} | Critical: ${dangerousSummary.critical || 0} | Warning: ${dangerousSummary.warning || 0}`
+        ),
+        downloadHistoryRow("Timeline events", timelineSummary.total || 0),
+      ].join("");
+
+      evidenceBundleIntegrity.innerHTML = [
+        downloadHistoryRow("Licence evidence captured", booleanText(integrity.licence_evidence_captured)),
+        downloadHistoryRow("Generated PDF evidence present", booleanText(integrity.generated_pdf_evidence_present)),
+        downloadHistoryRow("Document record present", booleanText(integrity.document_record_present)),
+        downloadHistoryRow(
+          "Download links with PDF evidence",
+          `${integrity.download_links_with_generated_pdf_evidence || 0} of ${integrity.download_links_total || 0}`
+        ),
+        downloadHistoryRow("Email events match download links", booleanText(integrity.email_events_match_download_links)),
+        downloadHistoryRow("Dangerous states present", booleanText(integrity.dangerous_states_present)),
+        downloadHistoryRow("Raw token exposed", booleanText(integrity.raw_token_exposed)),
+        downloadHistoryRow("Token hash exposed", booleanText(integrity.token_hash_exposed)),
+        downloadHistoryRow("Private R2 URL exposed", booleanText(integrity.private_r2_url_exposed)),
+        downloadHistoryRow("Read only", booleanText(controls.read_only)),
+        downloadHistoryRow("Mutates database", booleanText(controls.mutates_database)),
+        downloadHistoryRow("Writes to R2", booleanText(controls.writes_to_r2)),
+        downloadHistoryRow("Creates download link", booleanText(controls.creates_download_link)),
+        downloadHistoryRow("Sends email", booleanText(controls.sends_email)),
+        downloadHistoryRow("Serves download", booleanText(controls.serves_download)),
+        downloadHistoryRow("Exposes raw token", booleanText(controls.exposes_raw_token)),
+        downloadHistoryRow("Exposes token hash", booleanText(controls.exposes_token_hash)),
+        downloadHistoryRow("Includes private R2 URL", booleanText(controls.includes_private_r2_url)),
+      ].join("");
+
+      evidenceBundlePreview.textContent = JSON.stringify(
+        {
+          ok: data.ok,
+          bundle_type: data.bundle_type,
+          bundle_version: data.bundle_version,
+          generated_at: data.generated_at,
+          licence: {
+            id: data.licence?.id,
+            licence_number: data.licence?.licence_number,
+            status: data.licence?.status,
+          },
+          summary: data.summary,
+          operator_interpretation: data.operator_interpretation,
+          integrity_summary: data.integrity_summary,
+          controls: data.controls,
+        },
+        null,
+        2
+      );
+
+      evidenceBundleControls.innerHTML = `
+        <button class="rh-button rh-button-primary" type="button" data-download-evidence-bundle-json>
+          Download JSON Evidence Bundle
+        </button>
+        <p>
+          The downloaded file is generated locally by your browser from the admin-only JSON response.
+          It does not create a new CDAS download link or expose a recipient download token.
+        </p>
+      `;
+
+      evidenceBundleCard.hidden = false;
+    }
+
+    async function renderEvidenceBundle(licenceId) {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
+        return;
+      }
+
+      detailCard.hidden = false;
+      evidenceBundleCard.hidden = false;
+      resetEvidenceBundlePanel();
+      evidenceBundleStatus.dataset.state = "neutral";
+      evidenceBundleStatus.textContent = "Loading CDAS licence evidence bundle…";
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/evidence-bundle`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        evidenceBundleStatus.dataset.state = "error";
+        evidenceBundleStatus.textContent = `Could not load evidence bundle: ${error.message}`;
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        evidenceBundleStatus.dataset.state = "error";
+        evidenceBundleStatus.textContent =
+          data?.message || data?.error || "Evidence bundle could not be loaded.";
+        return;
+      }
+
+      renderEvidenceBundleData(data);
+
+      evidenceBundleCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      setStatus("CDAS licence evidence bundle loaded.", "success");
+    }
+
     async function prepareAndEmailDownload(licenceId) {
       const token = getStoredToken();
 
@@ -1957,13 +2506,11 @@ const pageDescription =
       if (!confirmed) {
         return;
       }
-
       detailCard.hidden = false;
       downloadLinkCard.hidden = false;
       resetDownloadLinkPanel();
       downloadLinkStatus.dataset.state = "neutral";
-      downloadLinkStatus.textContent =
-        "Explicitly reissuing controlled download, generating a new Download-ID-bound PDF, and emailing the recipient…";
+      downloadLinkStatus.textContent = "Reissuing controlled download with a new Download ID…";
 
       let response;
       let data;
@@ -1998,27 +2545,14 @@ const pageDescription =
 
         const blockers = Array.isArray(data?.blockers) ? data.blockers : [];
         const warnings = Array.isArray(data?.warnings) ? data.warnings : [];
-        const previousLinks = Array.isArray(data?.previous_links) ? data.previous_links : [];
 
         downloadLinkGrid.innerHTML = [
           downloadLinkRow("Error", data?.error),
           downloadLinkRow("Message", data?.message),
           downloadLinkRow("Blockers", renderDownloadLinkList(blockers), { html: true }),
           downloadLinkRow("Warnings", renderDownloadLinkList(warnings), { html: true }),
-          downloadLinkRow("Previous links", renderPreviousLinks(previousLinks), { html: true }),
         ].join("");
 
-        downloadLinkControls.innerHTML = [
-          downloadLinkRow("Reserved download link", booleanText(data?.controls?.reserved_download_link)),
-          downloadLinkRow("Generated PDF", booleanText(data?.controls?.generated_pdf)),
-          downloadLinkRow("Activated download link", booleanText(data?.controls?.activated_download_link)),
-          downloadLinkRow("Sent email", booleanText(data?.controls?.sent_email)),
-          downloadLinkRow("Explicit reissue required", booleanText(data?.controls?.explicit_reissue_required)),
-          downloadLinkRow("Prevents duplicate active links", booleanText(data?.controls?.prevents_duplicate_active_download_links)),
-          downloadLinkRow("Prevents stranded pending links", booleanText(data?.controls?.prevents_stranded_pending_generation_links)),
-        ].join("");
-
-        downloadLinkCard.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
 
@@ -2027,445 +2561,39 @@ const pageDescription =
       downloadLinkCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
       if (data.emailed) {
-        setStatus("CDAS download explicitly reissued, activated, and emailed.", "success");
+        setStatus("CDAS download reissued, activated, and emailed.", "success");
       } else {
-        setStatus("CDAS download explicitly reissued and activated, but email was not sent. Review the result panel.", "error");
+        setStatus("CDAS download reissued and activated, but email was not sent. Review the result panel.", "error");
       }
     }
 
-        function downloadHistoryRow(label, value, options = {}) {
-      const className = options.code ? "rh-download-history-code" : "";
+    function resetDetailPanels() {
+      renderedEvidenceCard.hidden = true;
+      generationPreviewCard.hidden = true;
+      pdfInspectionCard.hidden = true;
+      downloadLinkCard.hidden = true;
+      downloadHistoryCard.hidden = true;
+      evidenceBundleCard.hidden = true;
 
-      return `
-        <dl class="rh-download-history-row">
-          <dt>${escapeHtml(label)}</dt>
-          <dd class="${className}">
-            ${options.html ? value : escapeHtml(formatValue(value))}
-          </dd>
-        </dl>
-      `;
+      renderedMeta.innerHTML = "";
+      renderedBody.textContent = "";
+
+      generationStatus.textContent = "";
+      generationStatus.dataset.state = "neutral";
+      generationGrid.innerHTML = "";
+      generationControls.innerHTML = "";
+
+      pdfInspectionStatus.textContent = "";
+      pdfInspectionStatus.dataset.state = "neutral";
+      pdfInspectionGrid.innerHTML = "";
+      pdfInspectionControls.innerHTML = "";
+
+      resetDownloadLinkPanel();
+      resetDownloadHistoryPanel();
+      resetEvidenceBundlePanel();
     }
 
-    function renderDownloadHistoryList(items) {
-      const values = Array.isArray(items) ? items : [];
-
-      if (!values.length) {
-        return "None";
-      }
-
-      return `
-        <ul class="rh-download-history-list">
-          ${values.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ul>
-      `;
-    }
-
-    function downloadHistoryMini(label, value) {
-      return `
-        <div class="rh-download-history-mini">
-          <span>${escapeHtml(label)}</span>
-          <strong>${escapeHtml(formatValue(value))}</strong>
-        </div>
-      `;
-    }
-
-    function renderDangerousStates(states) {
-      const values = Array.isArray(states) ? states : [];
-
-      if (!values.length) {
-        return [
-          downloadHistoryRow("Status", "No dangerous states detected"),
-          downloadHistoryRow("Operator meaning", "No critical or warning states were reported by the evidence endpoint."),
-        ].join("");
-      }
-
-      return values
-        .map((state) => {
-          return `
-            <article class="rh-download-history-row">
-              <dt>${escapeHtml(state.code || "dangerous_state")}</dt>
-              <dd>
-                <strong>${escapeHtml(formatValue(state.severity))}</strong><br />
-                ${escapeHtml(formatValue(state.message))}
-                ${
-                  state.download_reference
-                    ? `<br /><span class="rh-download-history-code">${escapeHtml(state.download_reference)}</span>`
-                    : ""
-                }
-                ${
-                  state.download_link_id
-                    ? `<br /><span class="rh-download-history-code">${escapeHtml(state.download_link_id)}</span>`
-                    : ""
-                }
-              </dd>
-            </article>
-          `;
-        })
-        .join("");
-    }
-
-    function renderHistoryLinks(links) {
-      const values = Array.isArray(links) ? links : [];
-
-      if (!values.length) {
-        return downloadHistoryRow("Download links", "No download links found.");
-      }
-
-      return values
-        .map((link) => {
-          const emailEvents = Array.isArray(link.matching_email_events)
-            ? link.matching_email_events
-            : [];
-
-          const emailSummary = emailEvents.length
-            ? emailEvents
-                .map((event) => {
-                  const providerId = event.provider_message_id
-                    ? ` — ${event.provider_message_id}`
-                    : "";
-
-                  return `${event.email_type || "email"} ${event.status || "unknown"}${providerId}`;
-                })
-                .join("; ")
-            : "None matched";
-
-          const miniGrid = `
-            <div class="rh-download-history-mini-grid">
-              ${downloadHistoryMini("Status", link.status)}
-              ${downloadHistoryMini("Class", link.classification)}
-              ${downloadHistoryMini("Expired", booleanText(link.expired))}
-              ${downloadHistoryMini("Evidence", booleanText(link.has_generated_pdf_evidence))}
-              ${downloadHistoryMini("Created", formatDate(link.created_at))}
-              ${downloadHistoryMini("Used", formatDate(link.used_at))}
-            </div>
-          `;
-
-          return `
-            <article class="rh-download-history-row">
-              <dt>
-                ${escapeHtml(link.download_reference || link.id || "Download link")}
-              </dt>
-              <dd>
-                <div class="rh-download-history-code">
-                  ${escapeHtml(link.id || "")}
-                </div>
-
-                ${miniGrid}
-
-                <p>
-                  <strong>Generated PDF:</strong><br />
-                  <span class="rh-download-history-code">
-                    ${escapeHtml(formatValue(link.generated_pdf_object_key))}
-                  </span>
-                </p>
-
-                <p>
-                  <strong>SHA-256:</strong><br />
-                  <span class="rh-download-history-code">
-                    ${escapeHtml(formatValue(link.generated_pdf_sha256))}
-                  </span>
-                </p>
-
-                <p>
-                  <strong>Size:</strong>
-                  ${escapeHtml(formatValue(link.generated_pdf_size_bytes))}
-                </p>
-
-                <p>
-                  <strong>Email events:</strong>
-                  ${escapeHtml(emailSummary)}
-                </p>
-
-                ${
-                  link.failure_reason
-                    ? `<p><strong>Failure reason:</strong> ${escapeHtml(link.failure_reason)}</p>`
-                    : ""
-                }
-              </dd>
-            </article>
-          `;
-        })
-        .join("");
-    }
-
-    function renderHistoryEmailEvents(events) {
-      const values = Array.isArray(events) ? events : [];
-
-      if (!values.length) {
-        return downloadHistoryRow("Email events", "No CDAS email events found.");
-      }
-
-      return values
-        .map((event) => {
-          const metadata = event.metadata || {};
-
-          return `
-            <article class="rh-download-history-row">
-              <dt>${escapeHtml(event.email_type || "email_event")}</dt>
-              <dd>
-                <div class="rh-download-history-mini-grid">
-                  ${downloadHistoryMini("Status", event.status)}
-                  ${downloadHistoryMini("Provider", event.provider)}
-                  ${downloadHistoryMini("Created", formatDate(event.created_at))}
-                  ${downloadHistoryMini("Retryable", booleanText(Number(event.retryable || 0) > 0))}
-                  ${downloadHistoryMini("Retry count", event.retry_count)}
-                  ${downloadHistoryMini("Recipient", event.recipient_email)}
-                </div>
-
-                <p>
-                  <strong>Subject:</strong>
-                  ${escapeHtml(formatValue(event.subject))}
-                </p>
-
-                <p>
-                  <strong>Provider message ID:</strong><br />
-                  <span class="rh-download-history-code">
-                    ${escapeHtml(formatValue(event.provider_message_id))}
-                  </span>
-                </p>
-
-                <p>
-                  <strong>Download ID:</strong><br />
-                  <span class="rh-download-history-code">
-                    ${escapeHtml(formatValue(metadata.download_reference))}
-                  </span>
-                </p>
-
-                <p>
-                  <strong>Download link ID:</strong><br />
-                  <span class="rh-download-history-code">
-                    ${escapeHtml(formatValue(metadata.download_link_id))}
-                  </span>
-                </p>
-
-                <p>
-                  <strong>Raw R2 URL exposed:</strong>
-                  ${escapeHtml(booleanText(metadata.raw_r2_url_exposed))}
-                </p>
-
-                <p>
-                  <strong>Landing URL emailed:</strong>
-                  ${escapeHtml(booleanText(metadata.landing_url_emailed))}
-                </p>
-
-                ${
-                  event.error
-                    ? `<p><strong>Error:</strong> <span class="rh-download-history-code">${escapeHtml(event.error)}</span></p>`
-                    : ""
-                }
-              </dd>
-            </article>
-          `;
-        })
-        .join("");
-    }
-
-    function timelineState(item) {
-      if (item.success === false || String(item.status || "").toLowerCase() === "failed") {
-        return "failed";
-      }
-
-      if (
-        String(item.event_type || "").includes("denied") ||
-        String(item.type || "").includes("revoked") ||
-        String(item.status || "").toLowerCase() === "revoked"
-      ) {
-        return "warning";
-      }
-
-      return "normal";
-    }
-
-    function renderHistoryTimeline(items) {
-      const values = Array.isArray(items) ? items : [];
-
-      if (!values.length) {
-        return `
-          <article class="rh-timeline-item">
-            <div class="rh-timeline-title">
-              <strong>No timeline events found.</strong>
-            </div>
-          </article>
-        `;
-      }
-
-      return values
-        .map((item) => {
-          const stateName = timelineState(item);
-
-          const metaParts = [
-            item.type ? `type=${item.type}` : "",
-            item.status ? `status=${item.status}` : "",
-            item.event_type ? `event=${item.event_type}` : "",
-            item.download_reference ? `download_id=${item.download_reference}` : "",
-            item.download_id ? `download_link=${item.download_id}` : "",
-            item.provider_message_id ? `provider_message_id=${item.provider_message_id}` : "",
-          ].filter(Boolean);
-
-          return `
-            <article class="rh-timeline-item" data-state="${escapeHtml(stateName)}">
-              <div class="rh-timeline-title">
-                <strong>${escapeHtml(item.label || item.type || "Timeline event")}</strong>
-                <span>${escapeHtml(formatDate(item.at))}</span>
-              </div>
-              <div class="rh-timeline-meta">
-                ${escapeHtml(metaParts.join(" · ") || item.id || "")}
-              </div>
-            </article>
-          `;
-        })
-        .join("");
-    }
-
-    function renderDownloadHistoryData(data) {
-      const summary = data.summary || {};
-      const linkSummary = summary.links || {};
-      const emailSummary = summary.email_events || {};
-      const dangerousSummary = summary.dangerous_states || {};
-      const downloadEventSummary = summary.download_events || {};
-      const adminAuditSummary = summary.admin_audit_events || {};
-      const interpretation = data.operator_interpretation || {};
-      const controls = data.controls || {};
-
-      const critical = Number(dangerousSummary.critical || 0);
-      const warnings = Number(dangerousSummary.warning || 0);
-
-      if (critical > 0) {
-        downloadHistoryStatus.dataset.state = "danger";
-      } else if (warnings > 0) {
-        downloadHistoryStatus.dataset.state = "warning";
-      } else {
-        downloadHistoryStatus.dataset.state = "safe";
-      }
-
-      downloadHistoryStatus.textContent =
-        `${interpretation.status || "unknown"} — ${interpretation.message || "Download history loaded."}`;
-
-      downloadHistorySummary.innerHTML = [
-        downloadHistoryRow("Licence", data.licence?.licence_number),
-        downloadHistoryRow("Document", data.document?.title),
-        downloadHistoryRow("Operator status", interpretation.status),
-        downloadHistoryRow("Recommended next action", interpretation.recommended_next_action, { code: false }),
-
-        downloadHistoryRow("Dangerous states", `
-          <div class="rh-download-history-mini-grid">
-            ${downloadHistoryMini("Total", dangerousSummary.total)}
-            ${downloadHistoryMini("Critical", dangerousSummary.critical)}
-            ${downloadHistoryMini("Warning", dangerousSummary.warning)}
-          </div>
-        `, { html: true }),
-
-        downloadHistoryRow("Download links", `
-          <div class="rh-download-history-mini-grid">
-            ${downloadHistoryMini("Total", linkSummary.total)}
-            ${downloadHistoryMini("Active unused", linkSummary.active_unused)}
-            ${downloadHistoryMini("Pending", linkSummary.pending_generation)}
-            ${downloadHistoryMini("Used", linkSummary.used)}
-            ${downloadHistoryMini("Failed", linkSummary.failed)}
-            ${downloadHistoryMini("Evidence", linkSummary.with_generated_pdf_evidence)}
-          </div>
-        `, { html: true }),
-
-        downloadHistoryRow("Email events", `
-          <div class="rh-download-history-mini-grid">
-            ${downloadHistoryMini("Total", emailSummary.total)}
-            ${downloadHistoryMini("Sent", emailSummary.sent)}
-            ${downloadHistoryMini("Failed", emailSummary.failed)}
-            ${downloadHistoryMini("Skipped", emailSummary.skipped)}
-            ${downloadHistoryMini("Retryable", emailSummary.retryable)}
-            ${downloadHistoryMini("Latest", emailSummary.latest_status)}
-          </div>
-        `, { html: true }),
-
-        downloadHistoryRow("Download events", `
-          <div class="rh-download-history-mini-grid">
-            ${downloadHistoryMini("Total", downloadEventSummary.total)}
-            ${downloadHistoryMini("Successful", downloadEventSummary.successful)}
-            ${downloadHistoryMini("Failed", downloadEventSummary.failed)}
-          </div>
-        `, { html: true }),
-
-        downloadHistoryRow("Admin audit events", adminAuditSummary.total),
-        downloadHistoryRow("Latest Download ID", linkSummary.latest_download_reference, { code: true }),
-        downloadHistoryRow("Latest email provider ID", emailSummary.latest_provider_message_id, { code: true }),
-      ].join("");
-
-      downloadHistoryDangerousStates.innerHTML = renderDangerousStates(data.dangerous_states);
-      downloadHistoryLinks.innerHTML = renderHistoryLinks(data.download_links);
-      downloadHistoryEmailEvents.innerHTML = renderHistoryEmailEvents(data.email_events);
-      downloadHistoryTimeline.innerHTML = renderHistoryTimeline(data.timeline);
-
-      downloadHistoryControls.innerHTML = [
-        downloadHistoryRow("Read only", booleanText(controls.read_only)),
-        downloadHistoryRow("Mutates database", booleanText(controls.mutates_database)),
-        downloadHistoryRow("Writes to R2", booleanText(controls.writes_to_r2)),
-        downloadHistoryRow("Creates download link", booleanText(controls.creates_download_link)),
-        downloadHistoryRow("Sends email", booleanText(controls.sends_email)),
-        downloadHistoryRow("Serves download", booleanText(controls.serves_download)),
-        downloadHistoryRow("Exposes raw token", booleanText(controls.exposes_raw_token)),
-        downloadHistoryRow("Exposes token hash", booleanText(controls.exposes_token_hash)),
-        downloadHistoryRow("Includes private R2 URL", booleanText(controls.includes_private_r2_url)),
-        downloadHistoryRow("Evidence endpoint", booleanText(controls.evidence_endpoint)),
-        downloadHistoryRow("Message", data.message),
-      ].join("");
-
-      downloadHistoryCard.hidden = false;
-    }
-
-    async function renderDownloadHistory(licenceId) {
-      const token = getStoredToken();
-
-      if (!token) {
-        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
-        return;
-      }
-
-      detailCard.hidden = false;
-      downloadHistoryCard.hidden = false;
-      downloadHistoryStatus.dataset.state = "neutral";
-      downloadHistoryStatus.textContent = "Loading licence download history…";
-      downloadHistorySummary.innerHTML = "";
-      downloadHistoryDangerousStates.innerHTML = "";
-      downloadHistoryLinks.innerHTML = "";
-      downloadHistoryEmailEvents.innerHTML = "";
-      downloadHistoryTimeline.innerHTML = "";
-      downloadHistoryControls.innerHTML = "";
-
-      let response;
-      let data;
-
-      try {
-        response = await fetch(
-          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/download-history`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        data = await response.json();
-      } catch (error) {
-        downloadHistoryStatus.dataset.state = "danger";
-        downloadHistoryStatus.textContent = `Could not load download history: ${error.message}`;
-        return;
-      }
-
-      if (!response.ok || !data.ok) {
-        downloadHistoryStatus.dataset.state = "danger";
-        downloadHistoryStatus.textContent =
-          data?.message || data?.error || "Download history could not be loaded.";
-        return;
-      }
-
-      renderDownloadHistoryData(data);
-
-      downloadHistoryCard.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      setStatus("Licence download history loaded.", "success");
-    }
-
-        async function renderDetail(licenceId) {
+    async function loadLicenceDetail(licenceId) {
       const token = getStoredToken();
 
       if (!token) {
@@ -2474,19 +2602,17 @@ const pageDescription =
       }
 
       setStatus("Loading licence detail…");
+      resetDetailPanels();
 
       let response;
       let data;
 
       try {
-        response = await fetch(
-          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        response = await fetch(`/api/admin/cdas/licences/${encodeURIComponent(licenceId)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         data = await response.json();
       } catch (error) {
@@ -2494,61 +2620,69 @@ const pageDescription =
         return;
       }
 
-      if (!response.ok || !data.ok || !data.licence) {
-        setStatus(
-          data?.message || data?.error || "Licence detail could not be loaded.",
-          "error"
-        );
+      if (!response.ok || !data.ok || !data.row) {
+        setStatus(data?.message || data?.error || "Licence detail could not be loaded.", "error");
         return;
       }
 
-      const row = data.licence;
+      const row = data.row;
 
-      detailSubtitle.textContent = `${row.licence_number} — ${row.licence_holder_email_normalised}`;
+      detailSubtitle.textContent = `${row.licence_number} — ${row.licence_holder_name || row.licence_holder_email_normalised || "Unknown holder"}`;
 
       detailSections.innerHTML = [
-        renderDetailSection("Core licence information", [
-          detailItem("Licence number", row.licence_number),
+        renderDetailSection("Licence", [
           detailItem("Licence ID", row.id),
-          detailItem("Request ID", row.request_id),
+          detailItem("Licence number", row.licence_number),
           detailItem("Status", row.status),
           detailItem("Issued at", formatDate(row.issued_at)),
-          detailItem("Expires at", formatDate(row.expires_at), { hideEmpty: true }),
+          detailItem("Expires at", formatDate(row.expires_at)),
+          detailItem("Revoked at", formatDate(row.revoked_at)),
+          detailItem("Revoked by", row.revoked_by),
+          detailItem("Revocation reason", row.revocation_reason, { wide: true }),
+          detailItem("Superseded by", row.superseded_by),
+          detailItem("Corrected from", row.corrected_from),
+          detailItem("Suspected leak at", formatDate(row.suspected_leak_at)),
+          detailItem("Confirmed leak at", formatDate(row.confirmed_leak_at)),
+          detailItem("Notes", row.notes, { wide: true }),
         ]),
-        renderDetailSection("Document binding", [
-          detailItem("Document ID", row.document_id),
-          detailItem("Document version", row.document_version),
-          detailItem("Licence terms version", row.licence_terms_version),
-        ]),
-        renderDetailSection("Licence holder", [
+
+        renderDetailSection("Holder", [
           detailItem("Holder type", row.licence_holder_type),
           detailItem("Holder name", row.licence_holder_name),
-          detailItem("Organisation", row.organisation_name, { hideEmpty: true }),
+          detailItem("Organisation", row.organisation_name),
+          detailItem("Contact name", row.contact_name),
+          detailItem("Contact email", row.contact_email),
           detailItem("Holder email", row.licence_holder_email),
           detailItem("Normalised email", row.licence_holder_email_normalised),
-          detailItem("Contact name", row.contact_name, { hideEmpty: true }),
-          detailItem("Contact email", row.contact_email, { hideEmpty: true }),
           detailItem("Recipient category", row.recipient_category),
         ]),
+
+        renderDetailSection("Document", [
+          detailItem("Document ID", row.document_id),
+          detailItem("Document version", row.document_version),
+          detailItem("Request ID", row.request_id),
+          detailItem("Licence terms version", row.licence_terms_version),
+          detailItem("Source object", row.source_object, { wide: true }),
+          detailItem("Source SHA-256", row.source_sha256, { wide: true }),
+        ]),
+
         renderDetailSection("Generated PDF evidence", [
           detailItem("Generated PDF status", row.generated_pdf_status),
-          detailItem("Generated PDF created at", formatDate(row.generated_pdf_created_at), { hideEmpty: true }),
-          detailItem("Generated PDF object key", row.generated_pdf_object_key, { hideEmpty: true, wide: true }),
-          detailItem("Generated PDF filename", row.generated_pdf_filename, { hideEmpty: true }),
-          detailItem("Generated PDF SHA-256", row.generated_pdf_sha256, { hideEmpty: true, wide: true }),
-          detailItem("Generated PDF size", row.generated_pdf_size_bytes, { hideEmpty: true }),
-          detailItem("Generated PDF content type", row.generated_pdf_content_type, { hideEmpty: true }),
-          detailItem("Generated PDF error", row.generated_pdf_error, { hideEmpty: true, wide: true }),
+          detailItem("Generated PDF created at", formatDate(row.generated_pdf_created_at)),
+          detailItem("Generated PDF filename", row.generated_pdf_filename, { wide: true }),
+          detailItem("Generated PDF object key", row.generated_pdf_object_key, { wide: true }),
+          detailItem("Generated PDF SHA-256", row.generated_pdf_sha256, { wide: true }),
+          detailItem("Generated PDF size", row.generated_pdf_size_bytes),
+          detailItem("Generated PDF content type", row.generated_pdf_content_type),
+          detailItem("Generated PDF error", row.generated_pdf_error, { wide: true }),
         ]),
-        renderDetailSection("Status, correction, and leak tracking", [
-          detailItem("Revoked at", formatDate(row.revoked_at), { hideEmpty: true }),
-          detailItem("Revoked by", row.revoked_by, { hideEmpty: true }),
-          detailItem("Revocation reason", row.revocation_reason, { hideEmpty: true, wide: true }),
-          detailItem("Superseded by", row.superseded_by, { hideEmpty: true }),
-          detailItem("Corrected from", row.corrected_from, { hideEmpty: true }),
-          detailItem("Suspected leak at", formatDate(row.suspected_leak_at), { hideEmpty: true }),
-          detailItem("Confirmed leak at", formatDate(row.confirmed_leak_at), { hideEmpty: true }),
-          detailItem("Notes", row.notes, { hideEmpty: true, wide: true }),
+
+        renderDetailSection("Rendered licence evidence", [
+          detailItem("Rendered licence SHA-256", row.rendered_licence_sha256, { wide: true }),
+          detailItem("Rendered terms body SHA-256", row.rendered_terms_body_sha256, { wide: true }),
+          detailItem("Rendered at", formatDate(row.rendered_licence_at)),
+          detailItem("Placeholders", row.rendered_licence_placeholders, { wide: true }),
+          detailItem("Unresolved placeholders", row.rendered_licence_unresolved_placeholders, { wide: true }),
         ]),
       ].join("");
 
@@ -2560,39 +2694,81 @@ const pageDescription =
       setStatus("Licence detail loaded.", "success");
     }
 
-    function resetDetailPanels() {
-      renderedEvidenceCard.hidden = true;
-      renderedBody.textContent = "";
-      renderedMeta.innerHTML = "";
+    licencesBody.addEventListener("click", (event) => {
+      const viewButton = event.target.closest("[data-view-licence]");
+      const generationButton = event.target.closest("[data-generation-preview]");
+      const inspectPdfButton = event.target.closest("[data-inspect-pdf]");
+      const downloadHistoryButton = event.target.closest("[data-download-history]");
+      const evidenceBundleButton = event.target.closest("[data-evidence-bundle]");
+      const prepareEmailDownloadButton = event.target.closest("[data-prepare-email-download]");
+      const reissueDownloadButton = event.target.closest("[data-reissue-download]");
 
-      generationPreviewCard.hidden = true;
-      generationStatus.textContent = "";
-      generationStatus.dataset.state = "neutral";
-      generationGrid.innerHTML = "";
-      generationControls.innerHTML = "";
+      if (viewButton) {
+        loadLicenceDetail(viewButton.dataset.viewLicence);
+        return;
+      }
 
-      pdfInspectionCard.hidden = true;
-      pdfInspectionStatus.textContent = "";
-      pdfInspectionStatus.dataset.state = "neutral";
-      pdfInspectionGrid.innerHTML = "";
-      pdfInspectionControls.innerHTML = "";
+      if (generationButton) {
+        renderGenerationPreview(generationButton.dataset.generationPreview);
+        return;
+      }
 
-      downloadLinkCard.hidden = true;
-      resetDownloadLinkPanel();
+      if (inspectPdfButton) {
+        renderPdfInspection(inspectPdfButton.dataset.inspectPdf);
+        return;
+      }
 
-      downloadHistoryCard.hidden = true;
-      downloadHistoryStatus.textContent = "";
-      downloadHistoryStatus.dataset.state = "neutral";
-      downloadHistorySummary.innerHTML = "";
-      downloadHistoryDangerousStates.innerHTML = "";
-      downloadHistoryLinks.innerHTML = "";
-      downloadHistoryEmailEvents.innerHTML = "";
-      downloadHistoryTimeline.innerHTML = "";
-      downloadHistoryControls.innerHTML = "";
+      if (downloadHistoryButton) {
+        renderDownloadHistory(downloadHistoryButton.dataset.downloadHistory);
+        return;
+      }
 
-      detailSections.innerHTML = "";
-      detailSubtitle.textContent = "Selected CDAS licence record.";
-    }
+      if (evidenceBundleButton) {
+        renderEvidenceBundle(evidenceBundleButton.dataset.evidenceBundle);
+        return;
+      }
+
+      if (prepareEmailDownloadButton) {
+        prepareAndEmailDownload(prepareEmailDownloadButton.dataset.prepareEmailDownload);
+        return;
+      }
+
+      if (reissueDownloadButton) {
+        reissueDownload(reissueDownloadButton.dataset.reissueDownload);
+      }
+    });
+
+    evidenceBundleControls.addEventListener("click", (event) => {
+      const downloadButton = event.target.closest("[data-download-evidence-bundle-json]");
+
+      if (!downloadButton || !latestEvidenceBundle) {
+        return;
+      }
+
+      downloadJsonFile(evidenceBundleFileName(latestEvidenceBundle), latestEvidenceBundle);
+    });
+
+    copyDownloadLinkButton.addEventListener("click", async () => {
+      const value = downloadLinkUrlInput.value;
+
+      if (!value) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(value);
+        setStatus("Recipient landing URL copied to clipboard.", "success");
+      } catch {
+        downloadLinkUrlInput.select();
+        document.execCommand("copy");
+        setStatus("Recipient landing URL copied to clipboard.", "success");
+      }
+    });
+
+    closeDetailButton.addEventListener("click", () => {
+      detailCard.hidden = true;
+      resetDetailPanels();
+    });
 
     filtersForm.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -2610,152 +2786,6 @@ const pageDescription =
       fetchLicences();
     });
 
-    licencesBody.addEventListener("click", (event) => {
-      const target = event.target;
-
-      if (!(target instanceof HTMLElement)) {
-        return;
-      }
-
-      const viewButton = target.closest("[data-view-licence]");
-
-      if (viewButton instanceof HTMLElement) {
-        const licenceId = viewButton.dataset.viewLicence;
-
-        if (licenceId) {
-          renderDetail(licenceId);
-        }
-
-        return;
-      }
-
-      const generationButton = target.closest("[data-generation-preview]");
-
-      if (generationButton instanceof HTMLElement) {
-        const licenceId = generationButton.dataset.generationPreview;
-
-        if (licenceId) {
-          renderGenerationPreview(licenceId);
-        }
-
-        return;
-      }
-
-      const inspectPdfButton = target.closest("[data-inspect-pdf]");
-
-      if (inspectPdfButton instanceof HTMLElement) {
-        const licenceId = inspectPdfButton.dataset.inspectPdf;
-
-        if (licenceId) {
-          renderPdfInspection(licenceId);
-        }
-
-        return;
-      }
-
-      const downloadHistoryButton = target.closest("[data-download-history]");
-
-      if (downloadHistoryButton instanceof HTMLElement) {
-        const licenceId = downloadHistoryButton.dataset.downloadHistory;
-
-        if (licenceId) {
-          renderDownloadHistory(licenceId);
-        }
-
-        return;
-      }
-
-      const prepareEmailDownloadButton = target.closest("[data-prepare-email-download]");
-
-      if (prepareEmailDownloadButton instanceof HTMLElement) {
-        const licenceId = prepareEmailDownloadButton.dataset.prepareEmailDownload;
-
-        if (licenceId) {
-          prepareAndEmailDownload(licenceId);
-        }
-
-        return;
-      }
-
-      const reissueDownloadButton = target.closest("[data-reissue-download]");
-
-      if (reissueDownloadButton instanceof HTMLElement) {
-        const licenceId = reissueDownloadButton.dataset.reissueDownload;
-
-        if (licenceId) {
-          reissueDownload(licenceId);
-        }
-      }
-    });
-
-    copyDownloadLinkButton.addEventListener("click", async () => {
-      const value = downloadLinkUrlInput.value;
-
-      if (!value) {
-        setStatus("No recipient landing URL is available to copy.", "error");
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(value);
-        setStatus("Recipient landing URL copied to clipboard.", "success");
-      } catch {
-        downloadLinkUrlInput.focus();
-        downloadLinkUrlInput.select();
-        setStatus("Could not access clipboard. The link has been selected for manual copying.", "error");
-      }
-    });
-
-    closeDetailButton.addEventListener("click", () => {
-      detailCard.hidden = true;
-      resetDetailPanels();
-    });
-
-    const existingToken = getStoredToken();
-
-    if (existingToken) {
-      setStatus("Admin token found in this browser session. Loading CDAS licences…");
-      fetchLicences();
-    } else {
-      setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
-    }
-
-    window.relayhubAdminTokenUpdated = () => {
-      if (typeof fetchDownloadLinks === "function") {
-        fetchDownloadLinks();
-      }
-
-      if (typeof fetchLicences === "function") {
-        fetchLicences();
-      }
-
-      if (typeof fetchDocuments === "function") {
-        fetchDocuments();
-      }
-
-      if (typeof fetchLicenceTerms === "function") {
-        fetchLicenceTerms();
-      }
-
-      if (typeof fetchAccessRequests === "function") {
-        fetchAccessRequests();
-      }
-
-      if (typeof loadDownloads === "function") {
-        loadDownloads();
-      }
-
-      if (typeof loadContacts === "function") {
-        loadContacts();
-      }
-
-      if (typeof loadNewsletter === "function") {
-        loadNewsletter();
-      }
-    };
-
-    window.relayhubAdminTokenCleared = () => {
-      location.reload();
-    };
+    fetchLicences();
   </script>
 </BaseLayout>
