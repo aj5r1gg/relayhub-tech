@@ -30,6 +30,9 @@ import {
   recordCdasLicenceEvidenceBundleExport,
 } from "./licence-evidence-export.js";
 import {
+  archiveCdasLicenceEvidenceBundle,
+} from "./licence-evidence-archive.js";
+import {
   captureCdasDocumentSourceSha256,
 } from "./source-hash.js";
 import {
@@ -261,7 +264,7 @@ export async function handleCdasAdminRequest(request, env) {
   }
 
   /*
-   * CDAS download link registry.
+   * CDAS controlled download-link registry.
    */
   if (pathname === "/api/admin/cdas/download-links") {
     return listCdasDownloadLinks(request, env);
@@ -292,8 +295,9 @@ export async function handleCdasAdminRequest(request, env) {
   /*
    * CDAS issued licence registry.
    *
-   * Route order matters. Specific licence subroutes must appear before the
-   * generic /api/admin/cdas/licences/:id route.
+   * Important:
+   * Specific subroutes must appear before the generic
+   * /api/admin/cdas/licences/:id route.
    */
   if (pathname === "/api/admin/cdas/licences") {
     return listCdasLicences(request, env);
@@ -323,6 +327,35 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return getCdasLicenceDownloadHistory(request, env, licenceIdOrNumber);
+  }
+
+  /*
+   * CDAS licence evidence bundle R2 archive.
+   *
+   * Admin-only. Generates the evidence bundle server-side, calculates evidence,
+   * archives the JSON bundle to R2, and records an archive audit event when possible.
+   *
+   * Does not create download links, generate PDFs, email anyone, serve controlled
+   * documents, expose raw tokens, expose token hashes, or expose private R2 URLs.
+   *
+   * Important: this route must appear before /evidence-bundle/export-record
+   * and /evidence-bundle.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/evidence-bundle/archive")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/evidence-bundle/archive"
+    );
+
+    return archiveCdasLicenceEvidenceBundle(
+      request,
+      env,
+      licenceIdOrNumber
+    );
   }
 
   /*
