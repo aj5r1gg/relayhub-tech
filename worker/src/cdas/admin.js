@@ -14,6 +14,9 @@ import {
   resendCdasAccessRequestVerification,
 } from "./resend-verification.js";
 import {
+  reviewCdasAccessRequest,
+} from "./access-request-review.js";
+import {
   listCdasLicences,
   getCdasLicence,
 } from "./licences.js";
@@ -288,6 +291,19 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return resendCdasAccessRequestVerification(request, env, requestId);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/access-requests/") &&
+    pathname.endsWith("/review")
+  ) {
+    const requestId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/access-requests/",
+      "/review"
+    );
+
+    return reviewCdasAccessRequest(request, env, requestId);
   }
 
   if (pathname.startsWith("/api/admin/cdas/access-requests/")) {
