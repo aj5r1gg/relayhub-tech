@@ -200,12 +200,12 @@ const pageDescription =
       <section class="rh-download-link-issue" id="download-link-card" hidden>
         <div class="rh-download-link-heading">
           <div>
-            <p class="rh-eyebrow">Controlled link issuance</p>
-            <h3>Issue controlled download link</h3>
+            <p class="rh-eyebrow">Controlled download workflow</p>
+            <h3>Prepare and email download</h3>
             <p>
-              Admin-only issuance of a one-time controlled download link. The raw
-              token is shown only once. This panel must never auto-open or auto-fetch
-              the issued URL.
+              Admin-only operator workflow for preparing a requester-specific PDF,
+              activating a one-time controlled download link, and emailing the
+              recipient landing page. This panel must never expose private R2 URLs.
             </p>
           </div>
         </div>
@@ -213,7 +213,7 @@ const pageDescription =
         <div class="rh-download-link-status" id="download-link-status"></div>
 
         <div class="rh-download-link-url-card" id="download-link-url-card" hidden>
-          <label for="download-link-url">One-time download URL</label>
+          <label for="download-link-url">Recipient landing URL</label>
           <div class="rh-download-link-copy-row">
             <input id="download-link-url" type="text" readonly />
             <button class="rh-button rh-button-primary" id="copy-download-link" type="button">
@@ -221,8 +221,9 @@ const pageDescription =
             </button>
           </div>
           <p>
-            Do not refresh this panel expecting to recover the token. The token is
-            returned once by the Worker and only its SHA-256 hash is stored.
+            This URL is returned once by the Worker and is emailed to the recipient.
+            Only the token hash is stored. Do not use this link unless intentionally
+            consuming the single-use download.
           </p>
         </div>
 
@@ -547,17 +548,7 @@ const pageDescription =
       display: block;
       max-width: 36ch;
       overflow-wrap: anywhere;
-      word-break: break-word;
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        "Liberation Mono",
-        monospace;
-      font-size: 0.78rem;
-      line-height: 1.45;
+            line-height: 1.45;
       color: rgba(15, 23, 42, 0.72);
     }
 
@@ -661,7 +652,8 @@ const pageDescription =
 
     .rh-evidence-row,
     .rh-generation-row,
-    .rh-pdf-row {
+    .rh-pdf-row,
+    .rh-download-link-row {
       display: grid;
       grid-template-columns: 240px minmax(0, 1fr);
       gap: 1rem;
@@ -678,7 +670,8 @@ const pageDescription =
 
     .rh-evidence-row dt,
     .rh-generation-row dt,
-    .rh-pdf-row dt {
+    .rh-pdf-row dt,
+    .rh-download-link-row dt {
       color: rgba(15, 23, 42, 0.55);
       font-size: 0.72rem;
       font-weight: 900;
@@ -688,7 +681,8 @@ const pageDescription =
 
     .rh-evidence-row dd,
     .rh-generation-row dd,
-    .rh-pdf-row dd {
+    .rh-pdf-row dd,
+    .rh-download-link-row dd {
       margin: 0;
       color: #0f172a;
       overflow-wrap: anywhere;
@@ -698,7 +692,8 @@ const pageDescription =
 
     .rh-evidence-hash,
     .rh-generation-code,
-    .rh-pdf-code {
+    .rh-pdf-code,
+    .rh-download-link-code {
       font-family:
         ui-monospace,
         SFMono-Regular,
@@ -742,160 +737,42 @@ const pageDescription =
       font-size: 0.92rem;
     }
 
-    .rh-generation-preview {
-      margin-top: 1.25rem;
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 1rem;
-      padding: 1rem;
-      background:
-        radial-gradient(circle at top left, rgba(22, 163, 74, 0.08), transparent 28rem),
-        #fff;
-    }
-
-    .rh-generation-heading {
-      margin-bottom: 1rem;
-    }
-
-    .rh-generation-heading h3 {
-      margin: 0.25rem 0 0;
-      color: #0f172a;
-      font-size: 1.3rem;
-      letter-spacing: -0.04em;
-    }
-
-    .rh-generation-heading p:last-child {
-      margin: 0.35rem 0 0;
-      color: rgba(15, 23, 42, 0.68);
-      line-height: 1.6;
-    }
-
-    .rh-generation-status {
-      margin-bottom: 1rem;
-      padding: 0.9rem 1rem;
-      border-radius: 0.9rem;
-      background: #f8fafc;
-      color: rgba(15, 23, 42, 0.78);
-      line-height: 1.6;
-    }
-
-    .rh-generation-status[data-state="ready"] {
-      background: #f0fdf4;
-      color: #166534;
-    }
-
-    .rh-generation-status[data-state="blocked"] {
-      background: #fef2f2;
-      color: #991b1b;
-    }
-
-    .rh-generation-status[data-state="warning"] {
-      background: #fffbeb;
-      color: #92400e;
-    }
-
-    .rh-generation-grid,
-    .rh-generation-controls {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .rh-generation-controls {
-      margin-top: 1rem;
-    }
-
-    .rh-generation-list {
-      margin: 0;
-      padding-left: 1.2rem;
-    }
-
-    .rh-generation-list li {
-      margin: 0.15rem 0;
-    }
-
-    .rh-pdf-inspection {
-      margin-top: 1.25rem;
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 1rem;
-      padding: 1rem;
-      background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 28rem),
-        #fff;
-    }
-
-    .rh-pdf-inspection-heading {
-      margin-bottom: 1rem;
-    }
-
-    .rh-pdf-inspection-heading h3 {
-      margin: 0.25rem 0 0;
-      color: #0f172a;
-      font-size: 1.3rem;
-      letter-spacing: -0.04em;
-    }
-
-    .rh-pdf-inspection-heading p:last-child {
-      margin: 0.35rem 0 0;
-      color: rgba(15, 23, 42, 0.68);
-      line-height: 1.6;
-    }
-
-    .rh-pdf-inspection-status {
-      margin-bottom: 1rem;
-      padding: 0.9rem 1rem;
-      border-radius: 0.9rem;
-      background: #f8fafc;
-      color: rgba(15, 23, 42, 0.78);
-      line-height: 1.6;
-    }
-
-    .rh-pdf-inspection-status[data-state="passed"] {
-      background: #f0fdf4;
-      color: #166534;
-    }
-
-    .rh-pdf-inspection-status[data-state="warning"] {
-      background: #fffbeb;
-      color: #92400e;
-    }
-
-    .rh-pdf-inspection-status[data-state="failed"] {
-      background: #fef2f2;
-      color: #991b1b;
-    }
-
-        .rh-pdf-inspection-grid,
-    .rh-pdf-inspection-controls {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .rh-pdf-inspection-controls {
-      margin-top: 1rem;
-    }
-
-    .rh-pdf-list {
-      margin: 0;
-      padding-left: 1.2rem;
-    }
-
-    .rh-pdf-list li {
-      margin: 0.15rem 0;
-    }
-
+    .rh-generation-preview,
+    .rh-pdf-inspection,
     .rh-download-link-issue {
       margin-top: 1.25rem;
       border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 1rem;
       padding: 1rem;
+      background: #fff;
+    }
+
+    .rh-generation-preview {
+      background:
+        radial-gradient(circle at top left, rgba(22, 163, 74, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-pdf-inspection {
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-download-link-issue {
       background:
         radial-gradient(circle at top left, rgba(14, 165, 233, 0.1), transparent 28rem),
         #fff;
     }
 
+    .rh-generation-heading,
+    .rh-pdf-inspection-heading,
     .rh-download-link-heading {
       margin-bottom: 1rem;
     }
 
+    .rh-generation-heading h3,
+    .rh-pdf-inspection-heading h3,
     .rh-download-link-heading h3 {
       margin: 0.25rem 0 0;
       color: #0f172a;
@@ -903,12 +780,16 @@ const pageDescription =
       letter-spacing: -0.04em;
     }
 
+    .rh-generation-heading p:last-child,
+    .rh-pdf-inspection-heading p:last-child,
     .rh-download-link-heading p:last-child {
       margin: 0.35rem 0 0;
       color: rgba(15, 23, 42, 0.68);
       line-height: 1.6;
     }
 
+    .rh-generation-status,
+    .rh-pdf-inspection-status,
     .rh-download-link-status {
       margin-bottom: 1rem;
       padding: 0.9rem 1rem;
@@ -918,71 +799,100 @@ const pageDescription =
       line-height: 1.6;
     }
 
-    .rh-download-link-status[data-state="issued"] {
+    .rh-generation-status[data-state="ready"],
+    .rh-pdf-inspection-status[data-state="passed"],
+    .rh-download-link-status[data-state="success"] {
       background: #f0fdf4;
       color: #166534;
     }
 
+    .rh-generation-status[data-state="blocked"],
+    .rh-pdf-inspection-status[data-state="failed"],
+    .rh-download-link-status[data-state="error"] {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .rh-generation-status[data-state="warning"],
+    .rh-pdf-inspection-status[data-state="warning"],
     .rh-download-link-status[data-state="warning"] {
       background: #fffbeb;
       color: #92400e;
     }
 
-    .rh-download-link-status[data-state="failed"] {
-      background: #fef2f2;
-      color: #991b1b;
+    .rh-generation-grid,
+    .rh-generation-controls,
+    .rh-pdf-inspection-grid,
+    .rh-pdf-inspection-controls,
+    .rh-download-link-grid,
+    .rh-download-link-controls {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .rh-generation-controls,
+    .rh-pdf-inspection-controls,
+    .rh-download-link-controls {
+      margin-top: 1rem;
+    }
+
+    .rh-generation-list,
+    .rh-pdf-list,
+    .rh-download-link-list {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .rh-generation-list li,
+    .rh-pdf-list li,
+    .rh-download-link-list li {
+      margin: 0.15rem 0;
     }
 
     .rh-download-link-url-card {
-      display: grid;
-      gap: 0.55rem;
       margin-bottom: 1rem;
       padding: 1rem;
-      border: 1px solid rgba(14, 165, 233, 0.22);
+      border: 1px solid rgba(14, 165, 233, 0.25);
       border-radius: 1rem;
       background: #f0f9ff;
     }
 
     .rh-download-link-url-card label {
-      color: rgba(15, 23, 42, 0.72);
-      font-size: 0.76rem;
+      display: block;
+      margin-bottom: 0.45rem;
+      color: #075985;
+      font-size: 0.78rem;
       font-weight: 900;
       letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
     .rh-download-link-url-card input {
-      min-width: 0;
       width: 100%;
-      border: 1px solid rgba(14, 165, 233, 0.28);
-      border-radius: 0.85rem;
+      min-width: 0;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      border-radius: 0.75rem;
       padding: 0.75rem 0.85rem;
       background: #fff;
       color: #0f172a;
-      font:
-        0.88rem ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        "Liberation Mono",
-        monospace;
+      font: inherit;
     }
 
     .rh-download-link-url-card p {
-      margin: 0;
-      color: rgba(15, 23, 42, 0.68);
-      line-height: 1.6;
+      margin: 0.65rem 0 0;
+      color: rgba(12, 74, 110, 0.78);
+      font-size: 0.9rem;
+      line-height: 1.55;
     }
 
     .rh-download-link-copy-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.75rem;
+      gap: 0.6rem;
       align-items: center;
     }
 
-    .rh-download-link-grid,
+        .rh-download-link-grid,
     .rh-download-link-controls {
       display: grid;
       gap: 0.75rem;
@@ -1291,7 +1201,8 @@ const pageDescription =
 
       renderLicences(state.licences);
       updateMetrics(state.licences);
-            setStatus(
+
+      setStatus(
         `Loaded ${state.licences.length} CDAS licence record(s). Total matching records: ${state.total}.`,
         "success"
       );
@@ -1342,9 +1253,9 @@ const pageDescription =
                 </div>
               </td>
               <td>
-                <div class="rh-policy-stack">
-                  <span>${escapeHtml(formatValue(row.document_id))}</span>
-                  <span>Version: ${escapeHtml(formatValue(row.document_version))}</span>
+                <div class="rh-admin-title-stack">
+                  <strong>${escapeHtml(formatValue(row.document_id))}</strong>
+                  <span>v${escapeHtml(formatValue(row.document_version))}</span>
                   <span>Terms: ${escapeHtml(formatValue(row.licence_terms_version))}</span>
                 </div>
               </td>
@@ -1391,9 +1302,9 @@ const pageDescription =
                   <button
                     class="rh-button rh-button-primary"
                     type="button"
-                    data-issue-download-link="${escapeHtml(row.id)}"
+                    data-prepare-email-download="${escapeHtml(row.id)}"
                   >
-                    Issue Link
+                    Prepare &amp; Email
                   </button>
                 </div>
               </td>
@@ -1557,7 +1468,7 @@ const pageDescription =
         return;
       }
 
-      detailCard.hidden = false;
+            detailCard.hidden = false;
       generationPreviewCard.hidden = false;
       generationStatus.dataset.state = "neutral";
       generationStatus.textContent = "Loading generation readiness preview…";
@@ -1720,7 +1631,7 @@ const pageDescription =
           {
             headers: {
               Authorization: `Bearer ${token}`,
-                          },
+            },
           }
         );
 
@@ -1781,29 +1692,36 @@ const pageDescription =
       downloadLinkControls.innerHTML = "";
     }
 
-    function renderDownloadLinkIssueData(data) {
+    function renderDownloadWorkflowData(data) {
       const warnings = Array.isArray(data.warnings) ? data.warnings : [];
       const link = data.download_link || {};
       const licence = data.licence || {};
-      const evidence = data.generated_pdf_evidence || {};
+      const email = data.email_result || {};
       const controls = data.controls || {};
 
-      if (data.issued && warnings.length) {
+      const workflowSucceeded =
+        Boolean(data.ok) &&
+        Boolean(data.activated) &&
+        (Boolean(data.emailed) || Boolean(email.skipped));
+
+      if (workflowSucceeded && warnings.length) {
         downloadLinkStatus.dataset.state = "warning";
         downloadLinkStatus.textContent =
-          "Controlled download link issued, with warnings that should be reviewed.";
-      } else if (data.issued) {
-        downloadLinkStatus.dataset.state = "issued";
+          "CDAS download was prepared, activated, and email handling completed, with warnings to review.";
+      } else if (workflowSucceeded) {
+        downloadLinkStatus.dataset.state = "success";
         downloadLinkStatus.textContent =
-          "Controlled download link issued. The token is visible only in this panel response.";
+          data.message || "CDAS download was prepared, activated, and emailed.";
       } else {
-        downloadLinkStatus.dataset.state = "failed";
+        downloadLinkStatus.dataset.state = "error";
         downloadLinkStatus.textContent =
-          data.message || "Controlled download link was not issued.";
+          data.message || "CDAS download workflow did not complete.";
       }
 
-      if (link.url) {
-        downloadLinkUrlInput.value = link.url;
+      const landingUrl = link.landing_url || link.url || "";
+
+      if (landingUrl) {
+        downloadLinkUrlInput.value = landingUrl;
         downloadLinkUrlCard.hidden = false;
       } else {
         downloadLinkUrlInput.value = "";
@@ -1811,52 +1729,53 @@ const pageDescription =
       }
 
       downloadLinkGrid.innerHTML = [
-        downloadLinkRow("Issued", booleanText(data.issued)),
+        downloadLinkRow("Workflow action", data.workflow_action),
+        downloadLinkRow("Reserved", booleanText(data.reserved)),
+        downloadLinkRow("Generated", booleanText(data.generated)),
+        downloadLinkRow("Activated", booleanText(data.activated)),
+        downloadLinkRow("Emailed", booleanText(data.emailed)),
+        downloadLinkRow("Warnings", renderDownloadLinkList(warnings), { html: true }),
+
+        downloadLinkRow("Download ID", link.download_reference, { code: true }),
         downloadLinkRow("Download link ID", link.id, { code: true }),
         downloadLinkRow("Link status", link.status),
         downloadLinkRow("Expires at", link.expires_at),
         downloadLinkRow("Token visible once", booleanText(link.token_visible_once)),
-        downloadLinkRow("Single use by schema", booleanText(link.single_use_by_schema)),
-        downloadLinkRow("Superseded previous links", data.superseded_previous_links),
-        downloadLinkRow("Warnings", renderDownloadLinkList(warnings), { html: true }),
+        downloadLinkRow("Single use", booleanText(link.single_use)),
 
         downloadLinkRow("Licence number", licence.licence_number),
         downloadLinkRow("Document ID", licence.document_id),
         downloadLinkRow("Document version", licence.document_version),
+        downloadLinkRow("Recipient name", licence.licence_holder_name),
         downloadLinkRow("Recipient email", licence.licence_holder_email_normalised),
+        downloadLinkRow("Generated PDF status", licence.generated_pdf_status),
 
-        downloadLinkRow("Generated PDF object", licence.generated_pdf_object_key, { code: true }),
-        downloadLinkRow("Generated PDF SHA-256", licence.generated_pdf_sha256, { code: true }),
-        downloadLinkRow("Generated PDF size", licence.generated_pdf_size_bytes),
-
-        downloadLinkRow("Evidence object exists", booleanText(evidence.object_exists)),
-        downloadLinkRow("Evidence matches", booleanText(evidence.evidence_matches)),
-        downloadLinkRow("R2 size", evidence.r2_size),
-        downloadLinkRow("D1 size", evidence.d1_size),
-        downloadLinkRow("R2 calculated SHA-256", evidence.r2_calculated_sha256, { code: true }),
-        downloadLinkRow("D1 SHA-256", evidence.d1_sha256, { code: true }),
-        downloadLinkRow("R2 uploaded", evidence.r2_uploaded),
-        downloadLinkRow("R2 HTTP ETag", evidence.r2_http_etag, { code: true }),
+        downloadLinkRow("Email provider", email.provider),
+        downloadLinkRow("Email sent", booleanText(email.sent)),
+        downloadLinkRow("Email skipped", booleanText(email.skipped)),
+        downloadLinkRow("Provider message ID", email.provider_message_id, { code: true }),
+        downloadLinkRow("Email error", email.error, { code: true }),
+        downloadLinkRow("Email message", email.message),
       ].join("");
 
       downloadLinkControls.innerHTML = [
-        downloadLinkRow("Verifies licence active", booleanText(controls.verifies_licence_active)),
-        downloadLinkRow("Verifies generated PDF evidence", booleanText(controls.verifies_generated_pdf_evidence)),
-        downloadLinkRow("Creates download link record", booleanText(controls.creates_download_link_record)),
+        downloadLinkRow("Full operator workflow", booleanText(controls.full_operator_workflow)),
+        downloadLinkRow("Reserves link when needed", booleanText(controls.reserves_download_link_when_needed)),
+        downloadLinkRow("Generates PDF before email", booleanText(controls.generates_pdf_before_email)),
+        downloadLinkRow("Activates link before email", booleanText(controls.activates_link_before_email)),
+        downloadLinkRow("Emails landing page URL", booleanText(controls.landing_page_url_emailed)),
+        downloadLinkRow("Emails raw R2 URL", booleanText(controls.raw_r2_url_exposed)),
+        downloadLinkRow("Emails download API URL", booleanText(controls.download_api_url_emailed)),
+        downloadLinkRow("Single-use preserved", booleanText(controls.single_use_download_preserved)),
         downloadLinkRow("Stores raw token", booleanText(controls.stores_raw_token)),
-        downloadLinkRow("Stores token hash", booleanText(controls.stores_token_hash)),
-        downloadLinkRow("Returns token once", booleanText(controls.returns_token_once)),
-        downloadLinkRow("Supersedes previous unused links", booleanText(controls.supersedes_previous_unused_links)),
-        downloadLinkRow("Writes to R2", booleanText(controls.writes_to_r2)),
-        downloadLinkRow("Serves download", booleanText(controls.serves_download)),
-        downloadLinkRow("Public access", booleanText(controls.public_access)),
+        downloadLinkRow("Can reconstruct previous raw token", booleanText(controls.can_reconstruct_previous_raw_token)),
         downloadLinkRow("Message", data.message),
       ].join("");
 
       downloadLinkCard.hidden = false;
     }
 
-    async function issueDownloadLink(licenceId) {
+    async function prepareAndEmailDownload(licenceId) {
       const token = getStoredToken();
 
       if (!token) {
@@ -1865,8 +1784,8 @@ const pageDescription =
       }
 
       const confirmed = window.confirm(
-        "Issue a new controlled one-time download link for this licence?\n\n" +
-          "The raw token will be shown only once. The admin page will not open or test the URL automatically."
+        "Prepare and email a requester-specific controlled download for this licence?\n\n" +
+          "This will reserve a Download ID, generate the PDF if needed, activate the link, and email the recipient landing page. The admin page will not open or test the URL automatically."
       );
 
       if (!confirmed) {
@@ -1877,50 +1796,65 @@ const pageDescription =
       downloadLinkCard.hidden = false;
       resetDownloadLinkPanel();
       downloadLinkStatus.dataset.state = "neutral";
-      downloadLinkStatus.textContent = "Issuing controlled download link…";
+      downloadLinkStatus.textContent = "Preparing requester-specific PDF and emailing controlled download…";
 
       let response;
       let data;
 
       try {
         response = await fetch(
-          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/issue-download-link`,
+          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/email-download-link`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
+            body: JSON.stringify({}),
           }
         );
 
         data = await response.json();
       } catch (error) {
-        downloadLinkStatus.dataset.state = "failed";
-        downloadLinkStatus.textContent = `Could not issue controlled download link: ${error.message}`;
+        downloadLinkStatus.dataset.state = "error";
+        downloadLinkStatus.textContent = `Could not prepare and email controlled download: ${error.message}`;
         return;
       }
 
       if (!response.ok || !data.ok) {
-        downloadLinkStatus.dataset.state = "failed";
+        downloadLinkStatus.dataset.state = "error";
         downloadLinkStatus.textContent =
-          data?.message || data?.error || "Controlled download link could not be issued.";
+          data?.message || data?.error || "Controlled download workflow could not be completed.";
 
         const blockers = Array.isArray(data?.blockers) ? data.blockers : [];
         const warnings = Array.isArray(data?.warnings) ? data.warnings : [];
 
         downloadLinkGrid.innerHTML = [
+          downloadLinkRow("Error", data?.error),
+          downloadLinkRow("Message", data?.message),
           downloadLinkRow("Blockers", renderDownloadLinkList(blockers), { html: true }),
           downloadLinkRow("Warnings", renderDownloadLinkList(warnings), { html: true }),
         ].join("");
 
+        if (data?.issue_result || data?.generation_result) {
+          downloadLinkControls.innerHTML = [
+            downloadLinkRow("Reservation result", data.issue_result ? "Present" : "None"),
+            downloadLinkRow("Generation result", data.generation_result ? "Present" : "None"),
+          ].join("");
+        }
+
         return;
       }
 
-      renderDownloadLinkIssueData(data);
+      renderDownloadWorkflowData(data);
 
       downloadLinkCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      setStatus("Controlled download link issued. Copy it now; the token is visible only once.", "success");
+      if (data.emailed) {
+        setStatus("CDAS download prepared, activated, and emailed.", "success");
+      } else {
+        setStatus("CDAS download prepared and activated, but email was not sent. Review the result panel.", "error");
+      }
     }
 
     async function renderDetail(licenceId) {
@@ -2061,13 +1995,13 @@ const pageDescription =
         }
       }
 
-      const issueDownloadLinkButton = target.closest("[data-issue-download-link]");
+      const prepareEmailDownloadButton = target.closest("[data-prepare-email-download]");
 
-      if (issueDownloadLinkButton instanceof HTMLElement) {
-        const licenceId = issueDownloadLinkButton.dataset.issueDownloadLink;
+      if (prepareEmailDownloadButton instanceof HTMLElement) {
+        const licenceId = prepareEmailDownloadButton.dataset.prepareEmailDownload;
 
         if (licenceId) {
-          issueDownloadLink(licenceId);
+          prepareAndEmailDownload(licenceId);
         }
       }
     });
@@ -2076,13 +2010,13 @@ const pageDescription =
       const value = downloadLinkUrlInput.value;
 
       if (!value) {
-        setStatus("No controlled download link is available to copy.", "error");
+        setStatus("No recipient landing URL is available to copy.", "error");
         return;
       }
 
       try {
         await navigator.clipboard.writeText(value);
-        setStatus("Controlled download link copied to clipboard.", "success");
+        setStatus("Recipient landing URL copied to clipboard.", "success");
       } catch {
         downloadLinkUrlInput.focus();
         downloadLinkUrlInput.select();
@@ -2123,7 +2057,7 @@ const pageDescription =
     } else {
       setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
     }
-    
+
     window.relayhubAdminTokenUpdated = () => {
       if (typeof fetchDownloadLinks === "function") {
         fetchDownloadLinks();

@@ -21,6 +21,17 @@ async function readJsonBody(request) {
   }
 }
 
+function hasCompleteGeneratedPdfEvidence(licence) {
+  return Boolean(
+    licence &&
+      licence.generated_pdf_status === "generated" &&
+      licence.generated_pdf_object_key &&
+      licence.generated_pdf_filename &&
+      licence.generated_pdf_sha256 &&
+      licence.generated_pdf_size_bytes
+  );
+}
+
 async function getLicence(env, licenceIdOrNumber) {
   const ref = cleanText(licenceIdOrNumber);
 
@@ -235,8 +246,9 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
   /*
    * Safety rule:
    *
-   * If an active, unused, generated-PDF-bound link already exists, email that.
-   * Do not reserve another Download ID unnecessarily.
+   * If an active, unused, generated-PDF-bound link already exists, email that
+   * only when the caller provides the one-time landing URL. We cannot reconstruct
+   * the raw token because only the token hash is stored.
    */
   const existingActiveLink = await getLatestActiveDownloadLink(env, licence.id);
 
@@ -246,12 +258,47 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
   let activeLink = existingActiveLink;
   let workflowAction = "emailed_existing_active_link";
 
+  /*
+   * Guard against stranded pending_generation rows.
+   *
+   * The current PDF generator is intentionally idempotent when the licence already
+   * has complete generated PDF evidence. A new Download ID requires a new
+   * Download-ID-bound generated copy. Until we implement an explicit reissue /
+   * regeneration workflow, refuse before reserving a new pending_generation link.
+   */
+  if (!existingActiveLink && hasCompleteGeneratedPdfEvidence(licence)) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "generated_pdf_already_exists_without_reusable_download_token",
+        message:
+          "This licence already has generated PDF evidence, but there is no active unused download link and the raw token is not stored. A new Download-ID-bound generated copy requires an explicit reissue/regeneration workflow. No new link was reserved.",
+        licence: {
+          id: licence.id,
+          licence_number: licence.licence_number,
+          document_id: licence.document_id,
+          document_version: licence.document_version,
+          generated_pdf_status: licence.generated_pdf_status,
+          generated_pdf_object_key: licence.generated_pdf_object_key,
+          generated_pdf_sha256: licence.generated_pdf_sha256,
+          generated_pdf_size_bytes: licence.generated_pdf_size_bytes,
+        },
+        controls: {
+          reserved_download_link: false,
+          generated_pdf: false,
+          activated_download_link: false,
+          sent_email: false,
+          stores_raw_token: false,
+          can_reconstruct_previous_raw_token: false,
+          prevents_stranded_pending_generation_links: true,
+          requires_explicit_reissue_workflow: true,
+        },
+      },
+      409
+    );
+  }
+
   if (existingActiveLink) {
-    /*
-     * We cannot reconstruct the raw token from D1 because only the hash is stored.
-     * Therefore, existing active links can only be emailed if the caller provides
-     * a landing_url explicitly. This preserves the no-raw-token-at-rest rule.
-     */
     landingUrl = cleanText(body.landing_url || body.download_url || body.url);
 
     if (!landingUrl) {
@@ -260,19 +307,23 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
           ok: false,
           error: "active_download_link_exists_but_raw_token_unavailable",
           message:
-            "An active download link already exists, but the raw token is not stored and no landing_url was provided. Reserve/generate a new licence workflow or provide the one-time landing URL from the original issue response.",
+            "An active download link already exists, but the raw token is not stored and no landing_url was provided. Provide the one-time landing URL from the original issue response, or wait for an explicit reissue/regeneration workflow.",
           active_download_link: {
             id: existingActiveLink.id,
             download_reference: existingActiveLink.download_reference,
             status: existingActiveLink.status,
             activated_at: existingActiveLink.activated_at,
             expires_at: existingActiveLink.expires_at,
+            generated_pdf_object_key: existingActiveLink.generated_pdf_object_key,
+            generated_pdf_sha256: existingActiveLink.generated_pdf_sha256,
+            generated_pdf_size_bytes: existingActiveLink.generated_pdf_size_bytes,
           },
           controls: {
             stores_raw_token: false,
             can_reconstruct_landing_url: false,
             sends_email: false,
             raw_r2_url_exposed: false,
+            prevents_duplicate_active_download_links: true,
           },
         },
         409
@@ -280,7 +331,7 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
     }
   } else {
     /*
-     * Normal operator workflow:
+     * Normal operator workflow for a fresh, not-yet-generated licence:
      *
      * 1. reserve pending_generation link
      * 2. generate PDF using that Download ID
@@ -504,6 +555,8 @@ export async function emailCdasDownloadLink(request, env, licenceIdOrNumber) {
       single_use_download_preserved: true,
       stores_raw_token: false,
       can_reconstruct_previous_raw_token: false,
+      prevents_stranded_pending_generation_links: true,
+      requires_explicit_reissue_workflow_for_existing_generated_pdfs: true,
     },
     message: emailResult?.sent
       ? "CDAS download was prepared, activated, and emailed."
