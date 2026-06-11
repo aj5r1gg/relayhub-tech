@@ -1,8 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const DOWNLOAD_BASE = "";
-
 type DownloadStatus =
   | "Final"
   | "Current"
@@ -11,14 +9,26 @@ type DownloadStatus =
   | "Planned"
   | "Not released";
 
+type AccessMode =
+  | "public"
+  | "controlled"
+  | "private"
+  | "paid"
+  | "preparing"
+  | "planned"
+  | "not-released";
+
 type DownloadItem = {
   title: string;
   status: DownloadStatus;
+  accessMode: AccessMode;
   type?: string;
   version?: string;
   description: string;
   href?: string;
   filename?: string;
+  documentId?: string;
+  accessNote?: string;
 };
 
 type ReleaseDownloadItem = {
@@ -38,16 +48,19 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "RelayHub Overview",
     status: "Final",
+    accessMode: "controlled",
     type: "PDF",
     version: "v0.2",
+    documentId: "relayhub-overview",
     description:
       "Plain-language introduction to RelayHub, RelayOS, local-first operation, recovery-first design, and the community infrastructure goal.",
-    href: `/download/docs/RelayHub-Overview-v0.2.pdf?v=1`,
-    filename: "RelayHub-Overview-v0.2.pdf",
+    accessNote:
+      "Delivered through RelayHub controlled document access so the correct version, licence terms, and access record are preserved.",
   },
   {
     title: "RelayHub Constitution",
     status: "Final",
+    accessMode: "public",
     type: "PDF",
     version: "Foundational, v1.0",
     description:
@@ -58,6 +71,7 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "Purpose, Mission, Values & Principles",
     status: "Final",
+    accessMode: "public",
     type: "PDF",
     version: "Foundational",
     description:
@@ -68,16 +82,18 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "RelayHub Policy Registry",
     status: "Final",
+    accessMode: "public",
     type: "PDF",
     version: "Foundational, v0.2",
     description:
-	    "Plain-language guide to the RelayHub Policy Registry, including policy IDs, lifecycle states, authority, validation, release gates, waivers, review processes, and how RelayHub keeps governance traceable.",
+      "Plain-language guide to the RelayHub Policy Registry, including policy IDs, lifecycle states, authority, validation, release gates, waivers, review processes, and how RelayHub keeps governance traceable.",
     href: `/download/docs/RelayHub-PolicyRegistry-v0.2.pdf`,
     filename: "RelayHub-PolicyRegistry-v0.2.pdf",
   },
   {
     title: "RelayHub System Architecture Specification",
     status: "Final",
+    accessMode: "public",
     type: "PDF",
     version: "v0.8",
     description:
@@ -88,6 +104,7 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "RelayOS Platform Architecture Specification",
     status: "Final",
+    accessMode: "public",
     type: "PDF",
     version: "v0.3",
     description:
@@ -98,6 +115,7 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "Product Requirements Document",
     status: "Preparing",
+    accessMode: "preparing",
     type: "PDF",
     version: "v0.3",
     description:
@@ -106,6 +124,7 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "Governance & Policy Framework",
     status: "Preparing",
+    accessMode: "preparing",
     type: "PDF",
     version: "v0.1",
     description:
@@ -114,6 +133,7 @@ const documentDownloads: DownloadItem[] = [
   {
     title: "Branding & Identity Specification",
     status: "Preparing",
+    accessMode: "preparing",
     type: "PDF",
     version: "v1.2",
     description:
@@ -125,6 +145,7 @@ const guideDownloads: DownloadItem[] = [
   {
     title: "Home Node Quick Start",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "Beginner setup guide for plugging in a Home Node, scanning the QR code, claiming ownership, and reaching the dashboard.",
@@ -132,6 +153,7 @@ const guideDownloads: DownloadItem[] = [
   {
     title: "Recovery Guide",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "Offline-first recovery guidance covering rollback, local recovery, reset, transfer, and last-resort rebuild paths.",
@@ -139,6 +161,7 @@ const guideDownloads: DownloadItem[] = [
   {
     title: "Hardware Compatibility Guide",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "Hardware support states, validated classes, known limits, power notes, storage notes, and capability boundaries.",
@@ -146,6 +169,7 @@ const guideDownloads: DownloadItem[] = [
   {
     title: "Validation Guide",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "How RelayHub claims are tested, observed, reproduced, recovered, and promoted through release gates.",
@@ -180,6 +204,7 @@ const brandDownloads: DownloadItem[] = [
   {
     title: "RelayHub Logo Pack",
     status: "Planned",
+    accessMode: "planned",
     type: "ZIP",
     description:
       "Approved RelayHub logo files for public, media, and community use once the brand pack is finalised.",
@@ -187,6 +212,7 @@ const brandDownloads: DownloadItem[] = [
   {
     title: "RelayHub Brand Pack",
     status: "Planned",
+    accessMode: "planned",
     type: "ZIP",
     description:
       "Logos, colour references, social images, OpenGraph images, and approved usage notes.",
@@ -194,6 +220,7 @@ const brandDownloads: DownloadItem[] = [
   {
     title: "Media Kit",
     status: "Planned",
+    accessMode: "planned",
     type: "ZIP",
     description:
       "Public media resources for journalists, presenters, community organisers, and partners.",
@@ -204,6 +231,7 @@ const fieldTrialDownloads: DownloadItem[] = [
   {
     title: "Pilot Program Pack",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "Pilot readiness notes, participant expectations, onboarding flow, field observations, and feedback capture.",
@@ -211,6 +239,7 @@ const fieldTrialDownloads: DownloadItem[] = [
   {
     title: "Field Trial Checklist",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "Task checklist for testing setup, local-only operation, no-peers state, recovery, support export, and comprehension.",
@@ -218,6 +247,7 @@ const fieldTrialDownloads: DownloadItem[] = [
   {
     title: "Recovery Drill Worksheet",
     status: "Planned",
+    accessMode: "planned",
     type: "PDF",
     description:
       "Worksheet for rehearsing recovery without assuming terminal access or live internet.",
@@ -237,12 +267,12 @@ const hardwareDownloads = [
 
 const downloadRules = [
   {
-    title: "Final files only",
-    text: "Only files marked Final and given a verified download URL receive an active download button.",
+    title: "Respect access state",
+    text: "Some documents are public downloads. Controlled documents are delivered through RelayHub’s controlled document access workflow so the correct version, licence terms, and access record are preserved.",
   },
   {
-    title: "Downloads must actually download",
-    text: "Active links use direct R2 URLs with download filenames. R2 objects must also be uploaded with Content-Disposition: attachment.",
+    title: "No raw links for controlled files",
+    text: "Controlled documents must not expose raw storage links. They should route through the document access workflow and controlled download landing page.",
   },
   {
     title: "No dead public links",
@@ -294,8 +324,33 @@ const renderDownloadStatus = (status: DownloadStatus) => {
   return "rh-download-status rh-download-status-muted";
 };
 
-const hasFinalDownload = (item: DownloadItem) => {
-  return item.status === "Final" && Boolean(item.href);
+const renderAccessClass = (mode: AccessMode) => {
+  if (mode === "public") return "rh-access-pill rh-access-public";
+  if (mode === "controlled") return "rh-access-pill rh-access-controlled";
+  if (mode === "private") return "rh-access-pill rh-access-private";
+  if (mode === "paid") return "rh-access-pill rh-access-paid";
+  if (mode === "preparing") return "rh-access-pill rh-access-preparing";
+  if (mode === "planned") return "rh-access-pill rh-access-planned";
+  return "rh-access-pill rh-access-muted";
+};
+
+const renderAccessLabel = (mode: AccessMode) => {
+  if (mode === "public") return "Public download";
+  if (mode === "controlled") return "Controlled access";
+  if (mode === "private") return "Private access";
+  if (mode === "paid") return "Paid access";
+  if (mode === "preparing") return "Preparing";
+  if (mode === "planned") return "Planned";
+  return "Not released";
+};
+
+const getDocumentAccessHref = (item: DownloadItem) => {
+  const documentId = item.documentId || item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return `/document-access?document=${encodeURIComponent(documentId)}`;
+};
+
+const hasPublicDownload = (item: DownloadItem) => {
+  return item.status === "Final" && item.accessMode === "public" && Boolean(item.href);
 };
 
 const getDownloadFilename = (item: DownloadItem) => {
@@ -321,20 +376,20 @@ const getReleaseFilename = (href?: string, filename?: string) => {
 
 <BaseLayout
   title="Downloads | RelayHub"
-  description="RelayHub downloads hub for final public documents, guides, brand assets, field trial resources, future RelayOS images, checksums, signatures, hardware resources, and validation artefacts."
+  description="RelayHub downloads hub for public documents, controlled-access documents, guides, brand assets, field trial resources, future RelayOS images, checksums, signatures, hardware resources, and validation artefacts."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
       <p class="rh-eyebrow">Downloads</p>
 
       <h1 class="rh-title">
-        Public downloads for RelayHub.
+        RelayHub documents and downloads.
       </h1>
 
       <p class="rh-subtitle">
-        Final files download directly. Draft, planned, preparing, and unreleased
-        files may be listed for transparency, but they do not receive active
-        download links until they are ready and verified.
+        Some documents are public downloads. Controlled documents are delivered
+        through RelayHub’s document access workflow so the correct version,
+        licence terms, and access record are preserved.
       </p>
 
       <div class="rh-actions">
@@ -357,9 +412,9 @@ const getReleaseFilename = (href?: string, filename?: string) => {
       </h2>
 
       <p class="rh-section-lead">
-        Only final, verified files have active download buttons. Preparing or
-        planned documents are shown without links so the page does not expose
-        broken downloads.
+        Public documents can be downloaded directly. Controlled documents use
+        RelayHub’s document access workflow and are not served through raw public
+        storage links.
       </p>
 
       <div class="rh-download-grid">
@@ -372,14 +427,24 @@ const getReleaseFilename = (href?: string, filename?: string) => {
               {item.type && <span class="rh-download-type">{item.type}</span>}
             </div>
 
+            <div class="rh-access-row">
+              <span class={renderAccessClass(item.accessMode)}>
+                {renderAccessLabel(item.accessMode)}
+              </span>
+            </div>
+
             <h3 class="rh-download-title">{item.title}</h3>
 
             {item.version && <p class="rh-download-meta">{item.version}</p>}
 
             <p class="rh-download-text">{item.description}</p>
 
+            {item.accessNote && (
+              <p class="rh-download-note">{item.accessNote}</p>
+            )}
+
             <div class="rh-download-actions">
-              {hasFinalDownload(item) ? (
+              {hasPublicDownload(item) ? (
                 <a
                   class="rh-download-button"
                   href={item.href}
@@ -387,6 +452,21 @@ const getReleaseFilename = (href?: string, filename?: string) => {
                 >
                   Download
                 </a>
+              ) : item.accessMode === "controlled" ? (
+                <a
+                  class="rh-download-button"
+                  href={getDocumentAccessHref(item)}
+                >
+                  Request access
+                </a>
+              ) : item.accessMode === "private" ? (
+                <span class="rh-download-unavailable">
+                  Private access
+                </span>
+              ) : item.accessMode === "paid" ? (
+                <span class="rh-download-unavailable">
+                  Paid access coming soon
+                </span>
               ) : (
                 <span class="rh-download-unavailable">
                   Download not available yet
@@ -423,11 +503,17 @@ const getReleaseFilename = (href?: string, filename?: string) => {
               {item.type && <span class="rh-download-type">{item.type}</span>}
             </div>
 
+            <div class="rh-access-row">
+              <span class={renderAccessClass(item.accessMode)}>
+                {renderAccessLabel(item.accessMode)}
+              </span>
+            </div>
+
             <h3 class="rh-download-title">{item.title}</h3>
             <p class="rh-download-text">{item.description}</p>
 
             <div class="rh-download-actions">
-              {hasFinalDownload(item) ? (
+              {hasPublicDownload(item) ? (
                 <a
                   class="rh-download-button"
                   href={item.href}
@@ -551,11 +637,17 @@ const getReleaseFilename = (href?: string, filename?: string) => {
               {item.type && <span class="rh-download-type">{item.type}</span>}
             </div>
 
+            <div class="rh-access-row">
+              <span class={renderAccessClass(item.accessMode)}>
+                {renderAccessLabel(item.accessMode)}
+              </span>
+            </div>
+
             <h3 class="rh-download-title">{item.title}</h3>
             <p class="rh-download-text">{item.description}</p>
 
             <div class="rh-download-actions">
-              {hasFinalDownload(item) ? (
+              {hasPublicDownload(item) ? (
                 <a
                   class="rh-download-button"
                   href={item.href}
@@ -605,11 +697,17 @@ const getReleaseFilename = (href?: string, filename?: string) => {
               {item.type && <span class="rh-download-type">{item.type}</span>}
             </div>
 
+            <div class="rh-access-row">
+              <span class={renderAccessClass(item.accessMode)}>
+                {renderAccessLabel(item.accessMode)}
+              </span>
+            </div>
+
             <h3 class="rh-download-title">{item.title}</h3>
             <p class="rh-download-text">{item.description}</p>
 
             <div class="rh-download-actions">
-              {hasFinalDownload(item) ? (
+              {hasPublicDownload(item) ? (
                 <a
                   class="rh-download-button"
                   href={item.href}
@@ -684,9 +782,9 @@ const getReleaseFilename = (href?: string, filename?: string) => {
         </h2>
 
         <p class="rh-section-lead">
-          This page assumes the public downloads bucket is available at
-          <strong> downloads.relayhub.tech</strong>. Upload files into these
-          folders so the links resolve cleanly.
+          Public files may live behind the public download path. Controlled
+          documents should be managed through CDAS and should not expose raw
+          storage links on this page.
         </p>
       </div>
 
@@ -703,13 +801,13 @@ const getReleaseFilename = (href?: string, filename?: string) => {
       <p class="rh-kicker">Download rules</p>
 
       <h2 class="rh-section-title">
-        Every download should carry status and scope.
+        Every document should carry status, scope, and access state.
       </h2>
 
       <p class="rh-section-lead">
         RelayHub should avoid publishing files that create false expectations.
-        Downloads should explain their version, maturity, hardware class,
-        support boundary, and recovery implications.
+        Downloads should explain their version, maturity, access model, support
+        boundary, and recovery implications.
       </p>
 
       <div class="rh-download-grid rh-download-grid-3">
@@ -729,13 +827,13 @@ const getReleaseFilename = (href?: string, filename?: string) => {
         <p class="rh-kicker">Current status</p>
 
         <h2 class="rh-section-title">
-          The downloads hub is ready for final public files.
+          The downloads hub now supports public and controlled documents.
         </h2>
 
         <p class="rh-section-lead">
-          Upload final files to Cloudflare R2 with Content-Disposition:
-          attachment. Once the public URL returns 200 and the attachment header
-          is present, add the verified URL to this page.
+          Public documents can be downloaded directly. Controlled documents
+          should use the document access workflow so delivery remains traceable,
+          versioned, and licence-aware.
         </p>
       </div>
 
@@ -747,11 +845,11 @@ const getReleaseFilename = (href?: string, filename?: string) => {
         </p>
 
         <div class="rh-actions">
-          <a class="rh-button rh-button-accent" href="/contact">
-            Contact RelayHub
+          <a class="rh-button rh-button-accent" href="/document-access">
+            Request document access
           </a>
-          <a class="rh-button rh-button-secondary" href="/early-access">
-            Register interest
+          <a class="rh-button rh-button-secondary" href="/contact">
+            Contact RelayHub
           </a>
         </div>
       </article>
@@ -796,11 +894,20 @@ const getReleaseFilename = (href?: string, filename?: string) => {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
+  }
+
+  .rh-access-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
   }
 
   .rh-download-status,
-  .rh-download-type {
+  .rh-download-type,
+  .rh-access-pill {
     display: inline-flex;
     align-items: center;
     width: fit-content;
@@ -843,6 +950,48 @@ const getReleaseFilename = (href?: string, filename?: string) => {
     color: var(--color-muted);
   }
 
+  .rh-access-public {
+    border: 1px solid rgb(22 163 74 / 0.25);
+    background: rgb(22 163 74 / 0.1);
+    color: rgb(21 128 61);
+  }
+
+  .rh-access-controlled {
+    border: 1px solid rgb(37 99 235 / 0.25);
+    background: rgb(37 99 235 / 0.1);
+    color: rgb(29 78 216);
+  }
+
+  .rh-access-private {
+    border: 1px solid rgb(124 58 237 / 0.25);
+    background: rgb(124 58 237 / 0.1);
+    color: rgb(109 40 217);
+  }
+
+  .rh-access-paid {
+    border: 1px solid rgb(202 138 4 / 0.25);
+    background: rgb(202 138 4 / 0.1);
+    color: rgb(161 98 7);
+  }
+
+  .rh-access-preparing {
+    border: 1px solid rgb(217 119 6 / 0.25);
+    background: rgb(217 119 6 / 0.1);
+    color: rgb(180 83 9);
+  }
+
+  .rh-access-planned {
+    border: 1px solid rgb(37 99 235 / 0.2);
+    background: rgb(37 99 235 / 0.08);
+    color: rgb(29 78 216);
+  }
+
+  .rh-access-muted {
+    border: 1px solid rgb(148 163 184 / 0.25);
+    background: rgb(148 163 184 / 0.1);
+    color: rgb(100 116 139);
+  }
+
   .rh-dark .rh-download-type,
   .rh-download-card-dark .rh-download-type {
     border-color: rgb(255 255 255 / 0.16);
@@ -878,6 +1027,17 @@ const getReleaseFilename = (href?: string, filename?: string) => {
     margin: var(--space-4) 0 0;
     color: var(--color-text);
     line-height: 1.7;
+  }
+
+  .rh-download-note {
+    margin: var(--space-4) 0 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgb(37 99 235 / 0.18);
+    border-radius: var(--radius-lg);
+    background: rgb(37 99 235 / 0.06);
+    color: var(--color-text);
+    line-height: 1.6;
+    font-size: 0.94rem;
   }
 
   .rh-dark .rh-download-text,
