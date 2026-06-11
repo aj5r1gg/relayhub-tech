@@ -1437,6 +1437,14 @@ const pageDescription =
                   </button>
 
                   <button
+                    class="rh-button rh-button-secondary"
+                    type="button"
+                    data-archive-evidence-bundle="${licenceId}"
+                  >
+                    Archive Evidence
+                  </button>
+
+                  <button
                     class="rh-button rh-button-primary"
                     type="button"
                     data-prepare-email-download="${licenceId}"
@@ -2245,11 +2253,15 @@ const pageDescription =
       URL.revokeObjectURL(objectUrl);
     }
 
-    function renderEvidenceBundleData(data) {
+    function renderEvidenceBundleData(data, mode = "export") {
       const bundle = data.bundle || data;
       const exportEvidence = data.export_evidence || {};
+      const archiveEvidence = data.archive_evidence || {};
       const auditRecord = data.audit_record || {};
-      const exportControls = data.controls || {};
+      const r2Archive = data.r2_archive || {};
+      const actionControls = data.controls || {};
+
+      const isArchive = mode === "archive" || Boolean(data.archive_record_type);
 
       const summary = bundle.summary || {};
       const downloadLinkSummary = summary.download_links || {};
@@ -2271,19 +2283,51 @@ const pageDescription =
         evidenceBundleStatus.dataset.state = "success";
       }
 
-      evidenceBundleStatus.textContent = auditRecord.recorded
-        ? "CDAS licence evidence bundle export was recorded and the JSON bundle is ready to download."
-        : data.message || interpretation.message || "CDAS licence evidence bundle loaded.";
+      if (isArchive) {
+        evidenceBundleStatus.textContent = r2Archive.archived
+          ? "CDAS licence evidence bundle was archived to R2 and the archive event was recorded."
+          : data.message || "CDAS licence evidence bundle archive completed with warnings.";
+      } else {
+        evidenceBundleStatus.textContent = auditRecord.recorded
+          ? "CDAS licence evidence bundle export was recorded and the JSON bundle is ready to download."
+          : data.message || interpretation.message || "CDAS licence evidence bundle loaded.";
+      }
 
       evidenceBundleSummary.innerHTML = [
-        downloadHistoryRow("Export record type", data.export_record_type || "direct_evidence_bundle", { code: true }),
-        downloadHistoryRow("Export record version", data.export_record_version || "—"),
+        downloadHistoryRow(
+          isArchive ? "Archive record type" : "Export record type",
+          data.archive_record_type || data.export_record_type || "direct_evidence_bundle",
+          { code: true }
+        ),
+        downloadHistoryRow(
+          isArchive ? "Archive record version" : "Export record version",
+          data.archive_record_version || data.export_record_version || "—"
+        ),
         downloadHistoryRow("Audit recorded", booleanText(auditRecord.recorded)),
         downloadHistoryRow("Audit event ID", auditRecord.event_id || "—", { code: true }),
         downloadHistoryRow("Audit table", auditRecord.table || "—", { code: true }),
-        downloadHistoryRow("Recorded at", formatDate(data.recorded_at || exportEvidence.recorded_at)),
-        downloadHistoryRow("Bundle SHA-256", exportEvidence.bundle_sha256 || "—", { code: true }),
-        downloadHistoryRow("Bundle size bytes", exportEvidence.bundle_size_bytes || "—"),
+        downloadHistoryRow(
+          isArchive ? "Archived at" : "Recorded at",
+          formatDate(data.archived_at || data.recorded_at || archiveEvidence.archived_at || exportEvidence.recorded_at)
+        ),
+
+        downloadHistoryRow(
+          "Bundle SHA-256",
+          archiveEvidence.bundle_sha256 || exportEvidence.bundle_sha256 || "—",
+          { code: true }
+        ),
+        downloadHistoryRow(
+          "Bundle size bytes",
+          archiveEvidence.bundle_size_bytes || exportEvidence.bundle_size_bytes || "—"
+        ),
+
+        ...(isArchive
+          ? [
+              downloadHistoryRow("R2 archived", booleanText(r2Archive.archived)),
+              downloadHistoryRow("R2 object key", archiveEvidence.object_key || r2Archive.object_key || "—", { code: true }),
+              downloadHistoryRow("Content type", archiveEvidence.content_type || r2Archive.content_type || "—", { code: true }),
+            ]
+          : []),
 
         downloadHistoryRow("Bundle type", bundle.bundle_type, { code: true }),
         downloadHistoryRow("Bundle version", bundle.bundle_version),
@@ -2344,25 +2388,33 @@ const pageDescription =
         downloadHistoryRow("Bundle exposes token hash", booleanText(bundleControls.exposes_token_hash)),
         downloadHistoryRow("Bundle includes private R2 URL", booleanText(bundleControls.includes_private_r2_url)),
 
-        downloadHistoryRow("Export records audit event", booleanText(exportControls.records_admin_audit_event)),
-        downloadHistoryRow("Export mutates database", booleanText(exportControls.mutates_database)),
-        downloadHistoryRow("Export writes to R2", booleanText(exportControls.writes_to_r2)),
-        downloadHistoryRow("Export creates download link", booleanText(exportControls.creates_download_link)),
-        downloadHistoryRow("Export generates PDF", booleanText(exportControls.generates_pdf)),
-        downloadHistoryRow("Export sends email", booleanText(exportControls.sends_email)),
-        downloadHistoryRow("Export serves download", booleanText(exportControls.serves_download)),
-        downloadHistoryRow("Export exposes raw token", booleanText(exportControls.exposes_raw_token)),
-        downloadHistoryRow("Export exposes token hash", booleanText(exportControls.exposes_token_hash)),
-        downloadHistoryRow("Export includes private R2 URL", booleanText(exportControls.includes_private_r2_url)),
+        downloadHistoryRow(isArchive ? "Archive records audit event" : "Export records audit event", booleanText(actionControls.records_admin_audit_event)),
+        downloadHistoryRow(isArchive ? "Archive mutates database" : "Export mutates database", booleanText(actionControls.mutates_database)),
+        downloadHistoryRow(isArchive ? "Archive writes to R2" : "Export writes to R2", booleanText(actionControls.writes_to_r2)),
+        downloadHistoryRow(isArchive ? "Archive creates download link" : "Export creates download link", booleanText(actionControls.creates_download_link)),
+        downloadHistoryRow(isArchive ? "Archive generates PDF" : "Export generates PDF", booleanText(actionControls.generates_pdf)),
+        downloadHistoryRow(isArchive ? "Archive sends email" : "Export sends email", booleanText(actionControls.sends_email)),
+        downloadHistoryRow(isArchive ? "Archive serves download" : "Export serves download", booleanText(actionControls.serves_download)),
+        downloadHistoryRow(isArchive ? "Archive exposes raw token" : "Export exposes raw token", booleanText(actionControls.exposes_raw_token)),
+        downloadHistoryRow(isArchive ? "Archive exposes token hash" : "Export exposes token hash", booleanText(actionControls.exposes_token_hash)),
+        downloadHistoryRow(isArchive ? "Archive includes private R2 URL" : "Export includes private R2 URL", booleanText(actionControls.includes_private_r2_url)),
+
+        ...(isArchive
+          ? [
+              downloadHistoryRow("Archives evidence bundle JSON", booleanText(actionControls.archives_evidence_bundle_json)),
+            ]
+          : []),
       ].join("");
 
       evidenceBundlePreview.textContent = JSON.stringify(
         {
           ok: data.ok,
+          mode: isArchive ? "archive" : "export",
+          archive_record_type: data.archive_record_type,
           export_record_type: data.export_record_type,
-          export_record_version: data.export_record_version,
-          recorded_at: data.recorded_at,
+          archive_evidence: data.archive_evidence,
           export_evidence: data.export_evidence,
+          r2_archive: data.r2_archive,
           audit_record: data.audit_record,
           bundle: {
             ok: bundle.ok,
@@ -2379,7 +2431,7 @@ const pageDescription =
             integrity_summary: bundle.integrity_summary,
             controls: bundle.controls,
           },
-          export_controls: data.controls,
+          action_controls: data.controls,
         },
         null,
         2
@@ -2390,7 +2442,11 @@ const pageDescription =
           Download JSON Evidence Bundle
         </button>
         <p>
-          The export has been recorded server-side before this download button is shown.
+          ${
+            isArchive
+              ? "The evidence bundle has been archived server-side to R2 before this download button is shown."
+              : "The export has been recorded server-side before this download button is shown."
+          }
           The downloaded JSON file is generated locally by your browser from the returned
           evidence bundle. It does not create a recipient CDAS download link or expose a
           recipient download token.
@@ -2476,6 +2532,87 @@ const pageDescription =
           "Evidence bundle loaded, but the export audit record was not persisted. Review the panel.",
           "error"
         );
+      }
+    }
+
+    async function archiveEvidenceBundle(licenceId) {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "Archive this CDAS licence evidence bundle to R2?\n\n" +
+          "This will generate the evidence bundle server-side, calculate its SHA-256, " +
+          "store the JSON bundle in R2, and record an admin audit event.\n\n" +
+          "It will not create a download link, generate a PDF, send email, serve a document, " +
+          "expose raw tokens, expose token hashes, or expose private R2 URLs."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      detailCard.hidden = false;
+      evidenceBundleCard.hidden = false;
+      resetEvidenceBundlePanel();
+      evidenceBundleStatus.dataset.state = "neutral";
+      evidenceBundleStatus.textContent = "Archiving CDAS licence evidence bundle to R2…";
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/evidence-bundle/archive`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              action: "archive_evidence_bundle",
+              confirm_archive: true,
+            }),
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        evidenceBundleStatus.dataset.state = "error";
+        evidenceBundleStatus.textContent = `Could not archive evidence bundle: ${error.message}`;
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        evidenceBundleStatus.dataset.state = "error";
+        evidenceBundleStatus.textContent =
+          data?.message || data?.error || "Evidence bundle could not be archived.";
+
+        evidenceBundleSummary.innerHTML = [
+          downloadHistoryRow("Error", data?.error),
+          downloadHistoryRow("Message", data?.message),
+        ].join("");
+
+        return;
+      }
+
+      renderEvidenceBundleData(data, "archive");
+
+      evidenceBundleCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      if (data.r2_archive?.archived && data.audit_record?.recorded) {
+        setStatus("CDAS licence evidence bundle archived to R2 and audit event recorded.", "success");
+      } else if (data.r2_archive?.archived) {
+        setStatus(
+          "Evidence bundle archived to R2, but the audit record was not persisted. Review the panel.",
+          "error"
+        );
+      } else {
+        setStatus("Evidence bundle archive did not complete. Review the panel.", "error");
       }
     }
 
@@ -2772,6 +2909,7 @@ const pageDescription =
       const inspectPdfButton = event.target.closest("[data-inspect-pdf]");
       const downloadHistoryButton = event.target.closest("[data-download-history]");
       const evidenceBundleButton = event.target.closest("[data-evidence-bundle]");
+      const archiveEvidenceBundleButton = event.target.closest("[data-archive-evidence-bundle]");
       const prepareEmailDownloadButton = event.target.closest("[data-prepare-email-download]");
       const reissueDownloadButton = event.target.closest("[data-reissue-download]");
 
@@ -2797,6 +2935,11 @@ const pageDescription =
 
       if (evidenceBundleButton) {
         renderEvidenceBundle(evidenceBundleButton.dataset.evidenceBundle);
+        return;
+      }
+
+      if (archiveEvidenceBundleButton) {
+        archiveEvidenceBundle(archiveEvidenceBundleButton.dataset.archiveEvidenceBundle);
         return;
       }
 
