@@ -106,12 +106,11 @@ const pageDescription =
               <th>Status</th>
               <th>Evidence</th>
               <th>Issued</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody id="licences-body">
             <tr>
-              <td colspan="7" class="rh-admin-empty">
+              <td colspan="6" class="rh-admin-empty">
                 No records loaded yet.
               </td>
             </tr>
@@ -233,7 +232,6 @@ const pageDescription =
       </section>
     </section>
   </main>
-
   <style>
     .rh-admin-page {
       width: min(1220px, calc(100% - 2rem));
@@ -343,15 +341,10 @@ const pageDescription =
     }
 
     .rh-admin-actions,
-    .rh-admin-filter-actions,
-    .rh-admin-row-actions {
+    .rh-admin-filter-actions {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
-    }
-
-    .rh-admin-actions,
-    .rh-admin-filter-actions {
       justify-content: flex-end;
     }
 
@@ -432,7 +425,19 @@ const pageDescription =
       border-color: rgba(15, 23, 42, 0.34);
     }
 
-        .rh-admin-status {
+    .rh-button-warning {
+      background: #92400e;
+      color: #fff;
+      border-color: #92400e;
+    }
+
+    .rh-button-warning:hover {
+      background: #78350f;
+      color: #fff;
+      border-color: #78350f;
+    }
+
+    .rh-admin-status {
       margin: 1rem 0;
       padding: 0.85rem 1rem;
       border-radius: 0.9rem;
@@ -459,7 +464,7 @@ const pageDescription =
 
     .rh-admin-table {
       width: 100%;
-      min-width: 1120px;
+      min-width: 1040px;
       border-collapse: collapse;
       background: #fff;
       font-size: 0.92rem;
@@ -508,6 +513,39 @@ const pageDescription =
       word-break: break-word;
     }
 
+    .rh-licence-main-row td {
+      border-bottom: 0;
+    }
+
+    .rh-licence-actions-row td {
+      padding-top: 0;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.52), rgba(255, 255, 255, 1));
+      border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+    }
+
+    .rh-admin-row-actions {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0.65rem 0 0.2rem;
+    }
+
+    .rh-admin-row-actions .rh-button {
+      min-height: 2.35rem;
+      padding: 0.52rem 0.85rem;
+      font-size: 0.86rem;
+    }
+
+    .rh-admin-row-actions-note {
+      flex-basis: 100%;
+      margin: 0.15rem 0 0;
+      color: rgba(15, 23, 42, 0.55);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
     .rh-badge,
     .rh-evidence-pill {
       display: inline-flex;
@@ -548,15 +586,15 @@ const pageDescription =
       display: block;
       max-width: 36ch;
       overflow-wrap: anywhere;
-            line-height: 1.45;
+      line-height: 1.45;
       color: rgba(15, 23, 42, 0.72);
     }
 
     .rh-admin-detail-card {
       margin-top: 1rem;
     }
-
-    .rh-detail-sections {
+    
+        .rh-detail-sections {
       display: grid;
       gap: 1rem;
       margin-top: 1rem;
@@ -617,37 +655,86 @@ const pageDescription =
       border-right: 0 !important;
     }
 
-    .rh-rendered-evidence {
+    .rh-rendered-evidence,
+    .rh-generation-preview,
+    .rh-pdf-inspection,
+    .rh-download-link-issue {
       margin-top: 1.25rem;
       border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 1rem;
       padding: 1rem;
+      background: #fff;
+    }
+
+    .rh-rendered-evidence {
       background:
         radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28rem),
         #fff;
     }
 
-    .rh-rendered-heading {
+    .rh-generation-preview {
+      background:
+        radial-gradient(circle at top left, rgba(22, 163, 74, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-pdf-inspection {
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 28rem),
+        #fff;
+    }
+
+    .rh-download-link-issue {
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.1), transparent 28rem),
+        #fff;
+    }
+
+    .rh-rendered-heading,
+    .rh-generation-heading,
+    .rh-pdf-inspection-heading,
+    .rh-download-link-heading {
       margin-bottom: 1rem;
     }
 
-    .rh-rendered-heading h3 {
+    .rh-rendered-heading h3,
+    .rh-generation-heading h3,
+    .rh-pdf-inspection-heading h3,
+    .rh-download-link-heading h3 {
       margin: 0.25rem 0 0;
       color: #0f172a;
       font-size: 1.3rem;
       letter-spacing: -0.04em;
     }
 
-    .rh-rendered-heading p:last-child {
+    .rh-rendered-heading p:last-child,
+    .rh-generation-heading p:last-child,
+    .rh-pdf-inspection-heading p:last-child,
+    .rh-download-link-heading p:last-child {
       margin: 0.35rem 0 0;
       color: rgba(15, 23, 42, 0.68);
       line-height: 1.6;
     }
 
-    .rh-evidence-grid {
+    .rh-evidence-grid,
+    .rh-generation-grid,
+    .rh-generation-controls,
+    .rh-pdf-inspection-grid,
+    .rh-pdf-inspection-controls,
+    .rh-download-link-grid,
+    .rh-download-link-controls {
       display: grid;
       gap: 0.75rem;
+    }
+
+    .rh-evidence-grid {
       margin-bottom: 1rem;
+    }
+
+    .rh-generation-controls,
+    .rh-pdf-inspection-controls,
+    .rh-download-link-controls {
+      margin-top: 1rem;
     }
 
     .rh-evidence-row,
@@ -737,57 +824,6 @@ const pageDescription =
       font-size: 0.92rem;
     }
 
-    .rh-generation-preview,
-    .rh-pdf-inspection,
-    .rh-download-link-issue {
-      margin-top: 1.25rem;
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 1rem;
-      padding: 1rem;
-      background: #fff;
-    }
-
-    .rh-generation-preview {
-      background:
-        radial-gradient(circle at top left, rgba(22, 163, 74, 0.08), transparent 28rem),
-        #fff;
-    }
-
-    .rh-pdf-inspection {
-      background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 28rem),
-        #fff;
-    }
-
-    .rh-download-link-issue {
-      background:
-        radial-gradient(circle at top left, rgba(14, 165, 233, 0.1), transparent 28rem),
-        #fff;
-    }
-
-    .rh-generation-heading,
-    .rh-pdf-inspection-heading,
-    .rh-download-link-heading {
-      margin-bottom: 1rem;
-    }
-
-    .rh-generation-heading h3,
-    .rh-pdf-inspection-heading h3,
-    .rh-download-link-heading h3 {
-      margin: 0.25rem 0 0;
-      color: #0f172a;
-      font-size: 1.3rem;
-      letter-spacing: -0.04em;
-    }
-
-    .rh-generation-heading p:last-child,
-    .rh-pdf-inspection-heading p:last-child,
-    .rh-download-link-heading p:last-child {
-      margin: 0.35rem 0 0;
-      color: rgba(15, 23, 42, 0.68);
-      line-height: 1.6;
-    }
-
     .rh-generation-status,
     .rh-pdf-inspection-status,
     .rh-download-link-status {
@@ -818,22 +854,6 @@ const pageDescription =
     .rh-download-link-status[data-state="warning"] {
       background: #fffbeb;
       color: #92400e;
-    }
-
-    .rh-generation-grid,
-    .rh-generation-controls,
-    .rh-pdf-inspection-grid,
-    .rh-pdf-inspection-controls,
-    .rh-download-link-grid,
-    .rh-download-link-controls {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .rh-generation-controls,
-    .rh-pdf-inspection-controls,
-    .rh-download-link-controls {
-      margin-top: 1rem;
     }
 
     .rh-generation-list,
@@ -890,64 +910,6 @@ const pageDescription =
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.6rem;
       align-items: center;
-    }
-
-        .rh-download-link-grid,
-    .rh-download-link-controls {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .rh-download-link-controls {
-      margin-top: 1rem;
-    }
-
-    .rh-download-link-row {
-      display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-      gap: 1rem;
-      align-items: start;
-      padding: 0.85rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: 0.85rem;
-      background: #f8fafc;
-    }
-
-    .rh-download-link-row dt {
-      color: rgba(15, 23, 42, 0.55);
-      font-size: 0.72rem;
-      font-weight: 900;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-
-    .rh-download-link-row dd {
-      margin: 0;
-      color: #0f172a;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      line-height: 1.5;
-    }
-
-    .rh-download-link-code {
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        "Liberation Mono",
-        monospace;
-      font-size: 0.86rem;
-    }
-
-    .rh-download-link-list {
-      margin: 0;
-      padding-left: 1.2rem;
-    }
-
-    .rh-download-link-list li {
-      margin: 0.15rem 0;
     }
 
     @media (max-width: 960px) {
@@ -1111,7 +1073,7 @@ const pageDescription =
       });
     }
 
-    function badgeClass(value) {
+        function badgeClass(value) {
       const text = String(value || "").toLowerCase();
 
       if (!text) return "rh-badge";
@@ -1225,7 +1187,7 @@ const pageDescription =
       if (!licences.length) {
         licencesBody.innerHTML = `
           <tr>
-            <td colspan="7" class="rh-admin-empty">
+            <td colspan="6" class="rh-admin-empty">
               No CDAS licence records found.
             </td>
           </tr>
@@ -1236,9 +1198,10 @@ const pageDescription =
       licencesBody.innerHTML = licences
         .map((row) => {
           const hasEvidence = Boolean(row.rendered_licence_sha256);
+          const licenceId = escapeHtml(row.id);
 
           return `
-            <tr>
+            <tr class="rh-licence-main-row">
               <td>
                 <div class="rh-admin-title-stack">
                   <strong>${escapeHtml(row.licence_number)}</strong>
@@ -1273,12 +1236,15 @@ const pageDescription =
                 </div>
               </td>
               <td>${escapeHtml(formatDate(row.issued_at))}</td>
-              <td>
-                <div class="rh-admin-row-actions">
+            </tr>
+
+            <tr class="rh-licence-actions-row">
+              <td colspan="6">
+                <div class="rh-admin-row-actions" aria-label="Licence actions for ${escapeHtml(row.licence_number)}">
                   <button
                     class="rh-button rh-button-secondary"
                     type="button"
-                    data-view-licence="${escapeHtml(row.id)}"
+                    data-view-licence="${licenceId}"
                   >
                     View
                   </button>
@@ -1286,7 +1252,7 @@ const pageDescription =
                   <button
                     class="rh-button rh-button-secondary"
                     type="button"
-                    data-generation-preview="${escapeHtml(row.id)}"
+                    data-generation-preview="${licenceId}"
                   >
                     Generation
                   </button>
@@ -1294,7 +1260,7 @@ const pageDescription =
                   <button
                     class="rh-button rh-button-secondary"
                     type="button"
-                    data-inspect-pdf="${escapeHtml(row.id)}"
+                    data-inspect-pdf="${licenceId}"
                   >
                     Inspect PDF
                   </button>
@@ -1302,10 +1268,22 @@ const pageDescription =
                   <button
                     class="rh-button rh-button-primary"
                     type="button"
-                    data-prepare-email-download="${escapeHtml(row.id)}"
+                    data-prepare-email-download="${licenceId}"
                   >
                     Prepare &amp; Email
                   </button>
+
+                  <button
+                    class="rh-button rh-button-warning"
+                    type="button"
+                    data-reissue-download="${licenceId}"
+                  >
+                    Reissue Download
+                  </button>
+
+                  <p class="rh-admin-row-actions-note">
+                    Reissue Download creates a new licensed copy with a new Download ID.
+                  </p>
                 </div>
               </td>
             </tr>
@@ -1460,7 +1438,7 @@ const pageDescription =
       generationPreviewCard.hidden = false;
     }
 
-    async function renderGenerationPreview(licenceId) {
+        async function renderGenerationPreview(licenceId) {
       const token = getStoredToken();
 
       if (!token) {
@@ -1468,7 +1446,7 @@ const pageDescription =
         return;
       }
 
-            detailCard.hidden = false;
+      detailCard.hidden = false;
       generationPreviewCard.hidden = false;
       generationStatus.dataset.state = "neutral";
       generationStatus.textContent = "Loading generation readiness preview…";
@@ -1692,12 +1670,51 @@ const pageDescription =
       downloadLinkControls.innerHTML = "";
     }
 
-    function renderDownloadWorkflowData(data) {
-      const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+    function normaliseWorkflowData(data, workflowType = "prepare") {
       const link = data.download_link || {};
       const licence = data.licence || {};
       const email = data.email_result || {};
       const controls = data.controls || {};
+
+      return {
+        link,
+        licence,
+        email,
+        controls,
+        warnings: Array.isArray(data.warnings) ? data.warnings : [],
+        previousLinks: Array.isArray(data.previous_links) ? data.previous_links : [],
+        workflowType,
+      };
+    }
+
+    function renderPreviousLinks(previousLinks) {
+      if (!previousLinks.length) {
+        return "None";
+      }
+
+      return `
+        <ul class="rh-download-link-list">
+          ${previousLinks
+            .map((link) => {
+              const ref = escapeHtml(link.download_reference || link.id || "unknown");
+              const status = escapeHtml(link.status || "unknown");
+              const used = link.used_at ? `, used ${escapeHtml(formatDate(link.used_at))}` : "";
+              const failure = link.failure_reason
+                ? `, failure: ${escapeHtml(link.failure_reason)}`
+                : "";
+
+              return `<li><strong>${ref}</strong> — ${status}${used}${failure}</li>`;
+            })
+            .join("")}
+        </ul>
+      `;
+    }
+
+    function renderDownloadWorkflowData(data, workflowType = "prepare") {
+      const normalised = normaliseWorkflowData(data, workflowType);
+      const { link, licence, email, controls, warnings, previousLinks } = normalised;
+
+      const isReissue = workflowType === "reissue" || Boolean(data.reissued);
 
       const workflowSucceeded =
         Boolean(data.ok) &&
@@ -1706,12 +1723,16 @@ const pageDescription =
 
       if (workflowSucceeded && warnings.length) {
         downloadLinkStatus.dataset.state = "warning";
-        downloadLinkStatus.textContent =
-          "CDAS download was prepared, activated, and email handling completed, with warnings to review.";
+        downloadLinkStatus.textContent = isReissue
+          ? "CDAS download was explicitly reissued, activated, and email handling completed, with warnings to review."
+          : "CDAS download was prepared, activated, and email handling completed, with warnings to review.";
       } else if (workflowSucceeded) {
         downloadLinkStatus.dataset.state = "success";
         downloadLinkStatus.textContent =
-          data.message || "CDAS download was prepared, activated, and emailed.";
+          data.message ||
+          (isReissue
+            ? "CDAS download was explicitly reissued, activated, and emailed."
+            : "CDAS download was prepared, activated, and emailed.");
       } else {
         downloadLinkStatus.dataset.state = "error";
         downloadLinkStatus.textContent =
@@ -1730,6 +1751,7 @@ const pageDescription =
 
       downloadLinkGrid.innerHTML = [
         downloadLinkRow("Workflow action", data.workflow_action),
+        downloadLinkRow("Reissued", booleanText(data.reissued)),
         downloadLinkRow("Reserved", booleanText(data.reserved)),
         downloadLinkRow("Generated", booleanText(data.generated)),
         downloadLinkRow("Activated", booleanText(data.activated)),
@@ -1743,12 +1765,20 @@ const pageDescription =
         downloadLinkRow("Token visible once", booleanText(link.token_visible_once)),
         downloadLinkRow("Single use", booleanText(link.single_use)),
 
+        downloadLinkRow("Generated PDF object", link.generated_pdf_object_key, { code: true }),
+        downloadLinkRow("Generated PDF SHA-256", link.generated_pdf_sha256, { code: true }),
+        downloadLinkRow("Generated PDF size", link.generated_pdf_size_bytes),
+
         downloadLinkRow("Licence number", licence.licence_number),
         downloadLinkRow("Document ID", licence.document_id),
         downloadLinkRow("Document version", licence.document_version),
         downloadLinkRow("Recipient name", licence.licence_holder_name),
         downloadLinkRow("Recipient email", licence.licence_holder_email_normalised),
         downloadLinkRow("Generated PDF status", licence.generated_pdf_status),
+
+        downloadLinkRow("Previous generated PDF object", licence.previous_generated_pdf_object_key, { code: true }),
+        downloadLinkRow("Previous generated PDF SHA-256", licence.previous_generated_pdf_sha256, { code: true }),
+        downloadLinkRow("Previous links", renderPreviousLinks(previousLinks), { html: true }),
 
         downloadLinkRow("Email provider", email.provider),
         downloadLinkRow("Email sent", booleanText(email.sent)),
@@ -1759,16 +1789,19 @@ const pageDescription =
       ].join("");
 
       downloadLinkControls.innerHTML = [
+        downloadLinkRow("Explicit reissue workflow", booleanText(controls.explicit_reissue_workflow)),
         downloadLinkRow("Full operator workflow", booleanText(controls.full_operator_workflow)),
-        downloadLinkRow("Reserves link when needed", booleanText(controls.reserves_download_link_when_needed)),
-        downloadLinkRow("Generates PDF before email", booleanText(controls.generates_pdf_before_email)),
+        downloadLinkRow("Reserves new download link", booleanText(controls.reserves_new_download_link || controls.reserves_download_link_when_needed)),
+        downloadLinkRow("Creates new Download ID", booleanText(controls.creates_new_download_id)),
+        downloadLinkRow("Generates Download-ID-bound PDF", booleanText(controls.generates_new_download_id_bound_pdf || controls.generates_pdf_before_email)),
+        downloadLinkRow("Binds generated PDF to link", booleanText(controls.binds_generated_pdf_to_new_download_link)),
         downloadLinkRow("Activates link before email", booleanText(controls.activates_link_before_email)),
         downloadLinkRow("Emails landing page URL", booleanText(controls.landing_page_url_emailed)),
         downloadLinkRow("Emails raw R2 URL", booleanText(controls.raw_r2_url_exposed)),
         downloadLinkRow("Emails download API URL", booleanText(controls.download_api_url_emailed)),
         downloadLinkRow("Single-use preserved", booleanText(controls.single_use_download_preserved)),
         downloadLinkRow("Stores raw token", booleanText(controls.stores_raw_token)),
-        downloadLinkRow("Can reconstruct previous raw token", booleanText(controls.can_reconstruct_previous_raw_token)),
+        downloadLinkRow("Overwrites existing R2 object", booleanText(controls.overwrites_existing_r2_object)),
         downloadLinkRow("Message", data.message),
       ].join("");
 
@@ -1846,7 +1879,7 @@ const pageDescription =
         return;
       }
 
-      renderDownloadWorkflowData(data);
+      renderDownloadWorkflowData(data, "prepare");
 
       downloadLinkCard.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -1854,6 +1887,99 @@ const pageDescription =
         setStatus("CDAS download prepared, activated, and emailed.", "success");
       } else {
         setStatus("CDAS download prepared and activated, but email was not sent. Review the result panel.", "error");
+      }
+    }
+
+        async function reissueDownload(licenceId) {
+      const token = getStoredToken();
+
+      if (!token) {
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "Reissue this controlled download?\n\n" +
+          "This creates a new licensed copy with a new Download ID.\n\n" +
+          "Use this only when the previous link was used, expired, failed, revoked, superseded, or otherwise unavailable. The new recipient landing URL will be emailed to the licence holder."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      detailCard.hidden = false;
+      downloadLinkCard.hidden = false;
+      resetDownloadLinkPanel();
+      downloadLinkStatus.dataset.state = "neutral";
+      downloadLinkStatus.textContent =
+        "Explicitly reissuing controlled download, generating a new Download-ID-bound PDF, and emailing the recipient…";
+
+      let response;
+      let data;
+
+      try {
+        response = await fetch(
+          `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/reissue-download-link`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              confirm_reissue: true,
+              action: "reissue_download",
+            }),
+          }
+        );
+
+        data = await response.json();
+      } catch (error) {
+        downloadLinkStatus.dataset.state = "error";
+        downloadLinkStatus.textContent = `Could not reissue controlled download: ${error.message}`;
+        return;
+      }
+
+      if (!response.ok || !data.ok) {
+        downloadLinkStatus.dataset.state = "error";
+        downloadLinkStatus.textContent =
+          data?.message || data?.error || "Controlled download reissue could not be completed.";
+
+        const blockers = Array.isArray(data?.blockers) ? data.blockers : [];
+        const warnings = Array.isArray(data?.warnings) ? data.warnings : [];
+        const previousLinks = Array.isArray(data?.previous_links) ? data.previous_links : [];
+
+        downloadLinkGrid.innerHTML = [
+          downloadLinkRow("Error", data?.error),
+          downloadLinkRow("Message", data?.message),
+          downloadLinkRow("Blockers", renderDownloadLinkList(blockers), { html: true }),
+          downloadLinkRow("Warnings", renderDownloadLinkList(warnings), { html: true }),
+          downloadLinkRow("Previous links", renderPreviousLinks(previousLinks), { html: true }),
+        ].join("");
+
+        downloadLinkControls.innerHTML = [
+          downloadLinkRow("Reserved download link", booleanText(data?.controls?.reserved_download_link)),
+          downloadLinkRow("Generated PDF", booleanText(data?.controls?.generated_pdf)),
+          downloadLinkRow("Activated download link", booleanText(data?.controls?.activated_download_link)),
+          downloadLinkRow("Sent email", booleanText(data?.controls?.sent_email)),
+          downloadLinkRow("Explicit reissue required", booleanText(data?.controls?.explicit_reissue_required)),
+          downloadLinkRow("Prevents duplicate active links", booleanText(data?.controls?.prevents_duplicate_active_download_links)),
+          downloadLinkRow("Prevents stranded pending links", booleanText(data?.controls?.prevents_stranded_pending_generation_links)),
+        ].join("");
+
+        downloadLinkCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+
+      renderDownloadWorkflowData(data, "reissue");
+
+      downloadLinkCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      if (data.emailed) {
+        setStatus("CDAS download explicitly reissued, activated, and emailed.", "success");
+      } else {
+        setStatus("CDAS download explicitly reissued and activated, but email was not sent. Review the result panel.", "error");
       }
     }
 
@@ -1973,6 +2099,8 @@ const pageDescription =
         if (licenceId) {
           renderDetail(licenceId);
         }
+
+        return;
       }
 
       const generationButton = target.closest("[data-generation-preview]");
@@ -1983,6 +2111,8 @@ const pageDescription =
         if (licenceId) {
           renderGenerationPreview(licenceId);
         }
+
+        return;
       }
 
       const inspectPdfButton = target.closest("[data-inspect-pdf]");
@@ -1993,6 +2123,8 @@ const pageDescription =
         if (licenceId) {
           renderPdfInspection(licenceId);
         }
+
+        return;
       }
 
       const prepareEmailDownloadButton = target.closest("[data-prepare-email-download]");
@@ -2002,6 +2134,18 @@ const pageDescription =
 
         if (licenceId) {
           prepareAndEmailDownload(licenceId);
+        }
+
+        return;
+      }
+
+      const reissueDownloadButton = target.closest("[data-reissue-download]");
+
+      if (reissueDownloadButton instanceof HTMLElement) {
+        const licenceId = reissueDownloadButton.dataset.reissueDownload;
+
+        if (licenceId) {
+          reissueDownload(licenceId);
         }
       }
     });
