@@ -71,6 +71,10 @@ import {
   getCdasEmailEvent,
   retryCdasEmailEvent,
 } from "./email-events-admin.js";
+import {
+  listCdasDocumentReleasePolicies,
+  getCdasDocumentReleasePolicy,
+} from "./document-release-policies.js";
 import { getCdasHealth } from "./health.js";
 import { handleCdasOperationsJson } from "./operations.js";
 
@@ -149,6 +153,26 @@ export async function handleCdasAdminRequest(request, env) {
 
   if (pathname === "/api/admin/cdas/operations") {
     return handleCdasOperationsJson(request, env);
+  }
+
+  /*
+   * CDAS release policy registry.
+   *
+   * Read-only in Phase 3X-0B.
+   *
+   * Missing policy must evaluate as default-deny.
+   */
+  if (pathname === "/api/admin/cdas/release-policies") {
+    return listCdasDocumentReleasePolicies(request, env);
+  }
+
+  if (pathname.startsWith("/api/admin/cdas/release-policies/")) {
+    const documentIdOrSlug = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/release-policies/"
+    );
+
+    return getCdasDocumentReleasePolicy(request, env, documentIdOrSlug);
   }
 
   /*
