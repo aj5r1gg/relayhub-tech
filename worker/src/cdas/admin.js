@@ -27,6 +27,9 @@ import {
   getCdasLicenceEvidenceBundle,
 } from "./licence-evidence-bundle.js";
 import {
+  recordCdasLicenceEvidenceBundleExport,
+} from "./licence-evidence-export.js";
+import {
   captureCdasDocumentSourceSha256,
 } from "./source-hash.js";
 import {
@@ -258,7 +261,7 @@ export async function handleCdasAdminRequest(request, env) {
   }
 
   /*
-   * CDAS controlled download-link registry.
+   * CDAS download link registry.
    */
   if (pathname === "/api/admin/cdas/download-links") {
     return listCdasDownloadLinks(request, env);
@@ -289,9 +292,8 @@ export async function handleCdasAdminRequest(request, env) {
   /*
    * CDAS issued licence registry.
    *
-   * Important:
-   * Specific subroutes must appear before the generic
-   * /api/admin/cdas/licences/:id route.
+   * Route order matters. Specific licence subroutes must appear before the
+   * generic /api/admin/cdas/licences/:id route.
    */
   if (pathname === "/api/admin/cdas/licences") {
     return listCdasLicences(request, env);
@@ -323,6 +325,40 @@ export async function handleCdasAdminRequest(request, env) {
     return getCdasLicenceDownloadHistory(request, env, licenceIdOrNumber);
   }
 
+  /*
+   * CDAS licence evidence bundle export record.
+   *
+   * Admin-only. Generates the same evidence bundle server-side, calculates
+   * bundle evidence, and records an export audit event when possible.
+   *
+   * Does not write R2, create download links, generate PDFs, email anyone,
+   * serve downloads, expose raw tokens, expose token hashes, or expose private
+   * R2 URLs.
+   *
+   * Important: this route must appear before /evidence-bundle.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/evidence-bundle/export-record")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/evidence-bundle/export-record"
+    );
+
+    return recordCdasLicenceEvidenceBundleExport(
+      request,
+      env,
+      licenceIdOrNumber
+    );
+  }
+
+  /*
+   * CDAS licence evidence bundle.
+   *
+   * Read-only evidence export endpoint.
+   */
   if (
     pathname.startsWith("/api/admin/cdas/licences/") &&
     pathname.endsWith("/evidence-bundle")
