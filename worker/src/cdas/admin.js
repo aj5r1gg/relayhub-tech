@@ -77,6 +77,9 @@ import {
 } from "./document-release-policies.js";
 import { getCdasHealth } from "./health.js";
 import { handleCdasOperationsJson } from "./operations.js";
+import {
+  handleCdasRequestIntakeEvaluation,
+} from "./request-intake-policy.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
@@ -153,6 +156,15 @@ export async function handleCdasAdminRequest(request, env) {
 
   if (pathname === "/api/admin/cdas/operations") {
     return handleCdasOperationsJson(request, env);
+  }
+
+    /*
+   * CDAS Phase 3X-0E — request intake evaluator.
+   *
+   * Admin-only. Evaluation only. No request creation. No mutation.
+   */
+  if (pathname === "/api/admin/cdas/request-intake/evaluate") {
+    return handleCdasRequestIntakeEvaluation(request, env);
   }
 
   /*

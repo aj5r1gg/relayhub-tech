@@ -1,3 +1,5 @@
+import { jsonResponse, methodNotAllowed } from "../shared.js";
+
 import {
   getCdasDocumentReleasePolicyDecision,
 } from "./document-release-policies.js";
@@ -200,6 +202,14 @@ function finalDecision({ blockers, warnings, manualReviewReasons }) {
   };
 }
 
+async function readJsonBody(request) {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function evaluateCdasRequestIntakePolicy(
   env,
   {
@@ -270,6 +280,16 @@ export async function evaluateCdasRequestIntakePolicy(
   ) {
     manualReviewReasons.push("use_case_missing");
     riskFlags.push("missing_use_case");
+  }
+
+  if (
+    intakePolicy &&
+    bool(intakePolicy.require_use_case_for_restricted) &&
+    isRestrictedLike(releaseClass) &&
+    !cleanText(use_case)
+  ) {
+    manualReviewReasons.push("use_case_required_for_restricted");
+    riskFlags.push("missing_restricted_use_case");
   }
 
   if (
@@ -376,6 +396,7 @@ export async function evaluateCdasRequestIntakePolicy(
       role_title: cleanText(role_title),
       recipient_category: cleanText(recipient_category) || "unknown",
       use_case_present: Boolean(cleanText(use_case)),
+      user_agent_present: Boolean(cleanText(user_agent)),
     },
 
     counts_24h: counts,
@@ -399,4 +420,49 @@ export async function evaluateCdasRequestIntakePolicy(
       ? "Request intake may proceed to review."
       : "Request intake blocked before request creation.",
   };
+}
+
+export async function handleCdasRequestIntakeEvaluation(request, env) {
+  if (request.method !== "POST") {
+    return methodNotAllowed("POST");
+  }
+
+  const body = await readJsonBody(request);
+
+  if (!body || typeof body !== "object") {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "invalid_json_body",
+        message: "Expected a JSON request body.",
+      },
+      400
+    );
+  }
+
+  if (!cleanText(body.document_id)) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "document_id_required",
+        message: "document_id is required.",
+      },
+      400
+    );
+  }
+
+  const evaluation = await evaluateCdasRequestIntakePolicy(env, {
+    document_id: body.document_id,
+    document_version: body.document_version || "",
+    name: body.name,
+    email: body.email,
+    organisation_name: body.organisation_name,
+    role_title: body.role_title,
+    recipient_category: body.recipient_category,
+    use_case: body.use_case,
+    ip_hash: body.ip_hash,
+    user_agent: body.user_agent,
+  });
+
+  return jsonResponse(evaluation);
 }

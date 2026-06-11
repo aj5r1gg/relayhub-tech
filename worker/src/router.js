@@ -216,6 +216,7 @@ export async function routeRequest(request, env) {
     pathname.startsWith("/api/admin/cdas/email-events/") ||
     pathname === "/api/admin/cdas/release-policies" ||
     pathname.startsWith("/api/admin/cdas/release-policies/") ||
+    pathname === "/api/admin/cdas/request-intake/evaluate" ||
     pathname === "/api/admin/cdas/health" ||
     pathname === "/api/admin/cdas/operations"
   ) {
