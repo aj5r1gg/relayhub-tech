@@ -69,10 +69,55 @@ function unavailableResponse() {
   );
 }
 
+function isDownloadableLinkStatus(status) {
+  return status === "active" || status === "created";
+}
+
+function resolvedGeneratedObjectKey(record) {
+  return (
+    cleanText(record?.link_generated_pdf_object_key) ||
+    cleanText(record?.licence_generated_pdf_object_key) ||
+    cleanText(record?.generated_pdf_object_key)
+  );
+}
+
+function resolvedGeneratedSha256(record) {
+  return (
+    cleanText(record?.link_generated_pdf_sha256) ||
+    cleanText(record?.licence_generated_pdf_sha256) ||
+    cleanText(record?.generated_pdf_sha256)
+  );
+}
+
+function resolvedGeneratedSizeBytes(record) {
+  return (
+    record?.link_generated_pdf_size_bytes ||
+    record?.licence_generated_pdf_size_bytes ||
+    record?.generated_pdf_size_bytes
+  );
+}
+
+function resolvedGeneratedFilename(record) {
+  return (
+    cleanText(record?.licence_generated_pdf_filename) ||
+    cleanText(record?.generated_pdf_filename) ||
+    `${record?.document_id || "document"}-${record?.licence_number || "licence"}.pdf`
+  );
+}
+
+function resolvedGeneratedContentType(record) {
+  return (
+    cleanText(record?.licence_generated_pdf_content_type) ||
+    cleanText(record?.generated_pdf_content_type) ||
+    "application/pdf"
+  );
+}
+
 async function getDownloadRecord(env, tokenHash) {
   return await env.RELAYHUB_DB.prepare(
     `SELECT
        dl.id AS download_id,
+       dl.download_reference AS download_reference,
        dl.licence_id AS link_licence_id,
        dl.document_id AS link_document_id,
        dl.token_hash AS token_hash,
@@ -83,6 +128,12 @@ async function getDownloadRecord(env, tokenHash) {
        dl.revoked_at AS link_revoked_at,
        dl.superseded_at AS link_superseded_at,
        dl.failure_reason AS link_failure_reason,
+       dl.activated_at AS link_activated_at,
+
+       dl.generated_pdf_object_key AS link_generated_pdf_object_key,
+       dl.generated_pdf_sha256 AS link_generated_pdf_sha256,
+       dl.generated_pdf_size_bytes AS link_generated_pdf_size_bytes,
+       dl.generated_pdf_created_at AS link_generated_pdf_created_at,
 
        lic.id AS licence_id,
        lic.licence_number AS licence_number,
@@ -110,12 +161,12 @@ async function getDownloadRecord(env, tokenHash) {
        lic.rendered_terms_body_sha256 AS rendered_terms_body_sha256,
 
        lic.generated_pdf_status AS generated_pdf_status,
-       lic.generated_pdf_object_key AS generated_pdf_object_key,
-       lic.generated_pdf_filename AS generated_pdf_filename,
-       lic.generated_pdf_sha256 AS generated_pdf_sha256,
-       lic.generated_pdf_size_bytes AS generated_pdf_size_bytes,
-       lic.generated_pdf_content_type AS generated_pdf_content_type,
-       lic.generated_pdf_created_at AS generated_pdf_created_at,
+       lic.generated_pdf_object_key AS licence_generated_pdf_object_key,
+       lic.generated_pdf_filename AS licence_generated_pdf_filename,
+       lic.generated_pdf_sha256 AS licence_generated_pdf_sha256,
+       lic.generated_pdf_size_bytes AS licence_generated_pdf_size_bytes,
+       lic.generated_pdf_content_type AS licence_generated_pdf_content_type,
+       lic.generated_pdf_created_at AS licence_generated_pdf_created_at,
        lic.generated_pdf_error AS generated_pdf_error
      FROM document_download_links dl
      JOIN document_licences lic
@@ -136,8 +187,14 @@ function evaluateDownload(record, now) {
     return { blockers, warnings };
   }
 
-  if (record.link_status !== "created") {
-    blockers.push("download_link_status_not_created");
+  if (!isDownloadableLinkStatus(record.link_status)) {
+    if (record.link_status === "pending_generation") {
+      blockers.push("download_link_pending_generation");
+    } else if (record.link_status === "failed") {
+      blockers.push("download_link_failed");
+    } else {
+      blockers.push("download_link_status_not_downloadable");
+    }
   }
 
   if (record.link_used_at) {
@@ -178,15 +235,15 @@ function evaluateDownload(record, now) {
     blockers.push("generated_pdf_status_not_generated");
   }
 
-  if (!record.generated_pdf_object_key) {
+  if (!resolvedGeneratedObjectKey(record)) {
     blockers.push("missing_generated_pdf_object_key");
   }
 
-  if (!record.generated_pdf_sha256) {
+  if (!resolvedGeneratedSha256(record)) {
     blockers.push("missing_generated_pdf_sha256");
   }
 
-  if (!record.generated_pdf_size_bytes) {
+  if (!resolvedGeneratedSizeBytes(record)) {
     blockers.push("missing_generated_pdf_size_bytes");
   }
 
@@ -200,21 +257,11 @@ function evaluateDownload(record, now) {
 function denialEventTypeFromBlockers(blockers) {
   const values = Array.isArray(blockers) ? blockers : [];
 
-  if (values.includes("download_link_already_used")) {
-    return "download_replay_denied";
-  }
-
-  if (values.includes("download_link_expired")) {
-    return "download_expired";
-  }
-
-  if (values.includes("download_link_revoked")) {
-    return "download_revoked";
-  }
-
-  if (values.includes("download_link_superseded")) {
-    return "download_superseded";
-  }
+  if (values.includes("download_link_already_used")) return "download_replay_denied";
+  if (values.includes("download_link_expired")) return "download_expired";
+  if (values.includes("download_link_revoked")) return "download_revoked";
+  if (values.includes("download_link_superseded")) return "download_superseded";
+  if (values.includes("download_link_pending_generation")) return "download_pending_generation_denied";
 
   return "download_denied";
 }
@@ -223,7 +270,9 @@ function shouldMutateFailureReasonForBlockers(blockers) {
   const values = Array.isArray(blockers) ? blockers : [];
 
   const lifecycleDenials = new Set([
-    "download_link_status_not_created",
+    "download_link_status_not_downloadable",
+    "download_link_pending_generation",
+    "download_link_failed",
     "download_link_already_used",
     "download_link_revoked",
     "download_link_superseded",
@@ -241,9 +290,7 @@ async function recordDownloadEvent({
   success,
   failureReason = null,
 }) {
-  if (!record) {
-    return;
-  }
+  if (!record) return;
 
   const ip = getClientIp(request);
   const ipHash = ip ? await sha256HexFromText(ip) : null;
@@ -293,16 +340,16 @@ async function recordDownloadEvent({
       nowIso(),
       ipHash,
       getUserAgent(request),
-      record.generated_pdf_object_key || null,
+      resolvedGeneratedObjectKey(record) || null,
       record.source_object || null,
       record.source_sha256 || null,
-      record.generated_pdf_sha256 || null,
+      resolvedGeneratedSha256(record) || null,
       record.rendered_licence_sha256 || null,
       null,
       null,
-      null,
+      record.download_reference ? "cdas-footer-v2" : null,
       record.licence_terms_version || null,
-      null,
+      record.download_reference ? "cdas-pdf-lib-v2" : null,
       record.licence_terms_version,
       success ? 1 : 0,
       failureReason
@@ -329,9 +376,7 @@ async function safeRecordDownloadEvent(options) {
 }
 
 async function updateLinkFailureReason(env, record, request, reason) {
-  if (!record) {
-    return;
-  }
+  if (!record) return;
 
   const ip = getClientIp(request);
   const ipHash = ip ? await sha256HexFromText(ip) : null;
@@ -343,7 +388,7 @@ async function updateLinkFailureReason(env, record, request, reason) {
        ip_hash = COALESCE(ip_hash, ?),
        user_agent = COALESCE(user_agent, ?)
      WHERE id = ?
-       AND status = 'created'
+       AND status IN ('created', 'active')
        AND used_at IS NULL
        AND revoked_at IS NULL
        AND superseded_at IS NULL`
@@ -422,7 +467,7 @@ async function markDownloadUsed(env, record, request, usedAt) {
        user_agent = COALESCE(user_agent, ?),
        failure_reason = NULL
      WHERE id = ?
-       AND status = 'created'
+       AND status IN ('created', 'active')
        AND used_at IS NULL
        AND revoked_at IS NULL
        AND superseded_at IS NULL
@@ -482,7 +527,10 @@ export async function handleCdasDocumentDownload(request, env, token) {
     return handleDeniedDownload(env, record, request, readiness.blockers);
   }
 
-  const objectKey = normaliseR2Key(record.generated_pdf_object_key);
+  const objectKey = normaliseR2Key(resolvedGeneratedObjectKey(record));
+  const expectedSha256 = resolvedGeneratedSha256(record);
+  const expectedSize = resolvedGeneratedSizeBytes(record);
+
   const r2Object = await env.RELAYHUB_DOWNLOADS.get(objectKey);
 
   if (!r2Object) {
@@ -500,7 +548,7 @@ export async function handleCdasDocumentDownload(request, env, token) {
   const actualSize = r2Object.size ?? bytes.byteLength;
   const actualSha256 = await sha256HexFromBytes(bytes);
 
-  if (actualSha256 !== record.generated_pdf_sha256) {
+  if (actualSha256 !== expectedSha256) {
     await markPreConsumptionFailure(
       env,
       record,
@@ -511,7 +559,7 @@ export async function handleCdasDocumentDownload(request, env, token) {
     return unavailableResponse();
   }
 
-  if (Number(actualSize) !== Number(record.generated_pdf_size_bytes)) {
+  if (Number(actualSize) !== Number(expectedSize)) {
     await markPreConsumptionFailure(
       env,
       record,
@@ -547,20 +595,18 @@ export async function handleCdasDocumentDownload(request, env, token) {
     failureReason: null,
   });
 
-  const filename = safeAttachmentFilename(
-    record.generated_pdf_filename ||
-      `${record.document_id}-${record.licence_number}.pdf`
-  );
+  const filename = safeAttachmentFilename(resolvedGeneratedFilename(record));
 
   return new Response(bytes, {
     status: 200,
     headers: {
-      "Content-Type": "application/pdf",
+      "Content-Type": resolvedGeneratedContentType(record),
       "Content-Length": String(bytes.byteLength),
       "Content-Disposition": `attachment; filename="${filename}"`,
       "Cache-Control": "private, no-store, max-age=0",
       "X-RelayHub-CDAS": "controlled-download",
       "X-RelayHub-Licence": record.licence_number,
+      "X-RelayHub-Download-Reference": record.download_reference || "",
     },
   });
 }

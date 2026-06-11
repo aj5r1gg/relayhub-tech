@@ -39,23 +39,45 @@ function unavailableMetadataResponse(reason = "download_unavailable") {
   );
 }
 
+function isDownloadableLinkStatus(status) {
+  return status === "active" || status === "created";
+}
+
+function resolvedGeneratedObjectKey(record) {
+  return (
+    cleanText(record?.link_generated_pdf_object_key) ||
+    cleanText(record?.licence_generated_pdf_object_key) ||
+    cleanText(record?.generated_pdf_object_key)
+  );
+}
+
+function resolvedGeneratedSha256(record) {
+  return (
+    cleanText(record?.link_generated_pdf_sha256) ||
+    cleanText(record?.licence_generated_pdf_sha256) ||
+    cleanText(record?.generated_pdf_sha256)
+  );
+}
+
+function resolvedGeneratedSizeBytes(record) {
+  return (
+    record?.link_generated_pdf_size_bytes ||
+    record?.licence_generated_pdf_size_bytes ||
+    record?.generated_pdf_size_bytes
+  );
+}
+
 function publicUnavailableReason(record, now) {
   if (!record) {
     return "download_link_not_found";
   }
 
-  if (record.link_status !== "created") {
-    if (record.link_status === "used") {
-      return "download_link_used";
-    }
-
-    if (record.link_status === "revoked") {
-      return "download_link_revoked";
-    }
-
-    if (record.link_status === "superseded") {
-      return "download_link_superseded";
-    }
+  if (!isDownloadableLinkStatus(record.link_status)) {
+    if (record.link_status === "used") return "download_link_used";
+    if (record.link_status === "revoked") return "download_link_revoked";
+    if (record.link_status === "superseded") return "download_link_superseded";
+    if (record.link_status === "pending_generation") return "download_link_pending_generation";
+    if (record.link_status === "failed") return "download_link_failed";
 
     return "download_link_unavailable";
   }
@@ -93,9 +115,9 @@ function publicUnavailableReason(record, now) {
   }
 
   if (
-    !record.generated_pdf_object_key ||
-    !record.generated_pdf_sha256 ||
-    !record.generated_pdf_size_bytes ||
+    !resolvedGeneratedObjectKey(record) ||
+    !resolvedGeneratedSha256(record) ||
+    !resolvedGeneratedSizeBytes(record) ||
     record.generated_pdf_error
   ) {
     return "generated_pdf_evidence_unavailable";
@@ -108,6 +130,7 @@ async function getMetadataRecord(env, tokenHash) {
   return await env.RELAYHUB_DB.prepare(
     `SELECT
        dl.id AS download_id,
+       dl.download_reference AS download_reference,
        dl.licence_id AS link_licence_id,
        dl.document_id AS link_document_id,
        dl.status AS link_status,
@@ -116,6 +139,12 @@ async function getMetadataRecord(env, tokenHash) {
        dl.used_at AS link_used_at,
        dl.revoked_at AS link_revoked_at,
        dl.superseded_at AS link_superseded_at,
+       dl.activated_at AS link_activated_at,
+
+       dl.generated_pdf_object_key AS link_generated_pdf_object_key,
+       dl.generated_pdf_sha256 AS link_generated_pdf_sha256,
+       dl.generated_pdf_size_bytes AS link_generated_pdf_size_bytes,
+       dl.generated_pdf_created_at AS link_generated_pdf_created_at,
 
        lic.id AS licence_id,
        lic.licence_number AS licence_number,
@@ -131,9 +160,11 @@ async function getMetadataRecord(env, tokenHash) {
        lic.licence_holder_email_normalised AS licence_holder_email_normalised,
 
        lic.generated_pdf_status AS generated_pdf_status,
-       lic.generated_pdf_object_key AS generated_pdf_object_key,
-       lic.generated_pdf_sha256 AS generated_pdf_sha256,
-       lic.generated_pdf_size_bytes AS generated_pdf_size_bytes,
+       lic.generated_pdf_object_key AS licence_generated_pdf_object_key,
+       lic.generated_pdf_sha256 AS licence_generated_pdf_sha256,
+       lic.generated_pdf_size_bytes AS licence_generated_pdf_size_bytes,
+       lic.generated_pdf_content_type AS licence_generated_pdf_content_type,
+       lic.generated_pdf_created_at AS licence_generated_pdf_created_at,
        lic.generated_pdf_error AS generated_pdf_error,
 
        doc.title AS document_title,
@@ -203,8 +234,10 @@ export async function handleCdasDocumentDownloadMetadata(request, env, token) {
     },
     download_link: {
       id: record.download_id,
+      download_reference: record.download_reference || null,
       status: record.link_status,
       created_at: record.link_created_at,
+      activated_at: record.link_activated_at || null,
       expires_at: record.link_expires_at,
       used_at: record.link_used_at,
       revoked_at: record.link_revoked_at,
@@ -213,10 +246,19 @@ export async function handleCdasDocumentDownloadMetadata(request, env, token) {
     },
     generated_pdf: {
       status: record.generated_pdf_status,
-      size_bytes: Number(record.generated_pdf_size_bytes || 0),
-      sha256_present: Boolean(record.generated_pdf_sha256),
+      object_key_bound_to_link: Boolean(record.link_generated_pdf_object_key),
+      size_bytes: Number(resolvedGeneratedSizeBytes(record) || 0),
+      sha256_present: Boolean(resolvedGeneratedSha256(record)),
+      created_at:
+        record.link_generated_pdf_created_at ||
+        record.licence_generated_pdf_created_at ||
+        null,
     },
     controls: {
+      accepts_active_download_links: true,
+      accepts_legacy_created_download_links: true,
+      prefers_link_bound_generated_pdf_evidence: true,
+      falls_back_to_licence_generated_pdf_evidence: true,
       serves_download: false,
       consumes_link: false,
       mutates_database: false,
