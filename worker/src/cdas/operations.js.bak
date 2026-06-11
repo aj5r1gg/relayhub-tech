@@ -272,6 +272,46 @@ export async function handleCdasOperationsJson(request, env) {
         `,
       ),
     ),
+    pending_review: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_access_requests
+          WHERE status = 'pending_review'
+        `,
+      ),
+    ),
+    on_hold: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_access_requests
+          WHERE status = 'on_hold'
+        `,
+      ),
+    ),
+    review_approved: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_access_requests
+          WHERE status = 'review_approved'
+        `,
+      ),
+    ),
+    rejected: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_access_requests
+          WHERE status = 'rejected'
+        `,
+      ),
+    ),
     generated_pdfs_without_links: numberValue(
       await first(
         db,
