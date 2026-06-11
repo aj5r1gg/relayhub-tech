@@ -21,6 +21,9 @@ import {
   getCdasLicenceGenerationPreview,
 } from "./generation-preview.js";
 import {
+  getCdasLicenceDownloadHistory,
+} from "./licence-download-history.js";
+import {
   captureCdasDocumentSourceSha256,
 } from "./source-hash.js";
 import {
@@ -298,6 +301,19 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return getCdasLicenceGenerationPreview(request, env, licenceIdOrNumber);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/download-history")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/download-history"
+    );
+
+    return getCdasLicenceDownloadHistory(request, env, licenceIdOrNumber);
   }
 
   if (
