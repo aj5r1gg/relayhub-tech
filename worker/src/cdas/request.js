@@ -1,5 +1,6 @@
 import { sendCdasVerificationEmail } from "./email.js";
 import { recordCdasEmailEvent } from "./email-events.js";
+import { evaluateCdasRequestIntakePolicy } from "./request-intake-policy.js";
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=UTF-8",
@@ -167,6 +168,61 @@ function getBodyValue(body, ...keys) {
   return "";
 }
 
+function uniqueStrings(values) {
+  return [...new Set(values.map((value) => cleanText(value)).filter(Boolean))];
+}
+
+function getUseCaseFromBody(body) {
+  return cleanText(
+    getBodyValue(
+      body,
+      "use_case",
+      "useCase",
+      "access_reason",
+      "accessReason",
+      "purpose",
+      "intended_use",
+      "intendedUse"
+    )
+  );
+}
+
+function getOrganisationNameFromBody(body) {
+  return cleanText(
+    getBodyValue(body, "organisation_name", "organisationName", "organisation")
+  );
+}
+
+function getRoleTitleFromBody(body) {
+  return cleanText(getBodyValue(body, "role_title", "roleTitle"));
+}
+
+function getRecipientCategoryFromBody(body) {
+  return (
+    cleanText(getBodyValue(body, "recipient_category", "recipientCategory")) ||
+    "unknown"
+  );
+}
+
+function makePolicyBlockedResponse({ document, evaluation }) {
+  return {
+    ok: false,
+    error: "request_blocked_by_policy",
+    message:
+      evaluation?.public_message ||
+      "This document access request cannot be accepted at this time.",
+    document: document
+      ? {
+          id: document.id,
+          title: document.title,
+          version: document.version,
+        }
+      : null,
+    decision: evaluation?.decision || "hard_block",
+    next_state: evaluation?.next_state || "not_created",
+  };
+}
+
 async function getDocument(env, documentRef) {
   const ref = cleanText(documentRef);
 
@@ -274,9 +330,7 @@ function calculateRisk({ email, body, document, request }) {
     flags.push("higher_review_tld");
   }
 
-  const organisationName = cleanText(
-    getBodyValue(body, "organisation_name", "organisationName", "organisation")
-  );
+  const organisationName = getOrganisationNameFromBody(body);
 
   if (
     document.access_class === "paid_verified" &&
@@ -463,6 +517,7 @@ async function insertAccessRequest({
   ipHash,
   termsAccepted,
   risk,
+  intakeEvaluation,
   verificationTokenHash,
   verificationExpiresAt,
   invitation,
@@ -475,9 +530,7 @@ async function insertAccessRequest({
     cleanText(getBodyValue(body, "licence_holder_type", "licenceHolderType")) ||
     "individual";
 
-  const organisationName = cleanText(
-    getBodyValue(body, "organisation_name", "organisationName", "organisation")
-  );
+  const organisationName = getOrganisationNameFromBody(body);
 
   const contactName =
     cleanText(getBodyValue(body, "contact_name", "contactName")) || name;
@@ -488,9 +541,7 @@ async function insertAccessRequest({
 
   const roleTitle = cleanText(getBodyValue(body, "role_title", "roleTitle"));
 
-  const recipientCategory =
-    cleanText(getBodyValue(body, "recipient_category", "recipientCategory")) ||
-    "unknown";
+  const recipientCategory = getRecipientCategoryFromBody(body);
 
   const userAgent = request.headers.get("user-agent") || "";
 
@@ -845,6 +896,33 @@ export async function handleDocumentAccessRequest(request, env) {
     );
   }
 
+  const clientIp = getClientIp(request);
+  const ipHash = clientIp ? await sha256Hex(clientIp) : null;
+  const userAgent = request.headers.get("user-agent") || "";
+
+  const intakeEvaluation = await evaluateCdasRequestIntakePolicy(env, {
+    document_id: document.id,
+    document_version: document.version,
+    name,
+    email: emailNormalised,
+    organisation_name: getOrganisationNameFromBody(body),
+    role_title: getRoleTitleFromBody(body),
+    recipient_category: getRecipientCategoryFromBody(body),
+    use_case: getUseCaseFromBody(body),
+    ip_hash: ipHash,
+    user_agent: userAgent,
+  });
+
+  if (!intakeEvaluation.allowed) {
+    return jsonResponse(
+      makePolicyBlockedResponse({
+        document,
+        evaluation: intakeEvaluation,
+      }),
+      403
+    );
+  }
+
   let invitationUse = null;
 
   if (invitation) {
@@ -863,21 +941,32 @@ export async function handleDocumentAccessRequest(request, env) {
     }
   }
 
-  const clientIp = getClientIp(request);
-  const ipHash = clientIp ? await sha256Hex(clientIp) : null;
   const requestId = makeRequestId();
   const verificationToken = makeVerificationToken();
   const verificationTokenHash = await sha256Hex(verificationToken);
   const verificationExpiresAt = hoursFromNowIso(getVerificationExpiryHours(env));
   const verificationUrl = makeVerificationUrl(env, requestId, verificationToken);
 
-  const status = determineRequestStatus(document);
-  const risk = calculateRisk({
+  const status = intakeEvaluation.next_state || determineRequestStatus(document);
+  const baselineRisk = calculateRisk({
     email: emailNormalised,
     body,
     document,
     request,
   });
+
+  const policyRiskFlags = uniqueStrings([
+    ...(intakeEvaluation.risk_flags || []).map((flag) => `policy_${flag}`),
+    ...(intakeEvaluation.warnings || []).map((flag) => `policy_warning_${flag}`),
+    ...(intakeEvaluation.manual_review_reasons || []).map(
+      (flag) => `manual_review_${flag}`
+    ),
+  ]);
+
+  const risk = {
+    score: baselineRisk.score + policyRiskFlags.length,
+    flags: uniqueStrings([...baselineRisk.flags, ...policyRiskFlags]),
+  };
 
   const inserted = await insertAccessRequest({
     env,
@@ -891,6 +980,7 @@ export async function handleDocumentAccessRequest(request, env) {
     ipHash,
     termsAccepted,
     risk,
+    intakeEvaluation,
     verificationTokenHash,
     verificationExpiresAt,
     invitation,
@@ -915,6 +1005,10 @@ export async function handleDocumentAccessRequest(request, env) {
     access_class: document.access_class,
     classification: document.classification,
     status,
+    request_intake_decision: intakeEvaluation.decision,
+    request_intake_next_state: intakeEvaluation.next_state,
+    request_intake_policy_id:
+      intakeEvaluation.request_intake_policy?.id || null,
     terms_version: document.licence_terms_version,
     terms_accepted_at: inserted.terms_accepted_at,
     requested_at: inserted.requested_at,
@@ -928,10 +1022,10 @@ export async function handleDocumentAccessRequest(request, env) {
     risk_score: risk.score,
     risk_flags: risk.flags,
     message: emailDelivery.result?.sent
-      ? "Document access request was recorded. A verification email has been sent."
+      ? "Document access request was recorded for manual review. A verification email has been sent."
       : emailDelivery.result?.skipped
-        ? "Document access request was recorded. Verification email sending is currently disabled."
-        : "Document access request was recorded, but the verification email could not be sent. The request has been preserved for follow-up.",
+        ? "Document access request was recorded for manual review. Verification email sending is currently disabled."
+        : "Document access request was recorded for manual review, but the verification email could not be sent. The request has been preserved for follow-up.",
   };
 
   /*
