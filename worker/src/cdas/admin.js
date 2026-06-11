@@ -24,6 +24,9 @@ import {
   getCdasLicenceDownloadHistory,
 } from "./licence-download-history.js";
 import {
+  getCdasLicenceEvidenceBundle,
+} from "./licence-evidence-bundle.js";
+import {
   captureCdasDocumentSourceSha256,
 } from "./source-hash.js";
 import {
@@ -285,6 +288,10 @@ export async function handleCdasAdminRequest(request, env) {
 
   /*
    * CDAS issued licence registry.
+   *
+   * Important:
+   * Specific subroutes must appear before the generic
+   * /api/admin/cdas/licences/:id route.
    */
   if (pathname === "/api/admin/cdas/licences") {
     return listCdasLicences(request, env);
@@ -314,6 +321,19 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return getCdasLicenceDownloadHistory(request, env, licenceIdOrNumber);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/evidence-bundle")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/evidence-bundle"
+    );
+
+    return getCdasLicenceEvidenceBundle(request, env, licenceIdOrNumber);
   }
 
   if (
