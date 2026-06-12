@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { jsonResponse } from "../shared.js";
+import { evaluateCdasLicenceToPdfEligibility } from "./licence-to-pdf-gate.js";
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -56,43 +57,6 @@ function normaliseR2Key(value) {
   return cleanText(value).replace(/^\/+/, "");
 }
 
-function buildGeneratedObjectKey({ licence, document, downloadLink }) {
-  const documentSlug = slugify(
-    document?.slug || document?.id || licence.document_id || "document"
-  );
-  const versionSlug = slugify(
-    licence.document_version || document?.version || "version"
-  );
-  const licenceSlug = slugify(licence.licence_number || licence.id);
-  const downloadSlug = slugify(
-    downloadLink?.download_reference || downloadLink?.id || "download"
-  );
-
-  return [
-    "docs",
-    "generated",
-    "cdas",
-    documentSlug,
-    versionSlug,
-    `${licenceSlug}-${downloadSlug}.pdf`,
-  ].join("/");
-}
-
-function buildGeneratedFilename({ licence, document, downloadLink }) {
-  const title = safeFilename(
-    document?.title || licence.document_id || "RelayHub-Document"
-  );
-  const version = safeFilename(
-    licence.document_version || document?.version || "version"
-  );
-  const licenceNumber = safeFilename(licence.licence_number || licence.id);
-  const downloadReference = safeFilename(
-    downloadLink?.download_reference || downloadLink?.id || "download"
-  );
-
-  return `${title}-v${version}-${licenceNumber}-${downloadReference}.pdf`;
-}
-
 function splitText(text, maxChars = 92) {
   const words = String(text || "").split(/\s+/).filter(Boolean);
   const lines = [];
@@ -140,6 +104,24 @@ function dateOnly(value) {
   return text ? text.slice(0, 10) : "—";
 }
 
+function recipientEmail(licence) {
+  return (
+    cleanText(licence?.licence_holder_email_normalised) ||
+    cleanText(licence?.licence_holder_email) ||
+    cleanText(licence?.contact_email) ||
+    "—"
+  );
+}
+
+function recipientName(licence) {
+  return (
+    cleanText(licence?.licence_holder_name) ||
+    cleanText(licence?.contact_name) ||
+    recipientEmail(licence) ||
+    "—"
+  );
+}
+
 function documentDisplayName(document, licence) {
   const title = cleanText(document?.title || licence?.document_id || "Document");
   const version = cleanText(licence?.document_version || document?.version);
@@ -148,31 +130,14 @@ function documentDisplayName(document, licence) {
   return `${title} v${version}`;
 }
 
-function recipientEmail(licence) {
-  return (
-    cleanText(licence.licence_holder_email_normalised) ||
-    cleanText(licence.licence_holder_email) ||
-    "—"
-  );
-}
-
-function recipientName(licence) {
-  return (
-    cleanText(licence.licence_holder_name) ||
-    cleanText(licence.contact_name) ||
-    recipientEmail(licence) ||
-    "—"
-  );
-}
-
 function copyPermissionSummary(licence) {
-  const terms = cleanText(licence.licence_terms_version).toLowerCase();
+  const terms = cleanText(licence?.licence_terms_version).toLowerCase();
 
   if (terms.includes("free-public-distribution")) {
     return "This document may be shared complete and unmodified. Attribution must be preserved.";
   }
 
-  return "This document is governed by the issued licence terms appended to this generated copy.";
+  return "This document is governed by the issued licence terms for this recipient.";
 }
 
 function hasCompleteGeneratedPdfEvidence(licence) {
@@ -186,44 +151,27 @@ function hasCompleteGeneratedPdfEvidence(licence) {
   );
 }
 
-function alreadyGeneratedResponse(licence) {
-  return jsonResponse({
-    ok: true,
-    generated: false,
-    already_generated: true,
-    licence: {
-      id: licence.id,
-      licence_number: licence.licence_number,
-      document_id: licence.document_id,
-      document_version: licence.document_version,
-      licence_holder_email_normalised: licence.licence_holder_email_normalised,
-    },
-    generated_pdf: {
-      object_key: licence.generated_pdf_object_key,
-      filename: licence.generated_pdf_filename,
-      sha256: licence.generated_pdf_sha256,
-      size_bytes: licence.generated_pdf_size_bytes,
-      content_type: licence.generated_pdf_content_type || "application/pdf",
-      created_at: licence.generated_pdf_created_at,
-      status: licence.generated_pdf_status,
-    },
-    controls: {
-      reads_source_from_r2: false,
-      verifies_source_sha256: false,
-      stamps_pdf_pages: false,
-      inserts_document_copy_information_page: false,
-      appends_licence_evidence_page: false,
-      appends_issued_licence_terms: false,
-      writes_generated_pdf_to_r2: false,
-      updates_licence_generated_pdf_fields: false,
-      activates_reserved_download_link: false,
-      creates_download_link: false,
-      serves_download: false,
-      idempotent_retry: true,
-    },
-    message:
-      "Generated PDF already exists and licence evidence is complete. No new PDF was generated.",
-  });
+function buildGeneratedObjectKey({ licence, document }) {
+  const documentSlug = slugify(document?.slug || document?.id || licence.document_id || "document");
+  const versionSlug = slugify(licence.document_version || document?.version || "version");
+  const licenceSlug = slugify(licence.licence_number || licence.id);
+
+  return [
+    "docs",
+    "generated",
+    "cdas",
+    documentSlug,
+    versionSlug,
+    `${licenceSlug}.pdf`,
+  ].join("/");
+}
+
+function buildGeneratedFilename({ licence, document }) {
+  const title = safeFilename(document?.title || licence.document_id || "RelayHub-Document");
+  const version = safeFilename(licence.document_version || document?.version || "version");
+  const licenceNumber = safeFilename(licence.licence_number || licence.id);
+
+  return `${title}-v${version}-${licenceNumber}.pdf`;
 }
 
 async function getLicence(env, licenceIdOrNumber) {
@@ -241,49 +189,24 @@ async function getLicence(env, licenceIdOrNumber) {
     .first();
 }
 
-async function getDocument(env, documentId) {
-  const ref = cleanText(documentId);
+async function getDocument(env, documentId, version) {
+  const id = cleanText(documentId);
+  const ver = cleanText(version);
 
-  if (!ref) return null;
+  if (!id || !ver) return null;
 
   return await env.RELAYHUB_DB.prepare(
     `SELECT *
      FROM documents
      WHERE id = ?
+       AND version = ?
      LIMIT 1`
   )
-    .bind(ref)
+    .bind(id, ver)
     .first();
 }
 
-async function getPendingDownloadLink(env, { downloadLinkId, downloadReference, licenceId }) {
-  const id = cleanText(downloadLinkId);
-  const reference = cleanText(downloadReference);
-  const lic = cleanText(licenceId);
-
-  if (!lic || (!id && !reference)) return null;
-
-  return await env.RELAYHUB_DB.prepare(
-    `SELECT *
-     FROM document_download_links
-     WHERE licence_id = ?
-       AND status = 'pending_generation'
-       AND used_at IS NULL
-       AND revoked_at IS NULL
-       AND superseded_at IS NULL
-       AND (id = ? OR download_reference = ?)
-     ORDER BY created_at DESC
-     LIMIT 1`
-  )
-    .bind(lic, id, reference)
-    .first();
-}
-
-async function markGenerationFailed(env, licenceId, message, options = {}) {
-  const updateLicence = options.updateLicence !== false;
-
-  if (!updateLicence) return;
-
+async function markGenerationFailed(env, licenceId, message) {
   await env.RELAYHUB_DB.prepare(
     `UPDATE document_licences
      SET
@@ -292,60 +215,6 @@ async function markGenerationFailed(env, licenceId, message, options = {}) {
      WHERE id = ?`
   )
     .bind(String(message || "Unknown PDF generation failure").slice(0, 2000), licenceId)
-    .run();
-}
-
-async function markDownloadLinkFailed(env, downloadLinkId, message) {
-  const id = cleanText(downloadLinkId);
-
-  if (!id) return;
-
-  await env.RELAYHUB_DB.prepare(
-    `UPDATE document_download_links
-     SET
-       status = 'failed',
-       failure_reason = ?
-     WHERE id = ?
-       AND status = 'pending_generation'`
-  )
-    .bind(String(message || "Unknown PDF generation failure").slice(0, 2000), id)
-    .run();
-}
-
-async function activateDownloadLinkWithGeneratedPdf(
-  env,
-  {
-    downloadLink,
-    generatedObjectKey,
-    generatedSha256,
-    generatedSizeBytes,
-    generatedAt,
-  }
-) {
-  await env.RELAYHUB_DB.prepare(
-    `UPDATE document_download_links
-     SET
-       status = 'active',
-       activated_at = ?,
-       generated_pdf_object_key = ?,
-       generated_pdf_sha256 = ?,
-       generated_pdf_size_bytes = ?,
-       generated_pdf_created_at = ?,
-       failure_reason = NULL
-     WHERE id = ?
-       AND status = 'pending_generation'
-       AND used_at IS NULL
-       AND revoked_at IS NULL
-       AND superseded_at IS NULL`
-  )
-    .bind(
-      generatedAt,
-      generatedObjectKey,
-      generatedSha256,
-      generatedSizeBytes,
-      generatedAt,
-      downloadLink.id
-    )
     .run();
 }
 
@@ -377,63 +246,6 @@ async function recordCdasAuditEvent(env, eventType, metadata) {
   }
 }
 
-function evaluateGenerationBlockers({ licence, document }) {
-  const blockers = [];
-  const warnings = [];
-
-  if (!licence) {
-    blockers.push("licence_not_found");
-    return { blockers, warnings };
-  }
-
-  if (licence.status !== "active") {
-    blockers.push("licence_not_active");
-  }
-
-  if (!licence.licence_number) blockers.push("missing_licence_number");
-  if (!licence.document_id) blockers.push("missing_document_id");
-  if (!licence.document_version) blockers.push("missing_document_version");
-  if (!recipientEmail(licence) || recipientEmail(licence) === "—") {
-    blockers.push("missing_licence_holder_email");
-  }
-  if (!licence.rendered_licence_body) blockers.push("missing_rendered_licence_body");
-  if (!licence.rendered_licence_sha256) blockers.push("missing_rendered_licence_sha256");
-  if (!licence.rendered_terms_body_sha256) blockers.push("missing_rendered_terms_body_sha256");
-  if (!licence.source_object) blockers.push("missing_licence_source_object");
-  if (!licence.source_sha256) blockers.push("missing_licence_source_sha256");
-
-  if (licence.revoked_at || licence.status === "revoked") {
-    blockers.push("licence_revoked");
-  }
-
-  if (licence.confirmed_leak_at) {
-    blockers.push("confirmed_leak_recorded");
-  }
-
-  if (licence.suspected_leak_at) {
-    warnings.push("suspected_leak_recorded");
-  }
-
-  if (!document) {
-    blockers.push("document_not_found");
-  } else {
-    if (document.status !== "active") blockers.push("document_not_active");
-    if (document.version !== licence.document_version) blockers.push("document_version_mismatch");
-    if (!document.source_object) blockers.push("missing_document_source_object");
-    if (!document.source_sha256) blockers.push("missing_document_source_sha256");
-
-    if (
-      document.source_sha256 &&
-      licence.source_sha256 &&
-      document.source_sha256 !== licence.source_sha256
-    ) {
-      blockers.push("licence_source_sha256_differs_from_document_source_sha256");
-    }
-  }
-
-  return { blockers, warnings };
-}
-
 function drawTextBlock(page, lines, options) {
   const { x, yStart, size, lineHeight, font, color, maxLines, maxWidth } = options;
   let y = yStart;
@@ -458,12 +270,11 @@ function drawTextBlock(page, lines, options) {
   return y;
 }
 
-function drawFooterOnPages(pdfDoc, font, licence, downloadLink) {
+function drawFooterOnPages(pdfDoc, font, licence) {
   const pages = pdfDoc.getPages();
   const footerText = [
     "RelayHub licensed copy",
     `Licence: ${licence.licence_number}`,
-    `Download ID: ${downloadLink.download_reference}`,
     `Recipient: ${recipientEmail(licence)}`,
   ].join(" | ");
 
@@ -481,7 +292,7 @@ function drawFooterOnPages(pdfDoc, font, licence, downloadLink) {
   }
 }
 
-function addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink) {
+function addCopyInformationPage(pdfDoc, fonts, licence, document) {
   const page = pdfDoc.insertPage(1, [595.28, 841.89]);
   const { regular, bold } = fonts;
   const dark = rgb(0.06, 0.09, 0.16);
@@ -505,8 +316,8 @@ function addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink) 
   });
 
   const intro = [
-    "This is a requester-specific RelayHub document copy. The Download ID below identifies this particular generated copy and the controlled download link that delivered it.",
-    "The Download ID is not a public access code. It is operational evidence used for audit, recovery, support, and misuse investigation.",
+    "This is a recipient-specific RelayHub document copy. The licence number below identifies the issued licence associated with this generated copy.",
+    "This copy is not a public access code or public download link. It is operational evidence used for audit, recovery, support, and misuse investigation.",
   ];
 
   let y = drawTextBlock(page, intro.flatMap((line) => splitText(line, 88)), {
@@ -524,11 +335,11 @@ function addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink) 
   const rows = [
     ["Document", documentDisplayName(document, licence)],
     ["Licence number", licence.licence_number],
-    ["Download ID", downloadLink.download_reference],
+    ["Licence ID", licence.id],
     ["Recipient", recipientName(licence)],
     ["Recipient email", recipientEmail(licence)],
     ["Issued", dateOnly(licence.issued_at)],
-    ["Download link expires", dateOnly(downloadLink.expires_at)],
+    ["Licence terms version", licence.licence_terms_version || "—"],
     ["Copy permission", copyPermissionSummary(licence)],
   ];
 
@@ -541,7 +352,7 @@ function addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink) 
       color: muted,
     });
 
-    const valueLines = splitText(value, 76);
+    const valueLines = splitText(value || "—", 76);
     y = drawTextBlock(page, valueLines, {
       x: 190,
       yStart: y,
@@ -568,7 +379,7 @@ function addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink) 
   y -= 22;
 
   const note = [
-    "This copy may contain visible and embedded licence evidence. Removing the licence evidence, altering the footer, or redistributing the document outside the licence terms may breach the issued licence.",
+    "This copy may contain visible and embedded licence evidence. Removing licence evidence, altering the footer, or redistributing the document outside the licence terms may breach the issued licence.",
     "Retain this page when storing, forwarding, printing, or presenting the document.",
   ];
 
@@ -583,7 +394,7 @@ function addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink) 
   });
 }
 
-function addEvidencePage(pdfDoc, fonts, licence, document, downloadLink, sourceSha256) {
+function addEvidencePage(pdfDoc, fonts, licence, document, sourceSha256, generatedAt) {
   const page = pdfDoc.addPage([595.28, 841.89]);
   const { regular, bold } = fonts;
   const dark = rgb(0.06, 0.09, 0.16);
@@ -612,16 +423,14 @@ function addEvidencePage(pdfDoc, fonts, licence, document, downloadLink, sourceS
     ["Document version", licence.document_version],
     ["Licence number", licence.licence_number],
     ["Licence ID", licence.id],
-    ["Download ID", downloadLink.download_reference],
-    ["Download link ID", downloadLink.id],
     ["Recipient", recipientName(licence)],
     ["Recipient email", recipientEmail(licence)],
     ["Issued", licence.issued_at],
-    ["Generated", nowIso()],
+    ["Generated", generatedAt],
     ["Source object", normaliseR2Key(licence.source_object || document.source_object)],
     ["Source SHA-256", sourceSha256],
-    ["Rendered licence SHA-256", licence.rendered_licence_sha256],
-    ["Rendered terms body SHA-256", licence.rendered_terms_body_sha256],
+    ["Rendered licence SHA-256", licence.rendered_licence_sha256 || "not recorded"],
+    ["Rendered terms body SHA-256", licence.rendered_terms_body_sha256 || "not recorded"],
   ];
 
   let y = 704;
@@ -660,6 +469,10 @@ function addEvidencePage(pdfDoc, fonts, licence, document, downloadLink, sourceS
 }
 
 function addIssuedLicenceAppendix(pdfDoc, fonts, licence) {
+  const body = cleanText(licence.rendered_licence_body);
+
+  if (!body) return false;
+
   const { regular, bold } = fonts;
   const dark = rgb(0.06, 0.09, 0.16);
   const muted = rgb(0.35, 0.39, 0.47);
@@ -684,7 +497,7 @@ function addIssuedLicenceAppendix(pdfDoc, fonts, licence) {
   });
 
   titlePage.drawText(
-    "The following pages contain the exact rendered licence terms captured when this licence was issued.",
+    "The following pages contain the rendered licence terms captured when this licence was issued.",
     {
       x: 54,
       y: 704,
@@ -695,7 +508,7 @@ function addIssuedLicenceAppendix(pdfDoc, fonts, licence) {
     }
   );
 
-  const lines = splitMultilineText(licence.rendered_licence_body || "", 96);
+  const lines = splitMultilineText(body, 96);
   let page = pdfDoc.addPage([595.28, 841.89]);
   let y = 780;
 
@@ -726,6 +539,8 @@ function addIssuedLicenceAppendix(pdfDoc, fonts, licence) {
 
     y -= line ? 12 : 8;
   }
+
+  return true;
 }
 
 async function loadSourcePdf(env, licence, document) {
@@ -763,8 +578,8 @@ async function createGeneratedPdfBytes({
   sourceBytes,
   licence,
   document,
-  downloadLink,
   sourceSha256,
+  generatedAt,
 }) {
   const pdfDoc = await PDFDocument.load(sourceBytes, {
     ignoreEncryption: true,
@@ -778,14 +593,19 @@ async function createGeneratedPdfBytes({
     bold,
   };
 
-  addCopyInformationPage(pdfDoc, fonts, licence, document, downloadLink);
-  addEvidencePage(pdfDoc, fonts, licence, document, downloadLink, sourceSha256);
-  addIssuedLicenceAppendix(pdfDoc, fonts, licence);
-  drawFooterOnPages(pdfDoc, regular, licence, downloadLink);
+  addCopyInformationPage(pdfDoc, fonts, licence, document);
+  addEvidencePage(pdfDoc, fonts, licence, document, sourceSha256, generatedAt);
+  const appendedLicenceTerms = addIssuedLicenceAppendix(pdfDoc, fonts, licence);
+  drawFooterOnPages(pdfDoc, regular, licence);
 
-  return await pdfDoc.save({
+  const bytes = await pdfDoc.save({
     useObjectStreams: false,
   });
+
+  return {
+    bytes,
+    appendedLicenceTerms,
+  };
 }
 
 async function putGeneratedPdf(env, objectKey, bytes, filename) {
@@ -797,6 +617,7 @@ async function putGeneratedPdf(env, objectKey, bytes, filename) {
     customMetadata: {
       relayhub_system: "cdas",
       relayhub_object_type: "generated_pdf",
+      relayhub_generation_stage: "licence_bound_no_download_link",
       generated_at: nowIso(),
     },
   });
@@ -824,7 +645,8 @@ async function updateLicenceGeneratedPdfEvidence(
        generated_pdf_status = 'generated',
        generated_pdf_created_at = ?,
        generated_pdf_error = NULL
-     WHERE id = ?`
+     WHERE id = ?
+       AND generated_pdf_object_key IS NULL`
   )
     .bind(
       generatedObjectKey,
@@ -837,10 +659,57 @@ async function updateLicenceGeneratedPdfEvidence(
     .run();
 }
 
+function alreadyGeneratedResponse(licence) {
+  return jsonResponse({
+    ok: true,
+    generated: false,
+    already_generated: true,
+    licence: {
+      id: licence.id,
+      licence_number: licence.licence_number,
+      document_id: licence.document_id,
+      document_version: licence.document_version,
+      licence_holder_email_normalised:
+        licence.licence_holder_email_normalised || licence.licence_holder_email,
+    },
+    generated_pdf: {
+      object_key: licence.generated_pdf_object_key,
+      filename: licence.generated_pdf_filename,
+      sha256: licence.generated_pdf_sha256,
+      size_bytes: licence.generated_pdf_size_bytes,
+      content_type: licence.generated_pdf_content_type || "application/pdf",
+      created_at: licence.generated_pdf_created_at,
+      status: licence.generated_pdf_status,
+    },
+    controls: {
+      reads_source_from_r2: false,
+      verifies_source_sha256: false,
+      stamps_pdf_pages: false,
+      inserts_document_copy_information_page: false,
+      appends_licence_evidence_page: false,
+      appends_issued_licence_terms: false,
+      writes_generated_pdf_to_r2: false,
+      updates_licence_generated_pdf_fields: false,
+      creates_download_link: false,
+      activates_download_link: false,
+      sends_email: false,
+      serves_download: false,
+      idempotent_retry: true,
+    },
+    safety: {
+      generated_pdf_created: false,
+      download_link_created: false,
+      download_link_activated: false,
+      email_sent: false,
+    },
+    message:
+      "Generated PDF already exists and licence evidence is complete. No new PDF was generated.",
+  });
+}
+
 function buildGenerationResponse({
   licence,
   document,
-  downloadLink,
   generatedObjectKey,
   generatedFilename,
   generatedSha256,
@@ -848,16 +717,13 @@ function buildGenerationResponse({
   generatedAt,
   source,
   warnings,
-  mode,
-  isReissue,
+  appendedLicenceTerms,
 }) {
   return jsonResponse({
     ok: true,
     generated: true,
     already_generated: false,
-    mode,
-    reissue: Boolean(isReissue),
-    warnings,
+    action: "generate_personalised_pdf",
     licence: {
       id: licence.id,
       licence_number: licence.licence_number,
@@ -875,18 +741,6 @@ function buildGenerationResponse({
       source_object: document.source_object,
       source_sha256: document.source_sha256,
     },
-    download_link: {
-      id: downloadLink.id,
-      download_reference: downloadLink.download_reference,
-      status: "active",
-      activated: true,
-      activated_at: generatedAt,
-      expires_at: downloadLink.expires_at,
-      generated_pdf_object_key: generatedObjectKey,
-      generated_pdf_sha256: generatedSha256,
-      generated_pdf_size_bytes: generatedSizeBytes,
-      generated_pdf_created_at: generatedAt,
-    },
     generated_pdf: {
       object_key: generatedObjectKey,
       filename: generatedFilename,
@@ -902,25 +756,30 @@ function buildGenerationResponse({
       content_type: source.contentType,
       verified: true,
     },
+    warnings,
     controls: {
       reads_source_from_r2: true,
       verifies_source_sha256: true,
       stamps_pdf_pages: true,
       inserts_document_copy_information_page: true,
       appends_licence_evidence_page: true,
-      appends_issued_licence_terms: true,
+      appends_issued_licence_terms: Boolean(appendedLicenceTerms),
       writes_generated_pdf_to_r2: true,
       updates_licence_generated_pdf_fields: true,
-      activates_reserved_download_link: true,
       creates_download_link: false,
+      activates_download_link: false,
+      sends_email: false,
       serves_download: false,
-      idempotent_retry: false,
-      explicit_reissue_mode: Boolean(isReissue),
       overwrites_existing_r2_object: false,
     },
-    message: isReissue
-      ? "Reissued Download-ID-bound generated PDF was created, stored, bound to the reserved link, and activated."
-      : "Download-ID-bound generated PDF was created, stored, bound to the reserved link, and activated.",
+    safety: {
+      generated_pdf_created: true,
+      download_link_created: false,
+      download_link_activated: false,
+      email_sent: false,
+    },
+    message:
+      "Licence-bound personalised PDF was generated and recorded. No download link was created or activated, and no email was sent.",
   });
 }
 
@@ -937,10 +796,6 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
   }
 
   const body = await readOptionalJson(request);
-  const mode = cleanText(body.mode || "initial");
-  const isReissue =
-    mode === "reissue" && (body.allow_reissue === true || body.allowReissue === true);
-
   const licence = await getLicence(env, licenceIdOrNumber);
 
   if (!licence) {
@@ -954,105 +809,50 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
     );
   }
 
-  /*
-   * Normal generation remains idempotent.
-   *
-   * Reissue mode is the only path that may intentionally generate a new
-   * Download-ID-bound copy when licence-level generated PDF evidence already
-   * exists.
-   */
-  if (!isReissue && hasCompleteGeneratedPdfEvidence(licence)) {
+  if (hasCompleteGeneratedPdfEvidence(licence)) {
     return alreadyGeneratedResponse(licence);
   }
 
-  if (mode === "reissue" && !isReissue) {
+  const eligibility = await evaluateCdasLicenceToPdfEligibility(env, licence.id);
+
+  if (!eligibility.eligible) {
     return jsonResponse(
       {
         ok: false,
-        error: "reissue_not_explicitly_allowed",
+        error: "pdf_generation_blocked",
         message:
-          "Reissue mode requires allow_reissue=true. No PDF was generated.",
-      },
-      409
-    );
-  }
-
-  const document = await getDocument(env, licence.document_id);
-  const readiness = evaluateGenerationBlockers({ licence, document });
-
-  if (readiness.blockers.length) {
-    return jsonResponse(
-      {
-        ok: false,
-        error: "generation_blocked",
-        message:
-          "Generated PDF could not be created because one or more validation gates failed.",
-        blockers: readiness.blockers,
-        warnings: readiness.warnings,
-        licence: {
-          id: licence.id,
-          licence_number: licence.licence_number,
-          status: licence.status,
-          document_id: licence.document_id,
-          document_version: licence.document_version,
-          generated_pdf_status: licence.generated_pdf_status,
-        },
-        document: document
-          ? {
-              id: document.id,
-              title: document.title,
-              version: document.version,
-              status: document.status,
-              source_object: document.source_object,
-              source_sha256: document.source_sha256,
-            }
-          : null,
-        controls: {
-          writes_generated_pdf_to_r2: false,
-          updates_licence_generated_pdf_fields: false,
-          activates_reserved_download_link: false,
+          "Personalised PDF could not be generated because the licence-to-PDF gate did not pass.",
+        licence_id: licence.id,
+        licence_number: licence.licence_number,
+        decision: eligibility.decision,
+        blockers: eligibility.blockers,
+        warnings: eligibility.warnings,
+        counts: eligibility.counts,
+        safety: {
+          generated_pdf_created: false,
+          download_link_created: false,
+          download_link_activated: false,
+          email_sent: false,
         },
       },
       409
     );
   }
 
-  const downloadLink = await getPendingDownloadLink(env, {
-    downloadLinkId: body.download_link_id || body.downloadLinkId,
-    downloadReference: body.download_reference || body.downloadReference,
-    licenceId: licence.id,
-  });
+  const document = await getDocument(env, licence.document_id, licence.document_version);
 
-  if (!downloadLink) {
+  if (!document) {
     return jsonResponse(
       {
         ok: false,
-        error: "pending_download_link_not_found",
-        message:
-          "A pending_generation download link matching this licence and Download ID is required before generating a Download-ID-bound PDF.",
-        controls: {
-          writes_generated_pdf_to_r2: false,
-          updates_licence_generated_pdf_fields: false,
-          activates_reserved_download_link: false,
+        error: "document_not_found",
+        message: "Document for this licence and version was not found.",
+        safety: {
+          generated_pdf_created: false,
+          download_link_created: false,
+          download_link_activated: false,
+          email_sent: false,
         },
-      },
-      409
-    );
-  }
-
-  if (!downloadLink.download_reference) {
-    await markDownloadLinkFailed(
-      env,
-      downloadLink.id,
-      "missing_download_reference_for_pdf_generation"
-    );
-
-    return jsonResponse(
-      {
-        ok: false,
-        error: "missing_download_reference",
-        message:
-          "The pending download link does not have a Download ID, so no PDF was generated.",
       },
       409
     );
@@ -1061,23 +861,17 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
   const generatedObjectKey = buildGeneratedObjectKey({
     licence,
     document,
-    downloadLink,
   });
   const generatedFilename = buildGeneratedFilename({
     licence,
     document,
-    downloadLink,
   });
 
   try {
     const existingObject = await env.RELAYHUB_DOWNLOADS.head(generatedObjectKey);
 
     if (existingObject) {
-      await markDownloadLinkFailed(
-        env,
-        downloadLink.id,
-        "generated_object_key_already_exists"
-      );
+      await markGenerationFailed(env, licence.id, "generated_object_key_already_exists");
 
       return jsonResponse(
         {
@@ -1088,10 +882,18 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
           generated_pdf: {
             object_key: generatedObjectKey,
           },
+          safety: {
+            generated_pdf_created: false,
+            download_link_created: false,
+            download_link_activated: false,
+            email_sent: false,
+          },
           controls: {
             overwrites_existing_r2_object: false,
             writes_generated_pdf_to_r2: false,
-            activates_reserved_download_link: false,
+            creates_download_link: false,
+            activates_download_link: false,
+            sends_email: false,
           },
         },
         409
@@ -1099,23 +901,23 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
     }
 
     const source = await loadSourcePdf(env, licence, document);
+    const generatedAt = nowIso();
 
-    const generatedBytes = await createGeneratedPdfBytes({
+    const generated = await createGeneratedPdfBytes({
       sourceBytes: source.bytes,
       licence,
       document,
-      downloadLink,
       sourceSha256: source.actualSha256,
+      generatedAt,
     });
 
-    const generatedSha256 = await sha256HexFromBytes(generatedBytes);
-    const generatedSizeBytes = generatedBytes.byteLength;
-    const generatedAt = nowIso();
+    const generatedSha256 = await sha256HexFromBytes(generated.bytes);
+    const generatedSizeBytes = generated.bytes.byteLength;
 
     await putGeneratedPdf(
       env,
       generatedObjectKey,
-      generatedBytes,
+      generated.bytes,
       generatedFilename
     );
 
@@ -1128,76 +930,52 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
       generatedAt,
     });
 
-    await activateDownloadLinkWithGeneratedPdf(env, {
-      downloadLink,
-      generatedObjectKey,
-      generatedSha256,
-      generatedSizeBytes,
-      generatedAt,
-    });
-
-    await recordCdasAuditEvent(env, isReissue ? "generated_pdf_reissued" : "generated_pdf_created", {
+    await recordCdasAuditEvent(env, "generated_pdf_created", {
       related_type: "licence",
       related_id: licence.id,
       licence_id: licence.id,
       licence_number: licence.licence_number,
       document_id: licence.document_id,
       document_version: licence.document_version,
-      download_link_id: downloadLink.id,
-      download_reference: downloadLink.download_reference,
       generated_pdf_object_key: generatedObjectKey,
       generated_pdf_sha256: generatedSha256,
       generated_pdf_size_bytes: generatedSizeBytes,
-      reissue: Boolean(isReissue),
-    });
-
-    await recordCdasAuditEvent(env, "download_link_activated", {
-      related_type: "download_link",
-      related_id: downloadLink.id,
-      licence_id: licence.id,
-      licence_number: licence.licence_number,
-      document_id: licence.document_id,
-      download_link_id: downloadLink.id,
-      download_reference: downloadLink.download_reference,
-      generated_pdf_object_key: generatedObjectKey,
-      generated_pdf_sha256: generatedSha256,
-      reissue: Boolean(isReissue),
+      actor: cleanText(body.actor || "admin"),
+      note: cleanText(body.note || ""),
+      stage: "3X-0L-B",
+      creates_download_link: false,
+      activates_download_link: false,
+      sends_email: false,
     });
 
     return buildGenerationResponse({
       licence,
       document,
-      downloadLink,
       generatedObjectKey,
       generatedFilename,
       generatedSha256,
       generatedSizeBytes,
       generatedAt,
       source,
-      warnings: readiness.warnings,
-      mode,
-      isReissue,
+      warnings: eligibility.warnings || [],
+      appendedLicenceTerms: generated.appendedLicenceTerms,
     });
   } catch (error) {
     const message = error?.message || "unknown_pdf_generation_error";
 
-    await markGenerationFailed(env, licence.id, message, {
-      updateLicence: !isReissue,
-    });
+    await markGenerationFailed(env, licence.id, message);
 
-    await markDownloadLinkFailed(env, downloadLink.id, message);
-
-    await recordCdasAuditEvent(env, isReissue ? "generated_pdf_reissue_failed" : "generated_pdf_failed", {
+    await recordCdasAuditEvent(env, "generated_pdf_failed", {
       related_type: "licence",
       related_id: licence.id,
       licence_id: licence.id,
       licence_number: licence.licence_number,
       document_id: licence.document_id,
       document_version: licence.document_version,
-      download_link_id: downloadLink.id,
-      download_reference: downloadLink.download_reference,
       error: message,
-      reissue: Boolean(isReissue),
+      actor: cleanText(body.actor || "admin"),
+      note: cleanText(body.note || ""),
+      stage: "3X-0L-B",
     });
 
     return jsonResponse(
@@ -1205,12 +983,19 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
         ok: false,
         error: "pdf_generation_failed",
         message,
+        safety: {
+          generated_pdf_created: false,
+          download_link_created: false,
+          download_link_activated: false,
+          email_sent: false,
+        },
         controls: {
           writes_generated_pdf_to_r2: false,
-          updates_licence_generated_pdf_fields: !isReissue,
-          activates_reserved_download_link: false,
-          pending_download_link_marked_failed: true,
-          licence_generation_status_marked_failed: !isReissue,
+          updates_licence_generated_pdf_fields: true,
+          creates_download_link: false,
+          activates_download_link: false,
+          sends_email: false,
+          serves_download: false,
         },
       },
       500
