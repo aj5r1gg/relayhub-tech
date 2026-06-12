@@ -52,6 +52,10 @@ import {
   getCdasDownloadLinkActivationEligibility,
 } from "./download-link-activation.js";
 import {
+  getCdasActiveLinkDeliveryEligibility,
+  prepareCdasActiveLinkDelivery,
+} from "./active-link-delivery-preparation.js";
+import {
   emailCdasDownloadLink,
 } from "./email-download-link.js";
 import {
@@ -360,6 +364,45 @@ export async function handleCdasAdminRequest(request, env) {
   /*
    * CDAS controlled download-link registry.
    */
+  /*
+   * CDAS Phase 3X-0P — active download-link delivery preparation.
+   *
+   * Prepares delivery payload only. No email and no PDF serving.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/delivery-eligibility")
+  ) {
+    const downloadLinkIdOrReference = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/delivery-eligibility"
+    );
+
+    return getCdasActiveLinkDeliveryEligibility(
+      request,
+      env,
+      downloadLinkIdOrReference
+    );
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/prepare-delivery")
+  ) {
+    const downloadLinkIdOrReference = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/prepare-delivery"
+    );
+
+    return prepareCdasActiveLinkDelivery(
+      request,
+      env,
+      downloadLinkIdOrReference
+    );
+  }
+
   /*
    * CDAS Phase 3X-0O — controlled download-link activation gate/action.
    *
