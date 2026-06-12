@@ -56,6 +56,9 @@ import {
   prepareCdasActiveLinkDelivery,
 } from "./active-link-delivery-preparation.js";
 import {
+  sendCdasActiveLinkDeliveryEmail,
+} from "./active-link-email-send.js";
+import {
   emailCdasDownloadLink,
 } from "./email-download-link.js";
 import {
@@ -364,6 +367,28 @@ export async function handleCdasAdminRequest(request, env) {
   /*
    * CDAS controlled download-link registry.
    */
+  /*
+   * CDAS Phase 3X-0Q — controlled active-link delivery email send.
+   *
+   * Sends email only. No PDF serving and no link consumption.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/send-delivery-email")
+  ) {
+    const downloadLinkIdOrReference = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/send-delivery-email"
+    );
+
+    return sendCdasActiveLinkDeliveryEmail(
+      request,
+      env,
+      downloadLinkIdOrReference
+    );
+  }
+
   /*
    * CDAS Phase 3X-0P — active download-link delivery preparation.
    *
