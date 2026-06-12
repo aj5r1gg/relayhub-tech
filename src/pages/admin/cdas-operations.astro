@@ -622,6 +622,12 @@ const description =
       opacity: 0.45;
     }
 
+    .rh-mini-button-success {
+      border-color: rgba(22, 163, 74, 0.28);
+      background: rgba(240, 253, 244, 0.92);
+      color: #166534;
+    }
+
     .rh-mini-button-primary {
       border-color: rgba(37, 99, 235, 0.28);
       background: rgba(37, 99, 235, 0.08);
@@ -815,23 +821,33 @@ const description =
 
       const requestLink = `<a class="rh-table-action" href="${escapeHtml(
         adminUrl("/admin/cdas-access-requests/", { id: row.id }),
-      )}">Request</a>`;
+      )}">Open Request</a>`;
+
       const noteButton = `<button class="rh-mini-button" type="button" data-review-action="note" data-request-id="${id}">Note</button>`;
       const holdButton = `<button class="rh-mini-button" type="button" data-review-action="hold" data-request-id="${id}">Hold</button>`;
       const rejectButton = `<button class="rh-mini-button rh-mini-button-danger" type="button" data-review-action="reject" data-request-id="${id}">Reject</button>`;
-      const approveButton = `<button class="rh-mini-button rh-mini-button-primary" type="button" data-review-action="approve_review" data-request-id="${id}">Approve review</button>`;
+      const approveButton = `<button class="rh-mini-button rh-mini-button-primary" type="button" data-review-action="approve_review" data-request-id="${id}">Approve Review</button>`;
 
-      if (status === "rejected" || status === "review_approved") {
-        return `<div class="rh-review-actions">${requestLink}${noteButton}</div>`;
-      }
+      const eligibilityButton = `<button class="rh-mini-button" type="button" data-licence-action="eligibility" data-request-id="${id}">Check Eligibility</button>`;
+      const issueLicenceButton = `<button class="rh-mini-button rh-mini-button-success" type="button" data-licence-action="issue" data-request-id="${id}">Issue Licence</button>`;
+
+      const reviewButtons =
+        status === "rejected" || status === "review_approved" || status === "licence_issued"
+          ? noteButton
+          : `${noteButton}${holdButton}${rejectButton}${approveButton}`;
+
+      const licenceButtons =
+        status === "review_approved"
+          ? `${eligibilityButton}${issueLicenceButton}`
+          : eligibilityButton;
 
       return `
-        <div class="rh-review-actions">
+        <div class="rh-request-action-row-inner">
+          <span class="rh-request-action-label">Review actions</span>
           ${requestLink}
-          ${noteButton}
-          ${holdButton}
-          ${rejectButton}
-          ${approveButton}
+          ${reviewButtons}
+          <span class="rh-request-action-label">Licence handoff</span>
+          ${licenceButtons}
         </div>
       `;
     }
@@ -903,6 +919,112 @@ const description =
         await loadOperations();
       } catch (error) {
         setReviewActionResult("error", error?.message || "Review action failed.");
+      }
+    }
+
+
+
+    async function checkLicenceEligibility(requestId) {
+      const token = getAdminToken();
+
+      if (!token) {
+        setReviewActionResult("error", "Admin token is required before licence eligibility can be checked.");
+        return;
+      }
+
+      setReviewActionResult("loading", `Checking licence eligibility for ${requestId}…`);
+
+      try {
+        const response = await fetch(
+          `/api/admin/cdas/access-requests/${encodeURIComponent(requestId)}/licence-eligibility`,
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.message || data.error || `Eligibility check failed with ${response.status}`);
+        }
+
+        if (data.eligible) {
+          setReviewActionResult(
+            "success",
+            `${requestId} is eligible for licence issue. Existing licences: ${data.counts?.existing_licences_for_request ?? 0}.`,
+          );
+        } else {
+          setReviewActionResult(
+            "info",
+            `${requestId} is not eligible. Blockers: ${(data.blockers || []).join(", ") || "none reported"}.`,
+          );
+        }
+      } catch (error) {
+        setReviewActionResult("error", error?.message || "Licence eligibility check failed.");
+      }
+    }
+
+    async function issueReviewedLicence(requestId) {
+      const token = getAdminToken();
+
+      if (!token) {
+        setReviewActionResult("error", "Admin token is required before a licence can be issued.");
+        return;
+      }
+
+      const note = window.prompt(
+        "Enter licence issue note:",
+        "Issue licence only. Do not generate PDF, create download link, or send email.",
+      );
+
+      if (note === null) {
+        setReviewActionResult("info", "Licence issue cancelled.");
+        return;
+      }
+
+      setReviewActionResult("loading", `Issuing licence for ${requestId}…`);
+
+      try {
+        const response = await fetch(
+          `/api/admin/cdas/access-requests/${encodeURIComponent(requestId)}/issue-licence`,
+          {
+            method: "POST",
+            headers: {
+              accept: "application/json",
+              authorization: `Bearer ${token}`,
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              actor: "operations-centre",
+              note,
+            }),
+          },
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          const blockers = Array.isArray(data.blockers) && data.blockers.length
+            ? ` Blockers: ${data.blockers.join(", ")}.`
+            : "";
+
+          throw new Error(
+            `${data.message || data.error || `Licence issue failed with ${response.status}`}.${blockers}`,
+          );
+        }
+
+        setReviewActionResult(
+          "success",
+          `Licence issued for ${requestId}: ${data.licence_number}. No PDF, download link, or email was created.`,
+        );
+
+        await loadOperations();
+      } catch (error) {
+        setReviewActionResult("error", error?.message || "Licence issue failed.");
       }
     }
 
@@ -1317,6 +1439,23 @@ const description =
 
         loadOperations();
         return;
+      }
+
+      const licenceButton = event.target.closest("[data-licence-action][data-request-id]");
+
+      if (licenceButton) {
+        const action = licenceButton.getAttribute("data-licence-action");
+        const requestId = licenceButton.getAttribute("data-request-id");
+
+        if (action === "eligibility" && requestId) {
+          checkLicenceEligibility(requestId);
+          return;
+        }
+
+        if (action === "issue" && requestId) {
+          issueReviewedLicence(requestId);
+          return;
+        }
       }
 
       const button = event.target.closest("[data-review-action][data-request-id]");

@@ -272,6 +272,16 @@ export async function handleCdasOperationsJson(request, env) {
         `,
       ),
     ),
+    licence_issued: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_access_requests
+          WHERE status = 'licence_issued'
+        `,
+      ),
+    ),
     generated_pdfs_without_links: numberValue(
       await first(
         db,
