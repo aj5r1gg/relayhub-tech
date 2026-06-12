@@ -90,6 +90,9 @@ import {
   getCdasLicenceToPdfEligibility,
 } from "./licence-to-pdf-gate.js";
 import {
+  getCdasGeneratedPdfToDownloadLinkEligibility,
+} from "./generated-pdf-to-download-link-gate.js";
+import {
   handleCdasRequestIntakeEvaluation,
 } from "./request-intake-policy.js";
 
@@ -555,6 +558,28 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return reissueCdasDownloadLink(request, env, licenceIdOrNumber);
+  }
+
+  /*
+   * CDAS Phase 3X-0M — generated-PDF-to-download-link eligibility gate.
+   *
+   * Read-only. No download link creation, no activation, no email, no PDF serving.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/download-link-eligibility")
+  ) {
+    const licenceIdOrNumber = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/download-link-eligibility"
+    );
+
+    return getCdasGeneratedPdfToDownloadLinkEligibility(
+      request,
+      env,
+      licenceIdOrNumber
+    );
   }
 
   if (
