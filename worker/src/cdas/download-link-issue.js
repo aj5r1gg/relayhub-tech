@@ -1,4 +1,7 @@
 import { getClientIp, jsonResponse } from "../shared.js";
+import {
+  evaluateCdasGeneratedPdfToDownloadLinkEligibility,
+} from "./generated-pdf-to-download-link-gate.js";
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -9,8 +12,11 @@ function nowIso() {
 }
 
 function addDaysIso(days) {
+  const safeDays = Number.isFinite(Number(days)) ? Number(days) : 7;
+  const boundedDays = Math.max(1, Math.min(30, Math.floor(safeDays)));
+
   const date = new Date();
-  date.setUTCDate(date.getUTCDate() + days);
+  date.setUTCDate(date.getUTCDate() + boundedDays);
   return date.toISOString();
 }
 
@@ -66,6 +72,21 @@ function buildMetadataUrl(request, token) {
   return `${url.origin}/api/document-download-metadata/${encodeURIComponent(token)}`;
 }
 
+async function readOptionalJson(request) {
+  const contentType = cleanText(request.headers.get("Content-Type")).toLowerCase();
+
+  if (!contentType.includes("application/json")) {
+    return {};
+  }
+
+  try {
+    const body = await request.json();
+    return body && typeof body === "object" ? body : {};
+  } catch {
+    return {};
+  }
+}
+
 async function getLicence(env, licenceIdOrNumber) {
   const ref = cleanText(licenceIdOrNumber);
 
@@ -79,91 +100,6 @@ async function getLicence(env, licenceIdOrNumber) {
   )
     .bind(ref, ref)
     .first();
-}
-
-function evaluateLicenceForReservedDownloadLink(licence) {
-  const blockers = [];
-  const warnings = [];
-
-  if (!licence) {
-    blockers.push("licence_not_found");
-    return { blockers, warnings };
-  }
-
-  if (licence.status !== "active") {
-    blockers.push("licence_not_active");
-  }
-
-  if (licence.revoked_at || licence.status === "revoked") {
-    blockers.push("licence_revoked");
-  }
-
-  if (licence.confirmed_leak_at) {
-    blockers.push("confirmed_leak_recorded");
-  }
-
-  if (licence.suspected_leak_at) {
-    warnings.push("suspected_leak_recorded");
-  }
-
-  if (!licence.licence_number) {
-    blockers.push("missing_licence_number");
-  }
-
-  if (!licence.document_id) {
-    blockers.push("missing_document_id");
-  }
-
-  if (!licence.document_version) {
-    blockers.push("missing_document_version");
-  }
-
-  if (!licence.licence_holder_name) {
-    blockers.push("missing_licence_holder_name");
-  }
-
-  if (!licence.licence_holder_email_normalised && !licence.licence_holder_email) {
-    blockers.push("missing_licence_holder_email");
-  }
-
-  if (!licence.licence_terms_version) {
-    blockers.push("missing_licence_terms_version");
-  }
-
-  if (!licence.rendered_licence_body) {
-    blockers.push("missing_rendered_licence_body");
-  }
-
-  if (!licence.rendered_licence_sha256) {
-    blockers.push("missing_rendered_licence_sha256");
-  }
-
-  if (!licence.rendered_terms_body_sha256) {
-    blockers.push("missing_rendered_terms_body_sha256");
-  }
-
-  if (!licence.source_object) {
-    blockers.push("missing_source_object");
-  }
-
-  if (!licence.source_sha256) {
-    blockers.push("missing_source_sha256");
-  }
-
-  /*
-   * Generated PDF evidence is intentionally NOT required here.
-   *
-   * Phase 3W-G changes the workflow to:
-   *
-   *   reserve pending_generation download link
-   *   -> generate PDF with Download ID embedded
-   *   -> activate reserved link
-   *
-   * Therefore, generated_pdf_status/generated_pdf_object_key/generated_pdf_sha256
-   * must not block reservation.
-   */
-
-  return { blockers, warnings };
 }
 
 async function downloadReferenceExists(env, reference) {
@@ -191,24 +127,6 @@ async function makeUniqueDownloadReference(env) {
   throw new Error("Unable to allocate a unique download reference.");
 }
 
-async function supersedePreviousUnusedLinks(env, licenceId, supersededAt) {
-  const result = await env.RELAYHUB_DB.prepare(
-    `UPDATE document_download_links
-     SET
-       status = 'superseded',
-       superseded_at = ?
-     WHERE licence_id = ?
-       AND status IN ('created', 'pending_generation', 'active')
-       AND used_at IS NULL
-       AND revoked_at IS NULL
-       AND superseded_at IS NULL`
-  )
-    .bind(supersededAt, licenceId)
-    .run();
-
-  return result?.meta?.changes ?? 0;
-}
-
 async function recordDownloadEvent({
   env,
   request,
@@ -219,75 +137,83 @@ async function recordDownloadEvent({
   success = 1,
   failureReason = null,
 }) {
-  const ip = getClientIp(request);
-  const ipHash = ip ? await sha256HexFromText(ip) : null;
+  try {
+    const ip = getClientIp(request);
+    const ipHash = ip ? await sha256HexFromText(ip) : null;
 
-  const failureText = failureReason
-    ? cleanText(failureReason)
-    : downloadReference
-      ? `download_reference=${downloadReference}`
-      : null;
+    const failureText = failureReason
+      ? cleanText(failureReason)
+      : downloadReference
+        ? `download_reference=${downloadReference}`
+        : null;
 
-  await env.RELAYHUB_DB.prepare(
-    `INSERT INTO document_download_events (
-       id,
-       download_id,
-       licence_id,
-       licence_number,
-       document_id,
-       document_version,
-       licence_holder_name,
-       organisation_name,
-       licence_holder_email,
-       event_type,
-       event_at,
-       ip_hash,
-       user_agent,
-       generated_object,
-       source_object,
-       source_sha256,
-       generated_sha256,
-       template_sha256,
-       licence_page_template_version,
-       watermark_template_version,
-       footer_template_version,
-       terms_template_version,
-       generation_engine_version,
-       terms_version,
-       success,
-       failure_reason
-     )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  )
-    .bind(
-      buildId("dde"),
-      downloadId,
-      licence.id,
-      licence.licence_number,
-      licence.document_id,
-      licence.document_version,
-      licence.licence_holder_name || null,
-      licence.organisation_name || null,
-      licence.licence_holder_email_normalised || licence.licence_holder_email,
-      eventType,
-      nowIso(),
-      ipHash,
-      getUserAgent(request),
-      licence.generated_pdf_object_key || null,
-      licence.source_object || null,
-      licence.source_sha256 || null,
-      licence.generated_pdf_sha256 || null,
-      licence.rendered_licence_sha256 || null,
-      null,
-      null,
-      null,
-      licence.licence_terms_version || null,
-      null,
-      licence.licence_terms_version,
-      success ? 1 : 0,
-      failureText
+    await env.RELAYHUB_DB.prepare(
+      `INSERT INTO document_download_events (
+         id,
+         download_id,
+         licence_id,
+         licence_number,
+         document_id,
+         document_version,
+         licence_holder_name,
+         organisation_name,
+         licence_holder_email,
+         event_type,
+         event_at,
+         ip_hash,
+         user_agent,
+         generated_object,
+         source_object,
+         source_sha256,
+         generated_sha256,
+         template_sha256,
+         licence_page_template_version,
+         watermark_template_version,
+         footer_template_version,
+         terms_template_version,
+         generation_engine_version,
+         terms_version,
+         success,
+         failure_reason
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run();
+      .bind(
+        buildId("dde"),
+        downloadId,
+        licence.id,
+        licence.licence_number,
+        licence.document_id,
+        licence.document_version,
+        licence.licence_holder_name || null,
+        licence.organisation_name || null,
+        licence.licence_holder_email_normalised || licence.licence_holder_email,
+        eventType,
+        nowIso(),
+        ipHash,
+        getUserAgent(request),
+        licence.generated_pdf_object_key || null,
+        licence.source_object || null,
+        licence.source_sha256 || null,
+        licence.generated_pdf_sha256 || null,
+        licence.rendered_licence_sha256 || null,
+        null,
+        null,
+        null,
+        licence.licence_terms_version || null,
+        null,
+        licence.licence_terms_version,
+        success ? 1 : 0,
+        failureText
+      )
+      .run();
+  } catch {
+    /*
+     * Download-link creation must not fail merely because the legacy event table
+     * is unavailable or has drifted. The link record itself remains the source
+     * of truth for this phase.
+     */
+  }
 }
 
 export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
@@ -296,7 +222,7 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
       {
         ok: false,
         error: "method_not_allowed",
-        message: "Use POST to reserve a CDAS download link.",
+        message: "Use POST to create a controlled CDAS download link.",
       },
       405
     );
@@ -315,6 +241,7 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
     );
   }
 
+  const body = await readOptionalJson(request);
   const licence = await getLicence(env, ref);
 
   if (!licence) {
@@ -328,32 +255,29 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
     );
   }
 
-  const readiness = evaluateLicenceForReservedDownloadLink(licence);
+  const eligibility = await evaluateCdasGeneratedPdfToDownloadLinkEligibility(
+    env,
+    licence.id
+  );
 
-  if (readiness.blockers.length) {
+  if (!eligibility.eligible) {
     return jsonResponse(
       {
         ok: false,
-        error: "download_link_reservation_blocked",
+        error: "download_link_creation_blocked",
         message:
-          "Download link was not reserved because one or more blockers were found.",
-        blockers: readiness.blockers,
-        warnings: readiness.warnings,
-        licence: {
-          id: licence.id,
-          licence_number: licence.licence_number,
-          status: licence.status,
-          document_id: licence.document_id,
-          document_version: licence.document_version,
-          generated_pdf_status: licence.generated_pdf_status || null,
-        },
-        controls: {
-          reserves_download_link_record: false,
-          requires_generated_pdf_before_reservation: false,
-          stores_raw_token: false,
-          writes_to_r2: false,
-          serves_download: false,
-          public_access: false,
+          "Controlled download link was not created because the generated-PDF-to-download-link gate did not pass.",
+        licence_id: licence.id,
+        licence_number: licence.licence_number,
+        decision: eligibility.decision,
+        blockers: eligibility.blockers,
+        warnings: eligibility.warnings,
+        counts: eligibility.counts,
+        safety: {
+          download_link_created: false,
+          download_link_activated: false,
+          email_sent: false,
+          pdf_served: false,
         },
       },
       409
@@ -361,7 +285,7 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
   }
 
   const createdAt = nowIso();
-  const expiresAt = addDaysIso(7);
+  const expiresAt = addDaysIso(body.expires_in_days ?? 7);
   const downloadId = buildId("ddl");
   const downloadReference = await makeUniqueDownloadReference(env);
   const rawToken = `rh_dl_${randomHex(32)}`;
@@ -375,11 +299,14 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
   const ipHash = ip ? await sha256HexFromText(ip) : null;
   const userAgent = getUserAgent(request);
 
-  const supersededCount = await supersedePreviousUnusedLinks(
-    env,
-    licence.id,
-    createdAt
-  );
+  /*
+   * Phase 3X-0N creates the link record only.
+   *
+   * It intentionally uses pending_activation rather than created or active,
+   * because the current public download handlers treat created/active as
+   * downloadable states. Activation belongs to a later validation-gated phase.
+   */
+  const linkStatus = "pending_activation";
 
   await env.RELAYHUB_DB.prepare(
     `INSERT INTO document_download_links (
@@ -405,13 +332,13 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
      )
      VALUES (
        ?, ?, ?, ?,
-       'pending_generation',
+       ?,
        ?, ?,
        NULL, NULL, NULL,
        ?, ?, NULL,
        ?,
        NULL,
-       NULL, NULL, NULL, NULL
+       ?, ?, ?, ?
      )`
   )
     .bind(
@@ -419,11 +346,16 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
       licence.id,
       licence.document_id,
       tokenHash,
+      linkStatus,
       createdAt,
       expiresAt,
       ipHash,
       userAgent,
-      downloadReference
+      downloadReference,
+      licence.generated_pdf_object_key,
+      licence.generated_pdf_sha256,
+      licence.generated_pdf_size_bytes,
+      licence.generated_pdf_created_at
     )
     .run();
 
@@ -433,41 +365,26 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
     licence,
     downloadId,
     downloadReference,
-    eventType: "download_link_reserved",
+    eventType: "download_link_created_pending_activation",
     success: 1,
-    failureReason: null,
+    failureReason: cleanText(body.note || "3X-0N controlled link creation"),
   });
 
   return jsonResponse({
     ok: true,
-    reserved: true,
-    issued: false,
+    created: true,
+    activated: false,
+    emailed: false,
+    served: false,
+    action: "create_controlled_download_link",
     download_link: {
       id: downloadId,
       download_reference: downloadReference,
-      status: "pending_generation",
-
-      /*
-       * Default share URL.
-       *
-       * This is intentionally the recipient landing page, not the raw download
-       * API endpoint. Opening this URL does not consume the link. The link is
-       * consumed only when the recipient presses the final download button.
-       *
-       * During pending_generation, the URL must not serve a downloadable PDF.
-       */
+      status: linkStatus,
       url: landingUrl,
       landing_url: landingUrl,
-
-      /*
-       * Validation/support URLs.
-       *
-       * These are returned so the admin system can validate the full flow, but
-       * the UI should copy/share landing_url by default only after activation.
-       */
       api_download_url: apiDownloadUrl,
       metadata_url: metadataUrl,
-
       token_visible_once: true,
       expires_at: expiresAt,
       single_use_by_schema: true,
@@ -484,42 +401,44 @@ export async function issueCdasDownloadLink(request, env, licenceIdOrNumber) {
         licence.licence_holder_email_normalised || licence.licence_holder_email,
       issued_at: licence.issued_at,
       licence_terms_version: licence.licence_terms_version,
-      generated_pdf_status: licence.generated_pdf_status || null,
-      generated_pdf_object_key: licence.generated_pdf_object_key || null,
-      generated_pdf_sha256: licence.generated_pdf_sha256 || null,
-      generated_pdf_size_bytes: licence.generated_pdf_size_bytes || null,
+      generated_pdf_status: licence.generated_pdf_status,
+      generated_pdf_object_key: licence.generated_pdf_object_key,
+      generated_pdf_sha256: licence.generated_pdf_sha256,
+      generated_pdf_size_bytes: licence.generated_pdf_size_bytes,
+      generated_pdf_created_at: licence.generated_pdf_created_at,
     },
-    superseded_previous_links: supersededCount,
-    warnings: readiness.warnings,
+    warnings: eligibility.warnings || [],
     controls: {
-      verifies_licence_active: true,
-      verifies_licence_evidence: true,
-      requires_generated_pdf_before_reservation: false,
-      reserves_download_link_record: true,
-      status_is_pending_generation: true,
+      evaluates_generated_pdf_to_download_link_gate: true,
+      creates_download_link_record: true,
+      copies_generated_pdf_evidence_to_link: true,
+      status_is_pending_activation: true,
       creates_active_download_link: false,
+      activates_download_link: false,
       stores_raw_token: false,
       stores_token_hash: true,
       returns_token_once: true,
       default_share_url_is_landing_page: true,
       landing_page_does_not_consume_link: true,
-      pending_generation_link_is_not_downloadable: true,
-      api_download_url_returned_for_validation: true,
-      metadata_url_returned_for_validation: true,
-      supersedes_previous_unused_links: true,
+      pending_activation_link_is_not_downloadable: true,
       writes_to_r2: false,
+      sends_email: false,
       serves_download: false,
       public_access: false,
     },
     next_step: {
-      action: "generate_pdf_with_download_reference",
-      endpoint: `/api/admin/cdas/licences/${encodeURIComponent(
-        licence.id
-      )}/generate-pdf`,
+      action: "activate_controlled_download_link",
+      phase: "3X-0O",
       required_download_link_id: downloadId,
       required_download_reference: downloadReference,
     },
+    safety: {
+      download_link_created: true,
+      download_link_activated: false,
+      email_sent: false,
+      pdf_served: false,
+    },
     message:
-      "Controlled download link was reserved in pending_generation state. It is not downloadable until the generated PDF has been created and the link has been activated.",
+      "Controlled download link record was created in pending_activation state. It is not active, not emailed, and not downloadable yet.",
   });
 }

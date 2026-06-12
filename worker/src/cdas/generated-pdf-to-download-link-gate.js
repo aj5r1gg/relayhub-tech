@@ -76,12 +76,13 @@ async function getDownloadLinkCounts(env, licenceId) {
        COUNT(*) AS total,
        SUM(CASE WHEN status = 'created' THEN 1 ELSE 0 END) AS created_count,
        SUM(CASE WHEN status = 'pending_generation' THEN 1 ELSE 0 END) AS pending_generation_count,
+       SUM(CASE WHEN status = 'pending_activation' THEN 1 ELSE 0 END) AS pending_activation_count,
        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_count,
        SUM(CASE WHEN status = 'used' THEN 1 ELSE 0 END) AS used_count,
        SUM(CASE WHEN status = 'revoked' THEN 1 ELSE 0 END) AS revoked_count,
        SUM(CASE WHEN status = 'superseded' THEN 1 ELSE 0 END) AS superseded_count,
        SUM(CASE
-         WHEN status IN ('created', 'pending_generation', 'active')
+         WHEN status IN ('created', 'pending_generation', 'pending_activation', 'active')
           AND used_at IS NULL
           AND revoked_at IS NULL
           AND superseded_at IS NULL
@@ -97,6 +98,7 @@ async function getDownloadLinkCounts(env, licenceId) {
     total: numberValue(rows?.total),
     created: numberValue(rows?.created_count),
     pending_generation: numberValue(rows?.pending_generation_count),
+    pending_activation: numberValue(rows?.pending_activation_count),
     active: numberValue(rows?.active_count),
     used: numberValue(rows?.used_count),
     revoked: numberValue(rows?.revoked_count),
@@ -339,6 +341,7 @@ export async function evaluateCdasGeneratedPdfToDownloadLinkEligibility(
       download_links_total: downloadLinkCounts.total,
       download_links_created: downloadLinkCounts.created,
       download_links_pending_generation: downloadLinkCounts.pending_generation,
+      download_links_pending_activation: downloadLinkCounts.pending_activation,
       download_links_active: downloadLinkCounts.active,
       download_links_used: downloadLinkCounts.used,
       download_links_revoked: downloadLinkCounts.revoked,
