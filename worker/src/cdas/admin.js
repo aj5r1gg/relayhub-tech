@@ -81,6 +81,9 @@ import {
 import { getCdasHealth } from "./health.js";
 import { handleCdasOperationsJson } from "./operations.js";
 import {
+  getCdasReviewToLicenceEligibility,
+} from "./review-to-licence-gate.js";
+import {
   handleCdasRequestIntakeEvaluation,
 } from "./request-intake-policy.js";
 
@@ -278,6 +281,19 @@ export async function handleCdasAdminRequest(request, env) {
    */
   if (pathname === "/api/admin/cdas/access-requests") {
     return listCdasAccessRequests(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/access-requests/") &&
+    pathname.endsWith("/licence-eligibility")
+  ) {
+    const requestId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/access-requests/",
+      "/licence-eligibility"
+    );
+
+    return getCdasReviewToLicenceEligibility(request, env, requestId);
   }
 
   if (
