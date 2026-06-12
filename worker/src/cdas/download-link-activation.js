@@ -471,8 +471,16 @@ export async function evaluateCdasDownloadLinkActivationEligibility(
           status: licence.status,
           document_id: licence.document_id,
           document_version: licence.document_version,
+          licence_holder_name: licence.licence_holder_name || null,
+          organisation_name: licence.organisation_name || null,
+          licence_holder_email:
+            licence.licence_holder_email_normalised || licence.licence_holder_email,
           licence_holder_email_normalised:
             licence.licence_holder_email_normalised || licence.licence_holder_email,
+          licence_terms_version: licence.licence_terms_version,
+          source_object: licence.source_object || null,
+          source_sha256: licence.source_sha256 || null,
+          rendered_licence_sha256: licence.rendered_licence_sha256 || null,
           generated_pdf_status: licence.generated_pdf_status,
           generated_pdf_object_key: licence.generated_pdf_object_key,
           generated_pdf_sha256: licence.generated_pdf_sha256,
