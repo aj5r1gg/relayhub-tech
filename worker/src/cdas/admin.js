@@ -84,6 +84,9 @@ import {
   getCdasReviewToLicenceEligibility,
 } from "./review-to-licence-gate.js";
 import {
+  issueCdasReviewedRequestLicence,
+} from "./issue-reviewed-licence.js";
+import {
   handleCdasRequestIntakeEvaluation,
 } from "./request-intake-policy.js";
 
@@ -281,6 +284,19 @@ export async function handleCdasAdminRequest(request, env) {
    */
   if (pathname === "/api/admin/cdas/access-requests") {
     return listCdasAccessRequests(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/access-requests/") &&
+    pathname.endsWith("/issue-licence")
+  ) {
+    const requestId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/access-requests/",
+      "/issue-licence"
+    );
+
+    return issueCdasReviewedRequestLicence(request, env, requestId);
   }
 
   if (

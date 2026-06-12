@@ -217,25 +217,11 @@ function evaluateGate({
   if (!document) {
     blockers.push("document_not_found_for_request_version");
   } else {
-    if (document.status !== "active") {
-      blockers.push("document_not_active");
-    }
-
-    if (document.version !== accessRequest.document_version) {
-      blockers.push("document_version_mismatch");
-    }
-
-    if (!document.licence_terms_version) {
-      blockers.push("document_missing_licence_terms_version");
-    }
-
-    if (!document.source_object) {
-      blockers.push("document_missing_source_object");
-    }
-
-    if (!document.source_sha256) {
-      blockers.push("document_missing_source_sha256");
-    }
+    if (document.status !== "active") blockers.push("document_not_active");
+    if (document.version !== accessRequest.document_version) blockers.push("document_version_mismatch");
+    if (!document.licence_terms_version) blockers.push("document_missing_licence_terms_version");
+    if (!document.source_object) blockers.push("document_missing_source_object");
+    if (!document.source_sha256) blockers.push("document_missing_source_sha256");
   }
 
   if (!releasePolicy) {
@@ -250,9 +236,7 @@ function evaluateGate({
     }
 
     if (releasePolicy.licence_terms_status !== "active") {
-      blockers.push(
-        `licence_terms_status_${releasePolicy.licence_terms_status || "missing"}`,
-      );
+      blockers.push(`licence_terms_status_${releasePolicy.licence_terms_status || "missing"}`);
     }
 
     if (boolValue(releasePolicy.email_verification_required) && !accessRequest.email_verified_at) {
@@ -286,43 +270,33 @@ function evaluateGate({
   };
 }
 
-export async function getCdasReviewToLicenceEligibility(request, env, requestId) {
-  if (request.method !== "GET") {
-    return jsonResponse(
-      {
-        ok: false,
-        error: "method_not_allowed",
-        message: "Use GET to evaluate review-to-licence eligibility.",
-      },
-      { status: 405, headers: { allow: "GET" } },
-    );
-  }
-
+export async function evaluateCdasReviewToLicenceEligibility(env, requestId) {
   const id = cleanText(requestId);
-
-  if (!id) {
-    return jsonResponse(
-      {
-        ok: false,
-        error: "missing_request_id",
-        message: "Access request ID is required.",
-      },
-      { status: 400 },
-    );
-  }
-
   const accessRequest = await getAccessRequest(env, id);
 
   if (!accessRequest) {
-    return jsonResponse(
-      {
-        ok: false,
-        error: "access_request_not_found",
-        message: "CDAS access request was not found.",
-        request_id: id,
+    return {
+      ok: false,
+      eligible: false,
+      decision: "blocked",
+      request_id: id,
+      blockers: ["access_request_not_found"],
+      warnings: [],
+      request: null,
+      document: null,
+      release_policy: null,
+      latest_review_event: null,
+      counts: {
+        existing_licences_for_request: 0,
+        downstream_download_links_for_request: 0,
       },
-      { status: 404 },
-    );
+      safety: {
+        licence_created: false,
+        generated_pdf_created: false,
+        download_link_created: false,
+        email_sent: false,
+      },
+    };
   }
 
   const [document, releasePolicy, latestReviewEvent, existingLicenceCount, downstreamDownloadLinkCount] =
@@ -334,7 +308,7 @@ export async function getCdasReviewToLicenceEligibility(request, env, requestId)
       countDownloadLinksForRequest(env, id),
     ]);
 
-  const evaluation = evaluateGate({
+  const gate = evaluateGate({
     accessRequest,
     document,
     releasePolicy,
@@ -342,15 +316,15 @@ export async function getCdasReviewToLicenceEligibility(request, env, requestId)
     downstreamDownloadLinkCount,
   });
 
-  const eligible = evaluation.blockers.length === 0;
+  const eligible = gate.blockers.length === 0;
 
-  return jsonResponse({
+  return {
     ok: true,
     eligible,
     decision: eligible ? "eligible_for_licence_issue" : "blocked",
     request_id: id,
-    blockers: evaluation.blockers,
-    warnings: evaluation.warnings,
+    blockers: gate.blockers,
+    warnings: gate.warnings,
     counts: {
       existing_licences_for_request: existingLicenceCount,
       downstream_download_links_for_request: downstreamDownloadLinkCount,
@@ -366,5 +340,34 @@ export async function getCdasReviewToLicenceEligibility(request, env, requestId)
       download_link_created: false,
       email_sent: false,
     },
-  });
+  };
+}
+
+export async function getCdasReviewToLicenceEligibility(request, env, requestId) {
+  if (request.method !== "GET") {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "method_not_allowed",
+        message: "Use GET to evaluate review-to-licence eligibility.",
+      },
+      405,
+    );
+  }
+
+  const result = await evaluateCdasReviewToLicenceEligibility(env, requestId);
+
+  if (!result.request) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "access_request_not_found",
+        message: "CDAS access request was not found.",
+        request_id: cleanText(requestId),
+      },
+      404,
+    );
+  }
+
+  return jsonResponse(result);
 }
