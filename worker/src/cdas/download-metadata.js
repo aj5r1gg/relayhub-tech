@@ -23,7 +23,7 @@ function unavailableMetadataResponse(reason = "download_unavailable") {
       download_available: false,
       unavailable_reason: reason,
       message:
-        "This controlled download link is unavailable, expired, already used, revoked, or invalid.",
+        "This controlled download link is unavailable, expired, already used, revoked, superseded, invalid, or no longer authorised.",
       controls: {
         serves_download: false,
         consumes_link: false,
@@ -39,89 +39,62 @@ function unavailableMetadataResponse(reason = "download_unavailable") {
   );
 }
 
-function isDownloadableLinkStatus(status) {
-  return status === "active" || status === "created";
-}
+function isExpired(value, now = new Date()) {
+  const text = cleanText(value);
 
-function resolvedGeneratedObjectKey(record) {
-  return (
-    cleanText(record?.link_generated_pdf_object_key) ||
-    cleanText(record?.licence_generated_pdf_object_key) ||
-    cleanText(record?.generated_pdf_object_key)
-  );
-}
+  if (!text) return true;
 
-function resolvedGeneratedSha256(record) {
-  return (
-    cleanText(record?.link_generated_pdf_sha256) ||
-    cleanText(record?.licence_generated_pdf_sha256) ||
-    cleanText(record?.generated_pdf_sha256)
-  );
-}
+  const parsed = Date.parse(text);
 
-function resolvedGeneratedSizeBytes(record) {
-  return (
-    record?.link_generated_pdf_size_bytes ||
-    record?.licence_generated_pdf_size_bytes ||
-    record?.generated_pdf_size_bytes
-  );
+  if (!Number.isFinite(parsed)) return true;
+
+  return parsed <= now.getTime();
 }
 
 function publicUnavailableReason(record, now) {
-  if (!record) {
-    return "download_link_not_found";
-  }
+  if (!record) return "download_link_not_found";
 
-  if (!isDownloadableLinkStatus(record.link_status)) {
+  if (record.link_status !== "active") {
     if (record.link_status === "used") return "download_link_used";
     if (record.link_status === "revoked") return "download_link_revoked";
     if (record.link_status === "superseded") return "download_link_superseded";
-    if (record.link_status === "pending_generation") return "download_link_pending_generation";
-    if (record.link_status === "failed") return "download_link_failed";
+    if (record.link_status === "pending_activation") return "download_link_not_active";
 
     return "download_link_unavailable";
   }
 
-  if (record.link_used_at) {
-    return "download_link_used";
-  }
+  if (!record.link_activated_at) return "download_link_not_activated";
+  if (record.link_used_at) return "download_link_used";
+  if (record.link_revoked_at) return "download_link_revoked";
+  if (record.link_superseded_at) return "download_link_superseded";
+  if (!record.link_expires_at) return "download_link_missing_expiry";
+  if (isExpired(record.link_expires_at, now)) return "download_link_expired";
 
-  if (record.link_revoked_at) {
-    return "download_link_revoked";
-  }
+  if (record.licence_status !== "issued") return "licence_unavailable";
+  if (record.licence_revoked_at || record.confirmed_leak_at) return "licence_unavailable";
+  if (record.superseded_by) return "licence_superseded";
 
-  if (record.link_superseded_at) {
-    return "download_link_superseded";
-  }
-
-  if (!record.link_expires_at) {
-    return "download_link_missing_expiry";
-  }
-
-  if (new Date(record.link_expires_at).getTime() <= now.getTime()) {
-    return "download_link_expired";
-  }
-
-  if (record.licence_status !== "active") {
-    return "licence_unavailable";
-  }
-
-  if (record.licence_revoked_at || record.confirmed_leak_at) {
-    return "licence_unavailable";
-  }
-
-  if (record.generated_pdf_status !== "generated") {
-    return "generated_pdf_unavailable";
-  }
+  if (record.generated_pdf_status !== "generated") return "generated_pdf_unavailable";
 
   if (
-    !resolvedGeneratedObjectKey(record) ||
-    !resolvedGeneratedSha256(record) ||
-    !resolvedGeneratedSizeBytes(record) ||
-    record.generated_pdf_error
+    !record.link_generated_pdf_object_key ||
+    !record.link_generated_pdf_sha256 ||
+    !record.link_generated_pdf_size_bytes ||
+    !record.link_generated_pdf_created_at
   ) {
     return "generated_pdf_evidence_unavailable";
   }
+
+  if (
+    record.link_generated_pdf_object_key !== record.generated_pdf_object_key ||
+    record.link_generated_pdf_sha256 !== record.generated_pdf_sha256 ||
+    Number(record.link_generated_pdf_size_bytes || 0) !==
+      Number(record.generated_pdf_size_bytes || 0)
+  ) {
+    return "generated_pdf_evidence_mismatch";
+  }
+
+  if (record.generated_pdf_error) return "generated_pdf_error_present";
 
   return "";
 }
@@ -130,7 +103,6 @@ async function getMetadataRecord(env, tokenHash) {
   return await env.RELAYHUB_DB.prepare(
     `SELECT
        dl.id AS download_id,
-       dl.download_reference AS download_reference,
        dl.licence_id AS link_licence_id,
        dl.document_id AS link_document_id,
        dl.status AS link_status,
@@ -139,8 +111,8 @@ async function getMetadataRecord(env, tokenHash) {
        dl.used_at AS link_used_at,
        dl.revoked_at AS link_revoked_at,
        dl.superseded_at AS link_superseded_at,
+       dl.download_reference AS download_reference,
        dl.activated_at AS link_activated_at,
-
        dl.generated_pdf_object_key AS link_generated_pdf_object_key,
        dl.generated_pdf_sha256 AS link_generated_pdf_sha256,
        dl.generated_pdf_size_bytes AS link_generated_pdf_size_bytes,
@@ -153,6 +125,7 @@ async function getMetadataRecord(env, tokenHash) {
        lic.licence_terms_version AS licence_terms_version,
        lic.status AS licence_status,
        lic.revoked_at AS licence_revoked_at,
+       lic.superseded_by AS superseded_by,
        lic.suspected_leak_at AS suspected_leak_at,
        lic.confirmed_leak_at AS confirmed_leak_at,
        lic.licence_holder_name AS licence_holder_name,
@@ -160,11 +133,9 @@ async function getMetadataRecord(env, tokenHash) {
        lic.licence_holder_email_normalised AS licence_holder_email_normalised,
 
        lic.generated_pdf_status AS generated_pdf_status,
-       lic.generated_pdf_object_key AS licence_generated_pdf_object_key,
-       lic.generated_pdf_sha256 AS licence_generated_pdf_sha256,
-       lic.generated_pdf_size_bytes AS licence_generated_pdf_size_bytes,
-       lic.generated_pdf_content_type AS licence_generated_pdf_content_type,
-       lic.generated_pdf_created_at AS licence_generated_pdf_created_at,
+       lic.generated_pdf_object_key AS generated_pdf_object_key,
+       lic.generated_pdf_sha256 AS generated_pdf_sha256,
+       lic.generated_pdf_size_bytes AS generated_pdf_size_bytes,
        lic.generated_pdf_error AS generated_pdf_error,
 
        doc.title AS document_title,
@@ -177,6 +148,7 @@ async function getMetadataRecord(env, tokenHash) {
        ON lic.id = dl.licence_id
      LEFT JOIN documents doc
        ON doc.id = lic.document_id
+      AND doc.version = lic.document_version
      WHERE dl.token_hash = ?
      LIMIT 1`
   )
@@ -234,10 +206,10 @@ export async function handleCdasDocumentDownloadMetadata(request, env, token) {
     },
     download_link: {
       id: record.download_id,
-      download_reference: record.download_reference || null,
+      reference: record.download_reference || null,
       status: record.link_status,
       created_at: record.link_created_at,
-      activated_at: record.link_activated_at || null,
+      activated_at: record.link_activated_at,
       expires_at: record.link_expires_at,
       used_at: record.link_used_at,
       revoked_at: record.link_revoked_at,
@@ -246,19 +218,10 @@ export async function handleCdasDocumentDownloadMetadata(request, env, token) {
     },
     generated_pdf: {
       status: record.generated_pdf_status,
-      object_key_bound_to_link: Boolean(record.link_generated_pdf_object_key),
-      size_bytes: Number(resolvedGeneratedSizeBytes(record) || 0),
-      sha256_present: Boolean(resolvedGeneratedSha256(record)),
-      created_at:
-        record.link_generated_pdf_created_at ||
-        record.licence_generated_pdf_created_at ||
-        null,
+      size_bytes: Number(record.link_generated_pdf_size_bytes || 0),
+      sha256_present: Boolean(record.link_generated_pdf_sha256),
     },
     controls: {
-      accepts_active_download_links: true,
-      accepts_legacy_created_download_links: true,
-      prefers_link_bound_generated_pdf_evidence: true,
-      falls_back_to_licence_generated_pdf_evidence: true,
       serves_download: false,
       consumes_link: false,
       mutates_database: false,
