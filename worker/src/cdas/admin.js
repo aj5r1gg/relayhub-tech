@@ -48,6 +48,10 @@ import {
   issueCdasDownloadLink,
 } from "./download-link-issue.js";
 import {
+  activateCdasDownloadLink,
+  getCdasDownloadLinkActivationEligibility,
+} from "./download-link-activation.js";
+import {
   emailCdasDownloadLink,
 } from "./email-download-link.js";
 import {
@@ -356,6 +360,41 @@ export async function handleCdasAdminRequest(request, env) {
   /*
    * CDAS controlled download-link registry.
    */
+  /*
+   * CDAS Phase 3X-0O — controlled download-link activation gate/action.
+   *
+   * Activation only. No email and no PDF serving.
+   */
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/activation-eligibility")
+  ) {
+    const downloadLinkIdOrReference = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/activation-eligibility"
+    );
+
+    return getCdasDownloadLinkActivationEligibility(
+      request,
+      env,
+      downloadLinkIdOrReference
+    );
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/activate")
+  ) {
+    const downloadLinkIdOrReference = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/activate"
+    );
+
+    return activateCdasDownloadLink(request, env, downloadLinkIdOrReference);
+  }
+
   if (pathname === "/api/admin/cdas/download-links") {
     return listCdasDownloadLinks(request, env);
   }
@@ -560,11 +599,6 @@ export async function handleCdasAdminRequest(request, env) {
     return reissueCdasDownloadLink(request, env, licenceIdOrNumber);
   }
 
-  /*
-   * CDAS Phase 3X-0M — generated-PDF-to-download-link eligibility gate.
-   *
-   * Read-only. No download link creation, no activation, no email, no PDF serving.
-   */
   if (
     pathname.startsWith("/api/admin/cdas/licences/") &&
     pathname.endsWith("/download-link-eligibility")
