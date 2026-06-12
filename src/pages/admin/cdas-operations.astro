@@ -15,8 +15,8 @@ const description =
       <p>
         Single-pane operational view for document access, email delivery,
         licence issue, download links, workflow backlog, and evidence integrity.
-        This page includes safe manual review controls. It does not issue
-        licences, generate PDFs, or create download links.
+        This page includes guarded workflow controls for the proven CDAS
+        lifecycle. Each state transition remains explicit and validation-gated.
       </p>
     </section>
 
@@ -130,7 +130,7 @@ const description =
         <div id="pendingRequests"></div>
       </article>
 
-      <article class="rh-admin-card">
+      <article class="rh-admin-card rh-operations-wide-card">
         <div class="rh-card-heading">
           <p class="rh-eyebrow">Licences</p>
           <h2>Recent Licences</h2>
@@ -138,7 +138,7 @@ const description =
         <div id="recentLicences"></div>
       </article>
 
-      <article class="rh-admin-card">
+      <article class="rh-admin-card rh-operations-wide-card">
         <div class="rh-card-heading">
           <p class="rh-eyebrow">Downloads</p>
           <h2>Recent Downloads</h2>
@@ -640,6 +640,13 @@ const description =
       color: #991b1b;
     }
 
+    .rh-mini-button-warning {
+      border-color: rgba(217, 119, 6, 0.28);
+      background: rgba(255, 251, 235, 0.95);
+      color: #92400e;
+    }
+
+
     .rh-muted {
       margin: 0;
       color: rgba(15, 23, 42, 0.62);
@@ -1028,6 +1035,316 @@ const description =
       }
     }
 
+
+    function licenceWorkflowButtons(row) {
+      const licenceId = escapeHtml(row.id || "");
+      const linkId = escapeHtml(row.latest_download_link_id || "");
+      const pdfStatus = String(row.generated_pdf_status || "");
+      const linkStatus = String(row.latest_download_link_status || "");
+
+      const licenceLink = `<a class="rh-table-action" href="${escapeHtml(
+        adminUrl("/admin/cdas-licences/", {
+          id: row.id,
+          licence_number: row.licence_number,
+        }),
+      )}">Open Licence</a>`;
+
+      const downloadLinksLink = `<a class="rh-table-action" href="${escapeHtml(
+        adminUrl("/admin/cdas-download-links/", {
+          id: row.latest_download_link_id || "",
+          licence_number: row.licence_number,
+        }),
+      )}">Open Links</a>`;
+
+      const checkPdf = `<button class="rh-mini-button" type="button" data-cdas-workflow-action="check-pdf" data-licence-id="${licenceId}">Check PDF</button>`;
+      const generatePdf = `<button class="rh-mini-button rh-mini-button-success" type="button" data-cdas-workflow-action="generate-pdf" data-licence-id="${licenceId}">Generate PDF</button>`;
+      const checkLink = `<button class="rh-mini-button" type="button" data-cdas-workflow-action="check-link" data-licence-id="${licenceId}">Check Link</button>`;
+      const createLink = `<button class="rh-mini-button rh-mini-button-success" type="button" data-cdas-workflow-action="create-link" data-licence-id="${licenceId}">Create Link</button>`;
+
+      const checkActivation = linkId
+        ? `<button class="rh-mini-button" type="button" data-cdas-workflow-action="check-activation" data-download-link-id="${linkId}">Check Activation</button>`
+        : "";
+
+      const activateLink = linkId
+        ? `<button class="rh-mini-button rh-mini-button-success" type="button" data-cdas-workflow-action="activate-link" data-download-link-id="${linkId}">Activate Link</button>`
+        : "";
+
+      const prepareDelivery = linkId
+        ? `<button class="rh-mini-button rh-mini-button-warning" type="button" data-cdas-workflow-action="prepare-delivery" data-download-link-id="${linkId}">Prepare Delivery</button>`
+        : "";
+
+      const sendEmail = linkId
+        ? `<button class="rh-mini-button rh-mini-button-warning" type="button" data-cdas-workflow-action="send-email" data-download-link-id="${linkId}">Send Email</button>`
+        : "";
+
+      const pdfButtons = pdfStatus === "generated"
+        ? `${checkPdf}`
+        : `${checkPdf}${generatePdf}`;
+
+      const linkButtons = pdfStatus === "generated" && !linkId
+        ? `${checkLink}${createLink}`
+        : pdfStatus === "generated"
+          ? `${checkLink}`
+          : "";
+
+      const activationButtons = linkStatus === "pending_activation"
+        ? `${checkActivation}${activateLink}`
+        : linkId
+          ? checkActivation
+          : "";
+
+      const deliveryButtons = linkStatus === "active"
+        ? `${prepareDelivery}${sendEmail}`
+        : "";
+
+      const consumedNote = linkStatus === "used"
+        ? `<span class="rh-request-action-label">Consumed</span>`
+        : "";
+
+      return `
+        <div class="rh-request-action-row-inner">
+          <span class="rh-request-action-label">Workflow</span>
+          ${licenceLink}
+          ${downloadLinksLink}
+          <span class="rh-request-action-label">PDF</span>
+          ${pdfButtons}
+          <span class="rh-request-action-label">Link</span>
+          ${linkButtons}
+          ${activationButtons}
+          ${deliveryButtons}
+          ${consumedNote}
+        </div>
+      `;
+    }
+
+    async function workflowFetch(path, options = {}) {
+      const token = getAdminToken();
+
+      if (!token) {
+        throw new Error("Admin token is required before workflow actions can be submitted.");
+      }
+
+      const response = await fetch(path, {
+        method: options.method || "GET",
+        headers: {
+          accept: "application/json",
+          authorization: `Bearer ${token}`,
+          ...(options.body ? { "content-type": "application/json" } : {}),
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        const blockers = Array.isArray(data.blockers) && data.blockers.length
+          ? ` Blockers: ${data.blockers.join(", ")}.`
+          : "";
+
+        throw new Error(
+          `${data.message || data.error || `Workflow action failed with ${response.status}`}.${blockers}`,
+        );
+      }
+
+      return data;
+    }
+
+    function promptLandingUrl() {
+      return window.prompt(
+        "Paste the one-time landing URL or raw rh_dl_ token. It is not stored in D1 and cannot be recovered by the Operations Centre.",
+        "",
+      );
+    }
+
+    async function handleCdasWorkflowAction(action, button) {
+      const licenceId = button.getAttribute("data-licence-id") || "";
+      const downloadLinkId = button.getAttribute("data-download-link-id") || "";
+
+      try {
+        if (action === "check-pdf") {
+          setReviewActionResult("loading", `Checking PDF eligibility for ${licenceId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/pdf-eligibility`,
+          );
+
+          setReviewActionResult(
+            data.eligible ? "success" : "info",
+            data.eligible
+              ? `PDF generation is eligible for ${data.licence_number || licenceId}.`
+              : `PDF generation is blocked. Blockers: ${(data.blockers || []).join(", ") || "none reported"}.`,
+          );
+          return;
+        }
+
+        if (action === "generate-pdf") {
+          const note = window.prompt(
+            "Generate personalised PDF note:",
+            "Operations Centre: generate personalised PDF only. Do not create a download link, send email, or serve PDF.",
+          );
+          if (note === null) return;
+
+          setReviewActionResult("loading", `Generating personalised PDF for ${licenceId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/generate-pdf`,
+            {
+              method: "POST",
+              body: { actor: "operations-centre", note },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `PDF generated for ${data.licence?.licence_number || licenceId}. No link or email was created.`,
+          );
+          await loadOperations();
+          return;
+        }
+
+        if (action === "check-link") {
+          setReviewActionResult("loading", `Checking download-link eligibility for ${licenceId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/download-link-eligibility`,
+          );
+
+          setReviewActionResult(
+            data.eligible ? "success" : "info",
+            data.eligible
+              ? `Download-link creation is eligible for ${data.licence_number || licenceId}.`
+              : `Download-link creation is blocked. Blockers: ${(data.blockers || []).join(", ") || "none reported"}.`,
+          );
+          return;
+        }
+
+        if (action === "create-link") {
+          const daysRaw = window.prompt("Link expiry in days:", "7");
+          if (daysRaw === null) return;
+
+          const expiresInDays = Number(daysRaw || 7);
+
+          setReviewActionResult("loading", `Creating controlled download link for ${licenceId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/issue-download-link`,
+            {
+              method: "POST",
+              body: {
+                actor: "operations-centre",
+                note: "Operations Centre: create controlled link only. Do not activate, email, or serve PDF.",
+                expires_in_days: Number.isFinite(expiresInDays) ? expiresInDays : 7,
+              },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `Controlled link created in ${data.download_link?.status}. Copy this one-time URL now: ${data.download_link?.landing_url || data.download_link?.url || "not returned"}`,
+          );
+          await loadOperations();
+          return;
+        }
+
+        if (action === "check-activation") {
+          setReviewActionResult("loading", `Checking activation eligibility for ${downloadLinkId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/activation-eligibility`,
+          );
+
+          setReviewActionResult(
+            data.eligible ? "success" : "info",
+            data.eligible
+              ? `Download link ${data.download_reference || downloadLinkId} can be activated.`
+              : `Activation is blocked. Blockers: ${(data.blockers || []).join(", ") || "none reported"}.`,
+          );
+          return;
+        }
+
+        if (action === "activate-link") {
+          const note = window.prompt(
+            "Activation note:",
+            "Operations Centre: activate existing controlled download link only. Do not email or serve PDF.",
+          );
+          if (note === null) return;
+
+          setReviewActionResult("loading", `Activating download link ${downloadLinkId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/activate`,
+            {
+              method: "POST",
+              body: { actor: "operations-centre", note },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `Download link ${data.download_link?.download_reference || downloadLinkId} activated. No email was sent.`,
+          );
+          await loadOperations();
+          return;
+        }
+
+        if (action === "prepare-delivery") {
+          const landingUrl = promptLandingUrl();
+          if (landingUrl === null) return;
+
+          setReviewActionResult("loading", `Preparing delivery payload for ${downloadLinkId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/prepare-delivery`,
+            {
+              method: "POST",
+              body: {
+                actor: "operations-centre",
+                note: "Operations Centre: prepare delivery payload only. Do not email or serve PDF.",
+                landing_url: landingUrl,
+              },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `Delivery payload prepared for ${data.delivery_payload?.to || "recipient"}. No email was sent.`,
+          );
+          return;
+        }
+
+        if (action === "send-email") {
+          const landingUrl = promptLandingUrl();
+          if (landingUrl === null) return;
+
+          const confirmed = window.confirm(
+            "Send the controlled delivery email now? This will not serve the PDF or consume the link.",
+          );
+
+          if (!confirmed) {
+            setReviewActionResult("info", "Email send cancelled.");
+            return;
+          }
+
+          setReviewActionResult("loading", `Sending delivery email for ${downloadLinkId}…`);
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/send-delivery-email`,
+            {
+              method: "POST",
+              body: {
+                actor: "operations-centre",
+                note: "Operations Centre: send controlled delivery email only. Do not serve PDF or consume link.",
+                landing_url: landingUrl,
+              },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `Delivery email sent via ${data.email_result?.provider || "provider"}: ${data.email_result?.provider_message_id || "message id not returned"}.`,
+          );
+          await loadOperations();
+          return;
+        }
+
+        setReviewActionResult("error", `Unknown workflow action: ${action}`);
+      } catch (error) {
+        setReviewActionResult("error", error?.message || "Workflow action failed.");
+      }
+    }
+
     function table(targetId, rows, columns, emptyText, options = {}) {
       const target = document.getElementById(targetId);
       if (!target) return;
@@ -1323,7 +1640,19 @@ const description =
             },
             { key: "document_id", label: "Document" },
             { key: "document_version", label: "Version" },
-            { key: "status", label: "Status" },
+            { key: "status", label: "Licence" },
+            {
+              key: "generated_pdf_status",
+              label: "PDF",
+              render: (row) => niceLabel(row.generated_pdf_status || "not_generated"),
+            },
+            {
+              key: "latest_download_link_status",
+              label: "Link",
+              render: (row) => row.latest_download_link_status
+                ? `${niceLabel(row.latest_download_link_status)} ${row.latest_download_reference ? `(${row.latest_download_reference})` : ""}`
+                : "No link",
+            },
             {
               key: "actions",
               label: "Actions",
@@ -1346,6 +1675,7 @@ const description =
                   {
                     label: "Links",
                     href: adminUrl("/admin/cdas-download-links/", {
+                      id: row.latest_download_link_id || "",
                       licence_number: row.licence_number,
                     }),
                   },
@@ -1353,6 +1683,10 @@ const description =
             },
           ],
           "No recent licences.",
+          {
+            pageSize: 8,
+            renderExpandedHtml: (row) => licenceWorkflowButtons(row),
+          },
         );
 
         table(
@@ -1439,6 +1773,17 @@ const description =
 
         loadOperations();
         return;
+      }
+
+      const workflowButton = event.target.closest("[data-cdas-workflow-action]");
+
+      if (workflowButton) {
+        const action = workflowButton.getAttribute("data-cdas-workflow-action");
+
+        if (action) {
+          handleCdasWorkflowAction(action, workflowButton);
+          return;
+        }
       }
 
       const licenceButton = event.target.closest("[data-licence-action][data-request-id]");

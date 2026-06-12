@@ -319,13 +319,13 @@ export async function handleCdasOperationsJson(request, env) {
         [weekIso],
       ),
     ),
-    active: numberValue(
+    issued: numberValue(
       await first(
         db,
         `
           SELECT COUNT(*) AS total
           FROM document_licences
-          WHERE status = 'active'
+          WHERE status = 'issued'
         `,
       ),
     ),
@@ -360,7 +360,7 @@ export async function handleCdasOperationsJson(request, env) {
         `
           SELECT COUNT(*) AS total
           FROM document_download_links
-          WHERE status IN ('created', 'sent', 'active')
+          WHERE status IN ('created', 'pending_generation', 'pending_activation', 'sent', 'active')
             AND revoked_at IS NULL
             AND used_at IS NULL
             AND expires_at > ?
@@ -549,17 +549,80 @@ export async function handleCdasOperationsJson(request, env) {
       db,
       `
         SELECT
-          id,
-          licence_number,
-          document_id,
-          document_version,
-          licence_holder_name,
-          organisation_name,
-          status,
-          issued_at
-        FROM document_licences
-        ORDER BY issued_at DESC
-        LIMIT 10
+          l.id,
+          l.licence_number,
+          l.document_id,
+          l.document_version,
+          l.licence_holder_name,
+          l.organisation_name,
+          l.licence_holder_email_normalised,
+          l.status,
+          l.issued_at,
+          l.generated_pdf_status,
+          l.generated_pdf_object_key,
+          l.generated_pdf_sha256,
+          l.generated_pdf_size_bytes,
+          l.generated_pdf_created_at,
+
+          (
+            SELECT dl.id
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_id,
+
+          (
+            SELECT dl.status
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_status,
+
+          (
+            SELECT dl.download_reference
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_reference,
+
+          (
+            SELECT dl.created_at
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_created_at,
+
+          (
+            SELECT dl.activated_at
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_activated_at,
+
+          (
+            SELECT dl.used_at
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_used_at,
+
+          (
+            SELECT dl.expires_at
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_expires_at
+
+        FROM document_licences l
+        ORDER BY l.issued_at DESC
+        LIMIT 20
       `,
     ),
     recent_downloads: await all(
