@@ -87,6 +87,9 @@ import {
   issueCdasReviewedRequestLicence,
 } from "./issue-reviewed-licence.js";
 import {
+  getCdasLicenceToPdfEligibility,
+} from "./licence-to-pdf-gate.js";
+import {
   handleCdasRequestIntakeEvaluation,
 } from "./request-intake-policy.js";
 
@@ -383,6 +386,19 @@ export async function handleCdasAdminRequest(request, env) {
    * Specific subroutes must appear before the generic
    * /api/admin/cdas/licences/:id route.
    */
+  if (
+    pathname.startsWith("/api/admin/cdas/licences/") &&
+    pathname.endsWith("/pdf-eligibility")
+  ) {
+    const licenceId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/licences/",
+      "/pdf-eligibility"
+    );
+
+    return getCdasLicenceToPdfEligibility(request, env, licenceId);
+  }
+
   if (pathname === "/api/admin/cdas/licences") {
     return listCdasLicences(request, env);
   }
