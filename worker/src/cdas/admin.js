@@ -69,6 +69,7 @@ import {
   getCdasDownloadLink,
 } from "./download-links.js";
 import {
+  getCdasDownloadLinkRevocationEligibility,
   revokeCdasDownloadLink,
 } from "./download-link-revoke.js";
 import {
@@ -465,6 +466,19 @@ export async function handleCdasAdminRequest(request, env) {
 
   if (pathname === "/api/admin/cdas/download-links") {
     return listCdasDownloadLinks(request, env);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/revocation-eligibility")
+  ) {
+    const downloadId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/revocation-eligibility"
+    );
+
+    return getCdasDownloadLinkRevocationEligibility(request, env, downloadId);
   }
 
   if (
