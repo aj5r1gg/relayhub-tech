@@ -82,20 +82,19 @@ function classifyOperationsStatus({ health, email, workflow, integrity, queryFai
   if (
     integrity.download_links_without_licence > 0 ||
     integrity.download_events_without_licence > 0 ||
-    integrity.email_events_with_unknown_related_type > 0
+    integrity.email_events_without_related_record > 0
   ) {
     return "warning";
   }
 
-  if (email.unresolved_failed_events > 0 || email.retryable_events > 0) {
+  if (email.failed_events > 0 || email.retryable_events > 0) {
     return "attention";
   }
 
   if (
     workflow.pending_verification > 0 ||
     workflow.verified_unlicensed > 0 ||
-    workflow.generated_pdfs_without_links > 0 ||
-    email.failed_events > 0
+    workflow.generated_pdfs_without_links > 0
   ) {
     return "notice";
   }
@@ -228,57 +227,7 @@ export async function handleCdasOperationsJson(request, env) {
         `
           SELECT COUNT(*) AS total
           FROM document_access_requests
-          WHERE status = 'pending_approval'
-        `,
-      ),
-    ),
-    pending_review: numberValue(
-      await first(
-        db,
-        `
-          SELECT COUNT(*) AS total
-          FROM document_access_requests
-          WHERE status = 'pending_review'
-        `,
-      ),
-    ),
-    on_hold: numberValue(
-      await first(
-        db,
-        `
-          SELECT COUNT(*) AS total
-          FROM document_access_requests
-          WHERE status = 'on_hold'
-        `,
-      ),
-    ),
-    review_approved: numberValue(
-      await first(
-        db,
-        `
-          SELECT COUNT(*) AS total
-          FROM document_access_requests
-          WHERE status = 'review_approved'
-        `,
-      ),
-    ),
-    rejected: numberValue(
-      await first(
-        db,
-        `
-          SELECT COUNT(*) AS total
-          FROM document_access_requests
-          WHERE status = 'rejected'
-        `,
-      ),
-    ),
-    licence_issued: numberValue(
-      await first(
-        db,
-        `
-          SELECT COUNT(*) AS total
-          FROM document_access_requests
-          WHERE status = 'licence_issued'
+          WHERE status IN ('pending_approval', 'pending_review')
         `,
       ),
     ),
@@ -329,6 +278,16 @@ export async function handleCdasOperationsJson(request, env) {
         `,
       ),
     ),
+    active: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_licences
+          WHERE status IN ('issued', 'active')
+        `,
+      ),
+    ),
     revoked: numberValue(
       await first(
         db,
@@ -368,6 +327,35 @@ export async function handleCdasOperationsJson(request, env) {
         [now],
       ),
     ),
+    pending_activation_links: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_download_links
+          WHERE status = 'pending_activation'
+            AND revoked_at IS NULL
+            AND used_at IS NULL
+            AND expires_at > ?
+        `,
+        [now],
+      ),
+    ),
+    activated_links: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_download_links
+          WHERE status = 'active'
+            AND activated_at IS NOT NULL
+            AND revoked_at IS NULL
+            AND used_at IS NULL
+            AND expires_at > ?
+        `,
+        [now],
+      ),
+    ),
     expired_links: numberValue(
       await first(
         db,
@@ -388,6 +376,7 @@ export async function handleCdasOperationsJson(request, env) {
           SELECT COUNT(*) AS total
           FROM document_download_links
           WHERE used_at IS NOT NULL
+             OR status = 'used'
         `,
       ),
     ),
@@ -409,7 +398,20 @@ export async function handleCdasOperationsJson(request, env) {
           SELECT COUNT(*) AS total
           FROM document_download_events
           WHERE event_at >= ?
+            AND event_type = 'document_downloaded'
             AND success = 1
+        `,
+        [todayIso],
+      ),
+    ),
+    replay_denials_today: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_download_events
+          WHERE event_at >= ?
+            AND event_type = 'download_replay_denied'
         `,
         [todayIso],
       ),
@@ -439,31 +441,43 @@ export async function handleCdasOperationsJson(request, env) {
         `,
       ),
     ),
-
-    /*
-      cdas_email_events real schema uses:
-      - related_type
-      - related_id
-
-      This check deliberately validates known related_type values only.
-      It does not yet prove that the related_id exists in the relevant table.
-      That can be added later as a stronger integrity check per related_type.
-    */
-    email_events_with_unknown_related_type: numberValue(
+    email_events_without_related_record: numberValue(
       await first(
         db,
         `
           SELECT COUNT(*) AS total
           FROM cdas_email_events e
-          WHERE e.related_id IS NOT NULL
-            AND e.related_type IS NOT NULL
-            AND e.related_type NOT IN (
+          WHERE e.related_record_id IS NOT NULL
+            AND e.related_record_type IS NOT NULL
+            AND e.related_record_type NOT IN (
               'access_request',
               'licence',
               'download_link',
               'invitation',
               'test'
             )
+        `,
+      ),
+    ),
+    active_download_links_missing_activation: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_download_links
+          WHERE status = 'active'
+            AND activated_at IS NULL
+        `,
+      ),
+    ),
+    used_download_links_missing_used_at: numberValue(
+      await first(
+        db,
+        `
+          SELECT COUNT(*) AS total
+          FROM document_download_links
+          WHERE status = 'used'
+            AND used_at IS NULL
         `,
       ),
     ),
@@ -475,19 +489,19 @@ export async function handleCdasOperationsJson(request, env) {
       `
         SELECT
           id,
+          email_type AS event_type,
           related_type,
           related_id,
-          email_type,
+          status,
           recipient_email,
           provider,
           provider_message_id,
-          status,
+          subject,
           error,
           message,
-          subject,
           retryable,
           retry_count,
-          retry_of_event_id,
+          next_retry_after,
           created_at,
           resolved_at,
           resolved_by,
@@ -498,53 +512,26 @@ export async function handleCdasOperationsJson(request, env) {
         LIMIT 10
       `,
     ),
+
     pending_requests: await all(
       db,
       `
         SELECT
-          r.id,
-          r.document_id,
-          r.document_version,
-          r.name,
-          r.email,
-          r.email_normalised,
-          r.status,
-          r.requested_at,
-          r.email_verified_at,
-          r.email_delivery_status,
-          r.risk_score,
-          r.risk_flags,
-          r.approval_note,
-          r.denial_reason,
-          (
-            SELECT e.event_type
-            FROM document_access_request_review_events e
-            WHERE e.request_id = r.id
-            ORDER BY e.created_at DESC
-            LIMIT 1
-          ) AS latest_review_event,
-          (
-            SELECT e.created_at
-            FROM document_access_request_review_events e
-            WHERE e.request_id = r.id
-            ORDER BY e.created_at DESC
-            LIMIT 1
-          ) AS latest_review_at
-        FROM document_access_requests r
-        WHERE r.status IN (
-          'created',
-          'email_pending',
-          'email_sent',
-          'pending_approval',
-          'pending_review',
-          'on_hold',
-          'review_approved',
-          'rejected'
-        )
-        ORDER BY r.requested_at DESC
-        LIMIT 25
+          id,
+          document_id,
+          document_version,
+          name,
+          email,
+          status,
+          requested_at,
+          email_verified_at
+        FROM document_access_requests
+        WHERE status IN ('created', 'email_pending', 'email_sent', 'pending_approval', 'pending_review')
+        ORDER BY requested_at DESC
+        LIMIT 10
       `,
     ),
+
     recent_licences: await all(
       db,
       `
@@ -558,11 +545,18 @@ export async function handleCdasOperationsJson(request, env) {
           l.licence_holder_email_normalised,
           l.status,
           l.issued_at,
+          l.revoked_at,
+
+          NULL AS superseded_by,
+          NULL AS suspected_leak_at,
+          NULL AS confirmed_leak_at,
+
           l.generated_pdf_status,
           l.generated_pdf_object_key,
           l.generated_pdf_sha256,
           l.generated_pdf_size_bytes,
           l.generated_pdf_created_at,
+          l.generated_pdf_error,
 
           (
             SELECT dl.id
@@ -618,34 +612,133 @@ export async function handleCdasOperationsJson(request, env) {
             WHERE dl.licence_id = l.id
             ORDER BY dl.created_at DESC
             LIMIT 1
-          ) AS latest_download_link_expires_at
+          ) AS latest_download_link_expires_at,
+
+          (
+            SELECT dl.revoked_at
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_revoked_at,
+
+          (
+            SELECT dl.superseded_at
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_superseded_at,
+
+          (
+            SELECT MAX(e.event_at)
+            FROM document_download_events e
+            JOIN document_download_links dl
+              ON dl.id = e.download_id
+            WHERE dl.licence_id = l.id
+              AND e.event_type = 'download_link_created_pending_activation'
+              AND e.success = 1
+          ) AS link_created_event_at,
+
+          (
+            SELECT MAX(e.event_at)
+            FROM document_download_events e
+            JOIN document_download_links dl
+              ON dl.id = e.download_id
+            WHERE dl.licence_id = l.id
+              AND e.event_type = 'download_link_activated'
+              AND e.success = 1
+          ) AS link_activated_event_at,
+
+          (
+            SELECT MAX(e.event_at)
+            FROM document_download_events e
+            JOIN document_download_links dl
+              ON dl.id = e.download_id
+            WHERE dl.licence_id = l.id
+              AND e.event_type = 'active_link_delivery_email_sent'
+              AND e.success = 1
+          ) AS email_sent_event_at,
+
+          (
+            SELECT MAX(e.event_at)
+            FROM document_download_events e
+            JOIN document_download_links dl
+              ON dl.id = e.download_id
+            WHERE dl.licence_id = l.id
+              AND e.event_type = 'document_downloaded'
+              AND e.success = 1
+          ) AS downloaded_event_at,
+
+          (
+            SELECT MAX(e.event_at)
+            FROM document_download_events e
+            JOIN document_download_links dl
+              ON dl.id = e.download_id
+            WHERE dl.licence_id = l.id
+              AND e.event_type = 'download_replay_denied'
+          ) AS replay_denied_event_at,
+
+          (
+            SELECT COUNT(*)
+            FROM document_download_events e
+            JOIN document_download_links dl
+              ON dl.id = e.download_id
+            WHERE dl.licence_id = l.id
+          ) AS download_event_count
 
         FROM document_licences l
         ORDER BY l.issued_at DESC
         LIMIT 20
       `,
     ),
+
     recent_downloads: await all(
       db,
       `
         SELECT
-          id,
-          download_id,
-          licence_number,
-          document_id,
-          document_version,
-          licence_holder_name,
-          event_at,
-          success,
-          failure_reason
-        FROM document_download_events
-        ORDER BY event_at DESC
-        LIMIT 10
+          e.id,
+          e.download_id,
+          e.licence_id,
+          e.licence_number,
+          e.document_id,
+          e.document_version,
+          e.licence_holder_name,
+          e.event_type,
+          e.event_at,
+          e.success,
+          e.failure_reason,
+
+          dl.status AS download_link_status,
+          dl.download_reference AS download_reference,
+          dl.activated_at AS activated_at,
+          dl.used_at AS used_at,
+          dl.revoked_at AS revoked_at,
+          dl.superseded_at AS superseded_at,
+          dl.expires_at AS expires_at,
+
+          (
+            SELECT COUNT(*)
+            FROM document_download_events e2
+            WHERE e2.download_id = e.download_id
+          ) AS events_for_download
+
+        FROM document_download_events e
+        LEFT JOIN document_download_links dl
+          ON dl.id = e.download_id
+        ORDER BY e.event_at DESC
+        LIMIT 30
       `,
     ),
   };
 
   const queryFailures = compactFailureList({
+    core,
+    email,
+    workflow,
+    licences,
+    downloads,
+    integrity,
     recent_failed_emails: recent.failed_emails,
     recent_pending_requests: recent.pending_requests,
     recent_licences: recent.recent_licences,
@@ -680,16 +773,24 @@ export async function handleCdasOperationsJson(request, env) {
     notices.push("requests_waiting_for_admin_approval");
   }
 
+  if (workflow.generated_pdfs_without_links > 0) {
+    notices.push("generated_pdfs_waiting_for_download_links");
+  }
+
+  if (downloads.pending_activation_links > 0) {
+    notices.push("download_links_waiting_for_activation");
+  }
+
+  if (downloads.activated_links > 0) {
+    notices.push("active_download_links_waiting_for_delivery_or_download");
+  }
+
   if (email.retryable_events > 0) {
     notices.push("retryable_email_events_present");
   }
 
-  if (email.failed_events > 0 && email.unresolved_failed_events === 0) {
-    notices.push("historical_failed_email_events_present");
-  }
-
-  if (email.unresolved_failed_events > 0) {
-    warnings.push("unresolved_failed_email_events_present");
+  if (email.failed_events > 0) {
+    warnings.push("failed_email_events_present");
   }
 
   if (licences.generated_missing_hash > 0) {
@@ -704,8 +805,12 @@ export async function handleCdasOperationsJson(request, env) {
     warnings.push("download_events_without_licence");
   }
 
-  if (integrity.email_events_with_unknown_related_type > 0) {
-    warnings.push("email_events_with_unknown_related_type");
+  if (integrity.active_download_links_missing_activation > 0) {
+    warnings.push("active_download_links_missing_activation_timestamp");
+  }
+
+  if (integrity.used_download_links_missing_used_at > 0) {
+    warnings.push("used_download_links_missing_used_timestamp");
   }
 
   if (queryFailures.length > 0) {
