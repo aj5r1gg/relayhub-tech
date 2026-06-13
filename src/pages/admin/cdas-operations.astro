@@ -134,6 +134,10 @@ const description =
         <div class="rh-card-heading">
           <p class="rh-eyebrow">Licences</p>
           <h2>Recent Licences</h2>
+          <p class="rh-muted">
+            Lifecycle evidence for licence issue, PDF generation, controlled link
+            creation, activation, delivery email, download, and replay denial.
+          </p>
         </div>
         <div id="recentLicences"></div>
       </article>
@@ -142,6 +146,9 @@ const description =
         <div class="rh-card-heading">
           <p class="rh-eyebrow">Downloads</p>
           <h2>Recent Downloads</h2>
+          <p class="rh-muted">
+            Recent audit events from the controlled download lifecycle.
+          </p>
         </div>
         <div id="recentDownloads"></div>
       </article>
@@ -646,6 +653,84 @@ const description =
       color: #92400e;
     }
 
+    .rh-state-badges,
+    .rh-evidence-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .rh-state-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: 1px solid rgba(100, 116, 139, 0.18);
+      border-radius: 999px;
+      padding: 0.35rem 0.55rem;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .rh-state-badge-success {
+      border-color: rgba(22, 163, 74, 0.25);
+      background: rgba(240, 253, 244, 0.95);
+      color: #166534;
+    }
+
+    .rh-state-badge-info {
+      border-color: rgba(37, 99, 235, 0.22);
+      background: rgba(239, 246, 255, 0.95);
+      color: #1d4ed8;
+    }
+
+    .rh-state-badge-warning {
+      border-color: rgba(217, 119, 6, 0.28);
+      background: rgba(255, 251, 235, 0.95);
+      color: #92400e;
+    }
+
+    .rh-state-badge-danger {
+      border-color: rgba(220, 38, 38, 0.26);
+      background: rgba(254, 242, 242, 0.95);
+      color: #991b1b;
+    }
+
+    .rh-evidence-panel {
+      display: grid;
+      gap: 0.8rem;
+      padding: 0.85rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 1rem;
+      background: #f8fafc;
+      white-space: normal;
+    }
+
+    .rh-evidence-note {
+      margin: 0;
+      color: rgba(15, 23, 42, 0.66);
+      font-size: 0.86rem;
+      line-height: 1.55;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .rh-token-warning {
+      border: 1px solid rgba(217, 119, 6, 0.26);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.85rem;
+      background: rgba(255, 251, 235, 0.95);
+      color: #92400e;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.55;
+      white-space: normal;
+    }
+
 
     .rh-muted {
       margin: 0;
@@ -1035,6 +1120,169 @@ const description =
       }
     }
 
+
+
+    function badge(label, kind = "muted", title = "") {
+      const safeKind = ["success", "info", "warning", "danger", "muted"].includes(kind)
+        ? kind
+        : "muted";
+
+      return `<span class="rh-state-badge rh-state-badge-${safeKind}" title="${escapeHtml(title || label)}">${escapeHtml(label)}</span>`;
+    }
+
+    function lifecycleBadges(row) {
+      const badges = [];
+
+      badges.push(
+        row.status === "issued" || row.status === "active"
+          ? badge("Licence issued", "success", row.issued_at || "")
+          : row.status === "revoked"
+            ? badge("Licence revoked", "danger", row.revoked_at || "")
+            : badge(`Licence ${niceLabel(row.status || "unknown")}`, "warning"),
+      );
+
+      if (row.revoked_at) badges.push(badge("Licence revoked", "danger", row.revoked_at));
+      if (row.superseded_by) badges.push(badge("Licence superseded", "danger", row.superseded_by));
+      if (row.suspected_leak_at) badges.push(badge("Suspected leak", "warning", row.suspected_leak_at));
+      if (row.confirmed_leak_at) badges.push(badge("Confirmed leak", "danger", row.confirmed_leak_at));
+
+      badges.push(
+        row.generated_pdf_status === "generated"
+          ? badge("PDF generated", "success", row.generated_pdf_created_at || "")
+          : row.generated_pdf_error
+            ? badge("PDF failed", "danger", row.generated_pdf_error)
+            : badge(`PDF ${niceLabel(row.generated_pdf_status || "not_generated")}`, "warning"),
+      );
+
+      if (row.generated_pdf_sha256) {
+        badges.push(badge("PDF SHA-256", "info", row.generated_pdf_sha256));
+      }
+
+      if (row.latest_download_link_id) {
+        badges.push(badge("Link created", "success", row.latest_download_link_created_at || row.link_created_event_at || ""));
+
+        const linkStatus = String(row.latest_download_link_status || "");
+
+        if (linkStatus === "pending_activation") {
+          badges.push(badge("Pending activation", "warning", row.latest_download_reference || ""));
+        } else if (linkStatus === "active") {
+          badges.push(badge("Link active", "success", row.latest_download_link_activated_at || row.link_activated_event_at || ""));
+        } else if (linkStatus === "used") {
+          badges.push(badge("Downloaded", "success", row.latest_download_link_used_at || row.downloaded_event_at || ""));
+        } else if (linkStatus === "revoked" || row.latest_download_link_revoked_at) {
+          badges.push(badge("Link revoked", "danger", row.latest_download_link_revoked_at || ""));
+        } else if (linkStatus === "superseded" || row.latest_download_link_superseded_at) {
+          badges.push(badge("Link superseded", "danger", row.latest_download_link_superseded_at || ""));
+        } else {
+          badges.push(badge(`Link ${niceLabel(linkStatus || "unknown")}`, "info"));
+        }
+      } else {
+        badges.push(badge("No link", "muted"));
+      }
+
+      if (row.email_sent_event_at) badges.push(badge("Email sent", "success", row.email_sent_event_at));
+      if (row.downloaded_event_at) badges.push(badge("Download event", "success", row.downloaded_event_at));
+      if (row.replay_denied_event_at) badges.push(badge("Replay denied", "warning", row.replay_denied_event_at));
+
+      return `<div class="rh-state-badges">${badges.join("")}</div>`;
+    }
+
+    function licenceEvidencePanel(row) {
+      const linkId = row.latest_download_link_id || "";
+      const linkReference = row.latest_download_reference || "No download reference";
+      const eventCount = Number(row.download_event_count || 0);
+
+      return `
+        <div class="rh-evidence-panel">
+          ${lifecycleBadges(row)}
+          <p class="rh-evidence-note">
+            Latest link: <strong>${escapeHtml(linkReference)}</strong>
+            ${linkId ? ` · Link ID: <code>${escapeHtml(linkId)}</code>` : ""}
+            · Events recorded for this licence: <strong>${escapeHtml(eventCount)}</strong>
+            ${row.generated_pdf_sha256 ? ` · PDF SHA-256: <code>${escapeHtml(row.generated_pdf_sha256)}</code>` : ""}
+          </p>
+          <div class="rh-token-warning">
+            Token handling: raw controlled download URLs are shown only when a link is created.
+            They are not stored in D1 and cannot be recovered later from the Operations Centre.
+          </div>
+          ${licenceWorkflowButtons(row)}
+        </div>
+      `;
+    }
+
+    function downloadEventBadges(row) {
+      const eventType = String(row.event_type || "");
+      const success = Number(row.success) === 1;
+      const badges = [];
+
+      if (eventType === "document_downloaded") {
+        badges.push(badge("Downloaded", "success", row.event_at || ""));
+      } else if (eventType === "download_replay_denied") {
+        badges.push(badge("Replay denied", "warning", row.failure_reason || ""));
+      } else if (eventType === "active_link_delivery_email_sent") {
+        badges.push(badge("Email sent", "success", row.failure_reason || ""));
+      } else if (eventType === "active_link_delivery_email_blocked") {
+        badges.push(badge("Duplicate email blocked", "warning", row.failure_reason || ""));
+      } else if (eventType === "download_link_activated") {
+        badges.push(badge("Link activated", "success", row.event_at || ""));
+      } else if (eventType === "download_link_created_pending_activation") {
+        badges.push(badge("Link created", "info", row.event_at || ""));
+      } else {
+        badges.push(badge(niceLabel(eventType || "event"), success ? "info" : "warning", row.failure_reason || ""));
+      }
+
+      badges.push(success ? badge("Success", "success") : badge("Blocked / failed", "warning"));
+
+      if (row.download_link_status) {
+        badges.push(
+          badge(
+            `Link ${niceLabel(row.download_link_status)}`,
+            row.download_link_status === "used"
+              ? "success"
+              : row.download_link_status === "revoked" || row.download_link_status === "superseded"
+                ? "danger"
+                : "info",
+          ),
+        );
+      }
+
+      return `<div class="rh-state-badges">${badges.join("")}</div>`;
+    }
+
+    function downloadEvidencePanel(row) {
+      return `
+        <div class="rh-evidence-panel">
+          ${downloadEventBadges(row)}
+          <p class="rh-evidence-note">
+            Download reference: <strong>${escapeHtml(row.download_reference || "Not recorded")}</strong>
+            · Events for this link: <strong>${escapeHtml(row.events_for_download || 0)}</strong>
+            ${row.failure_reason ? ` · Detail: ${escapeHtml(row.failure_reason)}` : ""}
+          </p>
+          ${adminActionLinks([
+            {
+              label: "Open download link",
+              href: adminUrl("/admin/cdas-download-links/", {
+                id: row.download_id,
+                licence_number: row.licence_number,
+              }),
+            },
+            {
+              label: "Open licence",
+              href: adminUrl("/admin/cdas-licences/", {
+                licence_number: row.licence_number,
+              }),
+            },
+            {
+              label: "Analytics",
+              href: adminUrl("/admin/downloads/", {
+                event_id: row.id,
+                download_id: row.download_id,
+              }),
+            },
+          ])}
+        </div>
+      `;
+    }
 
     function licenceWorkflowButtons(row) {
       const licenceId = escapeHtml(row.id || "");
@@ -1631,27 +1879,21 @@ const description =
           data.recent?.recent_licences,
           [
             { key: "issued_at", label: "Issued" },
-            { key: "licence_number", label: "Licence" },
+            { key: "licence_number", label: "Licence", wrap: true },
             {
               key: "holder",
               label: "Holder",
               render: (row) =>
                 row.organisation_name || row.licence_holder_name || "",
+              wrap: true,
             },
-            { key: "document_id", label: "Document" },
+            { key: "document_id", label: "Document", wrap: true },
             { key: "document_version", label: "Version" },
-            { key: "status", label: "Licence" },
             {
-              key: "generated_pdf_status",
-              label: "PDF",
-              render: (row) => niceLabel(row.generated_pdf_status || "not_generated"),
-            },
-            {
-              key: "latest_download_link_status",
-              label: "Link",
-              render: (row) => row.latest_download_link_status
-                ? `${niceLabel(row.latest_download_link_status)} ${row.latest_download_reference ? `(${row.latest_download_reference})` : ""}`
-                : "No link",
+              key: "lifecycle",
+              label: "Lifecycle",
+              wrap: true,
+              renderHtml: (row) => lifecycleBadges(row),
             },
             {
               key: "actions",
@@ -1685,7 +1927,7 @@ const description =
           "No recent licences.",
           {
             pageSize: 8,
-            renderExpandedHtml: (row) => licenceWorkflowButtons(row),
+            renderExpandedHtml: (row) => licenceEvidencePanel(row),
           },
         );
 
@@ -1693,18 +1935,24 @@ const description =
           "recentDownloads",
           data.recent?.recent_downloads,
           [
-            { key: "event_at", label: "Downloaded" },
-            { key: "download_id", label: "Download ID" },
-            { key: "licence_number", label: "Licence" },
-            { key: "document_id", label: "Document" },
-            { key: "document_version", label: "Version" },
+            { key: "event_at", label: "Event Time" },
+            {
+              key: "event_type",
+              label: "Event",
+              render: (row) => niceLabel(row.event_type || ""),
+              wrap: true,
+            },
+            { key: "download_reference", label: "Reference", wrap: true },
+            { key: "download_id", label: "Download ID", wrap: true },
+            { key: "licence_number", label: "Licence", wrap: true },
             {
               key: "success",
               label: "Result",
               render: (row) =>
                 Number(row.success) === 1
                   ? "Success"
-                  : row.failure_reason || "Failed",
+                  : row.failure_reason || "Blocked / Failed",
+              wrap: true,
             },
             {
               key: "actions",
@@ -1735,6 +1983,10 @@ const description =
             },
           ],
           "No recent downloads.",
+          {
+            pageSize: 10,
+            renderExpandedHtml: (row) => downloadEvidencePanel(row),
+          },
         );
 
         if (rawPayload) {
