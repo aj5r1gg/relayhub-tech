@@ -793,7 +793,418 @@ const description =
         width: 100%;
       }
     }
-  </style>
+  
+  /* 3X-0T-C3-B: Operations Centre licence evidence readability repair */
+
+  .rh-state-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+  }
+
+  .rh-state-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.18rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #f8fafc;
+    color: #334155;
+  }
+
+  .rh-state-badge-success {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+
+  .rh-state-badge-info {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+  }
+
+  .rh-state-badge-warning {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+  }
+
+  .rh-state-badge-danger {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+  }
+
+  .rh-state-badge-muted {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+  }
+
+  .rh-evidence-panel {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .rh-evidence-note {
+    margin: 0;
+    line-height: 1.55;
+    color: #334155;
+  }
+
+  .rh-evidence-note code {
+    word-break: break-all;
+  }
+
+  .rh-token-warning {
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    line-height: 1.45;
+  }
+
+  .rh-request-action-row-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .rh-request-action-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .rh-table-action {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.32rem 0.7rem;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .rh-table-action:hover {
+    background: #e2e8f0;
+  }
+
+  .rh-mini-button {
+    appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+  }
+
+  .rh-mini-button:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #94a3b8;
+  }
+
+  .rh-mini-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .rh-mini-button-success {
+    background: #ecfdf5;
+    border-color: #86efac;
+    color: #166534;
+  }
+
+  .rh-mini-button-warning {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92400e;
+  }
+
+  .rh-mini-button-danger {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+
+  .rh-mini-button-primary {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+  }
+
+  [data-notice-result-for] {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  [data-notice-result-for][data-kind="success"] {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+
+  [data-notice-result-for][data-kind="warning"] {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+  }
+
+  [data-notice-result-for][data-kind="info"] {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+  }
+
+  [data-notice-result-for][data-kind="loading"] {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+
+
+  /* 3X-0T-C3-B: global styles for JS-rendered Operations Centre content */
+
+  :global(.rh-state-badges) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+  }
+
+  :global(.rh-state-badge) {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #f8fafc;
+    color: #334155;
+  }
+
+  :global(.rh-state-badge-success) {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+
+  :global(.rh-state-badge-info) {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+  }
+
+  :global(.rh-state-badge-warning) {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+  }
+
+  :global(.rh-state-badge-danger) {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+  }
+
+  :global(.rh-state-badge-muted) {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+  }
+
+  :global(.rh-evidence-panel) {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    white-space: normal;
+  }
+
+  :global(.rh-evidence-note) {
+    margin: 0;
+    line-height: 1.55;
+    color: #334155;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.rh-evidence-note code) {
+    word-break: break-all;
+  }
+
+  :global(.rh-token-warning) {
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    line-height: 1.45;
+  }
+
+  :global(.rh-request-action-row-inner) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  :global(.rh-request-action-label) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  :global(.rh-table-action) {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.32rem 0.7rem;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  :global(.rh-table-action:hover) {
+    background: #e2e8f0;
+  }
+
+  :global(.rh-mini-button) {
+    appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+  }
+
+  :global(.rh-mini-button:hover:not(:disabled)) {
+    background: #f8fafc;
+    border-color: #94a3b8;
+  }
+
+  :global(.rh-mini-button:disabled) {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  :global(.rh-mini-button-success) {
+    background: #ecfdf5;
+    border-color: #86efac;
+    color: #166534;
+  }
+
+  :global(.rh-mini-button-warning) {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92400e;
+  }
+
+  :global(.rh-mini-button-danger) {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+
+  :global(.rh-mini-button-primary) {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+  }
+
+  :global([data-notice-result-for]) {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  :global([data-notice-result-for][data-kind="success"]) {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+
+  :global([data-notice-result-for][data-kind="warning"]) {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+  }
+
+  :global([data-notice-result-for][data-kind="info"]) {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+  }
+
+  :global([data-notice-result-for][data-kind="loading"]) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+
+</style>
 
   <script is:inline>
     // @ts-nocheck
@@ -1296,6 +1707,56 @@ const description =
         !row.latest_download_link_superseded_at;
     }
 
+
+    function canNotifyRevokedDownloadLink(row) {
+      const status = String(row.latest_download_link_status || "").toLowerCase();
+
+      return Boolean(row.latest_download_link_id) &&
+        (status === "revoked" || Boolean(row.latest_download_link_revoked_at));
+    }
+
+    function revocationNoticeButtons(row) {
+      const linkId = escapeHtml(row.latest_download_link_id || "");
+      const linkReference = escapeHtml(row.latest_download_reference || row.latest_download_link_id || "");
+
+      if (!linkId) return "";
+
+      return `
+        <div class="rh-request-action-row-inner">
+          <span class="rh-request-action-label">Notice</span>
+          <button
+            class="rh-mini-button"
+            type="button"
+            data-recovery-action="check-revocation-notice"
+            data-download-link-id="${linkId}"
+            data-download-reference="${linkReference}"
+          >Check Notice</button>
+          <button
+            class="rh-mini-button rh-mini-button-warning"
+            type="button"
+            data-recovery-action="send-revocation-notice"
+            data-download-link-id="${linkId}"
+            data-download-reference="${linkReference}"
+          >Send Notice</button>
+          <span
+            class="rh-request-action-label"
+            data-notice-result-for="${linkId}"
+          ></span>
+        </div>
+      `;
+    }
+
+    function setInlineNoticeResult(downloadLinkId, kind, message) {
+      for (const target of document.querySelectorAll("[data-notice-result-for]")) {
+        if (target.getAttribute("data-notice-result-for") !== downloadLinkId) continue;
+
+        target.dataset.kind = kind || "info";
+        target.textContent = message || "";
+        target.title = message || "";
+        return;
+      }
+    }
+
     function downloadLinkRecoveryButtons(row) {
       const linkId = escapeHtml(row.latest_download_link_id || "");
       const linkReference = escapeHtml(row.latest_download_reference || row.latest_download_link_id || "");
@@ -1320,11 +1781,16 @@ const description =
                 ? "Superseded link"
                 : "Revocation unavailable";
 
+        const noticeButtons = canNotifyRevokedDownloadLink(row)
+          ? revocationNoticeButtons(row)
+          : "";
+
         return `
           <div class="rh-request-action-row-inner">
             <span class="rh-request-action-label">Recovery</span>
             <span class="rh-request-action-label">${escapeHtml(stateLabel)}</span>
           </div>
+          ${noticeButtons}
         `;
       }
 
@@ -1411,6 +1877,103 @@ const description =
           setReviewActionResult(
             "success",
             `${data.download_link?.download_reference || downloadReference} was revoked. Event recorded: ${data.event_recorded ? "yes" : "no"}.`,
+          );
+
+          await loadOperations();
+          return;
+        }
+
+        if (action === "check-revocation-notice") {
+          const originalLabel = button.textContent;
+          button.disabled = true;
+          button.textContent = "Checking…";
+
+          setInlineNoticeResult(downloadLinkId, "loading", "Checking notice eligibility…");
+          setReviewActionResult(
+            "loading",
+            `Checking revocation notice eligibility for ${downloadReference}…`,
+          );
+
+          try {
+            const data = await workflowFetch(
+              `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/revocation-notice-eligibility`,
+            );
+
+            const blockers = data.blockers || [];
+            const alreadySent = Boolean(data.notice?.already_sent);
+            const priorSentAt = data.notice?.prior_successful_notice_at || "";
+            const recipient = data.notice?.recipient_email || data.licence?.recipient_email || "recipient";
+
+            let inlineMessage;
+
+            if (data.eligible) {
+              inlineMessage = `Eligible: notice can be sent to ${recipient}.`;
+            } else if (alreadySent || blockers.includes("revocation_notice_already_sent")) {
+              inlineMessage = priorSentAt
+                ? `Already notified: ${priorSentAt}.`
+                : "Already notified.";
+            } else {
+              inlineMessage = `Blocked: ${blockers.join(", ") || "not eligible"}.`;
+            }
+
+            const globalMessage = data.eligible
+              ? `${downloadReference} is eligible for a revocation notice to ${recipient}.`
+              : `${downloadReference} cannot be notified. ${inlineMessage}`;
+
+            setInlineNoticeResult(
+              downloadLinkId,
+              data.eligible ? "success" : alreadySent ? "info" : "warning",
+              inlineMessage,
+            );
+
+            setReviewActionResult(
+              data.eligible ? "success" : "warning",
+              globalMessage,
+            );
+          } finally {
+            button.disabled = false;
+            button.textContent = originalLabel || "Check Notice";
+          }
+
+          return;
+        }
+
+        if (action === "send-revocation-notice") {
+          const note = window.prompt(
+            `Notice note for ${downloadReference}:`,
+            "Operations Centre: notify recipient that the controlled download link was revoked. Do not state that the licence was revoked. Do not reissue, activate, serve PDF, or modify licence.",
+          );
+
+          if (note === null) {
+            setReviewActionResult("info", "Revocation notice cancelled.");
+            return;
+          }
+
+          const confirmed = window.confirm(
+            `Send revocation notice for ${downloadReference}? This sends an email only. It does not reissue a link, activate a link, serve the PDF, or modify the licence.`,
+          );
+
+          if (!confirmed) {
+            setReviewActionResult("info", "Revocation notice cancelled.");
+            return;
+          }
+
+          setReviewActionResult("loading", `Sending revocation notice for ${downloadReference}…`);
+
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/send-revocation-notice`,
+            {
+              method: "POST",
+              body: {
+                actor: "operations-centre",
+                note,
+              },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `Revocation notice sent to ${data.notice?.recipient_email || data.licence?.recipient_email || "recipient"} via ${data.email_result?.provider || "provider"}. Message ID: ${data.email_result?.provider_message_id || "not returned"}.`,
           );
 
           await loadOperations();
