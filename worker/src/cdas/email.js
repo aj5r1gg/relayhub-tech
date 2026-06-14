@@ -252,6 +252,121 @@ function buildDownloadLinkHtmlEmail(payload) {
 </html>`;
 }
 
+
+function buildDownloadLinkRevocationNoticeTextEmail(payload) {
+  return [
+    "RelayHub controlled download link notice",
+    "",
+    `Document: ${payload.documentTitle}`,
+    `Document ID: ${payload.documentId}`,
+    `Licence: ${payload.licenceNumber}`,
+    `Download reference: ${payload.downloadReference}`,
+    `Recipient: ${payload.recipientEmail}`,
+    "",
+    "A controlled download link associated with this licence has been revoked or disabled by RelayHub.",
+    "",
+    "This notice relates to the controlled download link only. It does not mean that your document licence has been revoked unless RelayHub has separately notified you of that.",
+    "",
+    payload.reason
+      ? `Reason or operator note: ${payload.reason}`
+      : "Reason or operator note: not specified.",
+    "",
+    "If a replacement download link is required, RelayHub may issue one separately after review.",
+    "",
+    "RelayHub",
+  ].join("\n");
+}
+
+function buildDownloadLinkRevocationNoticeHtmlEmail(payload) {
+  const documentTitle = escapeHtml(payload.documentTitle);
+  const documentId = escapeHtml(payload.documentId);
+  const licenceNumber = escapeHtml(payload.licenceNumber);
+  const downloadReference = escapeHtml(payload.downloadReference);
+  const recipientEmail = escapeHtml(payload.recipientEmail);
+  const reason = escapeHtml(payload.reason || "Not specified.");
+
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>RelayHub controlled download link notice</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f8fafc;color:#0f172a;font-family:Arial,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
+            <tr>
+              <td style="padding:28px 28px 18px;">
+                <p style="margin:0 0 8px;color:#b45309;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">
+                  RelayHub Document Access
+                </p>
+                <h1 style="margin:0;color:#0f172a;font-size:28px;line-height:1.15;">
+                  Controlled download link revoked
+                </h1>
+                <p style="margin:16px 0 0;color:#475569;font-size:16px;line-height:1.6;">
+                  A controlled download link associated with your RelayHub document licence has been revoked or disabled.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:0 28px 8px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px;">
+                      <p style="margin:0 0 8px;color:#64748b;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Document</p>
+                      <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${documentTitle}</p>
+                      <p style="margin:6px 0 0;color:#64748b;font-size:14px;">${documentId}</p>
+
+                      <p style="margin:18px 0 8px;color:#64748b;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Licence</p>
+                      <p style="margin:0;color:#0f172a;font-size:15px;">${licenceNumber}</p>
+
+                      <p style="margin:18px 0 8px;color:#64748b;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Download reference</p>
+                      <p style="margin:0;color:#0f172a;font-size:15px;">${downloadReference}</p>
+
+                      <p style="margin:18px 0 8px;color:#64748b;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Recipient</p>
+                      <p style="margin:0;color:#0f172a;font-size:15px;">${recipientEmail}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:20px 28px;">
+                <p style="margin:0;color:#475569;font-size:15px;line-height:1.6;">
+                  This notice relates to the controlled download link only. It does <strong>not</strong> mean that your document licence has been revoked unless RelayHub has separately notified you of that.
+                </p>
+
+                <p style="margin:16px 0 0;color:#475569;font-size:15px;line-height:1.6;">
+                  Reason or operator note: ${reason}
+                </p>
+
+                <p style="margin:16px 0 0;color:#475569;font-size:15px;line-height:1.6;">
+                  If a replacement download link is required, RelayHub may issue one separately after review.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:18px 28px 28px;border-top:1px solid #e2e8f0;">
+                <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6;">
+                  RelayHub controls document access links separately from document licences. Link revocation is not the same thing as licence revocation.
+                </p>
+                <p style="margin:14px 0 0;color:#64748b;font-size:13px;">
+                  RelayHub
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
 async function sendResendEmail(env, email) {
   if (!isEmailEnabled(env)) {
     return {
@@ -409,5 +524,33 @@ export async function sendCdasDownloadLinkEmail(env, payload) {
     subject: `Your RelayHub download is ready: ${emailPayload.documentTitle}`,
     html: buildDownloadLinkHtmlEmail(emailPayload),
     text: buildDownloadLinkTextEmail(emailPayload),
+  });
+}
+export async function sendCdasDownloadLinkRevocationNoticeEmail(env, payload) {
+  const recipientEmail = normaliseEmail(payload.recipientEmail);
+
+  if (!recipientEmail) {
+    return {
+      ok: false,
+      sent: false,
+      error: "recipient_email_missing",
+      message: "Recipient email is required.",
+    };
+  }
+
+  const emailPayload = {
+    documentTitle: cleanText(payload.documentTitle) || "RelayHub document",
+    documentId: cleanText(payload.documentId) || "unknown-document",
+    licenceNumber: cleanText(payload.licenceNumber) || "unknown-licence",
+    downloadReference: cleanText(payload.downloadReference) || "unknown-download-reference",
+    recipientEmail,
+    reason: cleanText(payload.reason),
+  };
+
+  return await sendResendEmail(env, {
+    to: recipientEmail,
+    subject: `Controlled download link revoked: ${emailPayload.documentTitle}`,
+    html: buildDownloadLinkRevocationNoticeHtmlEmail(emailPayload),
+    text: buildDownloadLinkRevocationNoticeTextEmail(emailPayload),
   });
 }

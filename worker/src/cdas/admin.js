@@ -1,79 +1,7 @@
 import { jsonResponse } from "../shared.js";
-import { listCdasDocuments, getCdasDocument } from "./documents.js";
-import {
-  listCdasLicenceTerms,
-  getCdasLicenceTerms,
-} from "./terms.js";
-import { importCdasDocumentsFromCatalogue } from "./import.js";
-import { renderCdasDocumentLicence } from "./render.js";
-import {
-  listCdasAccessRequests,
-  getCdasAccessRequest,
-} from "./access-requests.js";
-import {
-  resendCdasAccessRequestVerification,
-} from "./resend-verification.js";
-import {
-  reviewCdasAccessRequest,
-} from "./access-request-review.js";
-import {
-  listCdasLicences,
-  getCdasLicence,
-} from "./licences.js";
-import {
-  getCdasLicenceGenerationPreview,
-} from "./generation-preview.js";
-import {
-  getCdasLicenceDownloadHistory,
-} from "./licence-download-history.js";
-import {
-  getCdasLicenceEvidenceBundle,
-} from "./licence-evidence-bundle.js";
-import {
-  recordCdasLicenceEvidenceBundleExport,
-} from "./licence-evidence-export.js";
-import {
-  archiveCdasLicenceEvidenceBundle,
-} from "./licence-evidence-archive.js";
-import {
-  captureCdasDocumentSourceSha256,
-} from "./source-hash.js";
-import {
-  generateCdasLicencePdf,
-} from "./generate-pdf.js";
-import {
-  inspectCdasGeneratedPdf,
-} from "./generated-pdf.js";
-import {
-  issueCdasDownloadLink,
-} from "./download-link-issue.js";
-import {
-  activateCdasDownloadLink,
-  getCdasDownloadLinkActivationEligibility,
-} from "./download-link-activation.js";
-import {
-  getCdasActiveLinkDeliveryEligibility,
-  prepareCdasActiveLinkDelivery,
-} from "./active-link-delivery-preparation.js";
-import {
-  sendCdasActiveLinkDeliveryEmail,
-} from "./active-link-email-send.js";
-import {
-  emailCdasDownloadLink,
-} from "./email-download-link.js";
-import {
-  reissueCdasDownloadLink,
-} from "./reissue-download-link.js";
-import {
-  listCdasDownloadLinks,
-  getCdasDownloadLink,
-} from "./download-links.js";
-import {
-  getCdasDownloadLinkRevocationEligibility,
-  revokeCdasDownloadLink,
-} from "./download-link-revoke.js";
 import {
   getCdasDownloadLinkRevocationNoticeEligibility,
+  sendCdasDownloadLinkRevocationNotice,
 } from "./download-link-revocation-notice.js";
 import {
   sendCdasVerificationEmailTest,
@@ -512,6 +440,23 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return revokeCdasDownloadLink(request, env, downloadId);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/send-revocation-notice")
+  ) {
+    const downloadId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/send-revocation-notice"
+    );
+
+    return sendCdasDownloadLinkRevocationNotice(
+      request,
+      env,
+      downloadId
+    );
   }
 
   if (pathname.startsWith("/api/admin/cdas/download-links/")) {

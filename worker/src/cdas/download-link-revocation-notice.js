@@ -1,4 +1,7 @@
-import { jsonResponse } from "../shared.js";
+import { getClientIp, jsonResponse } from "../shared.js";
+import {
+  sendCdasDownloadLinkRevocationNoticeEmail,
+} from "./email.js";
 
 const NOTICE_EMAIL_TYPE = "download_link_revocation_notice";
 
@@ -332,5 +335,477 @@ export async function getCdasDownloadLinkRevocationNoticeEligibility(
       token_hash_returned: false,
       notification_only_eligibility: true,
     },
+  });
+}
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function toHex(buffer) {
+  return [...new Uint8Array(buffer)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function sha256HexFromText(text) {
+  const encoded = new TextEncoder().encode(String(text ?? ""));
+  const digest = await crypto.subtle.digest("SHA-256", encoded);
+  return toHex(digest);
+}
+
+function buildId(prefix) {
+  const array = new Uint8Array(8);
+  crypto.getRandomValues(array);
+  const suffix = [...array]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+
+  return `${prefix}_${Date.now().toString(36)}_${suffix}`;
+}
+
+function getUserAgent(request) {
+  return cleanText(request.headers.get("User-Agent")).slice(0, 500);
+}
+
+async function readOptionalJson(request) {
+  const contentType = cleanText(request.headers.get("Content-Type")).toLowerCase();
+
+  if (!contentType.includes("application/json")) {
+    return {};
+  }
+
+  try {
+    const body = await request.json();
+    return body && typeof body === "object" ? body : {};
+  } catch {
+    return {};
+  }
+}
+
+async function recordRevocationNoticeEmailEvent({
+  env,
+  record,
+  subject,
+  status,
+  provider,
+  providerMessageId,
+  error,
+  message,
+  metadata,
+}) {
+  const db = getDb(env);
+  const createdAt = nowIso();
+  const sent = status === "sent";
+
+  await db
+    .prepare(
+      `INSERT INTO cdas_email_events (
+         id,
+         email_type,
+         related_type,
+         related_id,
+         status,
+         recipient_email,
+         subject,
+         retryable,
+         retry_count,
+         created_at,
+         resolved_at,
+         provider,
+         provider_message_id,
+         error,
+         message,
+         metadata_json
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .bind(
+      buildId("cee"),
+      NOTICE_EMAIL_TYPE,
+      "download_link",
+      record.download_id,
+      status,
+      normaliseEmail(record.licence_holder_email_normalised) ||
+        normaliseEmail(record.licence_holder_email),
+      subject,
+      sent ? 0 : 1,
+      0,
+      createdAt,
+      sent ? createdAt : null,
+      provider || null,
+      providerMessageId || null,
+      error || null,
+      message || null,
+      JSON.stringify(metadata || {}),
+    )
+    .run();
+}
+
+async function recordRevocationNoticeDownloadEvent({
+  env,
+  request,
+  record,
+  eventType,
+  success,
+  failureReason,
+  provider,
+  providerMessageId,
+}) {
+  try {
+    const ip = getClientIp(request);
+    const ipHash = ip ? await sha256HexFromText(ip) : null;
+
+    const failureParts = [];
+
+    if (failureReason) failureParts.push(cleanText(failureReason));
+    if (provider) failureParts.push(`provider=${cleanText(provider)}`);
+    if (providerMessageId) {
+      failureParts.push(`provider_message_id=${cleanText(providerMessageId)}`);
+    }
+
+    await getDb(env)
+      .prepare(
+        `INSERT INTO document_download_events (
+           id,
+           download_id,
+           licence_id,
+           licence_number,
+           document_id,
+           document_version,
+           licence_holder_name,
+           organisation_name,
+           licence_holder_email,
+           event_type,
+           event_at,
+           ip_hash,
+           user_agent,
+           generated_object,
+           source_object,
+           source_sha256,
+           generated_sha256,
+           template_sha256,
+           licence_page_template_version,
+           watermark_template_version,
+           footer_template_version,
+           terms_template_version,
+           generation_engine_version,
+           terms_version,
+           success,
+           failure_reason
+         )
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+      .bind(
+        buildId("dde"),
+        record.download_id,
+        record.licence_id,
+        record.licence_number,
+        record.document_id || record.link_document_id,
+        record.document_version,
+        record.licence_holder_name || null,
+        record.organisation_name || null,
+        normaliseEmail(record.licence_holder_email_normalised) ||
+          normaliseEmail(record.licence_holder_email),
+        eventType,
+        nowIso(),
+        ipHash,
+        getUserAgent(request),
+        record.link_generated_pdf_object_key ||
+          record.licence_generated_pdf_object_key ||
+          null,
+        null,
+        null,
+        record.link_generated_pdf_sha256 ||
+          record.licence_generated_pdf_sha256 ||
+          null,
+        null,
+        null,
+        null,
+        null,
+        record.licence_terms_version || null,
+        null,
+        record.licence_terms_version || null,
+        success ? 1 : 0,
+        failureParts.length ? failureParts.join(" | ").slice(0, 1000) : null,
+      )
+      .run();
+  } catch {
+    /*
+     * The provider result and cdas_email_events record remain the primary proof
+     * for this email action. Do not turn a successful email into a hard failure
+     * because the secondary download-event audit insert failed.
+     */
+  }
+}
+
+function buildRevocationNoticeSubject(record) {
+  const documentLabel = cleanText(record.document_id || record.link_document_id) ||
+    "RelayHub document";
+
+  return `Controlled download link revoked: ${documentLabel}`;
+}
+
+export async function sendCdasDownloadLinkRevocationNotice(
+  request,
+  env,
+  downloadId,
+) {
+  if (request.method !== "POST") {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "method_not_allowed",
+        message:
+          "Use POST to send a CDAS download-link revocation notice.",
+      },
+      405,
+    );
+  }
+
+  const id = cleanText(downloadId);
+
+  if (!id) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "missing_download_link_id",
+        message: "Download link ID is required.",
+      },
+      400,
+    );
+  }
+
+  const body = await readOptionalJson(request);
+  const actor = cleanText(body.actor) || "operations-centre";
+  const note = cleanText(body.note || body.reason);
+
+  const record = await getRevokedDownloadLinkNoticeRecord(env, id);
+
+  if (!record) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "download_link_not_found",
+        message: "CDAS download link was not found.",
+        controls: {
+          sends_email: false,
+          reissues_link: false,
+          activates_link: false,
+          serves_download: false,
+          modifies_licence: false,
+          deletes_r2_object: false,
+        },
+      },
+      404,
+    );
+  }
+
+  const eligibility = buildEligibility(record, env);
+
+  if (!eligibility.eligible) {
+    await recordRevocationNoticeDownloadEvent({
+      env,
+      request,
+      record,
+      eventType: "download_link_revocation_notice_blocked",
+      success: 0,
+      failureReason: eligibility.blockers.join(","),
+    });
+
+    return jsonResponse(
+      {
+        ok: false,
+        error: "download_link_revocation_notice_blocked",
+        message:
+          "Revocation notice was not sent because the eligibility gate did not pass.",
+        decision: eligibility.decision,
+        blockers: eligibility.blockers,
+        warnings: eligibility.warnings,
+        download_link: publicDownloadLink(record),
+        licence: publicLicence(record),
+        controls: {
+          sends_email: false,
+          reissues_link: false,
+          activates_link: false,
+          serves_download: false,
+          modifies_licence: false,
+          deletes_r2_object: false,
+          raw_token_returned: false,
+          token_hash_returned: false,
+        },
+      },
+      409,
+    );
+  }
+
+  /*
+   * Race guard. The eligibility query already checks this, but re-check the
+   * freshly loaded record immediately before sending so repeat requests do not
+   * silently resend a revocation notice.
+   */
+  if (Number(record.prior_successful_notice_count || 0) > 0) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "revocation_notice_already_sent",
+        message:
+          "A successful revocation notice has already been recorded for this download link.",
+        download_link: publicDownloadLink(record),
+        licence: publicLicence(record),
+        controls: {
+          sends_email: false,
+          reissues_link: false,
+          activates_link: false,
+          serves_download: false,
+          modifies_licence: false,
+          deletes_r2_object: false,
+        },
+      },
+      409,
+    );
+  }
+
+  const recipientEmail =
+    normaliseEmail(record.licence_holder_email_normalised) ||
+    normaliseEmail(record.licence_holder_email);
+
+  const subject = buildRevocationNoticeSubject(record);
+
+  const emailResult = await sendCdasDownloadLinkRevocationNoticeEmail(env, {
+    recipientEmail,
+    documentTitle: record.document_id || record.link_document_id,
+    documentId: record.document_id || record.link_document_id,
+    licenceNumber: record.licence_number,
+    downloadReference: record.download_reference,
+    reason:
+      note ||
+      record.link_failure_reason ||
+      "Controlled download link revoked by RelayHub.",
+  });
+
+  const sent = Boolean(emailResult?.ok && emailResult?.sent);
+  const skipped = Boolean(emailResult?.ok && emailResult?.skipped);
+
+  await recordRevocationNoticeEmailEvent({
+    env,
+    record,
+    subject,
+    status: sent ? "sent" : skipped ? "blocked" : "failed",
+    provider: emailResult?.provider || "resend",
+    providerMessageId: emailResult?.provider_message_id || null,
+    error: sent ? null : emailResult?.error || (skipped ? "cdas_email_disabled" : "email_send_failed"),
+    message:
+      sent
+        ? "Download-link revocation notice sent."
+        : emailResult?.message || "Download-link revocation notice was not sent.",
+    metadata: {
+      phase: "3X-0T-C2",
+      actor,
+      note,
+      download_reference: record.download_reference,
+      licence_number: record.licence_number,
+      licence_status: record.licence_status,
+      licence_revoked_at: record.licence_revoked_at || null,
+      link_status: record.link_status,
+      link_revoked_at: record.link_revoked_at || null,
+      wording_rule:
+        "This notice is about link revocation only. It must not claim the licence was revoked unless the licence itself is revoked.",
+    },
+  });
+
+  await recordRevocationNoticeDownloadEvent({
+    env,
+    request,
+    record,
+    eventType: sent
+      ? "download_link_revocation_notice_sent"
+      : skipped
+        ? "download_link_revocation_notice_blocked"
+        : "download_link_revocation_notice_failed",
+    success: sent ? 1 : 0,
+    failureReason:
+      sent
+        ? cleanText(note || "3X-0T-C2 revocation notice sent")
+        : emailResult?.message || emailResult?.error || "email_not_sent",
+    provider: emailResult?.provider || null,
+    providerMessageId: emailResult?.provider_message_id || null,
+  });
+
+  if (!emailResult?.ok || !sent) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: skipped ? "cdas_email_disabled" : emailResult?.error || "email_send_failed",
+        message:
+          emailResult?.message ||
+          "The download-link revocation notice was not sent.",
+        email_result: {
+          ok: Boolean(emailResult?.ok),
+          sent,
+          skipped,
+          provider: emailResult?.provider || null,
+          status: emailResult?.status || null,
+          error: emailResult?.error || null,
+          provider_message_id: emailResult?.provider_message_id || null,
+        },
+        download_link: publicDownloadLink(record),
+        licence: publicLicence(record),
+        controls: {
+          sends_email: false,
+          reissues_link: false,
+          activates_link: false,
+          serves_download: false,
+          modifies_licence: false,
+          deletes_r2_object: false,
+          raw_token_returned: false,
+          token_hash_returned: false,
+        },
+      },
+      skipped ? 409 : 502,
+    );
+  }
+
+  return jsonResponse({
+    ok: true,
+    sent: true,
+    emailed: true,
+    action: "send_download_link_revocation_notice",
+    email_result: {
+      provider: emailResult.provider || "resend",
+      status: emailResult.status || null,
+      provider_message_id: emailResult.provider_message_id || null,
+    },
+    download_link: publicDownloadLink(record),
+    licence: publicLicence(record),
+    notice: {
+      notice_type: NOTICE_EMAIL_TYPE,
+      recipient_email: recipientEmail,
+      subject,
+      wording_rule:
+        "Notice states that the controlled download link was revoked or disabled. It does not state that the licence was revoked unless the licence itself is revoked.",
+    },
+    controls: {
+      verified_revoked_download_link: true,
+      sent_email: true,
+      sends_email: true,
+      reissues_link: false,
+      activates_link: false,
+      serves_download: false,
+      modifies_licence: false,
+      deletes_r2_object: false,
+      raw_token_returned: false,
+      token_hash_returned: false,
+      exposes_raw_r2_url: false,
+    },
+    safety: {
+      email_sent: true,
+      link_reissued: false,
+      link_activated: false,
+      pdf_served: false,
+      link_consumed: false,
+      licence_modified: false,
+    },
+    message:
+      "Download-link revocation notice was sent. No link was reissued, no link was activated, no PDF was served, and the licence was not modified.",
   });
 }
