@@ -546,11 +546,6 @@ export async function handleCdasOperationsJson(request, env) {
           l.status,
           l.issued_at,
           l.revoked_at,
-
-          NULL AS superseded_by,
-          NULL AS suspected_leak_at,
-          NULL AS confirmed_leak_at,
-
           l.generated_pdf_status,
           l.generated_pdf_object_key,
           l.generated_pdf_sha256,
@@ -607,14 +602,6 @@ export async function handleCdasOperationsJson(request, env) {
           ) AS latest_download_link_used_at,
 
           (
-            SELECT dl.expires_at
-            FROM document_download_links dl
-            WHERE dl.licence_id = l.id
-            ORDER BY dl.created_at DESC
-            LIMIT 1
-          ) AS latest_download_link_expires_at,
-
-          (
             SELECT dl.revoked_at
             FROM document_download_links dl
             WHERE dl.licence_id = l.id
@@ -631,14 +618,12 @@ export async function handleCdasOperationsJson(request, env) {
           ) AS latest_download_link_superseded_at,
 
           (
-            SELECT MAX(e.event_at)
-            FROM document_download_events e
-            JOIN document_download_links dl
-              ON dl.id = e.download_id
+            SELECT dl.expires_at
+            FROM document_download_links dl
             WHERE dl.licence_id = l.id
-              AND e.event_type = 'download_link_created_pending_activation'
-              AND e.success = 1
-          ) AS link_created_event_at,
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_expires_at,
 
           (
             SELECT MAX(e.event_at)
@@ -646,38 +631,9 @@ export async function handleCdasOperationsJson(request, env) {
             JOIN document_download_links dl
               ON dl.id = e.download_id
             WHERE dl.licence_id = l.id
-              AND e.event_type = 'download_link_activated'
+              AND e.event_type = 'download_link_revoked'
               AND e.success = 1
-          ) AS link_activated_event_at,
-
-          (
-            SELECT MAX(e.event_at)
-            FROM document_download_events e
-            JOIN document_download_links dl
-              ON dl.id = e.download_id
-            WHERE dl.licence_id = l.id
-              AND e.event_type = 'active_link_delivery_email_sent'
-              AND e.success = 1
-          ) AS email_sent_event_at,
-
-          (
-            SELECT MAX(e.event_at)
-            FROM document_download_events e
-            JOIN document_download_links dl
-              ON dl.id = e.download_id
-            WHERE dl.licence_id = l.id
-              AND e.event_type = 'document_downloaded'
-              AND e.success = 1
-          ) AS downloaded_event_at,
-
-          (
-            SELECT MAX(e.event_at)
-            FROM document_download_events e
-            JOIN document_download_links dl
-              ON dl.id = e.download_id
-            WHERE dl.licence_id = l.id
-              AND e.event_type = 'download_replay_denied'
-          ) AS replay_denied_event_at,
+          ) AS link_revoked_event_at,
 
           (
             SELECT COUNT(*)
@@ -711,11 +667,9 @@ export async function handleCdasOperationsJson(request, env) {
 
           dl.status AS download_link_status,
           dl.download_reference AS download_reference,
-          dl.activated_at AS activated_at,
-          dl.used_at AS used_at,
           dl.revoked_at AS revoked_at,
+          dl.used_at AS used_at,
           dl.superseded_at AS superseded_at,
-          dl.expires_at AS expires_at,
 
           (
             SELECT COUNT(*)
@@ -730,6 +684,7 @@ export async function handleCdasOperationsJson(request, env) {
         LIMIT 30
       `,
     ),
+
   };
 
   const queryFailures = compactFailureList({

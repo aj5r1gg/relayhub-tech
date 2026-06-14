@@ -1205,6 +1205,7 @@ const description =
             Token handling: raw controlled download URLs are shown only when a link is created.
             They are not stored in D1 and cannot be recovered later from the Operations Centre.
           </div>
+          ${downloadLinkRecoveryButtons(row)}
           ${licenceWorkflowButtons(row)}
         </div>
       `;
@@ -1282,6 +1283,144 @@ const description =
           ])}
         </div>
       `;
+    }
+
+
+    function canRevokeDownloadLink(row) {
+      const status = String(row.latest_download_link_status || "").toLowerCase();
+
+      return Boolean(row.latest_download_link_id) &&
+        ["created", "pending_generation", "pending_activation", "sent", "active"].includes(status) &&
+        !row.latest_download_link_used_at &&
+        !row.latest_download_link_revoked_at &&
+        !row.latest_download_link_superseded_at;
+    }
+
+    function downloadLinkRecoveryButtons(row) {
+      const linkId = escapeHtml(row.latest_download_link_id || "");
+      const linkReference = escapeHtml(row.latest_download_reference || row.latest_download_link_id || "");
+      const status = String(row.latest_download_link_status || "").toLowerCase();
+
+      if (!linkId) {
+        return `
+          <div class="rh-request-action-row-inner">
+            <span class="rh-request-action-label">Recovery</span>
+            <span class="rh-request-action-label">No controlled link</span>
+          </div>
+        `;
+      }
+
+      if (!canRevokeDownloadLink(row)) {
+        const stateLabel =
+          status === "used"
+            ? "Used link cannot be revoked"
+            : status === "revoked" || row.latest_download_link_revoked_at
+              ? "Already revoked"
+              : status === "superseded" || row.latest_download_link_superseded_at
+                ? "Superseded link"
+                : "Revocation unavailable";
+
+        return `
+          <div class="rh-request-action-row-inner">
+            <span class="rh-request-action-label">Recovery</span>
+            <span class="rh-request-action-label">${escapeHtml(stateLabel)}</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="rh-request-action-row-inner">
+          <span class="rh-request-action-label">Recovery</span>
+          <button
+            class="rh-mini-button"
+            type="button"
+            data-recovery-action="check-revocation"
+            data-download-link-id="${linkId}"
+            data-download-reference="${linkReference}"
+          >Check Revoke</button>
+          <button
+            class="rh-mini-button rh-mini-button-danger"
+            type="button"
+            data-recovery-action="revoke-link"
+            data-download-link-id="${linkId}"
+            data-download-reference="${linkReference}"
+          >Revoke Link</button>
+        </div>
+      `;
+    }
+
+    async function handleRecoveryAction(action, button) {
+      const downloadLinkId = button.getAttribute("data-download-link-id") || "";
+      const downloadReference =
+        button.getAttribute("data-download-reference") || downloadLinkId;
+
+      try {
+        if (action === "check-revocation") {
+          setReviewActionResult(
+            "loading",
+            `Checking revocation eligibility for ${downloadReference}…`,
+          );
+
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/revocation-eligibility`,
+          );
+
+          setReviewActionResult(
+            data.eligible ? "success" : "info",
+            data.eligible
+              ? `${downloadReference} is eligible for guarded revocation.`
+              : `${downloadReference} cannot be revoked. Blockers: ${(data.blockers || []).join(", ") || "none reported"}.`,
+          );
+
+          return;
+        }
+
+        if (action === "revoke-link") {
+          const reason = window.prompt(
+            `Reason for revoking ${downloadReference}:`,
+            "Operations Centre recovery action. Revoke controlled download link only. Do not reissue, email, serve PDF, delete R2 object, or modify licence.",
+          );
+
+          if (reason === null) {
+            setReviewActionResult("info", "Revocation cancelled.");
+            return;
+          }
+
+          const confirmed = window.confirm(
+            `Revoke ${downloadReference}? This disables the controlled link but does not delete the PDF, reissue a link, send email, or modify the licence.`,
+          );
+
+          if (!confirmed) {
+            setReviewActionResult("info", "Revocation cancelled.");
+            return;
+          }
+
+          setReviewActionResult("loading", `Revoking ${downloadReference}…`);
+
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/revoke`,
+            {
+              method: "POST",
+              body: {
+                actor: "operations-centre",
+                reason,
+              },
+            },
+          );
+
+          setReviewActionResult(
+            "success",
+            `${data.download_link?.download_reference || downloadReference} was revoked. Event recorded: ${data.event_recorded ? "yes" : "no"}.`,
+          );
+
+          await loadOperations();
+          return;
+        }
+
+        setReviewActionResult("error", `Unknown recovery action: ${action}`);
+      } catch (error) {
+        setReviewActionResult("error", error?.message || "Recovery action failed.");
+      }
     }
 
     function licenceWorkflowButtons(row) {
@@ -2034,6 +2173,17 @@ const description =
 
         if (action) {
           handleCdasWorkflowAction(action, workflowButton);
+          return;
+        }
+      }
+
+      const recoveryButton = event.target.closest("[data-recovery-action][data-download-link-id]");
+
+      if (recoveryButton) {
+        const action = recoveryButton.getAttribute("data-recovery-action");
+
+        if (action) {
+          handleRecoveryAction(action, recoveryButton);
           return;
         }
       }
