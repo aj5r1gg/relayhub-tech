@@ -382,6 +382,8 @@ const pageDescription =
       background: #f8fafc;
       color: rgba(15, 23, 42, 0.75);
       font-size: 0.95rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
     }
 
     .rh-admin-status[data-state="error"] {
@@ -661,6 +663,64 @@ const pageDescription =
       return `rh-badge rh-badge-${text}`;
     }
 
+    function normaliseResponseSnippet(value) {
+      return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300);
+    }
+
+    async function readJsonResponse(response, endpoint) {
+      const contentType = response.headers.get("content-type") || "";
+      const rawText = await response.text();
+      const trimmed = rawText.trim();
+
+      if (!trimmed) {
+        return {};
+      }
+
+      const looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
+
+      if (!contentType.toLowerCase().includes("application/json") && !looksLikeJson) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Expected JSON from ${endpoint}, but received HTTP ${response.status} ${response.statusText || ""} ` +
+          `with content-type "${contentType || "unknown"}". Response starts: ${snippet || "empty response"}`
+        );
+      }
+
+      try {
+        return JSON.parse(trimmed);
+      } catch (error) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Invalid JSON from ${endpoint}. HTTP ${response.status} ${response.statusText || ""}. ` +
+          `Response starts: ${snippet || "empty response"}`
+        );
+      }
+    }
+
+    async function fetchAdminJson(endpoint, token, options = {}) {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        ...(options.headers || {}),
+      };
+
+      const response = await fetch(endpoint, {
+        method: options.method || "GET",
+        headers,
+        body: options.body,
+        cache: "no-store",
+      });
+
+      const data = await readJsonResponse(response, endpoint);
+
+      return { response, data };
+    }
+
     function isVerificationResendAllowed(row) {
       if (!row) {
         return false;
@@ -726,21 +786,19 @@ const pageDescription =
       let data;
 
       try {
-        response = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load CDAS access requests: ${error.message}`, "error");
+        renderRequests([]);
+        updateMetrics([]);
         return;
       }
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "CDAS access requests could not be loaded.",
+          data?.message || data?.error || `CDAS access requests could not be loaded. HTTP ${response.status}.`,
           "error"
         );
 
@@ -862,22 +920,17 @@ const pageDescription =
         return;
       }
 
+      const endpoint = `/api/admin/cdas/access-requests/${encodeURIComponent(requestId)}`;
+
       setStatus("Loading access request detail…");
 
       let response;
       let data;
 
       try {
-        response = await fetch(
-          `/api/admin/cdas/access-requests/${encodeURIComponent(requestId)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load access request detail: ${error.message}`, "error");
         return;
@@ -885,7 +938,7 @@ const pageDescription =
 
       if (!response.ok || !data.ok || !data.request) {
         setStatus(
-          data?.message || data?.error || "Access request detail could not be loaded.",
+          data?.message || data?.error || `Access request detail could not be loaded. HTTP ${response.status}.`,
           "error"
         );
         return;
@@ -998,23 +1051,21 @@ const pageDescription =
       }
 
       resendVerificationButton.disabled = true;
+
+      const endpoint = `/api/admin/cdas/access-requests/${encodeURIComponent(currentDetailRequestId)}/resend-verification`;
+
       setStatus("Resending verification email…");
 
       let response;
       let data;
 
       try {
-        response = await fetch(
-          `/api/admin/cdas/access-requests/${encodeURIComponent(currentDetailRequestId)}/resend-verification`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const result = await fetchAdminJson(endpoint, token, {
+          method: "POST",
+        });
 
-        data = await response.json();
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not resend verification email: ${error.message}`, "error");
         updateResendButton(currentDetailRequest);
@@ -1023,7 +1074,7 @@ const pageDescription =
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "Verification email could not be resent.",
+          data?.message || data?.error || `Verification email could not be resent. HTTP ${response.status}.`,
           "error"
         );
         updateResendButton(currentDetailRequest);

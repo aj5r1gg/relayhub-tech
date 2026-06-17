@@ -406,6 +406,8 @@ const pageDescription =
       background: #f8fafc;
       color: rgba(15, 23, 42, 0.75);
       font-size: 0.95rem;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
     }
 
     .rh-admin-status[data-state="error"] {
@@ -716,6 +718,60 @@ const pageDescription =
       return "rh-badge";
     }
 
+    function normaliseResponseSnippet(value) {
+      return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300);
+    }
+
+    async function readJsonResponse(response, endpoint) {
+      const contentType = response.headers.get("content-type") || "";
+      const rawText = await response.text();
+      const trimmed = rawText.trim();
+
+      if (!trimmed) {
+        return {};
+      }
+
+      const looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
+
+      if (!contentType.toLowerCase().includes("application/json") && !looksLikeJson) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Expected JSON from ${endpoint}, but received HTTP ${response.status} ${response.statusText || ""} ` +
+          `with content-type "${contentType || "unknown"}". Response starts: ${snippet || "empty response"}`
+        );
+      }
+
+      try {
+        return JSON.parse(trimmed);
+      } catch (error) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Invalid JSON from ${endpoint}. HTTP ${response.status} ${response.statusText || ""}. ` +
+          `Response starts: ${snippet || "empty response"}`
+        );
+      }
+    }
+
+    async function fetchAdminJson(endpoint, token) {
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      });
+
+      const data = await readJsonResponse(response, endpoint);
+
+      return { response, data };
+    }
+
     function getFilters() {
       const formData = new FormData(filtersForm);
       const params = new URLSearchParams();
@@ -753,21 +809,19 @@ const pageDescription =
       let data;
 
       try {
-        response = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load CDAS licence terms: ${error.message}`, "error");
+        renderTerms([]);
+        updateMetrics([]);
         return;
       }
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "CDAS licence terms could not be loaded.",
+          data?.message || data?.error || `CDAS licence terms could not be loaded. HTTP ${response.status}.`,
           "error"
         );
 
@@ -865,25 +919,35 @@ const pageDescription =
 
       if (!row || !row.body) {
         const token = getStoredToken();
+        const endpoint = `/api/admin/cdas/licence-terms/${encodeURIComponent(termsId)}`;
+
+        if (!token) {
+          setStatus("Enter and save your admin token to load the full terms record.", "error");
+          return;
+        }
+
+        let response;
+        let data;
 
         try {
-          const response = await fetch(
-            `/api/admin/cdas/licence-terms/${encodeURIComponent(termsId)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          const data = await response.json();
-
-          if (response.ok && data.ok && data.terms) {
-            row = data.terms;
-          }
+          const result = await fetchAdminJson(endpoint, token);
+          response = result.response;
+          data = result.data;
         } catch (error) {
           setStatus(`Could not load full terms record: ${error.message}`, "error");
           return;
+        }
+
+        if (!response.ok || !data.ok) {
+          setStatus(
+            data?.message || data?.error || `Full terms record could not be loaded. HTTP ${response.status}.`,
+            "error"
+          );
+          return;
+        }
+
+        if (data.terms) {
+          row = data.terms;
         }
       }
 
@@ -998,7 +1062,7 @@ const pageDescription =
     } else {
       setStatus("Enter and save your admin token to load CDAS licence terms.");
     }
-    
+
     window.relayhubAdminTokenUpdated = () => {
       if (typeof fetchDownloadLinks === "function") {
         fetchDownloadLinks();
@@ -1014,6 +1078,10 @@ const pageDescription =
 
       if (typeof fetchLicenceTerms === "function") {
         fetchLicenceTerms();
+      }
+
+      if (typeof fetchTerms === "function") {
+        fetchTerms();
       }
 
       if (typeof fetchAccessRequests === "function") {

@@ -1189,6 +1189,45 @@ const pageDescription =
       statusMessage.dataset.state = mode;
     }
 
+    function normaliseResponseSnippet(value) {
+      return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300);
+    }
+
+    async function readJsonResponse(response, endpoint = "admin API endpoint") {
+      const contentType = response.headers.get("content-type") || "";
+      const rawText = await response.text();
+      const trimmed = rawText.trim();
+
+      if (!trimmed) {
+        return {};
+      }
+
+      const looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
+
+      if (!contentType.toLowerCase().includes("application/json") && !looksLikeJson) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Expected JSON from ${endpoint}, but received HTTP ${response.status} ${response.statusText || ""} ` +
+          `with content-type "${contentType || "unknown"}". Response starts: ${snippet || "empty response"}`
+        );
+      }
+
+      try {
+        return JSON.parse(trimmed);
+      } catch (error) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Invalid JSON from ${endpoint}. HTTP ${response.status} ${response.statusText || ""}. ` +
+          `Response starts: ${snippet || "empty response"}`
+        );
+      }
+    }
+
     function escapeHtml(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -1296,7 +1335,7 @@ const pageDescription =
           },
         });
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         setStatus(`Could not load CDAS licences: ${error.message}`, "error");
         return;
@@ -1645,7 +1684,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         generationStatus.dataset.state = "blocked";
         generationStatus.textContent = `Could not load generation preview: ${error.message}`;
@@ -1792,7 +1831,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         pdfInspectionStatus.dataset.state = "failed";
         pdfInspectionStatus.textContent = `Could not inspect generated PDF: ${error.message}`;
@@ -2193,7 +2232,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         downloadHistoryStatus.dataset.state = "error";
         downloadHistoryStatus.textContent = `Could not load download history: ${error.message}`;
@@ -2501,7 +2540,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         evidenceBundleStatus.dataset.state = "error";
         evidenceBundleStatus.textContent = `Could not record evidence bundle export: ${error.message}`;
@@ -2580,7 +2619,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         evidenceBundleStatus.dataset.state = "error";
         evidenceBundleStatus.textContent = `Could not archive evidence bundle: ${error.message}`;
@@ -2655,7 +2694,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         downloadLinkStatus.dataset.state = "error";
         downloadLinkStatus.textContent = `Could not prepare and email controlled download: ${error.message}`;
@@ -2740,7 +2779,7 @@ const pageDescription =
           }
         );
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         downloadLinkStatus.dataset.state = "error";
         downloadLinkStatus.textContent = `Could not reissue controlled download: ${error.message}`;
@@ -2823,7 +2862,7 @@ const pageDescription =
           },
         });
 
-        data = await response.json();
+        data = await readJsonResponse(response, response.url || "admin API endpoint");
       } catch (error) {
         setStatus(`Could not load licence detail: ${error.message}`, "error");
         return;

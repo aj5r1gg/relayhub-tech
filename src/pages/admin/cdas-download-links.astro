@@ -49,15 +49,12 @@ const pageDescription =
         <div>
           <h2>Download link registry</h2>
           <p>
-            Search and filter controlled download links. Raw tokens are not
-            stored and cannot be recovered from this page.
+            Inspect generated CDAS download links, their lifecycle state, generated
+            PDF evidence, and associated download events.
           </p>
         </div>
 
         <div class="rh-admin-actions">
-          <a class="rh-button rh-button-secondary" href="/admin/cdas-licences">
-            Licences
-          </a>
           <button class="rh-button rh-button-secondary" id="refresh-button" type="button">
             Refresh
           </button>
@@ -67,22 +64,7 @@ const pageDescription =
       <form class="rh-admin-filters" id="filters-form">
         <label>
           Search
-          <input
-            id="filter-q"
-            name="q"
-            type="search"
-            placeholder="Link ID, licence, email, document…"
-          />
-        </label>
-
-        <label>
-          Document
-          <input
-            id="filter-document"
-            name="document_id"
-            type="search"
-            placeholder="relayhub-overview"
-          />
+          <input id="filter-q" name="q" type="search" placeholder="Link ID, licence, email, holder, document…" />
         </label>
 
         <label>
@@ -90,12 +72,17 @@ const pageDescription =
           <select id="filter-status" name="status">
             <option value="">All statuses</option>
             <option value="created">created</option>
+            <option value="active">active</option>
             <option value="used">used</option>
-            <option value="revoked">revoked</option>
-            <option value="superseded">superseded</option>
             <option value="expired">expired</option>
+            <option value="revoked">revoked</option>
             <option value="failed">failed</option>
           </select>
+        </label>
+
+        <label>
+          Licence ID
+          <input id="filter-licence-id" name="licence_id" type="search" placeholder="lic_…" />
         </label>
 
         <div class="rh-admin-filter-actions">
@@ -122,12 +109,11 @@ const pageDescription =
               <th>Status</th>
               <th>Lifecycle</th>
               <th>Events</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody id="links-body">
             <tr>
-              <td colspan="7" class="rh-admin-empty">
+              <td colspan="6" class="rh-admin-empty">
                 No records loaded yet.
               </td>
             </tr>
@@ -141,7 +127,7 @@ const pageDescription =
         <div>
           <h2>Download link detail</h2>
           <p id="detail-subtitle">
-            Selected controlled download link.
+            Selected CDAS download link record.
           </p>
         </div>
 
@@ -150,53 +136,35 @@ const pageDescription =
         </button>
       </div>
 
-      <div class="rh-detail-grid-wrap" id="detail-grid"></div>
+      <div class="rh-admin-detail-layout">
+        <section>
+          <h3>Link metadata</h3>
+          <div class="rh-detail-grid" id="detail-grid"></div>
+        </section>
 
-      <section class="rh-admin-subcard">
-        <div class="rh-subcard-heading">
-          <p class="rh-eyebrow">Generated PDF evidence</p>
-          <h3>Bound generated document</h3>
-          <p>
-            Evidence recorded against the licence. This does not expose the
-            private R2 object as a public URL.
-          </p>
-        </div>
+        <section>
+          <h3>Generated PDF evidence</h3>
+          <div class="rh-detail-grid" id="pdf-grid"></div>
+        </section>
 
-        <div class="rh-detail-grid-wrap" id="pdf-grid"></div>
-      </section>
+        <section>
+          <h3>Safety controls</h3>
+          <div class="rh-detail-grid" id="controls-grid"></div>
+        </section>
 
-      <section class="rh-admin-subcard">
-        <div class="rh-subcard-heading">
-          <p class="rh-eyebrow">Audit trail</p>
-          <h3>Download link events</h3>
-          <p>
-            Lifecycle events for this link. IP and user-agent values are shown
-            only as presence indicators.
-          </p>
-        </div>
-
-        <div class="rh-event-list" id="event-list"></div>
-      </section>
-
-      <section class="rh-admin-subcard">
-        <div class="rh-subcard-heading">
-          <p class="rh-eyebrow">Control proof</p>
-          <h3>Privacy and exposure controls</h3>
-          <p>
-            Proof returned by the Worker for this admin-only audit endpoint.
-          </p>
-        </div>
-
-        <div class="rh-detail-grid-wrap" id="controls-grid"></div>
-      </section>
+        <section>
+          <h3>Download events</h3>
+          <div class="rh-event-list" id="event-list"></div>
+        </section>
+      </div>
     </section>
   </main>
 
   <style>
     .rh-admin-page {
-      width: min(1240px, calc(100% - 2rem));
+      width: min(1180px, calc(100% - 2rem));
       margin: 0 auto;
-      padding: 7rem 0 5rem;
+      padding: 3rem 0 5rem;
     }
 
     .rh-admin-hero {
@@ -205,7 +173,7 @@ const pageDescription =
       border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 1.5rem;
       background:
-        radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 36rem),
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 36rem),
         linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
       box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
     }
@@ -215,11 +183,10 @@ const pageDescription =
       font-size: clamp(2rem, 5vw, 3.5rem);
       line-height: 1;
       letter-spacing: -0.05em;
-      color: #0f172a;
     }
 
     .rh-admin-hero p {
-      max-width: 900px;
+      max-width: 820px;
       margin: 0;
       color: rgba(15, 23, 42, 0.74);
       font-size: 1.05rem;
@@ -228,16 +195,15 @@ const pageDescription =
 
     .rh-eyebrow {
       margin: 0;
-      color: #0284c7;
-      font-size: 0.76rem;
-      font-weight: 900;
+      color: #2563eb;
+      font-size: 0.78rem;
+      font-weight: 800;
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
     .rh-admin-card,
-    .rh-admin-metric,
-    .rh-admin-subcard {
+    .rh-admin-metric {
       border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 1.25rem;
       background: rgba(255, 255, 255, 0.96);
@@ -249,12 +215,6 @@ const pageDescription =
       margin-top: 1rem;
     }
 
-    .rh-admin-subcard {
-      margin-top: 1rem;
-      padding: 1rem;
-      box-shadow: none;
-    }
-
     .rh-admin-section-heading {
       display: flex;
       align-items: flex-start;
@@ -263,26 +223,20 @@ const pageDescription =
     }
 
     .rh-admin-card h2,
-    .rh-admin-section-heading h2,
-    .rh-subcard-heading h3 {
+    .rh-admin-section-heading h2 {
       margin: 0;
-      color: #0f172a;
+      font-size: 1.25rem;
       letter-spacing: -0.03em;
     }
 
-    .rh-admin-card h2,
-    .rh-admin-section-heading h2 {
-      font-size: 1.25rem;
-    }
-
-    .rh-subcard-heading h3 {
-      margin-top: 0.25rem;
-      font-size: 1.15rem;
+    .rh-admin-card h3 {
+      margin: 1.25rem 0 0.75rem;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
     }
 
     .rh-admin-card p,
-    .rh-admin-section-heading p,
-    .rh-subcard-heading p {
+    .rh-admin-section-heading p {
       margin: 0.35rem 0 0;
       color: rgba(15, 23, 42, 0.67);
       line-height: 1.6;
@@ -330,6 +284,33 @@ const pageDescription =
     .rh-admin-actions,
     .rh-admin-filter-actions {
       justify-content: flex-end;
+    }
+
+    .rh-admin-action-row td {
+      padding-top: 0.75rem;
+      padding-bottom: 0.9rem;
+      background: #f8fafc;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+    }
+
+    .rh-admin-action-row .rh-admin-row-actions {
+      justify-content: flex-start;
+    }
+
+    .rh-admin-action-row-label {
+      color: rgba(15, 23, 42, 0.56);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .rh-admin-action-row-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .rh-admin-filters {
@@ -419,18 +400,11 @@ const pageDescription =
     .rh-button-danger:hover {
       background: #7f1d1d;
       color: #fff;
-      border-color: #7f1d1d;
     }
 
-    .rh-button[disabled],
-    .rh-button[aria-disabled="true"] {
+    .rh-button[disabled] {
       cursor: not-allowed;
-      opacity: 0.54;
-      transform: none;
-    }
-
-    .rh-button[disabled]:hover,
-    .rh-button[aria-disabled="true"]:hover {
+      opacity: 0.55;
       transform: none;
     }
 
@@ -441,6 +415,8 @@ const pageDescription =
       background: #f8fafc;
       color: rgba(15, 23, 42, 0.75);
       font-size: 0.95rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
     }
 
     .rh-admin-status[data-state="error"] {
@@ -495,7 +471,7 @@ const pageDescription =
 
     .rh-stack {
       display: grid;
-      gap: 0.18rem;
+      gap: 0.2rem;
     }
 
     .rh-stack strong {
@@ -503,9 +479,16 @@ const pageDescription =
     }
 
     .rh-stack span {
-      color: rgba(15, 23, 42, 0.64);
+      color: rgba(15, 23, 42, 0.66);
       font-size: 0.82rem;
+      line-height: 1.45;
       word-break: break-word;
+    }
+
+    .rh-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.86rem;
+      word-break: break-all;
     }
 
     .rh-badge {
@@ -514,184 +497,125 @@ const pageDescription =
       width: fit-content;
       border-radius: 999px;
       padding: 0.25rem 0.55rem;
+      background: #f1f5f9;
+      color: #334155;
       font-size: 0.78rem;
       font-weight: 800;
       white-space: nowrap;
-      background: #f1f5f9;
-      color: #334155;
     }
 
     .rh-badge-created {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: #e0f2fe;
+      color: #075985;
     }
 
-    .rh-badge-used {
+    .rh-badge-active {
       background: #dcfce7;
       color: #166534;
     }
 
-    .rh-badge-revoked,
+    .rh-badge-used {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
     .rh-badge-expired,
+    .rh-badge-revoked,
     .rh-badge-failed {
       background: #fee2e2;
       color: #991b1b;
-    }
-
-    .rh-badge-superseded {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .rh-code {
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        "Liberation Mono",
-        monospace;
-      font-size: 0.82rem;
-      overflow-wrap: anywhere;
-      word-break: break-word;
     }
 
     .rh-admin-detail-card {
       margin-top: 1rem;
     }
 
-    .rh-detail-grid-wrap {
+    .rh-admin-detail-layout {
       display: grid;
-      gap: 0.75rem;
+      gap: 1rem;
       margin-top: 1rem;
     }
 
-    .rh-detail-row {
+    .rh-detail-grid {
       display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-      gap: 1rem;
-      align-items: start;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .rh-detail-row {
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 0.9rem;
       padding: 0.85rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      border-radius: 0.85rem;
       background: #f8fafc;
     }
 
     .rh-detail-row dt {
-      color: rgba(15, 23, 42, 0.55);
-      font-size: 0.72rem;
+      color: rgba(15, 23, 42, 0.56);
+      font-size: 0.76rem;
       font-weight: 900;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
     .rh-detail-row dd {
-      margin: 0;
+      margin: 0.3rem 0 0;
       color: #0f172a;
-      overflow-wrap: anywhere;
       word-break: break-word;
       line-height: 1.5;
     }
 
     .rh-event-list {
       display: grid;
-      gap: 0.8rem;
-      margin-top: 1rem;
+      gap: 0.75rem;
     }
 
     .rh-event-card {
       border: 1px solid rgba(15, 23, 42, 0.1);
       border-radius: 1rem;
-      background: #fff;
-      overflow: hidden;
-    }
-
-    .rh-event-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 1rem;
       background: #f8fafc;
     }
 
-    .rh-event-card-header strong {
-      color: #0f172a;
+    .rh-event-card h4 {
+      margin: 0 0 0.5rem;
+      font-size: 0.95rem;
     }
 
-    .rh-event-card-header span {
-      color: rgba(15, 23, 42, 0.62);
-      font-size: 0.84rem;
-    }
-
-    .rh-event-card-body {
+    .rh-event-card dl {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0;
+      grid-template-columns: 150px 1fr;
+      gap: 0.35rem 0.75rem;
+      margin: 0;
+      font-size: 0.88rem;
     }
 
-    .rh-event-field {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    .rh-event-card dt {
+      color: rgba(15, 23, 42, 0.56);
+      font-weight: 800;
     }
 
-    .rh-event-field:nth-child(odd) {
-      border-right: 1px solid rgba(15, 23, 42, 0.06);
-    }
-
-    .rh-event-field dt {
-      color: rgba(15, 23, 42, 0.55);
-      font-size: 0.7rem;
-      font-weight: 900;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .rh-event-field dd {
-      margin: 0.25rem 0 0;
+    .rh-event-card dd {
+      margin: 0;
       color: #0f172a;
-      line-height: 1.45;
-      overflow-wrap: anywhere;
       word-break: break-word;
     }
 
     @media (max-width: 960px) {
-      .rh-admin-page {
-        padding-top: 6rem;
-      }
-
       .rh-admin-section-heading {
         display: grid;
       }
 
-      .rh-admin-summary-grid {
+      .rh-admin-summary-grid,
+      .rh-admin-filters,
+      .rh-detail-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .rh-admin-filters {
-        grid-template-columns: 1fr;
-      }
-
-      .rh-detail-row {
-        grid-template-columns: 1fr;
-        gap: 0.35rem;
-      }
-
-      .rh-event-card-body {
-        grid-template-columns: 1fr;
-      }
-
-      .rh-event-field:nth-child(odd) {
-        border-right: 0;
       }
     }
 
     @media (max-width: 640px) {
       .rh-admin-page {
-        width: min(100% - 1rem, 1240px);
-        padding-top: 5.5rem;
+        width: min(100% - 1rem, 1180px);
+        padding-top: 1rem;
       }
 
       .rh-admin-hero,
@@ -700,7 +624,9 @@ const pageDescription =
         border-radius: 1rem;
       }
 
-      .rh-admin-summary-grid {
+      .rh-admin-summary-grid,
+      .rh-admin-filters,
+      .rh-detail-grid {
         grid-template-columns: 1fr;
       }
 
@@ -708,6 +634,10 @@ const pageDescription =
       .rh-admin-actions .rh-button,
       .rh-admin-row-actions .rh-button {
         width: 100%;
+      }
+
+      .rh-event-card dl {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -718,7 +648,7 @@ const pageDescription =
     const TOKEN_STORAGE_KEY = "relayhub_admin_token";
 
     const state = {
-      rows: [],
+      links: [],
       total: 0,
       limit: 100,
       offset: 0,
@@ -752,6 +682,45 @@ const pageDescription =
       statusMessage.dataset.state = mode;
     }
 
+    function normaliseResponseSnippet(value) {
+      return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300);
+    }
+
+    async function readJsonResponse(response, endpoint = "admin API endpoint") {
+      const contentType = response.headers.get("content-type") || "";
+      const rawText = await response.text();
+      const trimmed = rawText.trim();
+
+      if (!trimmed) {
+        return {};
+      }
+
+      const looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
+
+      if (!contentType.toLowerCase().includes("application/json") && !looksLikeJson) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Expected JSON from ${endpoint}, but received HTTP ${response.status} ${response.statusText || ""} ` +
+          `with content-type "${contentType || "unknown"}". Response starts: ${snippet || "empty response"}`
+        );
+      }
+
+      try {
+        return JSON.parse(trimmed);
+      } catch (error) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Invalid JSON from ${endpoint}. HTTP ${response.status} ${response.statusText || ""}. ` +
+          `Response starts: ${snippet || "empty response"}`
+        );
+      }
+    }
+
     function escapeHtml(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -767,10 +736,6 @@ const pageDescription =
       }
 
       return String(value);
-    }
-
-    function booleanText(value) {
-      return value ? "Yes" : "No";
     }
 
     function formatDate(value) {
@@ -791,24 +756,37 @@ const pageDescription =
       });
     }
 
+    function booleanText(value) {
+      return Number(value) === 1 || value === true ? "yes" : "no";
+    }
+
     function badgeClass(value) {
       const text = String(value || "").toLowerCase();
 
-      if (!text) {
-        return "rh-badge";
-      }
+      if (!text) return "rh-badge";
 
       return `rh-badge rh-badge-${text}`;
     }
 
     function canRevokeLink(row) {
-      return (
-        row &&
-        row.status === "created" &&
-        !row.used_at &&
-        !row.revoked_at &&
-        !row.superseded_at
-      );
+      return row && row.status === "created" && !row.used_at;
+    }
+
+    async function fetchAdminJson(endpoint, token, options = {}) {
+      const response = await fetch(endpoint, {
+        method: options.method || "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          ...(options.headers || {}),
+        },
+        body: options.body,
+        cache: "no-store",
+      });
+
+      const data = await readJsonResponse(response, response.url || "admin API endpoint");
+
+      return { response, data };
     }
 
     function getFilters() {
@@ -829,17 +807,18 @@ const pageDescription =
       return params;
     }
 
-    async function fetchDownloadLinks() {
+    async function fetchLinks() {
       const token = getStoredToken();
 
       if (!token) {
-        setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
         renderLinks([]);
         updateMetrics([]);
         return;
       }
 
       const params = getFilters();
+      const endpoint = `/api/admin/cdas/download-links?${params.toString()}`;
 
       setStatus("Loading CDAS download links…");
 
@@ -847,21 +826,19 @@ const pageDescription =
       let data;
 
       try {
-        response = await fetch(`/api/admin/cdas/download-links?${params.toString()}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load CDAS download links: ${error.message}`, "error");
+        renderLinks([]);
+        updateMetrics([]);
         return;
       }
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "CDAS download links could not be loaded.",
+          data?.message || data?.error || `CDAS download links could not be loaded. HTTP ${response.status}.`,
           "error"
         );
 
@@ -870,14 +847,14 @@ const pageDescription =
         return;
       }
 
-      state.rows = Array.isArray(data.rows) ? data.rows : [];
-      state.total = Number(data.total || state.rows.length || 0);
+      state.links = Array.isArray(data.rows) ? data.rows : [];
+      state.total = Number(data.total || state.links.length || 0);
 
-      renderLinks(state.rows);
-      updateMetrics(state.rows);
+      renderLinks(state.links);
+      updateMetrics(state.links);
 
       setStatus(
-        `Loaded ${state.rows.length} CDAS download link record(s). Total matching records: ${state.total}.`,
+        `Loaded ${state.links.length} CDAS download link record(s). Total matching records: ${state.total}.`,
         "success"
       );
     }
@@ -885,9 +862,10 @@ const pageDescription =
     function updateMetrics(rows) {
       const created = rows.filter((row) => row.status === "created").length;
       const used = rows.filter((row) => row.status === "used").length;
-      const failures = rows.reduce((total, row) => {
-        return total + Number(row.events?.failure_count || 0);
-      }, 0);
+      const failures = rows.reduce(
+        (count, row) => count + Number(row.events?.failure_count || 0),
+        0
+      );
 
       metricTotal.textContent = String(state.total || rows.length || 0);
       metricCreated.textContent = String(created);
@@ -899,7 +877,7 @@ const pageDescription =
       if (!rows.length) {
         linksBody.innerHTML = `
           <tr>
-            <td colspan="7" class="rh-admin-empty">
+            <td colspan="6" class="rh-admin-empty">
               No CDAS download links found.
             </td>
           </tr>
@@ -909,6 +887,28 @@ const pageDescription =
 
       linksBody.innerHTML = rows
         .map((row) => {
+          const revokeButton = canRevokeLink(row)
+            ? `
+              <button
+                class="rh-button rh-button-danger"
+                type="button"
+                data-revoke-download-link="${escapeHtml(row.id)}"
+              >
+                Revoke
+              </button>
+            `
+            : `
+              <button
+                class="rh-button rh-button-secondary"
+                type="button"
+                disabled
+                aria-disabled="true"
+                title="Only unused created links can be revoked."
+              >
+                Revoke
+              </button>
+            `;
+
           return `
             <tr>
               <td>
@@ -958,40 +958,26 @@ const pageDescription =
                   <span>Last: ${escapeHtml(formatDate(row.events?.last_event_at))}</span>
                 </div>
               </td>
+            </tr>
 
-              <td>
-                <div class="rh-admin-row-actions">
-                  <button
-                    class="rh-button rh-button-secondary"
-                    type="button"
-                    data-view-download-link="${escapeHtml(row.id)}"
-                  >
-                    View
-                  </button>
+            <tr class="rh-admin-action-row">
+              <td colspan="6">
+                <div class="rh-admin-action-row-inner">
+                  <span class="rh-admin-action-row-label">
+                    Actions for ${escapeHtml(row.id)}
+                  </span>
 
-                  ${
-                    canRevokeLink(row)
-                      ? `
-                        <button
-                          class="rh-button rh-button-danger"
-                          type="button"
-                          data-revoke-download-link="${escapeHtml(row.id)}"
-                        >
-                          Revoke
-                        </button>
-                      `
-                      : `
-                        <button
-                          class="rh-button rh-button-secondary"
-                          type="button"
-                          disabled
-                          aria-disabled="true"
-                          title="Only unused created links can be revoked."
-                        >
-                          Revoke
-                        </button>
-                      `
-                  }
+                  <div class="rh-admin-row-actions">
+                    <button
+                      class="rh-button rh-button-secondary"
+                      type="button"
+                      data-view-download-link="${escapeHtml(row.id)}"
+                    >
+                      View
+                    </button>
+
+                    ${revokeButton}
+                  </div>
                 </div>
               </td>
             </tr>
@@ -1013,130 +999,15 @@ const pageDescription =
       `;
     }
 
-    function renderDetail(data) {
-      const link = data.download_link || {};
-      const pdf = link.generated_pdf || {};
-      const controls = data.controls || {};
-      const events = Array.isArray(data.events) ? data.events : [];
-
-      detailSubtitle.textContent = `${formatValue(link.id)} — ${formatValue(link.status)}`;
-
-      detailGrid.innerHTML = [
-        detailRow("Download link ID", link.id, { code: true }),
-        detailRow("Status", link.status),
-        detailRow("Licence number", link.licence_number),
-        detailRow("Licence ID", link.licence_id, { code: true }),
-        detailRow("Licence status", link.licence_status),
-        detailRow("Document ID", link.document_id),
-        detailRow("Document version", link.document_version),
-        detailRow("Recipient email", link.recipient_email),
-        detailRow("Licence holder", link.licence_holder_name),
-        detailRow("Organisation", link.organisation_name),
-        detailRow("Created at", formatDate(link.created_at)),
-        detailRow("Expires at", formatDate(link.expires_at)),
-        detailRow("Used at", formatDate(link.used_at)),
-        detailRow("Revoked at", formatDate(link.revoked_at)),
-        detailRow("Superseded at", formatDate(link.superseded_at)),
-        detailRow("Failure reason", link.failure_reason),
-        detailRow("Token hash present", booleanText(link.token_hash_present)),
-        detailRow("Token hash length", link.token_hash_length),
-        detailRow("IP hash present", booleanText(link.ip_hash_present)),
-        detailRow("User-agent present", booleanText(link.user_agent_present)),
-      ].join("");
-
-      pdfGrid.innerHTML = [
-        detailRow("Generated PDF status", pdf.status),
-        detailRow("Generated PDF object key", pdf.object_key, { code: true }),
-        detailRow("Generated PDF SHA-256", pdf.sha256, { code: true }),
-        detailRow("Generated PDF size", pdf.size_bytes),
-        detailRow("Generated PDF content type", pdf.content_type),
-        detailRow("Generated PDF created at", formatDate(pdf.created_at)),
-      ].join("");
-
-      controlsGrid.innerHTML = [
-        detailRow("Raw token returned", booleanText(controls.raw_token_returned)),
-        detailRow("Token hash returned", booleanText(controls.token_hash_returned)),
-        detailRow("Token hash presence only", booleanText(controls.token_hash_presence_only)),
-        detailRow("Serves download", booleanText(controls.serves_download)),
-        detailRow("Public access", booleanText(controls.public_access)),
-        detailRow("Mutates database", booleanText(controls.mutates_database)),
-        detailRow("Audit view only", booleanText(controls.audit_view_only)),
-      ].join("");
-
-      renderEvents(events);
-
-      detailCard.hidden = false;
-      detailCard.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function eventField(label, value, options = {}) {
-      const codeClass = options.code ? "rh-code" : "";
-
-      return `
-        <dl class="rh-event-field">
-          <dt>${escapeHtml(label)}</dt>
-          <dd class="${codeClass}">
-            ${escapeHtml(formatValue(value))}
-          </dd>
-        </dl>
-      `;
-    }
-
-    function renderEvents(events) {
-      if (!events.length) {
-        eventList.innerHTML = `
-          <div class="rh-admin-empty">
-            No events recorded for this download link.
-          </div>
-        `;
-        return;
-      }
-
-      eventList.innerHTML = events
-        .map((event) => {
-          return `
-            <article class="rh-event-card">
-              <div class="rh-event-card-header">
-                <div>
-                  <strong>${escapeHtml(event.event_type)}</strong>
-                  <span>${escapeHtml(formatDate(event.event_at))}</span>
-                </div>
-
-                <span class="${event.success ? "rh-badge rh-badge-used" : "rh-badge rh-badge-failed"}">
-                  ${event.success ? "success" : "failure"}
-                </span>
-              </div>
-
-              <div class="rh-event-card-body">
-                ${eventField("Event ID", event.id, { code: true })}
-                ${eventField("Download ID", event.download_id, { code: true })}
-                ${eventField("Licence number", event.licence_number)}
-                ${eventField("Document ID", event.document_id)}
-                ${eventField("Document version", event.document_version)}
-                ${eventField("Holder email", event.licence_holder_email)}
-                ${eventField("IP hash present", booleanText(event.ip_hash_present))}
-                ${eventField("User-agent present", booleanText(event.user_agent_present))}
-                ${eventField("Source object", event.source_object, { code: true })}
-                ${eventField("Source SHA-256", event.source_sha256, { code: true })}
-                ${eventField("Generated object", event.generated_object, { code: true })}
-                ${eventField("Generated SHA-256", event.generated_sha256, { code: true })}
-                ${eventField("Template SHA-256", event.template_sha256, { code: true })}
-                ${eventField("Terms version", event.terms_version)}
-                ${eventField("Failure reason", event.failure_reason)}
-              </div>
-            </article>
-          `;
-        })
-        .join("");
-    }
-
-    async function fetchDownloadLinkDetail(downloadId) {
+    async function renderDetail(linkId) {
       const token = getStoredToken();
 
       if (!token) {
-        setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
         return;
       }
+
+      const endpoint = `/api/admin/cdas/download-links/${encodeURIComponent(linkId)}`;
 
       setStatus("Loading download link detail…");
 
@@ -1144,124 +1015,195 @@ const pageDescription =
       let data;
 
       try {
-        response = await fetch(
-          `/api/admin/cdas/download-links/${encodeURIComponent(downloadId)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load download link detail: ${error.message}`, "error");
         return;
       }
 
-      if (!response.ok || !data.ok) {
+      if (!response.ok || !data.ok || !data.link) {
         setStatus(
-          data?.message || data?.error || "Download link detail could not be loaded.",
+          data?.message || data?.error || `Download link detail could not be loaded. HTTP ${response.status}.`,
           "error"
         );
         return;
       }
 
-      renderDetail(data);
+      const link = data.link;
+      const pdf = data.generated_pdf || {};
+      const events = Array.isArray(data.events) ? data.events : [];
+      const controls = data.controls || {};
+
+      detailSubtitle.textContent = `${link.id} — ${link.status}`;
+
+      detailGrid.innerHTML = [
+        detailRow("Download link ID", link.id, { code: true }),
+        detailRow("Status", link.status),
+        detailRow("Token hash present", booleanText(link.token_hash_present)),
+        detailRow("Token hash length", link.token_hash_length),
+        detailRow("Licence ID", link.licence_id, { code: true }),
+        detailRow("Licence number", link.licence_number),
+        detailRow("Document ID", link.document_id),
+        detailRow("Document version", link.document_version),
+        detailRow("Licence holder", link.licence_holder_name),
+        detailRow("Recipient email", link.recipient_email),
+        detailRow("Organisation", link.organisation_name),
+        detailRow("Created at", formatDate(link.created_at)),
+        detailRow("Expires at", formatDate(link.expires_at)),
+        detailRow("Used at", formatDate(link.used_at)),
+        detailRow("Failure reason", link.failure_reason),
+      ].join("");
+
+      pdfGrid.innerHTML = [
+        detailRow("Generated object", pdf.generated_object, { code: true }),
+        detailRow("Generated SHA-256", pdf.generated_sha256, { code: true }),
+        detailRow("Generated size", pdf.generated_size),
+        detailRow("Generated at", formatDate(pdf.generated_at)),
+        detailRow("Generated by", pdf.generated_by),
+        detailRow("R2 object present", booleanText(pdf.generated_object_present)),
+        detailRow("SHA present", booleanText(pdf.generated_sha256_present)),
+      ].join("");
+
+      controlsGrid.innerHTML = [
+        detailRow("Can download", booleanText(controls.can_download)),
+        detailRow("Can revoke", booleanText(controls.can_revoke)),
+        detailRow("Can reissue", booleanText(controls.can_reissue)),
+        detailRow("Can prepare delivery", booleanText(controls.can_prepare_delivery)),
+        detailRow("Can send delivery email", booleanText(controls.can_send_delivery_email)),
+        detailRow("Requires raw landing URL", booleanText(controls.requires_raw_landing_url)),
+      ].join("");
+
+      if (!events.length) {
+        eventList.innerHTML = `
+          <div class="rh-admin-empty">
+            No download events recorded for this link.
+          </div>
+        `;
+      } else {
+        eventList.innerHTML = events
+          .map((event) => {
+            return `
+              <article class="rh-event-card">
+                <h4>${escapeHtml(formatValue(event.event_type))}</h4>
+                <dl>
+                  <dt>Event ID</dt>
+                  <dd class="rh-code">${escapeHtml(formatValue(event.id))}</dd>
+
+                  <dt>Occurred at</dt>
+                  <dd>${escapeHtml(formatDate(event.created_at))}</dd>
+
+                  <dt>Success</dt>
+                  <dd>${escapeHtml(booleanText(event.success))}</dd>
+
+                  <dt>Failure reason</dt>
+                  <dd>${escapeHtml(formatValue(event.failure_reason))}</dd>
+
+                  <dt>IP hash</dt>
+                  <dd class="rh-code">${escapeHtml(formatValue(event.ip_hash))}</dd>
+
+                  <dt>User agent</dt>
+                  <dd>${escapeHtml(formatValue(event.user_agent))}</dd>
+                </dl>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      detailCard.hidden = false;
+      detailCard.scrollIntoView({ behavior: "smooth", block: "start" });
+
       setStatus("Download link detail loaded.", "success");
     }
 
-    async function revokeDownloadLink(downloadId) {
+    async function revokeDownloadLink(linkId) {
       const token = getStoredToken();
 
       if (!token) {
-        setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+        setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
         return;
       }
 
-      const firstConfirm = window.confirm(
-        "Revoke this controlled download link?\n\n" +
-          "Only unused created links can be revoked. This will not expose the raw token or public URL."
+      const row = state.links.find((item) => item.id === linkId);
+
+      if (!canRevokeLink(row)) {
+        setStatus("Only unused created download links can be revoked from this page.", "error");
+        return;
+      }
+
+      const reason = window.prompt(
+        `Enter a revocation reason for download link ${linkId}:`,
+        "Admin revoked unused download link before delivery."
       );
 
-      if (!firstConfirm) {
+      if (reason === null) {
         return;
       }
 
-      const reasonInput = window.prompt(
-        "Enter a revocation reason for the audit trail:",
-        "Admin revoked controlled download link."
-      );
+      const cleanReason = reason.trim();
 
-      if (reasonInput === null) {
+      if (!cleanReason) {
+        setStatus("Revocation reason is required.", "error");
         return;
       }
 
-      const reason = String(reasonInput || "").trim();
+      const endpoint = `/api/admin/cdas/download-links/${encodeURIComponent(linkId)}/revoke`;
 
-      if (!reason) {
-        setStatus("Revocation cancelled. A revocation reason is required.", "error");
-        return;
-      }
-
-      setStatus("Revoking controlled download link…");
+      setStatus("Revoking download link…");
 
       let response;
       let data;
 
       try {
-        response = await fetch(
-          `/api/admin/cdas/download-links/${encodeURIComponent(downloadId)}/revoke`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ reason }),
-          }
-        );
+        const result = await fetchAdminJson(endpoint, token, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reason: cleanReason,
+          }),
+        });
 
-        data = await response.json();
+        response = result.response;
+        data = result.data;
       } catch (error) {
-        setStatus(`Could not revoke controlled download link: ${error.message}`, "error");
+        setStatus(`Could not revoke download link: ${error.message}`, "error");
         return;
       }
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "Controlled download link could not be revoked.",
+          data?.message || data?.error || `Download link could not be revoked. HTTP ${response.status}.`,
           "error"
         );
-
         return;
       }
 
-      setStatus("Controlled download link revoked. Registry refreshed.", "success");
+      setStatus(data.message || "Download link revoked successfully.", "success");
+      await fetchLinks();
 
-      await fetchDownloadLinks();
-
-      try {
-        await fetchDownloadLinkDetail(downloadId);
-      } catch {
-        // The registry refresh is the important part. Detail reload failure is non-fatal.
+      if (!detailCard.hidden) {
+        detailCard.hidden = true;
       }
     }
 
     filtersForm.addEventListener("submit", (event) => {
       event.preventDefault();
       state.offset = 0;
-      fetchDownloadLinks();
+      fetchLinks();
     });
 
     resetFiltersButton.addEventListener("click", () => {
       filtersForm.reset();
       state.offset = 0;
-      fetchDownloadLinks();
+      fetchLinks();
     });
 
     refreshButton.addEventListener("click", () => {
-      fetchDownloadLinks();
+      fetchLinks();
     });
 
     linksBody.addEventListener("click", (event) => {
@@ -1274,10 +1216,10 @@ const pageDescription =
       const viewButton = target.closest("[data-view-download-link]");
 
       if (viewButton instanceof HTMLElement) {
-        const downloadId = viewButton.dataset.viewDownloadLink;
+        const linkId = viewButton.dataset.viewDownloadLink;
 
-        if (downloadId) {
-          fetchDownloadLinkDetail(downloadId);
+        if (linkId) {
+          renderDetail(linkId);
         }
 
         return;
@@ -1286,35 +1228,29 @@ const pageDescription =
       const revokeButton = target.closest("[data-revoke-download-link]");
 
       if (revokeButton instanceof HTMLElement) {
-        const downloadId = revokeButton.dataset.revokeDownloadLink;
+        const linkId = revokeButton.dataset.revokeDownloadLink;
 
-        if (downloadId) {
-          revokeDownloadLink(downloadId);
+        if (linkId) {
+          revokeDownloadLink(linkId);
         }
       }
     });
 
     closeDetailButton.addEventListener("click", () => {
       detailCard.hidden = true;
-      detailGrid.innerHTML = "";
-      pdfGrid.innerHTML = "";
-      eventList.innerHTML = "";
-      controlsGrid.innerHTML = "";
     });
 
     const existingToken = getStoredToken();
 
     if (existingToken) {
       setStatus("Admin token found in this browser session. Loading CDAS download links…");
-      fetchDownloadLinks();
+      fetchLinks();
     } else {
-      setStatus("Admin token is missing. Enter it in the admin token panel above.", "error");
+      setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
     }
 
     window.relayhubAdminTokenUpdated = () => {
-      if (typeof fetchDownloadLinks === "function") {
-        fetchDownloadLinks();
-      }
+      fetchLinks();
     };
 
     window.relayhubAdminTokenCleared = () => {

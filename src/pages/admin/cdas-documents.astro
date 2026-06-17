@@ -422,6 +422,8 @@ const pageDescription =
       background: #f8fafc;
       color: rgba(15, 23, 42, 0.75);
       font-size: 0.95rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
     }
 
     .rh-admin-status[data-state="error"] {
@@ -738,6 +740,60 @@ const pageDescription =
       return "rh-badge";
     }
 
+    function normaliseResponseSnippet(value) {
+      return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300);
+    }
+
+    async function readJsonResponse(response, endpoint) {
+      const contentType = response.headers.get("content-type") || "";
+      const rawText = await response.text();
+      const trimmed = rawText.trim();
+
+      if (!trimmed) {
+        return {};
+      }
+
+      const looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
+
+      if (!contentType.toLowerCase().includes("application/json") && !looksLikeJson) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Expected JSON from ${endpoint}, but received HTTP ${response.status} ${response.statusText || ""} ` +
+          `with content-type "${contentType || "unknown"}". Response starts: ${snippet || "empty response"}`
+        );
+      }
+
+      try {
+        return JSON.parse(trimmed);
+      } catch (error) {
+        const snippet = normaliseResponseSnippet(trimmed);
+
+        throw new Error(
+          `Invalid JSON from ${endpoint}. HTTP ${response.status} ${response.statusText || ""}. ` +
+          `Response starts: ${snippet || "empty response"}`
+        );
+      }
+    }
+
+    async function fetchAdminJson(endpoint, token) {
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      });
+
+      const data = await readJsonResponse(response, endpoint);
+
+      return { response, data };
+    }
+
     function getFilters() {
       const formData = new FormData(filtersForm);
       const params = new URLSearchParams();
@@ -775,21 +831,19 @@ const pageDescription =
       let data;
 
       try {
-        response = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load CDAS documents: ${error.message}`, "error");
+        renderDocuments([]);
+        updateMetrics([]);
         return;
       }
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "CDAS documents could not be loaded.",
+          data?.message || data?.error || `CDAS documents could not be loaded. HTTP ${response.status}.`,
           "error"
         );
 
@@ -953,6 +1007,7 @@ const pageDescription =
       }
 
       const doc = state.documents.find((item) => item.id === documentId);
+      const endpoint = `/api/admin/cdas/documents/${encodeURIComponent(documentId)}/rendered-licence`;
 
       setStatus("Loading rendered licence preview…");
 
@@ -960,16 +1015,9 @@ const pageDescription =
       let data;
 
       try {
-        response = await fetch(
-          `/api/admin/cdas/documents/${encodeURIComponent(documentId)}/rendered-licence`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        data = await response.json();
+        const result = await fetchAdminJson(endpoint, token);
+        response = result.response;
+        data = result.data;
       } catch (error) {
         setStatus(`Could not load rendered licence preview: ${error.message}`, "error");
         return;
@@ -977,7 +1025,7 @@ const pageDescription =
 
       if (!response.ok || !data.ok) {
         setStatus(
-          data?.message || data?.error || "Rendered licence preview could not be loaded.",
+          data?.message || data?.error || `Rendered licence preview could not be loaded. HTTP ${response.status}.`,
           "error"
         );
         return;
@@ -1080,7 +1128,7 @@ const pageDescription =
     } else {
       setStatus("Admin token is missing. Open another admin page and enter it once.", "error");
     }
-    
+
     window.relayhubAdminTokenUpdated = () => {
       if (typeof fetchDownloadLinks === "function") {
         fetchDownloadLinks();

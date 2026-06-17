@@ -18,7 +18,10 @@ import {
   activateCdasDownloadLink,
 } from "./download-link-activation.js";
 import { prepareCdasActiveLinkDelivery } from "./active-link-delivery-preparation.js";
-import { getCdasDownloadLink } from "./download-links.js";
+import {
+  listCdasDownloadLinks,
+  getCdasDownloadLink,
+} from "./download-links.js";
 import { sendCdasActiveLinkDeliveryEmail } from "./active-link-email-send.js";
 import {
   sendCdasVerificationEmailTest,
@@ -55,6 +58,55 @@ import {
 import {
   handleCdasRequestIntakeEvaluation,
 } from "./request-intake-policy.js";
+import { listCdasDocuments } from "./documents.js";
+import {
+  listCdasLicenceTerms,
+  getCdasLicenceTerms,
+} from "./terms.js";
+import {
+  listCdasAccessRequests,
+  getCdasAccessRequest,
+} from "./access-requests.js";
+import {
+  resendCdasAccessRequestVerification,
+} from "./resend-verification.js";
+import {
+  reviewCdasAccessRequest,
+} from "./access-request-review.js";
+import {
+  listCdasLicences,
+  getCdasLicence,
+} from "./licences.js";
+import {
+  getCdasLicenceGenerationPreview,
+} from "./generation-preview.js";
+import {
+  getCdasLicenceDownloadHistory,
+} from "./licence-download-history.js";
+import {
+  getCdasLicenceEvidenceBundle,
+} from "./licence-evidence-bundle.js";
+import {
+  recordCdasLicenceEvidenceBundleExport,
+} from "./licence-evidence-export.js";
+import {
+  archiveCdasLicenceEvidenceBundle,
+} from "./licence-evidence-archive.js";
+import {
+  generateCdasLicencePdf,
+} from "./generate-pdf.js";
+import {
+  inspectCdasGeneratedPdf,
+} from "./generated-pdf.js";
+import {
+  emailCdasDownloadLink,
+} from "./email-download-link.js";
+import {
+  reissueCdasDownloadLink,
+} from "./reissue-download-link.js";
+import {
+  issueCdasDownloadLink,
+} from "./download-link-issue.js";
 
 function isCdasAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
