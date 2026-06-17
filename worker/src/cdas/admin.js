@@ -17,6 +17,7 @@ import {
   getCdasDownloadLinkActivationEligibility,
   activateCdasDownloadLink,
 } from "./download-link-activation.js";
+import { prepareCdasActiveLinkDelivery } from "./active-link-delivery-preparation.js";
 import {
   sendCdasVerificationEmailTest,
 } from "./email-test.js";
