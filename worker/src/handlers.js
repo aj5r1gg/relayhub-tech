@@ -64,6 +64,8 @@ import {
   sendCdasEmail,
 } from "./services/email.js";
 
+import { handleUploadAdminRequest } from "./upload/admin-routes.js";
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -106,6 +108,10 @@ export default {
       }
 
       return methodNotAllowed("GET");
+    }
+
+    if (url.pathname.startsWith("/api/admin/uploads")) {
+      return handleUploadAdminRequest(request, env);
     }
 
     if (url.pathname === "/api/admin/document-requests") {
