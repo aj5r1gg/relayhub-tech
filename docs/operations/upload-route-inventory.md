@@ -247,3 +247,28 @@ U1-K is complete when:
 - validation commands are documented
 - no upload HTTP route has been added
 - existing CDAS routes remain unaffected
+
+## 9. U2-E Orchestrator Validation Gate
+
+Status: Passed when local validation reports:
+
+    U2 orchestrator validation failures: 0
+
+Validated behaviours:
+
+- transaction helper accepts valid states and rejects invalid states
+- R2 absence helper allows confirmed-missing objects only
+- R2 absence helper blocks existing objects
+- R2 write helper validates hash and size before write
+- R2 write helper writes source, SHA-256 sidecar, and metadata sidecar
+- R2 write helper verifies readback
+- orchestrator updates upload transaction lifecycle
+- orchestrator records admin audit events
+- orchestrator blocks overwrite attempts
+- orchestrator marks partial R2 write failure as recovery-required
+- no upload HTTP route exists yet
+- no document is published by upload
+- no licence is created by upload
+- no download link is created by upload
+- no email is sent by upload
+
