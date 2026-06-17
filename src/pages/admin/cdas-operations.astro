@@ -1267,6 +1267,164 @@ const description =
       line-height: 1.35;
     }
 
+  
+    /* D4: expanded workflow controls below table records */
+    :global(.rh-request-action-row) {
+      background: #f8fafc;
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 0 !important;
+    }
+
+    :global(.rh-request-action-row-inner) {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.75rem 0.9rem;
+      border-left: 3px solid #2563eb;
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(248, 250, 252, 0.9));
+    }
+
+    :global(.rh-request-action-label) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.8rem;
+      color: #475569;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+  
+    /* D4: Recent Licences record-card layout */
+    :global(.rh-licence-record-list) {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    :global(.rh-licence-record-card) {
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 1rem;
+      background: #ffffff;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+    }
+
+    :global(.rh-licence-record-main) {
+      display: grid;
+      grid-template-columns: minmax(13rem, 1.5fr) repeat(4, minmax(7rem, 1fr)) minmax(13rem, 1.5fr);
+      gap: 0.75rem;
+      padding: 0.85rem 0.9rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    :global(.rh-licence-record-field) {
+      min-width: 0;
+    }
+
+    :global(.rh-licence-record-field span),
+    :global(.rh-licence-record-label) {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: rgba(15, 23, 42, 0.58);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    :global(.rh-licence-record-field strong) {
+      display: block;
+      color: #0f172a;
+      font-size: 0.86rem;
+      font-weight: 750;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    :global(.rh-licence-record-evidence) {
+      display: grid;
+      grid-template-columns: minmax(12rem, 0.85fr) minmax(18rem, 1.4fr);
+      gap: 0.9rem;
+      padding: 0.85rem 0.9rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      background: #fbfdff;
+    }
+
+    :global(.rh-licence-record-actions) {
+      padding: 0;
+      background: #f8fafc;
+    }
+
+    :global(.rh-licence-record-actions .rh-request-action-row-inner) {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.8rem 0.9rem;
+      border-left: 3px solid #2563eb;
+      background: linear-gradient(
+        90deg,
+        rgba(37, 99, 235, 0.08),
+        rgba(248, 250, 252, 0.95)
+      );
+    }
+
+    @media (max-width: 980px) {
+      :global(.rh-licence-record-main),
+      :global(.rh-licence-record-evidence) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  
+    /* D4: inline workflow result beside licence controls */
+    :global(.rh-inline-workflow-result) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.8rem;
+      max-width: 100%;
+      margin-left: 0.25rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.75rem;
+      color: #475569;
+      font-size: 0.78rem;
+      font-weight: 750;
+      line-height: 1.35;
+      background: rgba(241, 245, 249, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      overflow-wrap: anywhere;
+    }
+
+    :global(.rh-inline-workflow-result:empty) {
+      display: none;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="loading"]) {
+      color: #1d4ed8;
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="success"]) {
+      color: #166534;
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="info"]) {
+      color: #334155;
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="error"]) {
+      color: #991b1b;
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
   </style>
 
   <script is:inline>
@@ -1420,6 +1578,16 @@ const description =
 
     function setReviewActionResult(kind, message) {
       const target = document.getElementById("reviewActionResult");
+      if (!target) return;
+
+      target.dataset.kind = kind || "info";
+      target.textContent = message || "";
+    }
+
+    function setInlineWorkflowActionResult(button, kind, message) {
+      const container = button?.closest(".rh-licence-record-actions, .rh-request-action-row-inner");
+      const target = container?.querySelector(".rh-inline-workflow-result");
+
       if (!target) return;
 
       target.dataset.kind = kind || "info";
@@ -2051,9 +2219,27 @@ const description =
 
     function licenceWorkflowButtons(row) {
       const licenceId = escapeHtml(row.id || "");
-      const linkId = escapeHtml(row.latest_download_link_id || "");
+      const latestLinkId = row.latest_download_link_id || "";
+      const latestLinkReference = row.latest_download_reference || latestLinkId;
+      const latestLinkStatus = String(row.latest_download_link_status || "").toLowerCase();
+
       const pdfStatus = String(row.generated_pdf_status || "");
-      const linkStatus = String(row.latest_download_link_status || "");
+      const openLinkCount = Number(row.open_download_link_count || 0);
+      const pendingActivationCount = Number(row.pending_activation_link_count || 0);
+      const hasOpenReplacement = openLinkCount > 0 || pendingActivationCount > 0;
+
+      const supersededLinkId = row.latest_superseded_link_id || "";
+      const supersededReference = row.latest_superseded_reference || supersededLinkId;
+      const supersededStatus = String(row.latest_superseded_link_status || "").toLowerCase();
+
+      const latestIsReissueCandidate = ["revoked", "superseded", "failed"].includes(latestLinkStatus);
+
+      const reissueSourceLinkId = supersededLinkId || (latestIsReissueCandidate ? latestLinkId : "");
+      const reissueSourceReference = supersededReference || (latestIsReissueCandidate ? latestLinkReference : "");
+      const reissueSourceStatus = supersededStatus || (latestIsReissueCandidate ? latestLinkStatus : "");
+
+      const safeReissueSourceId = escapeHtml(reissueSourceLinkId);
+      const safeReissueReference = escapeHtml(reissueSourceReference || reissueSourceLinkId);
 
       const licenceLink = `<a class="rh-table-action" href="${escapeHtml(
         adminUrl("/admin/cdas-licences/", {
@@ -2074,43 +2260,71 @@ const description =
       const checkLink = `<button class="rh-mini-button" type="button" data-cdas-workflow-action="check-link" data-licence-id="${licenceId}">Check Link</button>`;
       const createLink = `<button class="rh-mini-button rh-mini-button-success" type="button" data-cdas-workflow-action="create-link" data-licence-id="${licenceId}">Create Link</button>`;
 
-      const checkActivation = linkId
+      const linkId = escapeHtml(latestLinkId);
+
+      const checkActivation = latestLinkId
         ? `<button class="rh-mini-button" type="button" data-cdas-workflow-action="check-activation" data-download-link-id="${linkId}">Check Activation</button>`
         : "";
 
-      const activateLink = linkId
+      const activateLink = latestLinkId
         ? `<button class="rh-mini-button rh-mini-button-success" type="button" data-cdas-workflow-action="activate-link" data-download-link-id="${linkId}">Activate Link</button>`
         : "";
 
-      const prepareDelivery = linkId
+      const prepareDelivery = latestLinkId
         ? `<button class="rh-mini-button rh-mini-button-warning" type="button" data-cdas-workflow-action="prepare-delivery" data-download-link-id="${linkId}">Prepare Delivery</button>`
         : "";
 
-      const sendEmail = linkId
+      const sendEmail = latestLinkId
         ? `<button class="rh-mini-button rh-mini-button-warning" type="button" data-cdas-workflow-action="send-email" data-download-link-id="${linkId}">Send Email</button>`
         : "";
+
+      const checkReissue = reissueSourceLinkId
+        ? `<button
+            class="rh-mini-button"
+            type="button"
+            data-cdas-workflow-action="check-reissue"
+            data-download-link-id="${safeReissueSourceId}"
+            data-download-reference="${safeReissueReference}"
+          >Check Reissue</button>`
+        : "";
+
+      const createReissue = reissueSourceLinkId && !hasOpenReplacement
+        ? `<button
+            class="rh-mini-button rh-mini-button-success"
+            type="button"
+            data-cdas-workflow-action="reissue-link"
+            data-download-link-id="${safeReissueSourceId}"
+            data-download-reference="${safeReissueReference}"
+          >Create Replacement</button>`
+        : "";
+
+      const reissueState = reissueSourceLinkId && hasOpenReplacement
+        ? `<span class="rh-request-action-label" title="Open replacement links: ${escapeHtml(openLinkCount)}">Reissue blocked: replacement open</span>`
+        : reissueSourceLinkId
+          ? `<span class="rh-request-action-label">Source: ${escapeHtml(niceLabel(reissueSourceStatus || "candidate"))}</span>`
+          : `<span class="rh-request-action-label">No reissue source</span>`;
 
       const pdfButtons = pdfStatus === "generated"
         ? `${checkPdf}`
         : `${checkPdf}${generatePdf}`;
 
-      const linkButtons = pdfStatus === "generated" && !linkId
+      const linkButtons = pdfStatus === "generated" && !latestLinkId
         ? `${checkLink}${createLink}`
         : pdfStatus === "generated"
           ? `${checkLink}`
           : "";
 
-      const activationButtons = linkStatus === "pending_activation"
+      const activationButtons = latestLinkStatus === "pending_activation"
         ? `${checkActivation}${activateLink}`
-        : linkId
+        : latestLinkId
           ? checkActivation
           : "";
 
-      const deliveryButtons = linkStatus === "active"
+      const deliveryButtons = latestLinkStatus === "active"
         ? `${prepareDelivery}${sendEmail}`
         : "";
 
-      const consumedNote = linkStatus === "used"
+      const consumedNote = latestLinkStatus === "used"
         ? `<span class="rh-request-action-label">Consumed</span>`
         : "";
 
@@ -2126,6 +2340,89 @@ const description =
           ${activationButtons}
           ${deliveryButtons}
           ${consumedNote}
+          <span class="rh-request-action-label">Reissue</span>
+          ${checkReissue}
+          ${createReissue}
+          ${reissueState}
+          <span class="rh-inline-workflow-result" aria-live="polite"></span>
+        </div>
+      `;
+    }
+
+
+    function recentLicenceCards(targetId, rows) {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      if (!Array.isArray(rows) || rows.length === 0) {
+        target.innerHTML = emptyMessage("No recent licences.");
+        return;
+      }
+
+      target.innerHTML = `
+        <div class="rh-licence-record-list">
+          ${rows
+            .map((row) => {
+              const holder = row.organisation_name || row.licence_holder_name || "";
+              const latestLink = row.latest_download_reference || row.latest_download_link_id || "No link";
+              const latestStatus = niceLabel(row.latest_download_link_status || "unknown");
+              const reissue = reissueEvidence(row);
+              const state = linkStateBadges(row);
+              const actions = licenceWorkflowButtons(row);
+
+              return `
+                <article class="rh-licence-record-card">
+                  <div class="rh-licence-record-main">
+                    <div class="rh-licence-record-field rh-licence-record-field-wide">
+                      <span>Licence</span>
+                      <strong>${escapeHtml(row.licence_number || row.id || "")}</strong>
+                    </div>
+
+                    <div class="rh-licence-record-field">
+                      <span>Holder</span>
+                      <strong>${escapeHtml(holder)}</strong>
+                    </div>
+
+                    <div class="rh-licence-record-field">
+                      <span>Document</span>
+                      <strong>${escapeHtml(row.document_id || "")}</strong>
+                    </div>
+
+                    <div class="rh-licence-record-field">
+                      <span>Version</span>
+                      <strong>${escapeHtml(row.document_version || "")}</strong>
+                    </div>
+
+                    <div class="rh-licence-record-field">
+                      <span>Licence Status</span>
+                      <strong>${escapeHtml(niceLabel(row.status || ""))}</strong>
+                    </div>
+
+                    <div class="rh-licence-record-field rh-licence-record-field-wide">
+                      <span>Latest Link</span>
+                      <strong>${escapeHtml(latestLink)} (${escapeHtml(latestStatus)})</strong>
+                    </div>
+                  </div>
+
+                  <div class="rh-licence-record-evidence">
+                    <div>
+                      <span class="rh-licence-record-label">Evidence State</span>
+                      ${state}
+                    </div>
+
+                    <div>
+                      <span class="rh-licence-record-label">Reissue Evidence</span>
+                      ${reissue}
+                    </div>
+                  </div>
+
+                  <div class="rh-licence-record-actions">
+                    ${actions}
+                  </div>
+                </article>
+              `;
+            })
+            .join("")}
         </div>
       `;
     }
@@ -2172,6 +2469,11 @@ const description =
     async function handleCdasWorkflowAction(action, button) {
       const licenceId = button.getAttribute("data-licence-id") || "";
       const downloadLinkId = button.getAttribute("data-download-link-id") || "";
+
+      const setWorkflowResult = (kind, message) => {
+        setReviewActionResult(kind, message);
+        setInlineWorkflowActionResult(button, kind, message);
+      };
 
       try {
         if (action === "check-pdf") {
@@ -2352,9 +2654,87 @@ const description =
           return;
         }
 
+
+        if (action === "check-reissue") {
+          const downloadReference =
+            button.getAttribute("data-download-reference") || downloadLinkId;
+
+          setWorkflowResult(
+            "loading",
+            `Checking reissue eligibility for ${downloadReference}…`,
+          );
+
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/reissue-eligibility`,
+          );
+
+          const blockers = (data.blockers || []).join(", ") || "none reported";
+
+          setWorkflowResult(
+            data.eligible ? "success" : "info",
+            data.eligible
+              ? `${downloadReference} is eligible for controlled reissue. Next action: ${niceLabel(data.next_allowed_action || "create replacement pending activation link")}.`
+              : `${downloadReference} cannot be reissued now. Blockers: ${blockers}.`,
+          );
+
+          return;
+        }
+
+        if (action === "reissue-link") {
+          const downloadReference =
+            button.getAttribute("data-download-reference") || downloadLinkId;
+
+          const note = window.prompt(
+            `Controlled reissue note for ${downloadReference}:`,
+            "Operations Centre: create replacement pending_activation link only. Do not activate, email, serve PDF, modify licence, or delete R2.",
+          );
+
+          if (note === null) {
+            setReviewActionResult("info", "Controlled reissue cancelled.");
+            return;
+          }
+
+          const confirmed = window.confirm(
+            `Create a replacement controlled download link for ${downloadReference}? This returns a one-time landing URL. It does not activate the link, email anyone, serve the PDF, modify the licence, or delete R2.`,
+          );
+
+          if (!confirmed) {
+            setReviewActionResult("info", "Controlled reissue cancelled.");
+            return;
+          }
+
+          setReviewActionResult(
+            "loading",
+            `Creating replacement controlled link for ${downloadReference}…`,
+          );
+
+          const data = await workflowFetch(
+            `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/reissue`,
+            {
+              method: "POST",
+              body: {
+                actor: "operations-centre",
+                note,
+                expires_in_days: 7,
+              },
+            },
+          );
+
+          const newLink = data.new_download_link || {};
+          const landingUrl = newLink.landing_url || newLink.url || "";
+
+          setReviewActionResult(
+            "success",
+            `Replacement link ${newLink.download_reference || newLink.id || ""} created in ${newLink.status || "pending_activation"}. Copy this one-time URL now: ${landingUrl || "not returned"}`,
+          );
+
+          await loadOperations();
+          return;
+        }
+
         setReviewActionResult("error", `Unknown workflow action: ${action}`);
       } catch (error) {
-        setReviewActionResult("error", error?.message || "Workflow action failed.");
+        setWorkflowResult("error", error?.message || "Workflow action failed.");
       }
     }
 
@@ -2745,34 +3125,9 @@ const description =
           },
         );
 
-        table(
+        recentLicenceCards(
           "recentLicences",
           data.recent?.recent_licences,
-          [
-            { key: "issued_at", label: "Issued" },
-            { key: "licence_number", label: "Licence" },
-            {
-              key: "holder",
-              label: "Holder",
-              render: (row) =>
-                row.organisation_name || row.licence_holder_name || "",
-            },
-            { key: "document_id", label: "Document", wrap: true },
-            { key: "document_version", label: "Version" },
-            { key: "status", label: "Licence" },
-            {
-              key: "link_state",
-              label: "Evidence State",
-              renderHtml: (row) => linkStateBadges(row),
-            },
-            {
-              key: "reissue_evidence",
-              label: "Reissue Evidence",
-              wrap: true,
-              renderHtml: (row) => reissueEvidence(row),
-            },
-          ],
-          "No recent licences.",
         );
 
         table(
