@@ -1,4 +1,5 @@
 import { jsonResponse } from "../shared.js";
+import { parseStrictUploadRequest } from "./parse-multipart.js";
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -94,6 +95,62 @@ function getUploadRouteMode(request) {
   };
 }
 
+function buildNoSideEffects() {
+  return {
+    parses_multipart: true,
+    creates_upload_transaction: false,
+    writes_r2: false,
+    publishes_document: false,
+    creates_licence: false,
+    creates_download_link: false,
+    sends_email: false,
+  };
+}
+
+function buildSideEffectsConfirmed() {
+  return {
+    creates_upload_transaction: false,
+    writes_r2: false,
+    publishes_document: false,
+    creates_licence: false,
+    creates_download_link: false,
+    sends_email: false,
+  };
+}
+
+function safeFileSummary(file) {
+  if (!file) {
+    return null;
+  }
+
+  return {
+    name: file.name || null,
+    size: file.size ?? null,
+    type: file.type || null,
+  };
+}
+
+function buildParsedUploadSummary(parsed) {
+  const value = parsed?.value || {};
+
+  return {
+    upload_domain: "cdas_document",
+    file: safeFileSummary(value.file),
+    filename: value.file?.name || null,
+    file_size: value.file?.size ?? null,
+    file_type: value.file?.type || null,
+    fields: value.fields || {},
+  };
+}
+
+function buildObservedRequest(request) {
+  return {
+    method: request.method,
+    content_type: request.headers.get("content-type") || null,
+    content_length: request.headers.get("content-length") || null,
+  };
+}
+
 function buildCdasUploadRouteStatus(request, env) {
   const switches = getUploadRouteSwitches(env);
   const routeMode = getUploadRouteMode(request);
@@ -101,20 +158,12 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "skeleton",
+    route_status: "dry_run_multipart_validation",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     mode: routeMode.mode,
     switches,
-    side_effects: {
-      parses_multipart: false,
-      creates_upload_transaction: false,
-      writes_r2: false,
-      publishes_document: false,
-      creates_licence: false,
-      creates_download_link: false,
-      sends_email: false,
-    },
+    side_effects: buildNoSideEffects(),
     requirements_before_real_write: [
       "UPLOADS_ENABLED=true",
       "CDAS_UPLOADS_ENABLED=true",
@@ -203,7 +252,7 @@ function dryRunRequiredResponse(request, env) {
       ok: false,
       error: "upload_route_dry_run_required",
       message:
-        "This skeleton route only accepts dry-run requests. Add ?mode=dry-run. No upload action was performed.",
+        "This route only accepts dry-run requests. Add ?mode=dry-run. No upload action was performed.",
     },
     409
   );
@@ -241,7 +290,29 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
     return dryRunDisabledResponse(request, env);
   }
 
-  const contentType = request.headers.get("content-type") || "";
+  const parsed = await parseStrictUploadRequest(request, {
+    domain: "cdas_document",
+    uploadDomain: "cdas_document",
+    upload_domain: "cdas_document",
+    maxBytes: 10 * 1024 * 1024,
+  });
+
+  if (!parsed.ok) {
+    return jsonResponse(
+      {
+        ...buildCdasUploadRouteStatus(request, env),
+        ok: false,
+        accepted: false,
+        error: parsed.error,
+        message: parsed.message,
+        details: parsed.details || {},
+        observed_request: buildObservedRequest(request),
+        validation_stage: "strict_multipart_dry_run",
+        side_effects_confirmed: buildSideEffectsConfirmed(),
+      },
+      400
+    );
+  }
 
   return jsonResponse(
     {
@@ -249,15 +320,13 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       ok: true,
       accepted: true,
       message:
-        "CDAS upload route skeleton reached in dry-run mode. No upload action was performed.",
-      observed_request: {
-        method: request.method,
-        content_type: contentType || null,
-        content_length: request.headers.get("content-length") || null,
-      },
-      validation_stage: "route_skeleton_only",
+        "CDAS upload dry-run multipart validation passed. No upload action was performed.",
+      observed_request: buildObservedRequest(request),
+      validation_stage: "strict_multipart_dry_run",
+      parsed_upload: buildParsedUploadSummary(parsed),
+      side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-B should add strict dry-run multipart parsing without R2 writes.",
+        "U3-C should add dry-run prefix validation and object-key preview without R2 writes.",
     },
     200
   );
@@ -281,11 +350,11 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "skeleton",
+  routeStatus: "dry_run_multipart_validation",
   adminOnly: true,
   disabledByDefault: true,
   dryRunOnly: true,
-  parsesMultipart: false,
+  parsesMultipart: true,
   createsUploadTransaction: false,
   writesR2: false,
   publishesDocuments: false,

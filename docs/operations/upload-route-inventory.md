@@ -272,3 +272,88 @@ Validated behaviours:
 - no download link is created by upload
 - no email is sent by upload
 
+
+## 10. U3-A First Internal Upload Route Skeleton
+
+Route introduced:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Skeleton only.
+    Admin-only.
+    Disabled by default.
+    Dry-run only.
+
+Policy posture:
+
+- no multipart parsing yet
+- no upload transaction creation
+- no R2 write
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+- no raw admin token storage
+- no raw IP storage
+
+Required switches for dry-run POST acceptance:
+
+- UPLOADS_ENABLED=true
+- CDAS_UPLOADS_ENABLED=true
+- UPLOAD_ROUTE_SKELETON_ENABLED=true
+- UPLOAD_ROUTE_DRY_RUN_ENABLED=true
+
+Validation gate:
+
+    U3-A route skeleton validation failures: 0
+
+Next gate:
+
+    U3-B — Strict Dry-Run Multipart Parsing Route
+
+
+## 11. U3-B Strict Dry-Run Multipart Parsing Route
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Dry-run multipart validation only.
+
+Policy posture:
+
+- admin-only
+- disabled unless upload dry-run switches are enabled
+- strict multipart parsing enabled
+- required CDAS fields validated
+- duplicate fields blocked
+- unexpected fields blocked
+- missing file blocked
+- no upload transaction creation
+- no R2 write
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+
+Required switches for dry-run POST acceptance:
+
+- UPLOADS_ENABLED=true
+- CDAS_UPLOADS_ENABLED=true
+- UPLOAD_ROUTE_SKELETON_ENABLED=true
+- UPLOAD_ROUTE_DRY_RUN_ENABLED=true
+
+Validation gate:
+
+    U3-B strict dry-run multipart validation failures: 0
+
+Next gate:
+
+    U3-C — Dry-Run Prefix Validation and Object-Key Preview
+
