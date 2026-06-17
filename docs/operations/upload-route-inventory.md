@@ -1,0 +1,249 @@
+# RelayHub Website — Controlled Upload Facility Route Inventory
+
+Status: U1-K foundation update  
+Scope: Controlled Upload Facility v0.3  
+Implementation status: no upload routes implemented yet
+
+## 1. Current Safety Position
+
+The Controlled Upload Facility foundation currently provides helper modules and database tables only.
+
+At this stage there are no public, admin, or internal HTTP upload routes.
+
+This is deliberate.
+
+Upload route creation is blocked until the foundation helpers are validated and the required route gates are wired in.
+
+## 2. Implemented Foundation Components
+
+The following foundation components now exist:
+
+| Component | Status | Purpose |
+|---|---:|---|
+| upload_transactions table | Implemented | Upload transaction ledger |
+| storage_prefixes table | Implemented | Governed R2 prefix registry |
+| seeded storage prefixes | Implemented | Safe initial CDAS/private namespaces |
+| upload_idempotency_keys table | Implemented | Browser retry/idempotency protection |
+| Prefix validation helper | Implemented | Blocks cross-domain and invalid prefixes |
+| Object-key builder helper | Implemented | Generates final object keys |
+| Hash helper | Implemented | Calculates SHA-256 and file size evidence |
+| Multipart parser helper | Implemented | Strict upload form parsing |
+| Idempotency helper | Implemented | Detects retries and unsafe replay states |
+| Emergency switch helper | Implemented | Upload-specific fail-closed controls |
+| Upload audit helper | Implemented | Integrates with admin_audit_events |
+
+## 3. Routes Not Yet Implemented
+
+The following routes are reserved for future implementation only.
+
+They must not exist yet.
+
+| Future Route | Method | Status | Notes |
+|---|---:|---:|---|
+| /api/admin/uploads/cdas-document | POST | Not implemented | Future controlled CDAS document upload route |
+| /api/admin/uploads/private-file | POST | Not implemented | Future controlled private-file upload route |
+| /api/admin/uploads/prefixes | GET | Not implemented | Future read-only storage prefix list |
+| /api/admin/uploads/prefixes | POST | Not implemented | Future governed prefix creation route |
+| /api/admin/uploads/transactions | GET | Not implemented | Future read-only transaction list |
+| /api/admin/uploads/transactions/:id | GET | Not implemented | Future upload transaction detail view |
+| /api/admin/uploads/transactions/:id/recover | POST | Not implemented | Future recovery action route |
+| /api/admin/uploads/evidence/:id | GET | Not implemented | Future evidence view/export route |
+
+## 4. Required Gates Before Any Upload Route Is Created
+
+Every future upload route must pass these gates before doing any write action:
+
+1. Admin authentication gate
+2. Upload emergency switch gate
+3. Upload-domain switch gate
+4. Strict multipart parser gate
+5. Prefix validation gate
+6. Object-key builder gate
+7. Idempotency gate
+8. File sanity and hash gate
+9. Upload transaction ledger gate
+10. Audit event gate
+11. Recovery classification gate
+
+No future route may write to R2 before the upload transaction has been created.
+
+No future route may activate, publish, licence, email, or create a download link as a side effect of upload.
+
+## 5. Emergency Switches
+
+The following environment-controlled switches are reserved for upload control:
+
+| Switch | Purpose |
+|---|---|
+| UPLOADS_ENABLED | Master upload creation switch |
+| CDAS_UPLOADS_ENABLED | CDAS document upload switch |
+| PRIVATE_FILE_UPLOADS_ENABLED | Private-file upload switch |
+| STORAGE_PREFIX_CREATION_ENABLED | Storage prefix creation switch |
+| UPLOAD_RECOVERY_ENABLED | Upload recovery action switch |
+| UPLOAD_EVIDENCE_EXPORT_ENABLED | Upload evidence export switch |
+
+Disabling upload creation must not disable:
+
+- existing public website pages
+- existing CDAS licences
+- existing CDAS download links
+- existing controlled downloads
+- read-only admin visibility
+- recovery evidence already recorded
+
+## 6. Reserved Route Behaviour
+
+### POST /api/admin/uploads/cdas-document
+
+Reserved for future CDAS source-document upload.
+
+Required foundation helpers:
+
+- validateStoragePrefixForUpload
+- buildCdasSourceObjectKeys
+- parseStrictUploadRequest
+- buildUploadSourceEvidence
+- beginIdempotentUpload
+- requireCdasUploadsEnabled
+- writeUploadAdminAuditEvent
+
+Must not:
+
+- publish a document
+- activate a document
+- issue a licence
+- create a download link
+- send email
+- overwrite an existing R2 object
+
+### POST /api/admin/uploads/private-file
+
+Reserved for future private controlled file upload.
+
+Required foundation helpers:
+
+- validateStoragePrefixForUpload
+- buildPrivateFileObjectKeys
+- parseStrictUploadRequest
+- buildUploadSourceEvidence
+- beginIdempotentUpload
+- requirePrivateFileUploadsEnabled
+- writeUploadAdminAuditEvent
+
+Must not:
+
+- create a public listing
+- create a public link
+- send email
+- overwrite an existing R2 object
+
+### GET /api/admin/uploads/prefixes
+
+Reserved for future read-only prefix listing.
+
+Must be read-only.
+
+Must not create, update, disable, or delete prefixes.
+
+### POST /api/admin/uploads/prefixes
+
+Reserved for future governed prefix creation.
+
+Must require:
+
+- admin authentication
+- STORAGE_PREFIX_CREATION_ENABLED
+- prefix validation
+- audit event
+
+Must not allow arbitrary object-key creation.
+
+### GET /api/admin/uploads/transactions
+
+Reserved for future upload transaction visibility.
+
+Must be read-only.
+
+### GET /api/admin/uploads/transactions/:id
+
+Reserved for future upload transaction detail view.
+
+Must be read-only.
+
+### POST /api/admin/uploads/transactions/:id/recover
+
+Reserved for future controlled recovery actions.
+
+Must require:
+
+- admin authentication
+- UPLOAD_RECOVERY_ENABLED
+- recovery state validation
+- audit event
+
+Must not blindly re-upload to the same object key after a failed-after-R2 state.
+
+### GET /api/admin/uploads/evidence/:id
+
+Reserved for future upload evidence view/export.
+
+Must require:
+
+- admin authentication
+- UPLOAD_EVIDENCE_EXPORT_ENABLED for export actions
+- audit event for export actions
+
+Read-only evidence viewing may remain available even when export is disabled.
+
+## 7. Route Inventory Validation Commands
+
+Use these checks before and after each upload-related implementation step.
+
+### Confirm no upload routes currently exist
+
+Run:
+
+    grep -R "api/admin/uploads\|uploads/cdas-document\|uploads/private-file" -n worker/src src/pages || true
+
+Expected result during U1-K:
+
+    No route handlers should be returned.
+
+### Confirm upload helper modules exist
+
+Run:
+
+    find worker/src/upload -maxdepth 1 -type f -print | sort
+
+Expected helper files:
+
+    worker/src/upload/audit.js
+    worker/src/upload/emergency.js
+    worker/src/upload/hash.js
+    worker/src/upload/idempotency.js
+    worker/src/upload/object-keys.js
+    worker/src/upload/parse-multipart.js
+    worker/src/upload/prefixes.js
+
+### Confirm existing CDAS routes remain untouched
+
+Run:
+
+    grep -R "handleCdas\|/api/admin/cdas\|document-download" -n worker/src | head -80
+
+Expected result:
+
+    Existing CDAS route handlers should still be present.
+    No upload route should be required for existing CDAS downloads.
+
+## 8. U1-K Completion Criteria
+
+U1-K is complete when:
+
+- upload route inventory exists
+- all future upload routes are marked Not implemented
+- helper gates are documented
+- emergency switches are documented
+- validation commands are documented
+- no upload HTTP route has been added
+- existing CDAS routes remain unaffected
