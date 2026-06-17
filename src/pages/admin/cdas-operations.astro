@@ -1425,6 +1425,53 @@ const description =
       border-color: #fecaca;
     }
 
+  
+    /* D5-0: inline workflow result inside licence action bands */
+    :global(.rh-inline-workflow-result) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.8rem;
+      max-width: 100%;
+      margin-left: 0.25rem;
+      padding: 0.3rem 0.65rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 0.75rem;
+      background: rgba(241, 245, 249, 0.95);
+      color: #475569;
+      font-size: 0.78rem;
+      font-weight: 750;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    :global(.rh-inline-workflow-result:empty) {
+      display: none;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="loading"]) {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="success"]) {
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+      color: #166534;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="info"]) {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    :global(.rh-inline-workflow-result[data-kind="error"]) {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
   </style>
 
   <script is:inline>
@@ -2477,12 +2524,12 @@ const description =
 
       try {
         if (action === "check-pdf") {
-          setReviewActionResult("loading", `Checking PDF eligibility for ${licenceId}…`);
+          setWorkflowResult("loading", `Checking PDF eligibility for ${licenceId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/pdf-eligibility`,
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             data.eligible ? "success" : "info",
             data.eligible
               ? `PDF generation is eligible for ${data.licence_number || licenceId}.`
@@ -2498,7 +2545,7 @@ const description =
           );
           if (note === null) return;
 
-          setReviewActionResult("loading", `Generating personalised PDF for ${licenceId}…`);
+          setWorkflowResult("loading", `Generating personalised PDF for ${licenceId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/generate-pdf`,
             {
@@ -2507,7 +2554,7 @@ const description =
             },
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             "success",
             `PDF generated for ${data.licence?.licence_number || licenceId}. No link or email was created.`,
           );
@@ -2516,12 +2563,12 @@ const description =
         }
 
         if (action === "check-link") {
-          setReviewActionResult("loading", `Checking download-link eligibility for ${licenceId}…`);
+          setWorkflowResult("loading", `Checking download-link eligibility for ${licenceId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/download-link-eligibility`,
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             data.eligible ? "success" : "info",
             data.eligible
               ? `Download-link creation is eligible for ${data.licence_number || licenceId}.`
@@ -2536,7 +2583,7 @@ const description =
 
           const expiresInDays = Number(daysRaw || 7);
 
-          setReviewActionResult("loading", `Creating controlled download link for ${licenceId}…`);
+          setWorkflowResult("loading", `Creating controlled download link for ${licenceId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/licences/${encodeURIComponent(licenceId)}/issue-download-link`,
             {
@@ -2549,7 +2596,7 @@ const description =
             },
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             "success",
             `Controlled link created in ${data.download_link?.status}. Copy this one-time URL now: ${data.download_link?.landing_url || data.download_link?.url || "not returned"}`,
           );
@@ -2558,12 +2605,12 @@ const description =
         }
 
         if (action === "check-activation") {
-          setReviewActionResult("loading", `Checking activation eligibility for ${downloadLinkId}…`);
+          setWorkflowResult("loading", `Checking activation eligibility for ${downloadLinkId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/activation-eligibility`,
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             data.eligible ? "success" : "info",
             data.eligible
               ? `Download link ${data.download_reference || downloadLinkId} can be activated.`
@@ -2579,7 +2626,7 @@ const description =
           );
           if (note === null) return;
 
-          setReviewActionResult("loading", `Activating download link ${downloadLinkId}…`);
+          setWorkflowResult("loading", `Activating download link ${downloadLinkId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/activate`,
             {
@@ -2588,7 +2635,7 @@ const description =
             },
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             "success",
             `Download link ${data.download_link?.download_reference || downloadLinkId} activated. No email was sent.`,
           );
@@ -2600,7 +2647,7 @@ const description =
           const landingUrl = promptLandingUrl();
           if (landingUrl === null) return;
 
-          setReviewActionResult("loading", `Preparing delivery payload for ${downloadLinkId}…`);
+          setWorkflowResult("loading", `Preparing delivery payload for ${downloadLinkId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/prepare-delivery`,
             {
@@ -2613,7 +2660,7 @@ const description =
             },
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             "success",
             `Delivery payload prepared for ${data.delivery_payload?.to || "recipient"}. No email was sent.`,
           );
@@ -2629,11 +2676,11 @@ const description =
           );
 
           if (!confirmed) {
-            setReviewActionResult("info", "Email send cancelled.");
+            setWorkflowResult("info", "Email send cancelled.");
             return;
           }
 
-          setReviewActionResult("loading", `Sending delivery email for ${downloadLinkId}…`);
+          setWorkflowResult("loading", `Sending delivery email for ${downloadLinkId}…`);
           const data = await workflowFetch(
             `/api/admin/cdas/download-links/${encodeURIComponent(downloadLinkId)}/send-delivery-email`,
             {
@@ -2646,7 +2693,7 @@ const description =
             },
           );
 
-          setReviewActionResult(
+          setWorkflowResult(
             "success",
             `Delivery email sent via ${data.email_result?.provider || "provider"}: ${data.email_result?.provider_message_id || "message id not returned"}.`,
           );
@@ -2690,7 +2737,7 @@ const description =
           );
 
           if (note === null) {
-            setReviewActionResult("info", "Controlled reissue cancelled.");
+            setWorkflowResult("info", "Controlled reissue cancelled.");
             return;
           }
 
@@ -2699,11 +2746,11 @@ const description =
           );
 
           if (!confirmed) {
-            setReviewActionResult("info", "Controlled reissue cancelled.");
+            setWorkflowResult("info", "Controlled reissue cancelled.");
             return;
           }
 
-          setReviewActionResult(
+          setWorkflowResult(
             "loading",
             `Creating replacement controlled link for ${downloadReference}…`,
           );
@@ -2723,7 +2770,7 @@ const description =
           const newLink = data.new_download_link || {};
           const landingUrl = newLink.landing_url || newLink.url || "";
 
-          setReviewActionResult(
+          setWorkflowResult(
             "success",
             `Replacement link ${newLink.download_reference || newLink.id || ""} created in ${newLink.status || "pending_activation"}. Copy this one-time URL now: ${landingUrl || "not returned"}`,
           );
@@ -2732,7 +2779,7 @@ const description =
           return;
         }
 
-        setReviewActionResult("error", `Unknown workflow action: ${action}`);
+        setWorkflowResult("error", `Unknown workflow action: ${action}`);
       } catch (error) {
         setWorkflowResult("error", error?.message || "Workflow action failed.");
       }

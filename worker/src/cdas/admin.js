@@ -14,6 +14,10 @@ import {
   reissueCdasDownloadLinkFromDownloadLink,
 } from "./download-link-reissue.js";
 import {
+  getCdasDownloadLinkActivationEligibility,
+  activateCdasDownloadLink,
+} from "./download-link-activation.js";
+import {
   sendCdasVerificationEmailTest,
 } from "./email-test.js";
 import {
