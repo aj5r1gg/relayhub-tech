@@ -18,6 +18,8 @@ import {
   activateCdasDownloadLink,
 } from "./download-link-activation.js";
 import { prepareCdasActiveLinkDelivery } from "./active-link-delivery-preparation.js";
+import { getCdasDownloadLink } from "./download-links.js";
+import { sendCdasActiveLinkDeliveryEmail } from "./active-link-email-send.js";
 import {
   sendCdasVerificationEmailTest,
 } from "./email-test.js";
