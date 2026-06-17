@@ -32,3 +32,6 @@ private-r2-seed/documents/audit/**
 
 # Local database/export backups
 backups/
+
+# Cloudflare Wrangler local state
+.wrangler/
