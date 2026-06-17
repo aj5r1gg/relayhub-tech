@@ -1,11 +1,18 @@
 import { jsonResponse } from "../shared.js";
 import {
+  getCdasDownloadLinkRevocationEligibility,
+  revokeCdasDownloadLink,
+} from "./download-link-revoke.js";
+import {
   getCdasDownloadLinkRevocationNoticeEligibility,
   sendCdasDownloadLinkRevocationNotice,
 } from "./download-link-revocation-notice.js";
 import {
   getCdasDownloadLinkReissueEligibility,
 } from "./download-link-reissue-eligibility.js";
+import {
+  reissueCdasDownloadLinkFromDownloadLink,
+} from "./download-link-reissue.js";
 import {
   sendCdasVerificationEmailTest,
 } from "./email-test.js";
@@ -473,6 +480,23 @@ export async function handleCdasAdminRequest(request, env) {
     );
 
     return getCdasDownloadLinkReissueEligibility(request, env, downloadId);
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/reissue")
+  ) {
+    const downloadId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/reissue"
+    );
+
+    return reissueCdasDownloadLinkFromDownloadLink(
+      request,
+      env,
+      downloadId
+    );
   }
 
   if (pathname.startsWith("/api/admin/cdas/download-links/")) {
