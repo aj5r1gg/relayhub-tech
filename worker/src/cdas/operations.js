@@ -542,16 +542,13 @@ export async function handleCdasOperationsJson(request, env) {
           l.document_version,
           l.licence_holder_name,
           l.organisation_name,
-          l.licence_holder_email_normalised,
           l.status,
           l.issued_at,
-          l.revoked_at,
           l.generated_pdf_status,
           l.generated_pdf_object_key,
           l.generated_pdf_sha256,
           l.generated_pdf_size_bytes,
           l.generated_pdf_created_at,
-          l.generated_pdf_error,
 
           (
             SELECT dl.id
@@ -562,20 +559,20 @@ export async function handleCdasOperationsJson(request, env) {
           ) AS latest_download_link_id,
 
           (
-            SELECT dl.status
-            FROM document_download_links dl
-            WHERE dl.licence_id = l.id
-            ORDER BY dl.created_at DESC
-            LIMIT 1
-          ) AS latest_download_link_status,
-
-          (
             SELECT dl.download_reference
             FROM document_download_links dl
             WHERE dl.licence_id = l.id
             ORDER BY dl.created_at DESC
             LIMIT 1
           ) AS latest_download_reference,
+
+          (
+            SELECT dl.status
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+            ORDER BY dl.created_at DESC
+            LIMIT 1
+          ) AS latest_download_link_status,
 
           (
             SELECT dl.created_at
@@ -618,70 +615,127 @@ export async function handleCdasOperationsJson(request, env) {
           ) AS latest_download_link_superseded_at,
 
           (
-            SELECT dl.expires_at
+            SELECT dl.failure_reason
             FROM document_download_links dl
             WHERE dl.licence_id = l.id
             ORDER BY dl.created_at DESC
             LIMIT 1
-          ) AS latest_download_link_expires_at,
-
-          (
-            SELECT MAX(e.event_at)
-            FROM document_download_events e
-            JOIN document_download_links dl
-              ON dl.id = e.download_id
-            WHERE dl.licence_id = l.id
-              AND e.event_type = 'download_link_revoked'
-              AND e.success = 1
-          ) AS link_revoked_event_at,
+          ) AS latest_download_link_failure_reason,
 
           (
             SELECT COUNT(*)
-            FROM document_download_events e
-            JOIN document_download_links dl
-              ON dl.id = e.download_id
+            FROM document_download_links dl
             WHERE dl.licence_id = l.id
-          ) AS download_event_count
+              AND dl.status IN ('created', 'pending_generation', 'pending_activation', 'active', 'sent')
+              AND dl.used_at IS NULL
+              AND dl.revoked_at IS NULL
+              AND dl.superseded_at IS NULL
+          ) AS open_download_link_count,
+
+          (
+            SELECT COUNT(*)
+            FROM document_download_links dl
+            WHERE dl.licence_id = l.id
+              AND dl.status = 'pending_activation'
+              AND dl.used_at IS NULL
+              AND dl.revoked_at IS NULL
+              AND dl.superseded_at IS NULL
+          ) AS pending_activation_link_count,
+
+          (
+            SELECT de.event_at
+            FROM document_download_events de
+            WHERE de.licence_id = l.id
+              AND de.event_type = 'download_link_reissued_pending_activation'
+            ORDER BY de.event_at DESC
+            LIMIT 1
+          ) AS latest_reissue_event_at,
+
+          (
+            SELECT de.download_id
+            FROM document_download_events de
+            WHERE de.licence_id = l.id
+              AND de.event_type = 'download_link_reissued_pending_activation'
+            ORDER BY de.event_at DESC
+            LIMIT 1
+          ) AS latest_reissue_download_id,
+
+          (
+            SELECT de.failure_reason
+            FROM document_download_events de
+            WHERE de.licence_id = l.id
+              AND de.event_type = 'download_link_reissued_pending_activation'
+            ORDER BY de.event_at DESC
+            LIMIT 1
+          ) AS latest_reissue_detail,
+
+          (
+            SELECT old.download_reference
+            FROM document_download_links old
+            WHERE old.licence_id = l.id
+              AND old.superseded_at IS NOT NULL
+            ORDER BY old.superseded_at DESC
+            LIMIT 1
+          ) AS latest_superseded_reference,
+
+          (
+            SELECT old.id
+            FROM document_download_links old
+            WHERE old.licence_id = l.id
+              AND old.superseded_at IS NOT NULL
+            ORDER BY old.superseded_at DESC
+            LIMIT 1
+          ) AS latest_superseded_link_id,
+
+          (
+            SELECT old.status
+            FROM document_download_links old
+            WHERE old.licence_id = l.id
+              AND old.superseded_at IS NOT NULL
+            ORDER BY old.superseded_at DESC
+            LIMIT 1
+          ) AS latest_superseded_link_status,
+
+          (
+            SELECT old.superseded_at
+            FROM document_download_links old
+            WHERE old.licence_id = l.id
+              AND old.superseded_at IS NOT NULL
+            ORDER BY old.superseded_at DESC
+            LIMIT 1
+          ) AS latest_superseded_at
 
         FROM document_licences l
         ORDER BY l.issued_at DESC
-        LIMIT 20
+        LIMIT 10
       `,
     ),
-
     recent_downloads: await all(
       db,
       `
         SELECT
-          e.id,
-          e.download_id,
-          e.licence_id,
-          e.licence_number,
-          e.document_id,
-          e.document_version,
-          e.licence_holder_name,
-          e.event_type,
-          e.event_at,
-          e.success,
-          e.failure_reason,
-
+          de.id,
+          de.download_id,
+          de.licence_number,
+          de.document_id,
+          de.document_version,
+          de.licence_holder_name,
+          de.event_type,
+          de.event_at,
+          de.success,
+          de.failure_reason,
+          dl.download_reference,
           dl.status AS download_link_status,
-          dl.download_reference AS download_reference,
-          dl.revoked_at AS revoked_at,
-          dl.used_at AS used_at,
-          dl.superseded_at AS superseded_at,
-
-          (
-            SELECT COUNT(*)
-            FROM document_download_events e2
-            WHERE e2.download_id = e.download_id
-          ) AS events_for_download
-
-        FROM document_download_events e
+          dl.created_at AS download_link_created_at,
+          dl.activated_at AS download_link_activated_at,
+          dl.used_at AS download_link_used_at,
+          dl.revoked_at AS download_link_revoked_at,
+          dl.superseded_at AS download_link_superseded_at
+        FROM document_download_events de
         LEFT JOIN document_download_links dl
-          ON dl.id = e.download_id
-        ORDER BY e.event_at DESC
-        LIMIT 30
+          ON dl.id = de.download_id
+        ORDER BY de.event_at DESC
+        LIMIT 10
       `,
     ),
 
