@@ -4,6 +4,9 @@ import {
   sendCdasDownloadLinkRevocationNotice,
 } from "./download-link-revocation-notice.js";
 import {
+  getCdasDownloadLinkReissueEligibility,
+} from "./download-link-reissue-eligibility.js";
+import {
   sendCdasVerificationEmailTest,
 } from "./email-test.js";
 import {
@@ -457,6 +460,19 @@ export async function handleCdasAdminRequest(request, env) {
       env,
       downloadId
     );
+  }
+
+  if (
+    pathname.startsWith("/api/admin/cdas/download-links/") &&
+    pathname.endsWith("/reissue-eligibility")
+  ) {
+    const downloadId = extractTrailingRouteParam(
+      pathname,
+      "/api/admin/cdas/download-links/",
+      "/reissue-eligibility"
+    );
+
+    return getCdasDownloadLinkReissueEligibility(request, env, downloadId);
   }
 
   if (pathname.startsWith("/api/admin/cdas/download-links/")) {
