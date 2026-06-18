@@ -1,5 +1,8 @@
 import { jsonResponse } from "../shared.js";
 import { parseStrictUploadRequest } from "./parse-multipart.js";
+import { byteLength, sha256Hex } from "./hash.js";
+
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -147,6 +150,7 @@ function buildNoSideEffects() {
     parses_multipart: true,
     validates_prefix: true,
     previews_object_keys: true,
+    calculates_hash_evidence: true,
     creates_upload_transaction: false,
     writes_r2: false,
     publishes_document: false,
@@ -207,7 +211,7 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "dry_run_prefix_validation_object_key_preview",
+    route_status: "dry_run_hash_evidence_preview",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     mode: routeMode.mode,
@@ -497,6 +501,106 @@ function buildCdasDryRunObjectKeyPreview(fields, prefixRecord) {
   });
 }
 
+function getFileExtension(filename) {
+  const cleanName = cleanText(filename).toLowerCase();
+  const parts = cleanName.split(".");
+
+  if (parts.length < 2) {
+    return "";
+  }
+
+  return parts.pop();
+}
+
+function asciiFromFirstBytes(bytes, count = 8) {
+  const view = new Uint8Array(bytes).slice(0, count);
+  return Array.from(view)
+    .map((byte) => String.fromCharCode(byte))
+    .join("");
+}
+
+function validatePdfDryRunSanity(file, bytes, sourceSize) {
+  const filename = cleanText(file?.name);
+  const mimeType = cleanText(file?.type);
+  const extension = getFileExtension(filename);
+  const firstBytes = asciiFromFirstBytes(bytes, 8);
+
+  const checks = {
+    non_empty: sourceSize > 0,
+    within_size_limit: sourceSize <= MAX_UPLOAD_BYTES,
+    filename_extension_pdf: extension === "pdf",
+    mime_type_pdf: !mimeType || mimeType === "application/pdf",
+    pdf_magic_header: firstBytes.startsWith("%PDF-"),
+  };
+
+  const failedChecks = Object.entries(checks)
+    .filter(([, passed]) => !passed)
+    .map(([name]) => name);
+
+  if (failedChecks.length) {
+    return fail(
+      "upload_pdf_sanity_failed",
+      "Basic PDF sanity checks failed.",
+      {
+        filename,
+        mime_type: mimeType || null,
+        extension: extension || null,
+        source_size: sourceSize,
+        first_bytes_ascii: firstBytes,
+        failed_checks: failedChecks,
+        checks,
+      }
+    );
+  }
+
+  return pass({
+    filename,
+    mime_type: mimeType || null,
+    extension,
+    source_size: sourceSize,
+    first_bytes_ascii: firstBytes,
+    checks,
+  });
+}
+
+async function buildDryRunHashEvidence(parsed) {
+  const file = parsed?.value?.file;
+
+  if (!file) {
+    return fail(
+      "upload_hash_file_missing",
+      "File is required before hash evidence can be calculated."
+    );
+  }
+
+  const bytes = await file.arrayBuffer();
+  const sourceSize = byteLength(bytes);
+
+  const sanity = validatePdfDryRunSanity(file, bytes, sourceSize);
+
+  if (!sanity.ok) {
+    return sanity;
+  }
+
+  const hash = await sha256Hex(bytes);
+
+  if (!hash.ok) {
+    return hash;
+  }
+
+  return pass({
+    source_sha256: hash.value,
+    source_size: sourceSize,
+    file_name: file.name || null,
+    file_type: file.type || null,
+    pdf_sanity: sanity.value,
+    sidecars_preview: {
+      sha256_text: `${hash.value}\n`,
+    },
+    writes_r2: false,
+  });
+}
+
 async function buildCdasDryRunPreview(env, parsed) {
   const fields = parsed?.value?.fields || {};
   const storagePrefixId = fields.storage_prefix_id;
@@ -516,9 +620,16 @@ async function buildCdasDryRunPreview(env, parsed) {
     return objectKeysResult;
   }
 
+  const hashEvidence = await buildDryRunHashEvidence(parsed);
+
+  if (!hashEvidence.ok) {
+    return hashEvidence;
+  }
+
   return pass({
     storage_prefix: prefixResult.value,
     object_key_preview: objectKeysResult.value,
+    hash_evidence: hashEvidence.value,
   });
 }
 
@@ -527,7 +638,7 @@ async function parseCdasDryRunMultipart(request) {
     domain: "cdas_document",
     uploadDomain: "cdas_document",
     upload_domain: "cdas_document",
-    maxBytes: 10 * 1024 * 1024,
+    maxBytes: MAX_UPLOAD_BYTES,
   });
 }
 
@@ -594,7 +705,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
         message: preview.message,
         details: preview.details || {},
         observed_request: buildObservedRequest(request),
-        validation_stage: "dry_run_prefix_validation_object_key_preview",
+        validation_stage: "dry_run_hash_evidence_preview",
         parsed_upload: buildParsedUploadSummary(parsed),
         side_effects_confirmed: buildSideEffectsConfirmed(),
       },
@@ -608,14 +719,14 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       ok: true,
       accepted: true,
       message:
-        "CDAS upload dry-run validation passed. Prefix and object keys were previewed. No upload action was performed.",
+        "CDAS upload dry-run validation passed. Prefix, object keys, and hash evidence were previewed. No upload action was performed.",
       observed_request: buildObservedRequest(request),
-      validation_stage: "dry_run_prefix_validation_object_key_preview",
+      validation_stage: "dry_run_hash_evidence_preview",
       parsed_upload: buildParsedUploadSummary(parsed),
       dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-D should add dry-run hash evidence preview without creating an upload transaction or writing to R2.",
+        "U3-E should add dry-run R2 absence checks without creating an upload transaction or writing to R2.",
     },
     200
   );
@@ -639,13 +750,14 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "dry_run_prefix_validation_object_key_preview",
+  routeStatus: "dry_run_hash_evidence_preview",
   adminOnly: true,
   disabledByDefault: true,
   dryRunOnly: true,
   parsesMultipart: true,
   validatesPrefix: true,
   previewsObjectKeys: true,
+  calculatesHashEvidence: true,
   createsUploadTransaction: false,
   writesR2: false,
   publishesDocuments: false,
