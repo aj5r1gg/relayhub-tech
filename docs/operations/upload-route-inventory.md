@@ -357,3 +357,40 @@ Next gate:
 
     U3-C — Dry-Run Prefix Validation and Object-Key Preview
 
+
+## 12. U3-C Dry-Run Prefix Validation and Object-Key Preview
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Dry-run prefix validation and object-key preview only.
+
+Policy posture:
+
+- admin-only
+- disabled unless upload dry-run switches are enabled
+- strict multipart parsing enabled
+- storage prefix must exist
+- storage prefix must belong to cdas_document
+- storage prefix must be active
+- storage prefix must remain under docs/originals/relayhub/
+- object keys are previewed only
+- no upload transaction creation
+- no R2 write
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+
+Validation gate:
+
+    U3-C dry-run prefix/object-key preview validation failures: 0
+
+Next gate:
+
+    U3-D — Dry-Run Hash Evidence Preview
+

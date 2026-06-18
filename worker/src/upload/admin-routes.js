@@ -46,6 +46,24 @@ function adminAuthFailed() {
   );
 }
 
+function fail(error, message, details = {}) {
+  return {
+    ok: false,
+    error,
+    message,
+    details,
+    warnings: [],
+  };
+}
+
+function pass(value, warnings = []) {
+  return {
+    ok: true,
+    value,
+    warnings,
+  };
+}
+
 function isUploadAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
 
@@ -95,9 +113,40 @@ function getUploadRouteMode(request) {
   };
 }
 
+function safeSlug(value) {
+  return cleanText(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+}
+
+function safeVersion(value) {
+  return cleanText(value)
+    .toLowerCase()
+    .replace(/^v/, "")
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function normalisePrefix(prefix) {
+  const cleanPrefix = cleanText(prefix).replaceAll("\\", "/");
+
+  if (!cleanPrefix) {
+    return "";
+  }
+
+  return cleanPrefix.endsWith("/") ? cleanPrefix : `${cleanPrefix}/`;
+}
+
 function buildNoSideEffects() {
   return {
     parses_multipart: true,
+    validates_prefix: true,
+    previews_object_keys: true,
     creates_upload_transaction: false,
     writes_r2: false,
     publishes_document: false,
@@ -158,7 +207,7 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "dry_run_multipart_validation",
+    route_status: "dry_run_prefix_validation_object_key_preview",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     mode: routeMode.mode,
@@ -258,6 +307,230 @@ function dryRunRequiredResponse(request, env) {
   );
 }
 
+async function getStoragePrefixForDryRun(env, storagePrefixId) {
+  const prefixId = cleanText(storagePrefixId);
+
+  if (!prefixId) {
+    return fail(
+      "upload_storage_prefix_id_missing",
+      "Storage prefix ID is required."
+    );
+  }
+
+  if (!env?.DB?.prepare) {
+    return fail(
+      "upload_storage_prefix_database_unavailable",
+      "D1 database binding is unavailable, so storage prefix could not be validated."
+    );
+  }
+
+  const row = await env.DB.prepare(
+    `SELECT
+       id,
+       domain,
+       label,
+       prefix,
+       status,
+       description
+     FROM storage_prefixes
+     WHERE id = ?`
+  )
+    .bind(prefixId)
+    .first();
+
+  if (!row) {
+    return fail(
+      "upload_storage_prefix_not_found",
+      "Storage prefix could not be found.",
+      {
+        storage_prefix_id: prefixId,
+      }
+    );
+  }
+
+  if (row.domain !== "cdas_document") {
+    return fail(
+      "upload_storage_prefix_domain_mismatch",
+      "Storage prefix does not belong to the CDAS document upload domain.",
+      {
+        storage_prefix_id: row.id,
+        expected_domain: "cdas_document",
+        actual_domain: row.domain,
+      }
+    );
+  }
+
+  if (row.status !== "active") {
+    return fail(
+      "upload_storage_prefix_not_active",
+      "Storage prefix is not active and cannot be used for upload.",
+      {
+        storage_prefix_id: row.id,
+        status: row.status,
+      }
+    );
+  }
+
+  const prefix = normalisePrefix(row.prefix);
+
+  if (!prefix) {
+    return fail(
+      "upload_storage_prefix_empty",
+      "Storage prefix is empty.",
+      {
+        storage_prefix_id: row.id,
+      }
+    );
+  }
+
+  if (prefix.startsWith("/")) {
+    return fail(
+      "upload_storage_prefix_leading_slash",
+      "Storage prefix must not begin with a slash.",
+      {
+        storage_prefix_id: row.id,
+        prefix,
+      }
+    );
+  }
+
+  if (prefix.includes("//")) {
+    return fail(
+      "upload_storage_prefix_duplicate_separator",
+      "Storage prefix must not contain duplicate path separators.",
+      {
+        storage_prefix_id: row.id,
+        prefix,
+      }
+    );
+  }
+
+  if (
+    prefix === ".." ||
+    prefix.startsWith("../") ||
+    prefix.endsWith("/..") ||
+    prefix.includes("/../")
+  ) {
+    return fail(
+      "upload_storage_prefix_path_escape",
+      "Storage prefix must not contain parent-directory references.",
+      {
+        storage_prefix_id: row.id,
+        prefix,
+      }
+    );
+  }
+
+  if (!prefix.startsWith("docs/originals/relayhub/")) {
+    return fail(
+      "upload_storage_prefix_outside_cdas_root",
+      "CDAS document uploads must remain under docs/originals/relayhub/.",
+      {
+        storage_prefix_id: row.id,
+        prefix,
+      }
+    );
+  }
+
+  return pass({
+    id: row.id,
+    domain: row.domain,
+    label: row.label,
+    prefix,
+    status: row.status,
+    description: row.description || null,
+  });
+}
+
+function buildCdasDryRunObjectKeyPreview(fields, prefixRecord) {
+  const slug = safeSlug(fields.slug);
+  const version = safeVersion(fields.version);
+
+  if (!slug) {
+    return fail(
+      "upload_object_key_slug_invalid",
+      "Document slug is required before object keys can be previewed."
+    );
+  }
+
+  if (!version) {
+    return fail(
+      "upload_object_key_version_invalid",
+      "Document version is required before object keys can be previewed."
+    );
+  }
+
+  const base = `${normalisePrefix(prefixRecord.prefix)}${slug}/${version}/`;
+
+  if (base.includes("//")) {
+    return fail(
+      "upload_object_key_duplicate_separator",
+      "Generated object key contains duplicate path separators.",
+      {
+        base,
+      }
+    );
+  }
+
+  if (
+    base === ".." ||
+    base.startsWith("../") ||
+    base.endsWith("/..") ||
+    base.includes("/../")
+  ) {
+    return fail(
+      "upload_object_key_path_escape",
+      "Generated object key contains parent-directory references.",
+      {
+        base,
+      }
+    );
+  }
+
+  return pass({
+    base_prefix: base,
+    source_object_key: `${base}source.pdf`,
+    sha256_object_key: `${base}source.sha256`,
+    metadata_object_key: `${base}metadata.json`,
+    overwrite_allowed: false,
+    writes_r2: false,
+  });
+}
+
+async function buildCdasDryRunPreview(env, parsed) {
+  const fields = parsed?.value?.fields || {};
+  const storagePrefixId = fields.storage_prefix_id;
+
+  const prefixResult = await getStoragePrefixForDryRun(env, storagePrefixId);
+
+  if (!prefixResult.ok) {
+    return prefixResult;
+  }
+
+  const objectKeysResult = buildCdasDryRunObjectKeyPreview(
+    fields,
+    prefixResult.value
+  );
+
+  if (!objectKeysResult.ok) {
+    return objectKeysResult;
+  }
+
+  return pass({
+    storage_prefix: prefixResult.value,
+    object_key_preview: objectKeysResult.value,
+  });
+}
+
+async function parseCdasDryRunMultipart(request) {
+  return parseStrictUploadRequest(request, {
+    domain: "cdas_document",
+    uploadDomain: "cdas_document",
+    upload_domain: "cdas_document",
+    maxBytes: 10 * 1024 * 1024,
+  });
+}
+
 async function handleCdasDocumentUploadSkeleton(request, env) {
   const switches = getUploadRouteSwitches(env);
   const routeMode = getUploadRouteMode(request);
@@ -290,12 +563,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
     return dryRunDisabledResponse(request, env);
   }
 
-  const parsed = await parseStrictUploadRequest(request, {
-    domain: "cdas_document",
-    uploadDomain: "cdas_document",
-    upload_domain: "cdas_document",
-    maxBytes: 10 * 1024 * 1024,
-  });
+  const parsed = await parseCdasDryRunMultipart(request);
 
   if (!parsed.ok) {
     return jsonResponse(
@@ -314,19 +582,40 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
     );
   }
 
+  const preview = await buildCdasDryRunPreview(env, parsed);
+
+  if (!preview.ok) {
+    return jsonResponse(
+      {
+        ...buildCdasUploadRouteStatus(request, env),
+        ok: false,
+        accepted: false,
+        error: preview.error,
+        message: preview.message,
+        details: preview.details || {},
+        observed_request: buildObservedRequest(request),
+        validation_stage: "dry_run_prefix_validation_object_key_preview",
+        parsed_upload: buildParsedUploadSummary(parsed),
+        side_effects_confirmed: buildSideEffectsConfirmed(),
+      },
+      400
+    );
+  }
+
   return jsonResponse(
     {
       ...buildCdasUploadRouteStatus(request, env),
       ok: true,
       accepted: true,
       message:
-        "CDAS upload dry-run multipart validation passed. No upload action was performed.",
+        "CDAS upload dry-run validation passed. Prefix and object keys were previewed. No upload action was performed.",
       observed_request: buildObservedRequest(request),
-      validation_stage: "strict_multipart_dry_run",
+      validation_stage: "dry_run_prefix_validation_object_key_preview",
       parsed_upload: buildParsedUploadSummary(parsed),
+      dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-C should add dry-run prefix validation and object-key preview without R2 writes.",
+        "U3-D should add dry-run hash evidence preview without creating an upload transaction or writing to R2.",
     },
     200
   );
@@ -350,11 +639,13 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "dry_run_multipart_validation",
+  routeStatus: "dry_run_prefix_validation_object_key_preview",
   adminOnly: true,
   disabledByDefault: true,
   dryRunOnly: true,
   parsesMultipart: true,
+  validatesPrefix: true,
+  previewsObjectKeys: true,
   createsUploadTransaction: false,
   writesR2: false,
   publishesDocuments: false,
