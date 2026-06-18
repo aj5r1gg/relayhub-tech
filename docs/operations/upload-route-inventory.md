@@ -394,3 +394,42 @@ Next gate:
 
     U3-D — Dry-Run Hash Evidence Preview
 
+
+## 14. U3-E Dry-Run R2 Absence Check
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Dry-run R2 absence check only.
+
+Policy posture:
+
+- admin-only
+- disabled unless upload dry-run switches are enabled
+- strict multipart parsing enabled
+- storage prefix validation enabled
+- object keys previewed only
+- SHA-256 evidence calculated
+- basic PDF sanity checked
+- R2 absence checked for source, SHA-256 sidecar, and metadata sidecar
+- existing R2 object blocks upload
+- uncertain R2 state blocks upload
+- no upload transaction creation
+- no R2 write
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+
+Validation gate:
+
+    U3-E dry-run R2 absence validation failures: 0
+
+Next gate:
+
+    U3-F — Disabled Real-Write Gate
+

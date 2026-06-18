@@ -1,6 +1,7 @@
 import { jsonResponse } from "../shared.js";
 import { parseStrictUploadRequest } from "./parse-multipart.js";
 import { byteLength, sha256Hex } from "./hash.js";
+import { requireUploadObjectKeysAbsent } from "./r2-objects.js";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
@@ -151,6 +152,7 @@ function buildNoSideEffects() {
     validates_prefix: true,
     previews_object_keys: true,
     calculates_hash_evidence: true,
+    checks_r2_absence: true,
     creates_upload_transaction: false,
     writes_r2: false,
     publishes_document: false,
@@ -211,7 +213,7 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "dry_run_hash_evidence_preview",
+    route_status: "dry_run_r2_absence_check",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     mode: routeMode.mode,
@@ -227,8 +229,8 @@ function buildCdasUploadRouteStatus(request, env) {
       "storage prefix validation",
       "object key builder",
       "hash evidence",
-      "upload transaction creation",
       "R2 no-overwrite check",
+      "upload transaction creation",
       "R2 write helper",
       "orchestrator validation gate",
       "recovery path validation",
@@ -601,6 +603,41 @@ async function buildDryRunHashEvidence(parsed) {
   });
 }
 
+async function buildDryRunR2AbsenceCheck(env, objectKeyPreview) {
+  const objectKeys = {
+    source: objectKeyPreview.source_object_key,
+    sha256: objectKeyPreview.sha256_object_key,
+    metadata: objectKeyPreview.metadata_object_key,
+  };
+
+  const absence = await requireUploadObjectKeysAbsent(env, objectKeys, {
+    bindingName: "DOCUMENT_BUCKET",
+  });
+
+  if (!absence.ok) {
+    return fail(
+      "upload_r2_absence_check_failed",
+      "Dry-run R2 absence check failed. Upload would be blocked.",
+      {
+        reason: absence.error,
+        upstream_message: absence.message,
+        upstream_details: absence.details || {},
+        object_keys: objectKeys,
+        writes_r2: false,
+      }
+    );
+  }
+
+  return pass({
+    absence_confirmed: true,
+    safe_to_write_new_objects: true,
+    checked_count: absence.value.checked_count,
+    object_keys: objectKeys,
+    results: absence.value.results,
+    writes_r2: false,
+  });
+}
+
 async function buildCdasDryRunPreview(env, parsed) {
   const fields = parsed?.value?.fields || {};
   const storagePrefixId = fields.storage_prefix_id;
@@ -626,10 +663,17 @@ async function buildCdasDryRunPreview(env, parsed) {
     return hashEvidence;
   }
 
+  const r2Absence = await buildDryRunR2AbsenceCheck(env, objectKeysResult.value);
+
+  if (!r2Absence.ok) {
+    return r2Absence;
+  }
+
   return pass({
     storage_prefix: prefixResult.value,
     object_key_preview: objectKeysResult.value,
     hash_evidence: hashEvidence.value,
+    r2_absence_check: r2Absence.value,
   });
 }
 
@@ -705,11 +749,11 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
         message: preview.message,
         details: preview.details || {},
         observed_request: buildObservedRequest(request),
-        validation_stage: "dry_run_hash_evidence_preview",
+        validation_stage: "dry_run_r2_absence_check",
         parsed_upload: buildParsedUploadSummary(parsed),
         side_effects_confirmed: buildSideEffectsConfirmed(),
       },
-      400
+      409
     );
   }
 
@@ -719,14 +763,14 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       ok: true,
       accepted: true,
       message:
-        "CDAS upload dry-run validation passed. Prefix, object keys, and hash evidence were previewed. No upload action was performed.",
+        "CDAS upload dry-run validation passed. Prefix, object keys, hash evidence, and R2 absence were checked. No upload action was performed.",
       observed_request: buildObservedRequest(request),
-      validation_stage: "dry_run_hash_evidence_preview",
+      validation_stage: "dry_run_r2_absence_check",
       parsed_upload: buildParsedUploadSummary(parsed),
       dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-E should add dry-run R2 absence checks without creating an upload transaction or writing to R2.",
+        "U3-F should create a disabled real-write route gate, still blocked unless an explicit future switch is enabled.",
     },
     200
   );
@@ -750,7 +794,7 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "dry_run_hash_evidence_preview",
+  routeStatus: "dry_run_r2_absence_check",
   adminOnly: true,
   disabledByDefault: true,
   dryRunOnly: true,
@@ -758,6 +802,7 @@ export const uploadAdminRoutePolicy = {
   validatesPrefix: true,
   previewsObjectKeys: true,
   calculatesHashEvidence: true,
+  checksR2Absence: true,
   createsUploadTransaction: false,
   writesR2: false,
   publishesDocuments: false,
