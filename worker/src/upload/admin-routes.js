@@ -98,6 +98,7 @@ function getUploadRouteSwitches(env = {}) {
     cdas_uploads_enabled: envEnabled(env.CDAS_UPLOADS_ENABLED),
     upload_route_skeleton_enabled: envEnabled(env.UPLOAD_ROUTE_SKELETON_ENABLED),
     upload_route_dry_run_enabled: envEnabled(env.UPLOAD_ROUTE_DRY_RUN_ENABLED),
+    upload_route_real_write_enabled: envEnabled(env.UPLOAD_ROUTE_REAL_WRITE_ENABLED),
   };
 }
 
@@ -111,9 +112,34 @@ function getUploadRouteMode(request) {
     url.searchParams.get("dry_run") === "1" ||
     url.searchParams.get("dryRun") === "1";
 
+  const realWrite =
+    mode === "real-write" ||
+    mode === "real_write" ||
+    mode === "write" ||
+    mode === "live" ||
+    url.searchParams.get("real_write") === "1" ||
+    url.searchParams.get("realWrite") === "1";
+
+  if (dryRun) {
+    return {
+      mode: "dry-run",
+      dry_run: true,
+      real_write: false,
+    };
+  }
+
+  if (realWrite) {
+    return {
+      mode: "real-write",
+      dry_run: false,
+      real_write: true,
+    };
+  }
+
   return {
-    mode: dryRun ? "dry-run" : mode || "blocked",
-    dry_run: dryRun,
+    mode: mode || "blocked",
+    dry_run: false,
+    real_write: false,
   };
 }
 
@@ -153,6 +179,7 @@ function buildNoSideEffects() {
     previews_object_keys: true,
     calculates_hash_evidence: true,
     checks_r2_absence: true,
+    recognises_real_write_intent: true,
     creates_upload_transaction: false,
     writes_r2: false,
     publishes_document: false,
@@ -213,9 +240,10 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "dry_run_r2_absence_check",
+    route_status: "disabled_real_write_gate",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
+    real_write_requested: routeMode.real_write,
     mode: routeMode.mode,
     switches,
     side_effects: buildNoSideEffects(),
@@ -223,8 +251,7 @@ function buildCdasUploadRouteStatus(request, env) {
       "UPLOADS_ENABLED=true",
       "CDAS_UPLOADS_ENABLED=true",
       "UPLOAD_ROUTE_SKELETON_ENABLED=true",
-      "UPLOAD_ROUTE_DRY_RUN_ENABLED=true",
-      "future explicit real-write switch not yet implemented",
+      "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
       "strict multipart parser",
       "storage prefix validation",
       "object key builder",
@@ -234,6 +261,8 @@ function buildCdasUploadRouteStatus(request, env) {
       "R2 write helper",
       "orchestrator validation gate",
       "recovery path validation",
+      "audit path validation",
+      "manual release gate approval",
     ],
   };
 }
@@ -307,9 +336,56 @@ function dryRunRequiredResponse(request, env) {
       ok: false,
       error: "upload_route_dry_run_required",
       message:
-        "This route only accepts dry-run requests. Add ?mode=dry-run. No upload action was performed.",
+        "This route currently accepts dry-run requests only. Add ?mode=dry-run. No upload action was performed.",
     },
     409
+  );
+}
+
+function realWriteDisabledResponse(request, env) {
+  const status = buildCdasUploadRouteStatus(request, env);
+
+  return jsonResponse(
+    {
+      ...status,
+      ok: false,
+      accepted: false,
+      error: "upload_real_write_disabled",
+      message:
+        "Real CDAS upload write mode is recognised but disabled by policy. No upload transaction was created and no R2 write was performed.",
+      validation_stage: "disabled_real_write_gate",
+      side_effects_confirmed: buildSideEffectsConfirmed(),
+      required_switch: "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
+      next_gate:
+        "A later implementation gate must explicitly connect the validated route to the upload transaction and write orchestrator.",
+    },
+    423
+  );
+}
+
+function realWriteNotImplementedResponse(request, env) {
+  const status = buildCdasUploadRouteStatus(request, env);
+
+  return jsonResponse(
+    {
+      ...status,
+      ok: false,
+      accepted: false,
+      error: "upload_real_write_not_implemented",
+      message:
+        "Real CDAS upload write mode is gated but not implemented in this route yet. No upload transaction was created and no R2 write was performed.",
+      validation_stage: "disabled_real_write_gate",
+      side_effects_confirmed: buildSideEffectsConfirmed(),
+      required_future_components: [
+        "upload transaction creation",
+        "idempotency integration",
+        "R2 write orchestrator integration",
+        "audit event integration",
+        "recovery classification",
+        "post-write verification",
+      ],
+    },
+    501
   );
 }
 
@@ -516,6 +592,7 @@ function getFileExtension(filename) {
 
 function asciiFromFirstBytes(bytes, count = 8) {
   const view = new Uint8Array(bytes).slice(0, count);
+
   return Array.from(view)
     .map((byte) => String.fromCharCode(byte))
     .join("");
@@ -710,6 +787,14 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
     return routeSkeletonDisabledResponse(request, env);
   }
 
+  if (routeMode.real_write) {
+    if (!switches.upload_route_real_write_enabled) {
+      return realWriteDisabledResponse(request, env);
+    }
+
+    return realWriteNotImplementedResponse(request, env);
+  }
+
   if (!routeMode.dry_run) {
     return dryRunRequiredResponse(request, env);
   }
@@ -770,7 +855,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-F should create a disabled real-write route gate, still blocked unless an explicit future switch is enabled.",
+        "U3-G should wire the real-write path to transaction creation and the upload write orchestrator behind the explicit real-write gate.",
     },
     200
   );
@@ -794,10 +879,14 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "dry_run_r2_absence_check",
+  routeStatus: "disabled_real_write_gate",
   adminOnly: true,
   disabledByDefault: true,
-  dryRunOnly: true,
+  dryRunOnly: false,
+  dryRunSupported: true,
+  realWriteIntentRecognised: true,
+  realWriteDisabledByDefault: true,
+  realWriteImplemented: false,
   parsesMultipart: true,
   validatesPrefix: true,
   previewsObjectKeys: true,

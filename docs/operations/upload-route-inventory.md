@@ -433,3 +433,38 @@ Next gate:
 
     U3-F — Disabled Real-Write Gate
 
+
+## 15. U3-F Disabled Real-Write Gate
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Disabled real-write gate.
+
+Policy posture:
+
+- admin-only
+- dry-run remains supported
+- real-write intent is recognised
+- real-write is disabled by default
+- real-write requires UPLOAD_ROUTE_REAL_WRITE_ENABLED=true
+- even with the real-write switch enabled, real-write returns not implemented until a later gate wires the transaction and write orchestrator
+- no upload transaction creation
+- no R2 write
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+
+Validation gate:
+
+    U3-F disabled real-write gate validation failures: 0
+
+Next gate:
+
+    U3-G — Real-Write Transaction and Orchestrator Wiring
+
