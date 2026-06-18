@@ -468,3 +468,46 @@ Next gate:
 
     U3-G — Real-Write Transaction and Orchestrator Wiring
 
+
+## 16. U3-G Real-Write Transaction and Orchestrator Wiring
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Real-write transaction and orchestrator wiring.
+
+Policy posture:
+
+- admin-only
+- dry-run remains supported
+- real-write intent is recognised
+- real-write is disabled by default
+- real-write requires UPLOAD_ROUTE_REAL_WRITE_ENABLED=true
+- strict multipart parsing enabled
+- storage prefix validation enabled
+- object keys generated
+- SHA-256 evidence calculated
+- basic PDF sanity checked
+- R2 absence checked before transaction/write
+- upload transaction created for real-write mode
+- source, SHA-256 sidecar, and metadata sidecar written through upload write orchestrator
+- orchestrator owns transaction status updates
+- orchestrator owns R2 write helper path
+- recovery-required failures are surfaced
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+
+Validation gate:
+
+    U3-G real-write transaction/orchestrator validation failures: 0
+
+Next gate:
+
+    U3-H — Real-Write Idempotency Replay Handling
+

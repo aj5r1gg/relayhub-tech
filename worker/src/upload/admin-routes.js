@@ -2,6 +2,8 @@ import { jsonResponse } from "../shared.js";
 import { parseStrictUploadRequest } from "./parse-multipart.js";
 import { byteLength, sha256Hex } from "./hash.js";
 import { requireUploadObjectKeysAbsent } from "./r2-objects.js";
+import { createUploadTransaction } from "./transactions.js";
+import { orchestrateUploadR2Write } from "./write-orchestrator.js";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
@@ -9,8 +11,17 @@ function cleanText(value) {
   return String(value ?? "").trim();
 }
 
+function nullableText(value) {
+  const text = cleanText(value);
+  return text || null;
+}
+
 function envEnabled(value) {
   return cleanText(value).toLowerCase() === "true";
+}
+
+function nowIso() {
+  return new Date().toISOString();
 }
 
 function methodNotAllowed(allowed = ["GET"]) {
@@ -143,6 +154,25 @@ function getUploadRouteMode(request) {
   };
 }
 
+function getRequestId(request) {
+  return (
+    cleanText(request.headers.get("x-request-id")) ||
+    cleanText(request.headers.get("cf-ray")) ||
+    cleanText(crypto.randomUUID?.()) ||
+    `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`
+  );
+}
+
+function getAdminActor(request, env) {
+  return (
+    cleanText(env.UPLOAD_ADMIN_ACTOR) ||
+    cleanText(env.RELAYHUB_ADMIN_ACTOR) ||
+    cleanText(request.headers.get("cf-access-authenticated-user-email")) ||
+    cleanText(request.headers.get("x-admin-actor")) ||
+    "admin"
+  );
+}
+
 function safeSlug(value) {
   return cleanText(value)
     .toLowerCase()
@@ -172,7 +202,7 @@ function normalisePrefix(prefix) {
   return cleanPrefix.endsWith("/") ? cleanPrefix : `${cleanPrefix}/`;
 }
 
-function buildNoSideEffects() {
+function buildNoSideEffects(realWrite = false) {
   return {
     parses_multipart: true,
     validates_prefix: true,
@@ -180,8 +210,8 @@ function buildNoSideEffects() {
     calculates_hash_evidence: true,
     checks_r2_absence: true,
     recognises_real_write_intent: true,
-    creates_upload_transaction: false,
-    writes_r2: false,
+    creates_upload_transaction: realWrite,
+    writes_r2: realWrite,
     publishes_document: false,
     creates_licence: false,
     creates_download_link: false,
@@ -189,7 +219,7 @@ function buildNoSideEffects() {
   };
 }
 
-function buildSideEffectsConfirmed() {
+function buildSideEffectsConfirmed(overrides = {}) {
   return {
     creates_upload_transaction: false,
     writes_r2: false,
@@ -197,6 +227,7 @@ function buildSideEffectsConfirmed() {
     creates_licence: false,
     creates_download_link: false,
     sends_email: false,
+    ...overrides,
   };
 }
 
@@ -240,13 +271,15 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "disabled_real_write_gate",
+    route_status: "real_write_transaction_orchestrator_wiring",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     real_write_requested: routeMode.real_write,
     mode: routeMode.mode,
     switches,
-    side_effects: buildNoSideEffects(),
+    side_effects: buildNoSideEffects(
+      routeMode.real_write && switches.upload_route_real_write_enabled
+    ),
     requirements_before_real_write: [
       "UPLOADS_ENABLED=true",
       "CDAS_UPLOADS_ENABLED=true",
@@ -336,7 +369,7 @@ function dryRunRequiredResponse(request, env) {
       ok: false,
       error: "upload_route_dry_run_required",
       message:
-        "This route currently accepts dry-run requests only. Add ?mode=dry-run. No upload action was performed.",
+        "This route currently accepts dry-run or explicitly gated real-write requests only. Add ?mode=dry-run for dry-run validation.",
     },
     409
   );
@@ -353,39 +386,11 @@ function realWriteDisabledResponse(request, env) {
       error: "upload_real_write_disabled",
       message:
         "Real CDAS upload write mode is recognised but disabled by policy. No upload transaction was created and no R2 write was performed.",
-      validation_stage: "disabled_real_write_gate",
+      validation_stage: "real_write_gate",
       side_effects_confirmed: buildSideEffectsConfirmed(),
       required_switch: "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
-      next_gate:
-        "A later implementation gate must explicitly connect the validated route to the upload transaction and write orchestrator.",
     },
     423
-  );
-}
-
-function realWriteNotImplementedResponse(request, env) {
-  const status = buildCdasUploadRouteStatus(request, env);
-
-  return jsonResponse(
-    {
-      ...status,
-      ok: false,
-      accepted: false,
-      error: "upload_real_write_not_implemented",
-      message:
-        "Real CDAS upload write mode is gated but not implemented in this route yet. No upload transaction was created and no R2 write was performed.",
-      validation_stage: "disabled_real_write_gate",
-      side_effects_confirmed: buildSideEffectsConfirmed(),
-      required_future_components: [
-        "upload transaction creation",
-        "idempotency integration",
-        "R2 write orchestrator integration",
-        "audit event integration",
-        "recovery classification",
-        "post-write verification",
-      ],
-    },
-    501
   );
 }
 
@@ -590,6 +595,20 @@ function getFileExtension(filename) {
   return parts.pop();
 }
 
+function safeFilename(filename) {
+  const cleanName = cleanText(filename).toLowerCase();
+  const extension = getFileExtension(cleanName);
+  const withoutExtension = extension
+    ? cleanName.slice(0, -(extension.length + 1))
+    : cleanName;
+
+  const base =
+    safeSlug(withoutExtension) ||
+    `upload-${Date.now().toString(36)}`;
+
+  return extension ? `${base}.${extension}` : base;
+}
+
 function asciiFromFirstBytes(bytes, count = 8) {
   const view = new Uint8Array(bytes).slice(0, count);
 
@@ -763,6 +782,167 @@ async function parseCdasDryRunMultipart(request) {
   });
 }
 
+function buildRealWriteObjectKeys(objectKeyPreview) {
+  return {
+    source: objectKeyPreview.source_object_key,
+    sha256: objectKeyPreview.sha256_object_key,
+    metadata: objectKeyPreview.metadata_object_key,
+  };
+}
+
+function buildUploadMetadata(fields, preview, uploadTransaction) {
+  return {
+    upload_domain: "cdas_document",
+    upload_transaction_id: uploadTransaction.id,
+    title: nullableText(fields.title),
+    slug: nullableText(fields.slug),
+    version: nullableText(fields.version),
+    summary: nullableText(fields.summary),
+    classification: nullableText(fields.classification),
+    access_class: nullableText(fields.access_class),
+    licence_terms_version: nullableText(fields.licence_terms_version),
+    storage_prefix_id: preview.storage_prefix.id,
+    storage_prefix: preview.storage_prefix.prefix,
+    source_sha256: preview.hash_evidence.source_sha256,
+    source_size: preview.hash_evidence.source_size,
+    generated_at: nowIso(),
+    publication_status: "not_published",
+    licence_status: "not_created",
+    download_link_status: "not_created",
+    email_status: "not_sent",
+  };
+}
+
+async function readUploadBytesForWrite(parsed) {
+  const file = parsed?.value?.file;
+
+  if (!file) {
+    return fail(
+      "upload_write_file_missing",
+      "File is required before real-write upload can proceed."
+    );
+  }
+
+  const bytes = await file.arrayBuffer();
+
+  return pass(bytes);
+}
+
+async function createCdasUploadTransaction(request, env, parsed, preview) {
+  const fields = parsed?.value?.fields || {};
+  const file = parsed?.value?.file;
+  const objectKeys = buildRealWriteObjectKeys(preview.object_key_preview);
+  const eventAt = nowIso();
+
+  const transaction = await createUploadTransaction(env, {
+    uploadDomain: "cdas_document",
+    uploadStatus: "started",
+    relatedRecordType: "cdas_document_upload_candidate",
+    relatedRecordId: safeSlug(fields.slug),
+    originalFilename: file?.name || null,
+    safeFilename: safeFilename(file?.name || "source.pdf"),
+    mimeType: file?.type || "application/pdf",
+    fileExtension: getFileExtension(file?.name || "source.pdf") || "pdf",
+    sourceSize: preview.hash_evidence.source_size,
+    sourceSha256: preview.hash_evidence.source_sha256,
+    selectedPrefixId: preview.storage_prefix.id,
+    selectedPrefix: preview.storage_prefix.prefix,
+    intendedObjectKey: objectKeys.source,
+    finalObjectKey: objectKeys.source,
+    startedAt: eventAt,
+    recoveryStatus: "none",
+    adminActor: getAdminActor(request, env),
+    userAgent: request.headers.get("user-agent") || null,
+    requestId: getRequestId(request),
+    notes:
+      "Created by CDAS upload real-write route. Source object only; document publication, licence creation, download link creation, and email are intentionally not performed by this route.",
+  });
+
+  if (!transaction.ok) {
+    return transaction;
+  }
+
+  return pass({
+    transaction: transaction.value,
+    object_keys: objectKeys,
+    event_at: eventAt,
+  });
+}
+
+async function performCdasRealWrite(request, env, parsed, preview) {
+  const bytesResult = await readUploadBytesForWrite(parsed);
+
+  if (!bytesResult.ok) {
+    return bytesResult;
+  }
+
+  const transactionResult = await createCdasUploadTransaction(
+    request,
+    env,
+    parsed,
+    preview
+  );
+
+  if (!transactionResult.ok) {
+    return transactionResult;
+  }
+
+  const fields = parsed?.value?.fields || {};
+  const file = parsed?.value?.file;
+  const transaction = transactionResult.value.transaction;
+  const objectKeys = transactionResult.value.object_keys;
+
+  const orchestration = await orchestrateUploadR2Write(env, request, {
+    uploadTransactionId: transaction.id,
+    uploadDomain: "cdas_document",
+    relatedRecordType: "cdas_document_upload_candidate",
+    relatedRecordId: safeSlug(fields.slug),
+    storagePrefixId: preview.storage_prefix.id,
+    storagePrefix: preview.storage_prefix.prefix,
+    objectKeys,
+    bytes: bytesResult.value,
+    sourceSha256: preview.hash_evidence.source_sha256,
+    sourceSize: preview.hash_evidence.source_size,
+    originalFilename: file?.name || null,
+    safeFilename: safeFilename(file?.name || "source.pdf"),
+    mimeType: file?.type || "application/pdf",
+    fileExtension: getFileExtension(file?.name || "source.pdf") || "pdf",
+    eventAt: transactionResult.value.event_at,
+    metadata: buildUploadMetadata(fields, preview, transaction),
+    notes:
+      "CDAS source uploaded through real-write route. Publication, licence generation, download-link creation, and email delivery remain separate gated workflows.",
+  });
+
+  if (!orchestration.ok) {
+    return fail(
+      orchestration.error || "upload_real_write_orchestration_failed",
+      orchestration.message || "Real-write upload orchestration failed.",
+      {
+        upload_transaction_id: transaction.id,
+        transaction_created: true,
+        recovery_required: Boolean(orchestration.details?.recovery_required),
+        orchestration_details: orchestration.details || {},
+        warnings: orchestration.warnings || [],
+      }
+    );
+  }
+
+  return pass(
+    {
+      upload_transaction: transaction,
+      orchestration: orchestration.value,
+      object_keys: objectKeys,
+      source_sha256: preview.hash_evidence.source_sha256,
+      source_size: preview.hash_evidence.source_size,
+      publication_status: "not_published",
+      licence_status: "not_created",
+      download_link_status: "not_created",
+      email_status: "not_sent",
+    },
+    orchestration.warnings || []
+  );
+}
+
 async function handleCdasDocumentUploadSkeleton(request, env) {
   const switches = getUploadRouteSwitches(env);
   const routeMode = getUploadRouteMode(request);
@@ -787,19 +967,15 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
     return routeSkeletonDisabledResponse(request, env);
   }
 
-  if (routeMode.real_write) {
-    if (!switches.upload_route_real_write_enabled) {
-      return realWriteDisabledResponse(request, env);
-    }
-
-    return realWriteNotImplementedResponse(request, env);
+  if (routeMode.real_write && !switches.upload_route_real_write_enabled) {
+    return realWriteDisabledResponse(request, env);
   }
 
-  if (!routeMode.dry_run) {
+  if (!routeMode.dry_run && !routeMode.real_write) {
     return dryRunRequiredResponse(request, env);
   }
 
-  if (!switches.upload_route_dry_run_enabled) {
+  if (routeMode.dry_run && !switches.upload_route_dry_run_enabled) {
     return dryRunDisabledResponse(request, env);
   }
 
@@ -815,7 +991,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
         message: parsed.message,
         details: parsed.details || {},
         observed_request: buildObservedRequest(request),
-        validation_stage: "strict_multipart_dry_run",
+        validation_stage: "strict_multipart_validation",
         side_effects_confirmed: buildSideEffectsConfirmed(),
       },
       400
@@ -834,11 +1010,65 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
         message: preview.message,
         details: preview.details || {},
         observed_request: buildObservedRequest(request),
-        validation_stage: "dry_run_r2_absence_check",
+        validation_stage: routeMode.real_write
+          ? "real_write_preflight"
+          : "dry_run_r2_absence_check",
         parsed_upload: buildParsedUploadSummary(parsed),
         side_effects_confirmed: buildSideEffectsConfirmed(),
       },
       409
+    );
+  }
+
+  if (routeMode.real_write) {
+    const realWrite = await performCdasRealWrite(request, env, parsed, preview.value);
+
+    if (!realWrite.ok) {
+      return jsonResponse(
+        {
+          ...buildCdasUploadRouteStatus(request, env),
+          ok: false,
+          accepted: false,
+          error: realWrite.error,
+          message: realWrite.message,
+          details: realWrite.details || {},
+          observed_request: buildObservedRequest(request),
+          validation_stage: "real_write_transaction_orchestrator",
+          parsed_upload: buildParsedUploadSummary(parsed),
+          dry_run_preview: preview.value,
+          side_effects_confirmed: buildSideEffectsConfirmed({
+            creates_upload_transaction:
+              realWrite.details?.transaction_created === true,
+            writes_r2: Boolean(
+              realWrite.details?.orchestration_details?.r2_write
+            ),
+          }),
+          warnings: realWrite.warnings || [],
+        },
+        realWrite.details?.recovery_required ? 500 : 409
+      );
+    }
+
+    return jsonResponse(
+      {
+        ...buildCdasUploadRouteStatus(request, env),
+        ok: true,
+        accepted: true,
+        message:
+          "CDAS source upload completed. Source, SHA-256 sidecar, and metadata sidecar were written. No document publication, licence, download link, or email was created.",
+        observed_request: buildObservedRequest(request),
+        validation_stage: "real_write_transaction_orchestrator",
+        parsed_upload: buildParsedUploadSummary(parsed),
+        upload_result: realWrite.value,
+        side_effects_confirmed: buildSideEffectsConfirmed({
+          creates_upload_transaction: true,
+          writes_r2: true,
+        }),
+        warnings: realWrite.warnings || [],
+        next_gate:
+          "U3-H should add idempotency replay handling before this route is considered safe for repeated real-world use.",
+      },
+      201
     );
   }
 
@@ -855,7 +1085,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-G should wire the real-write path to transaction creation and the upload write orchestrator behind the explicit real-write gate.",
+        "U3-H should add idempotency replay handling before this route is considered safe for repeated real-world use.",
     },
     200
   );
@@ -879,21 +1109,22 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "disabled_real_write_gate",
+  routeStatus: "real_write_transaction_orchestrator_wiring",
   adminOnly: true,
   disabledByDefault: true,
-  dryRunOnly: false,
   dryRunSupported: true,
   realWriteIntentRecognised: true,
   realWriteDisabledByDefault: true,
-  realWriteImplemented: false,
+  realWriteImplemented: true,
+  realWriteRequiresExplicitSwitch: "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
   parsesMultipart: true,
   validatesPrefix: true,
   previewsObjectKeys: true,
   calculatesHashEvidence: true,
   checksR2Absence: true,
-  createsUploadTransaction: false,
-  writesR2: false,
+  createsUploadTransaction: true,
+  writesR2: true,
+  writesOnlyThroughOrchestrator: true,
   publishesDocuments: false,
   createsLicences: false,
   createsDownloadLinks: false,
