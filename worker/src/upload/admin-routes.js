@@ -46,6 +46,24 @@ function addHoursIso(dateIso, hours = 24) {
   return new Date(base.getTime() + hours * 60 * 60 * 1000).toISOString();
 }
 
+function fail(error, message, details = {}) {
+  return {
+    ok: false,
+    error,
+    message,
+    details,
+    warnings: [],
+  };
+}
+
+function pass(value, warnings = []) {
+  return {
+    ok: true,
+    value,
+    warnings,
+  };
+}
+
 function methodNotAllowed(allowed = ["GET"]) {
   return jsonResponse(
     {
@@ -81,24 +99,6 @@ function adminAuthFailed() {
     },
     401
   );
-}
-
-function fail(error, message, details = {}) {
-  return {
-    ok: false,
-    error,
-    message,
-    details,
-    warnings: [],
-  };
-}
-
-function pass(value, warnings = []) {
-  return {
-    ok: true,
-    value,
-    warnings,
-  };
 }
 
 function buildUploadIdempotencyRecordId() {
@@ -147,6 +147,7 @@ function getUploadRouteMode(request) {
   const url = new URL(request.url);
 
   const mode = cleanText(url.searchParams.get("mode"));
+
   const dryRun =
     mode === "dry-run" ||
     mode === "dry_run" ||
@@ -243,7 +244,11 @@ function buildNoSideEffects(realWrite = false) {
     requires_idempotency_for_real_write: true,
     creates_upload_transaction: realWrite,
     writes_r2: realWrite,
+    creates_draft_cdas_document_record: realWrite,
     publishes_document: false,
+    activates_document: false,
+    makes_document_requestable: false,
+    generates_pdf: false,
     creates_licence: false,
     creates_download_link: false,
     sends_email: false,
@@ -254,7 +259,11 @@ function buildSideEffectsConfirmed(overrides = {}) {
   return {
     creates_upload_transaction: false,
     writes_r2: false,
+    creates_draft_cdas_document_record: false,
     publishes_document: false,
+    activates_document: false,
+    makes_document_requestable: false,
+    generates_pdf: false,
     creates_licence: false,
     creates_download_link: false,
     sends_email: false,
@@ -302,7 +311,7 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "real_write_idempotency_replay_handling",
+    route_status: "cdas_draft_document_record_creation_gate",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     real_write_requested: routeMode.real_write,
@@ -325,7 +334,8 @@ function buildCdasUploadRouteStatus(request, env) {
       "idempotency replay check",
       "upload transaction creation",
       "R2 write helper",
-      "orchestrator validation gate",
+      "write orchestrator",
+      "draft CDAS document row creation",
       "recovery path validation",
       "audit path validation",
       "manual release gate approval",
@@ -402,7 +412,7 @@ function dryRunRequiredResponse(request, env) {
       ok: false,
       error: "upload_route_dry_run_required",
       message:
-        "This route currently accepts dry-run or explicitly gated real-write requests only. Add ?mode=dry-run for dry-run validation.",
+        "This route accepts dry-run or explicitly gated real-write requests only. Add ?mode=dry-run for dry-run validation.",
     },
     409
   );
@@ -418,7 +428,7 @@ function realWriteDisabledResponse(request, env) {
       accepted: false,
       error: "upload_real_write_disabled",
       message:
-        "Real CDAS upload write mode is recognised but disabled by policy. No upload transaction was created and no R2 write was performed.",
+        "Real CDAS upload write mode is recognised but disabled by policy. No upload transaction was created, no R2 write was performed, and no document row was created.",
       validation_stage: "real_write_gate",
       side_effects_confirmed: buildSideEffectsConfirmed(),
       required_switch: "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
@@ -767,6 +777,376 @@ async function buildDryRunR2AbsenceCheck(env, objectKeyPreview) {
   });
 }
 
+async function getD1TableColumns(env, tableName) {
+  if (!env?.DB?.prepare) {
+    return fail(
+      "upload_database_unavailable",
+      "D1 database binding is unavailable."
+    );
+  }
+
+  const safeTable = cleanText(tableName);
+
+  if (!/^[a-zA-Z0-9_]+$/.test(safeTable)) {
+    return fail(
+      "upload_invalid_table_name",
+      "D1 table name is invalid.",
+      {
+        table_name: safeTable,
+      }
+    );
+  }
+
+  const result = await env.DB.prepare(`PRAGMA table_info(${safeTable})`).all();
+  const rows = Array.isArray(result?.results) ? result.results : [];
+  const columns = new Set(rows.map((row) => row.name).filter(Boolean));
+
+  return pass(columns);
+}
+
+function buildCdasDocumentId(fields = {}) {
+  return safeSlug(fields.slug);
+}
+
+function buildCdasGeneratedPrefix(fields = {}) {
+  const slug = safeSlug(fields.slug);
+  const version = safeVersion(fields.version);
+
+  if (!slug || !version) {
+    return null;
+  }
+
+  return `docs/generated/cdas/${slug}/${version}/`;
+}
+
+async function getExistingCdasDocumentByIdOrSlug(env, documentId, slug) {
+  if (!env?.DB?.prepare) {
+    return fail(
+      "upload_documents_database_unavailable",
+      "D1 database binding is unavailable."
+    );
+  }
+
+  const cleanDocumentId = cleanText(documentId);
+  const cleanSlug = cleanText(slug);
+
+  if (!cleanDocumentId || !cleanSlug) {
+    return fail(
+      "upload_document_identity_missing",
+      "Document ID and slug are required."
+    );
+  }
+
+  const row = await env.DB.prepare(
+    `SELECT id, slug, title, version, status
+     FROM documents
+     WHERE id = ? OR slug = ?
+     LIMIT 1`
+  )
+    .bind(cleanDocumentId, cleanSlug)
+    .first();
+
+  return pass(row || null);
+}
+
+async function preflightCdasDraftDocumentRecord(env, fields = {}) {
+  const documentId = buildCdasDocumentId(fields);
+  const slug = safeSlug(fields.slug);
+
+  if (!documentId) {
+    return fail(
+      "upload_document_id_invalid",
+      "A valid document ID could not be derived from the uploaded document slug."
+    );
+  }
+
+  if (!slug) {
+    return fail(
+      "upload_document_slug_invalid",
+      "A valid document slug is required."
+    );
+  }
+
+  const existing = await getExistingCdasDocumentByIdOrSlug(
+    env,
+    documentId,
+    slug
+  );
+
+  if (!existing.ok) {
+    return existing;
+  }
+
+  if (existing.value) {
+    return fail(
+      "upload_document_record_already_exists",
+      "A CDAS document record already exists for this document ID or slug.",
+      {
+        document_id: documentId,
+        slug,
+        existing_document: existing.value,
+      }
+    );
+  }
+
+  return pass({
+    document_id: documentId,
+    slug,
+    status: "draft",
+    is_listed: 0,
+    requires_approval: 1,
+    safe_to_create: true,
+  });
+}
+
+function buildCdasDraftDocumentRow(fields, preview, uploadTransaction) {
+  const eventAt = nowIso();
+  const documentId = buildCdasDocumentId(fields);
+  const slug = safeSlug(fields.slug);
+
+  return {
+    id: documentId,
+    slug,
+    title: cleanText(fields.title),
+    summary: nullableText(fields.summary),
+    description: nullableText(fields.description),
+    version: cleanText(fields.version),
+    status: "draft",
+    classification: cleanText(fields.classification || "controlled"),
+    access_class: cleanText(fields.access_class || "controlled_verified"),
+    source_object: preview.object_key_preview.source_object_key,
+    source_sha256: preview.hash_evidence.source_sha256,
+    generated_prefix: buildCdasGeneratedPrefix(fields),
+    licence_terms_version: cleanText(fields.licence_terms_version),
+    is_listed: 0,
+    allow_redownload: 1,
+    max_redownloads: null,
+    requires_approval: 1,
+    current_version_of: null,
+    supersedes_document_id: null,
+    superseded_by_document_id: null,
+    created_at: eventAt,
+    updated_at: eventAt,
+    upload_transaction_id: uploadTransaction?.id || null,
+    upload_status: "source_uploaded",
+  };
+}
+
+function buildCdasDraftAdminVisibilityEvidence(draftDocumentRecord, preview) {
+  const document =
+    draftDocumentRecord?.document ||
+    draftDocumentRecord?.document_record ||
+    draftDocumentRecord ||
+    {};
+
+  const documentId = cleanText(document.id);
+  const slug = cleanText(document.slug);
+  const status = cleanText(document.status || "draft");
+
+  return {
+    admin_visible: true,
+    admin_surface: "cdas_documents_admin",
+    admin_path: "/admin/cdas-documents",
+    admin_filter_hint: documentId || slug || null,
+    review_state: "draft_review_required",
+    document_id: documentId || null,
+    slug: slug || null,
+    status,
+    is_listed: Number(document.is_listed ?? 0),
+    requires_approval: Number(document.requires_approval ?? 1),
+    source_object:
+      cleanText(document.source_object) ||
+      preview?.object_key_preview?.source_object_key ||
+      null,
+    source_sha256:
+      cleanText(document.source_sha256) ||
+      preview?.hash_evidence?.source_sha256 ||
+      null,
+    public_visibility: {
+      listed_publicly: false,
+      requestable_publicly: false,
+      downloadable_publicly: false,
+      public_url_created: false,
+    },
+    prohibited_side_effects: {
+      activated: false,
+      generated_pdf_created: false,
+      licence_created: false,
+      download_link_created: false,
+      email_sent: false,
+    },
+    required_admin_actions_before_release: [
+      "Review uploaded source object",
+      "Confirm document title, slug, version, classification, and access class",
+      "Confirm licence terms version",
+      "Run document evidence checks",
+      "Approve or reject draft",
+      "Only then proceed to a separate activation gate",
+    ],
+  };
+}
+
+async function insertCdasDraftDocumentRecord(env, row) {
+  const columnsResult = await getD1TableColumns(env, "documents");
+
+  if (!columnsResult.ok) {
+    return columnsResult;
+  }
+
+  const availableColumns = columnsResult.value;
+
+  const requiredColumns = [
+    "id",
+    "slug",
+    "title",
+    "version",
+    "status",
+    "classification",
+    "access_class",
+    "source_object",
+    "licence_terms_version",
+    "created_at",
+    "updated_at",
+  ];
+
+  const missingRequired = requiredColumns.filter(
+    (column) => !availableColumns.has(column)
+  );
+
+  if (missingRequired.length) {
+    return fail(
+      "upload_documents_schema_missing_required_columns",
+      "The documents table is missing required columns for CDAS upload.",
+      {
+        missing_columns: missingRequired,
+      }
+    );
+  }
+
+  const insertableEntries = Object.entries(row).filter(([column]) =>
+    availableColumns.has(column)
+  );
+
+  const columns = insertableEntries.map(([column]) => column);
+  const values = insertableEntries.map(([, value]) => value);
+  const placeholders = columns.map(() => "?").join(", ");
+
+  await env.DB.prepare(
+    `INSERT INTO documents (${columns.join(", ")})
+     VALUES (${placeholders})`
+  )
+    .bind(...values)
+    .run();
+
+  return pass({
+    document: Object.fromEntries(insertableEntries),
+    inserted_columns: columns,
+    status: "draft",
+    is_listed: row.is_listed,
+    requires_approval: row.requires_approval,
+  });
+}
+
+async function markUploadTransactionRecoveryRequiredForDocumentRecordFailure(
+  env,
+  uploadTransactionId,
+  failureReason,
+  eventAt = nowIso()
+) {
+  const id = cleanText(uploadTransactionId);
+
+  if (!id || !env?.DB?.prepare) {
+    return pass({
+      recorded: false,
+      reason: "upload_transaction_not_available",
+    });
+  }
+
+  await env.DB.prepare(
+    `UPDATE upload_transactions
+     SET upload_status = ?,
+         recovery_status = ?,
+         failure_stage = ?,
+         failure_reason = ?,
+         failed_at = ?
+     WHERE id = ?`
+  )
+    .bind(
+      "recovery_required",
+      "required",
+      "documents_row_insert",
+      cleanText(failureReason),
+      eventAt,
+      id
+    )
+    .run();
+
+  return pass({
+    recorded: true,
+    upload_transaction_id: id,
+    upload_status: "recovery_required",
+    recovery_status: "required",
+    failure_stage: "documents_row_insert",
+  });
+}
+
+async function buildCdasDraftDocumentRecordPreview(env, parsed, preview) {
+  const fields = parsed?.value?.fields || {};
+
+  const preflight = await preflightCdasDraftDocumentRecord(env, fields);
+
+  if (!preflight.ok) {
+    return preflight;
+  }
+
+  const row = buildCdasDraftDocumentRow(fields, preview, {
+    id: "pending_upload_transaction",
+  });
+  
+  const documentRecordPreview = {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    version: row.version,
+    status: row.status,
+    classification: row.classification,
+    access_class: row.access_class,
+    source_object: row.source_object,
+    source_sha256: row.source_sha256,
+    generated_prefix: row.generated_prefix,
+    licence_terms_version: row.licence_terms_version,
+    is_listed: row.is_listed,
+    requires_approval: row.requires_approval,
+    allow_redownload: row.allow_redownload,
+  };
+
+  return pass({
+    preflight: preflight.value,
+    document_record_preview: documentRecordPreview,
+    admin_visibility_preview: {
+      admin_visible_after_real_write: true,
+      admin_surface: "cdas_documents_admin",
+      admin_path: "/admin/cdas-documents",
+      admin_filter_hint: row.id,
+      review_state: "draft_review_required",
+      public_visibility_after_real_write: {
+        listed_publicly: false,
+        requestable_publicly: false,
+        downloadable_publicly: false,
+        public_url_created: false,
+      },
+      prohibited_side_effects_after_real_write: {
+        activated: false,
+        generated_pdf_created: false,
+        licence_created: false,
+        download_link_created: false,
+        email_sent: false,
+      },
+    },
+    writes_d1: false,
+  });
+}
+
 async function buildCdasDryRunPreview(env, parsed) {
   const fields = parsed?.value?.fields || {};
   const storagePrefixId = fields.storage_prefix_id;
@@ -798,11 +1178,26 @@ async function buildCdasDryRunPreview(env, parsed) {
     return r2Absence;
   }
 
-  return pass({
+  const preview = {
     storage_prefix: prefixResult.value,
     object_key_preview: objectKeysResult.value,
     hash_evidence: hashEvidence.value,
     r2_absence_check: r2Absence.value,
+  };
+
+  const draftDocumentRecord = await buildCdasDraftDocumentRecordPreview(
+    env,
+    parsed,
+    preview
+  );
+
+  if (!draftDocumentRecord.ok) {
+    return draftDocumentRecord;
+  }
+
+  return pass({
+    ...preview,
+    draft_document_record: draftDocumentRecord.value,
   });
 }
 
@@ -888,7 +1283,7 @@ function classifyCdasIdempotencyReplay(record) {
       idempotency_status: status,
       upload_transaction_id: record.upload_transaction_id,
       message:
-        "This upload request has already completed. No new transaction or R2 write will be attempted.",
+        "This upload request has already completed. No new transaction, R2 write, or document row creation will be attempted.",
     });
   }
 
@@ -1033,7 +1428,7 @@ async function createCdasIdempotencyRecordForTransaction(
       expiresAt,
       0,
       null,
-      "Created by CDAS upload real-write route before controlled R2 write."
+      "Created by CDAS upload real-write route before controlled R2 write and draft document row creation."
     )
     .run();
 
@@ -1129,7 +1524,7 @@ async function createCdasUploadTransaction(
     idempotencyKeyHash: idempotency?.idempotency_key_hash || null,
     idempotencyExpiresAt: addHoursIso(eventAt, 24),
     notes:
-      "Created by CDAS upload real-write route. Source object only; document publication, licence creation, download link creation, and email are intentionally not performed by this route.",
+      "Created by CDAS upload real-write route. Source object only; draft document row may be created after R2 write. Publication, licence creation, download link creation, and email are intentionally not performed by this route.",
   });
 
   if (!transaction.ok) {
@@ -1205,7 +1600,7 @@ async function performCdasRealWrite(request, env, parsed, preview, idempotency) 
     eventAt: transactionResult.value.event_at,
     metadata: buildUploadMetadata(fields, preview, transaction),
     notes:
-      "CDAS source uploaded through real-write route. Publication, licence generation, download-link creation, and email delivery remain separate gated workflows.",
+      "CDAS source uploaded through real-write route. Draft document row creation may follow. Publication, licence generation, download-link creation, and email delivery remain separate gated workflows.",
   });
 
   if (!orchestration.ok) {
@@ -1234,6 +1629,55 @@ async function performCdasRealWrite(request, env, parsed, preview, idempotency) 
     );
   }
 
+  const draftDocumentRow = buildCdasDraftDocumentRow(
+    fields,
+    preview,
+    transaction
+  );
+
+  const draftDocumentRecord = await insertCdasDraftDocumentRecord(
+    env,
+    draftDocumentRow
+  );
+
+  if (!draftDocumentRecord.ok) {
+    await updateCdasIdempotencyStatus(
+      env,
+      idempotency,
+      "recovery_required",
+      {
+        eventAt: transactionResult.value.event_at,
+        notes:
+          draftDocumentRecord.message ||
+          "CDAS draft document record creation failed after R2 write.",
+      }
+    );
+
+    const recoveryMark =
+      await markUploadTransactionRecoveryRequiredForDocumentRecordFailure(
+        env,
+        transaction.id,
+        draftDocumentRecord.message ||
+          "CDAS draft document record creation failed after R2 write.",
+        transactionResult.value.event_at
+      );
+
+    return fail(
+      draftDocumentRecord.error || "upload_document_record_create_failed",
+      draftDocumentRecord.message ||
+        "CDAS draft document record creation failed after R2 write.",
+      {
+        upload_transaction_id: transaction.id,
+        transaction_created: true,
+        r2_write_completed: true,
+        recovery_required: true,
+        recovery_recorded: recoveryMark.ok === true,
+        recovery_details: recoveryMark.value || null,
+        document_record_details: draftDocumentRecord.details || {},
+      }
+    );
+  }
+
   const idempotencyCompleted = await updateCdasIdempotencyStatus(
     env,
     idempotency,
@@ -1242,13 +1686,21 @@ async function performCdasRealWrite(request, env, parsed, preview, idempotency) 
       : "completed",
     {
       eventAt: transactionResult.value.event_at,
-      notes: "CDAS upload real-write completed.",
+      notes:
+        "CDAS upload real-write completed and draft document record created.",
     }
+  );
+  
+  const adminVisibility = buildCdasDraftAdminVisibilityEvidence(
+    draftDocumentRecord.value,
+    preview
   );
 
   return pass(
     {
       upload_transaction: transaction,
+      draft_document_record: draftDocumentRecord.value,
+      admin_visibility: adminVisibility,
       idempotency: {
         idempotency_key_hash: idempotency.idempotency_key_hash,
         status: idempotencyCompleted.ok
@@ -1260,7 +1712,13 @@ async function performCdasRealWrite(request, env, parsed, preview, idempotency) 
       object_keys: objectKeys,
       source_sha256: preview.hash_evidence.source_sha256,
       source_size: preview.hash_evidence.source_size,
+      document_status: "draft",
+      document_is_listed: 0,
+      document_requires_approval: 1,
       publication_status: "not_published",
+      activation_status: "not_activated",
+      requestability_status: "not_requestable",
+      generated_pdf_status: "not_generated",
       licence_status: "not_created",
       download_link_status: "not_created",
       email_status: "not_sent",
@@ -1370,7 +1828,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
           accepted: true,
           idempotent_replay: true,
           message:
-            "This upload request already completed. Existing upload transaction was returned and no new R2 write was attempted.",
+            "This upload request already completed. Existing upload transaction was returned and no new R2 write or document row creation was attempted.",
           validation_stage: "real_write_idempotency_replay",
           parsed_upload: buildParsedUploadSummary(parsed),
           replay: {
@@ -1428,15 +1886,16 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
           message: realWrite.message,
           details: realWrite.details || {},
           observed_request: buildObservedRequest(request),
-          validation_stage: "real_write_transaction_orchestrator",
+          validation_stage: "real_write_transaction_orchestrator_draft_document",
           parsed_upload: buildParsedUploadSummary(parsed),
           dry_run_preview: preview.value,
           side_effects_confirmed: buildSideEffectsConfirmed({
             creates_upload_transaction:
               realWrite.details?.transaction_created === true,
-            writes_r2: Boolean(
-              realWrite.details?.orchestration_details?.r2_write
-            ),
+            writes_r2:
+              realWrite.details?.r2_write_completed === true ||
+              Boolean(realWrite.details?.orchestration_details?.r2_write),
+            creates_draft_cdas_document_record: false,
           }),
           warnings: realWrite.warnings || [],
         },
@@ -1450,18 +1909,19 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
         ok: true,
         accepted: true,
         message:
-          "CDAS source upload completed. Source, SHA-256 sidecar, and metadata sidecar were written. No document publication, licence, download link, or email was created.",
+          "CDAS source upload completed and a draft document record was created. The document remains draft, unlisted, not requestable, not downloadable, not licensed, and no email was sent.",
         observed_request: buildObservedRequest(request),
-        validation_stage: "real_write_transaction_orchestrator",
+        validation_stage: "real_write_transaction_orchestrator_draft_document",
         parsed_upload: buildParsedUploadSummary(parsed),
         upload_result: realWrite.value,
         side_effects_confirmed: buildSideEffectsConfirmed({
           creates_upload_transaction: true,
           writes_r2: true,
+          creates_draft_cdas_document_record: true,
         }),
         warnings: realWrite.warnings || [],
         next_gate:
-          "U3-I should add evidence and recovery validation for the real-write route before release promotion.",
+          "U3-L should add admin review actions for approving, rejecting, or holding the uploaded draft without making it public automatically.",
       },
       201
     );
@@ -1473,14 +1933,14 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       ok: true,
       accepted: true,
       message:
-        "CDAS upload dry-run validation passed. Prefix, object keys, hash evidence, and R2 absence were checked. No upload action was performed.",
+        "CDAS upload dry-run validation passed. Prefix, object keys, hash evidence, R2 absence, and draft document row preflight were checked. No upload action was performed.",
       observed_request: buildObservedRequest(request),
-      validation_stage: "dry_run_r2_absence_check",
+      validation_stage: "dry_run_r2_absence_and_draft_document_preflight",
       parsed_upload: buildParsedUploadSummary(parsed),
       dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-I should add evidence and recovery validation for the real-write route before release promotion.",
+        "U3-L should add admin review actions for approving, rejecting, or holding the uploaded draft without making it public automatically.",
     },
     200
   );
@@ -1504,7 +1964,7 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "real_write_idempotency_replay_handling",
+  routeStatus: "cdas_draft_document_record_creation_gate",
   adminOnly: true,
   disabledByDefault: true,
   dryRunSupported: true,
@@ -1520,6 +1980,13 @@ export const uploadAdminRoutePolicy = {
   createsUploadTransaction: true,
   writesR2: true,
   writesOnlyThroughOrchestrator: true,
+  createsDraftCdasDocumentRecord: true,
+  draftDocumentStatus: "draft",
+  draftDocumentIsListed: 0,
+  draftDocumentRequiresApproval: 1,
+  activatesDocuments: false,
+  makesDocumentsRequestable: false,
+  generatesPdf: false,
   requiresIdempotencyForRealWrite: true,
   idempotencyField: "client_request_id",
   idempotencyRawKeyStored: false,
@@ -1528,4 +1995,10 @@ export const uploadAdminRoutePolicy = {
   createsLicences: false,
   createsDownloadLinks: false,
   sendsEmail: false,
+  exposesAdminVisibilityEvidence: true,
+  adminVisibilitySurface: "cdas_documents_admin",
+  adminVisibilityPath: "/admin/cdas-documents",
+  publicVisibilityCreated: false,
+  publicUrlCreated: false,
+  adminReviewRequiredBeforeActivation: true,
 };

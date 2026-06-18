@@ -610,3 +610,56 @@ Next gate:
 
     U3-J — CDAS Draft Document Record Creation Gate
 
+
+## 20. U3-K CDAS Draft Document Evidence and Admin Visibility Gate
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    CDAS draft document evidence and admin visibility gate.
+
+Policy posture:
+
+- admin-only
+- real-write remains explicitly gated
+- uploaded source remains controlled intake
+- draft documents row is visible to admin workflows
+- admin review path is declared
+- admin review is required before activation
+- document remains draft
+- document remains unlisted
+- document remains not publicly requestable
+- document remains not publicly downloadable
+- no public URL is created
+- no generated PDF is created
+- no licence is issued
+- no download link is created
+- no email is sent
+- completed idempotency replay returns existing transaction reference and does not write again
+- uploaded draft can be reviewed in /admin/cdas-documents
+
+Validation gate:
+
+    U3-K admin visibility policy validation failures: 0
+
+Additional evidence required:
+
+- dry-run response includes admin_visibility_preview
+- real-write response includes admin_visibility
+- admin can locate uploaded draft in CDAS documents admin surface
+- draft row has status = draft
+- draft row has is_listed = 0
+- draft row has requires_approval = 1
+- public listing test returns no exposure
+- public request/download route cannot access the draft
+- no document_licences row exists
+- no document_download_links row exists
+- no email delivery event exists
+
+Next gate:
+
+    U3-L — CDAS Draft Review Action Gate
+
