@@ -1,0 +1,121 @@
+# RelayHub Controlled Upload Facility — U3-I Evidence
+
+Gate:
+
+    U3-I — Real-Write Route Evidence and Recovery Validation
+
+Date:
+
+    YYYY-MM-DD
+
+Environment:
+
+    local / preview / remote production
+
+Operator:
+
+    <name>
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Policy posture:
+
+- admin-only
+- real-write explicitly gated
+- client_request_id required for real-write
+- raw client request ID not stored
+- upload transaction created
+- R2 source object written
+- SHA-256 sidecar written
+- metadata sidecar written
+- completed replay does not write R2 again
+- partial R2 failure produces recovery-required evidence
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no public exposure
+
+Validation commands run:
+
+1. node --check worker/src/upload/admin-routes.js
+2. U3-G real-write route validation
+3. U3-H idempotency validation
+4. U3-I evidence/recovery validation
+5. D1 upload transaction query
+6. D1 idempotency query
+7. R2 source object get/list
+8. R2 sha256 sidecar get
+9. R2 metadata sidecar get
+10. negative publication/licence/link/email checks
+11. public exposure negative tests
+
+Successful upload evidence:
+
+Upload ID:
+Domain:
+Related Record:
+Original Filename:
+Stored Object:
+SHA-256:
+Size:
+MIME Type:
+Status:
+Recovery Status:
+Admin Actor:
+Created At:
+Completed At:
+Audit Event:
+Validation Result:
+Public Exposure Check:
+Notes:
+
+Idempotency evidence:
+
+Client Request ID:
+Idempotency Hash:
+Raw Client Request ID Stored: no
+Initial Status:
+Completed Status:
+Replay Result:
+Replay Wrote R2 Again: no
+Replay Created Second Transaction: no
+
+R2 evidence:
+
+Source Object:
+SHA-256 Sidecar:
+Metadata Sidecar:
+Source SHA-256:
+Sidecar SHA-256:
+Hash Match:
+Readback Result:
+
+Negative side-effect evidence:
+
+Document Published: no
+Document Listed: no
+Licence Created: no
+Download Link Created: no
+Email Sent: no
+Public URL Exposed: no
+
+Recovery evidence:
+
+Injected Failure:
+Expected Result:
+Observed Result:
+Transaction Status:
+Recovery Status:
+Idempotency Status:
+Source Object May Exist:
+Sidecars Complete:
+Operator Action Required:
+Recovery Notes:
+
+Conclusion:
+
+PASS / FAIL
+

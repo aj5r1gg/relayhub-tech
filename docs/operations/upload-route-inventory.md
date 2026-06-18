@@ -553,3 +553,60 @@ Next gate:
 
     U3-I — Real-Write Route Evidence and Recovery Validation
 
+
+## 18. U3-I Real-Write Route Evidence and Recovery Validation
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Real-write evidence and recovery validation gate.
+
+Policy posture:
+
+- no new production route behaviour added
+- validates U3-G real-write transaction/orchestrator wiring
+- validates U3-H idempotency replay handling
+- proves upload transaction evidence exists
+- proves R2 source object exists
+- proves SHA-256 sidecar exists
+- proves metadata sidecar exists
+- proves source hash matches evidence
+- proves completed replay does not write R2 again
+- proves missing client_request_id blocks real-write
+- proves existing R2 object blocks overwrite
+- proves partial R2 failure produces recovery-required evidence
+- proves no document publication occurs
+- proves no licence is created
+- proves no download link is created
+- proves no email is sent
+- proves no public exposure is created
+
+Evidence artefact:
+
+    docs/evidence/uploads/upload-phase-u3-cdas-upload-proof.txt
+
+Validation gate:
+
+    U3-I policy evidence validation failures: 0
+
+Additional evidence required before promotion:
+
+- successful real-write transaction ID
+- source object key
+- source SHA-256
+- R2 SHA-256 sidecar readback
+- R2 metadata sidecar readback
+- upload transaction query result
+- idempotency query result
+- replay query result
+- recovery-required failure proof
+- negative publication/licence/link/email proof
+- public exposure negative test proof
+
+Next gate:
+
+    U3-J — CDAS Draft Document Record Creation Gate
+
