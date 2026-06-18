@@ -511,3 +511,45 @@ Next gate:
 
     U3-H — Real-Write Idempotency Replay Handling
 
+
+## 17. U3-H Real-Write Idempotency Replay Handling
+
+Route:
+
+    /api/admin/uploads/cdas-document
+
+Status:
+
+    Real-write idempotency replay handling.
+
+Policy posture:
+
+- admin-only
+- dry-run remains supported
+- real-write remains explicitly gated
+- real-write requires client_request_id
+- raw client request ID is not stored
+- idempotency hash is stored
+- completed replay returns existing transaction reference
+- completed replay does not create a second transaction
+- completed replay does not write R2 again
+- in-progress replay is blocked
+- recovery-required replay is blocked
+- failed/abandoned replay is blocked pending a later controlled retry policy
+- successful real-write marks idempotency completed
+- failed-before-R2 marks idempotency failed_before_r2
+- failed-after-R2 marks idempotency recovery_required / failed_after_r2
+- no document publication
+- no licence creation
+- no download link creation
+- no email
+- no private R2 URL exposure
+
+Validation gate:
+
+    U3-H idempotency policy validation failures: 0
+
+Next gate:
+
+    U3-I — Real-Write Route Evidence and Recovery Validation
+

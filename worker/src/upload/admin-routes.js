@@ -4,8 +4,24 @@ import { byteLength, sha256Hex } from "./hash.js";
 import { requireUploadObjectKeysAbsent } from "./r2-objects.js";
 import { createUploadTransaction } from "./transactions.js";
 import { orchestrateUploadR2Write } from "./write-orchestrator.js";
+import { getIdempotencyRecordForClientKey } from "./idempotency.js";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+const IDEMPOTENCY_COMPLETED_STATUSES = new Set([
+  "completed",
+  "completed_with_warning",
+]);
+
+const IDEMPOTENCY_RECOVERY_REQUIRED_STATUSES = new Set([
+  "failed_after_r2",
+  "recovery_required",
+]);
+
+const IDEMPOTENCY_IN_PROGRESS_STATUSES = new Set([
+  "started",
+  "in_progress",
+]);
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -22,6 +38,12 @@ function envEnabled(value) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function addHoursIso(dateIso, hours = 24) {
+  const base = dateIso ? new Date(dateIso) : new Date();
+
+  return new Date(base.getTime() + hours * 60 * 60 * 1000).toISOString();
 }
 
 function methodNotAllowed(allowed = ["GET"]) {
@@ -77,6 +99,14 @@ function pass(value, warnings = []) {
     value,
     warnings,
   };
+}
+
+function buildUploadIdempotencyRecordId() {
+  const random =
+    crypto.randomUUID?.() ||
+    `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
+
+  return `uidem_${random.replaceAll("-", "")}`;
 }
 
 function isUploadAdminAuthorized(request, env) {
@@ -210,6 +240,7 @@ function buildNoSideEffects(realWrite = false) {
     calculates_hash_evidence: true,
     checks_r2_absence: true,
     recognises_real_write_intent: true,
+    requires_idempotency_for_real_write: true,
     creates_upload_transaction: realWrite,
     writes_r2: realWrite,
     publishes_document: false,
@@ -271,7 +302,7 @@ function buildCdasUploadRouteStatus(request, env) {
   return {
     ok: true,
     route: "/api/admin/uploads/cdas-document",
-    route_status: "real_write_transaction_orchestrator_wiring",
+    route_status: "real_write_idempotency_replay_handling",
     upload_domain: "cdas_document",
     dry_run_requested: routeMode.dry_run,
     real_write_requested: routeMode.real_write,
@@ -285,11 +316,13 @@ function buildCdasUploadRouteStatus(request, env) {
       "CDAS_UPLOADS_ENABLED=true",
       "UPLOAD_ROUTE_SKELETON_ENABLED=true",
       "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
+      "client_request_id",
       "strict multipart parser",
       "storage prefix validation",
       "object key builder",
       "hash evidence",
       "R2 no-overwrite check",
+      "idempotency replay check",
       "upload transaction creation",
       "R2 write helper",
       "orchestrator validation gate",
@@ -828,7 +861,246 @@ async function readUploadBytesForWrite(parsed) {
   return pass(bytes);
 }
 
-async function createCdasUploadTransaction(request, env, parsed, preview) {
+function getClientRequestIdFromUpload(request, parsed) {
+  const fields = parsed?.value?.fields || {};
+
+  return (
+    cleanText(fields.client_request_id) ||
+    cleanText(request.headers.get("x-idempotency-key")) ||
+    cleanText(request.headers.get("x-client-request-id"))
+  );
+}
+
+function classifyCdasIdempotencyReplay(record) {
+  if (!record) {
+    return pass({
+      replay: false,
+      action: "create_new",
+    });
+  }
+
+  const status = cleanText(record.status);
+
+  if (IDEMPOTENCY_COMPLETED_STATUSES.has(status)) {
+    return pass({
+      replay: true,
+      action: "return_existing_result",
+      idempotency_status: status,
+      upload_transaction_id: record.upload_transaction_id,
+      message:
+        "This upload request has already completed. No new transaction or R2 write will be attempted.",
+    });
+  }
+
+  if (IDEMPOTENCY_RECOVERY_REQUIRED_STATUSES.has(status)) {
+    return fail(
+      "upload_idempotency_replay_recovery_required",
+      "This upload request previously reached a recovery-required state. A blind retry is blocked.",
+      {
+        idempotency_status: status,
+        upload_transaction_id: record.upload_transaction_id,
+      }
+    );
+  }
+
+  if (IDEMPOTENCY_IN_PROGRESS_STATUSES.has(status)) {
+    return fail(
+      "upload_idempotency_replay_in_progress",
+      "This upload request is already in progress. A duplicate write is blocked.",
+      {
+        idempotency_status: status,
+        upload_transaction_id: record.upload_transaction_id,
+      }
+    );
+  }
+
+  return fail(
+    "upload_idempotency_replay_blocked",
+    "This upload request key has already been used and cannot be safely replayed by this route.",
+    {
+      idempotency_status: status,
+      upload_transaction_id: record.upload_transaction_id,
+    }
+  );
+}
+
+async function prepareCdasRealWriteIdempotency(request, env, parsed) {
+  const clientRequestId = getClientRequestIdFromUpload(request, parsed);
+
+  const lookup = await getIdempotencyRecordForClientKey(env, clientRequestId);
+
+  if (!lookup.ok) {
+    return lookup;
+  }
+
+  const replay = classifyCdasIdempotencyReplay(lookup.value.record);
+
+  if (!replay.ok) {
+    return replay;
+  }
+
+  return pass({
+    client_request_id: clientRequestId,
+    idempotency_key_hash: lookup.value.idempotency_key_hash,
+    replay: replay.value.replay,
+    replay_action: replay.value.action,
+    replay_record: lookup.value.record || null,
+    replay_decision: replay.value,
+  });
+}
+
+async function recordCdasIdempotencyReplay(env, record, eventAt = nowIso()) {
+  if (!record?.id || !env?.DB?.prepare) {
+    return pass({
+      recorded: false,
+      reason: "idempotency_replay_record_not_available",
+    });
+  }
+
+  await env.DB.prepare(
+    `UPDATE upload_idempotency_keys
+     SET replay_count = COALESCE(replay_count, 0) + 1,
+         last_replayed_at = ?,
+         updated_at = ?
+     WHERE id = ?`
+  )
+    .bind(eventAt, eventAt, record.id)
+    .run();
+
+  return pass({
+    recorded: true,
+    idempotency_record_id: record.id,
+    replayed_at: eventAt,
+  });
+}
+
+async function createCdasIdempotencyRecordForTransaction(
+  env,
+  idempotency,
+  transaction,
+  eventAt = nowIso()
+) {
+  if (!env?.DB?.prepare) {
+    return fail(
+      "upload_idempotency_database_unavailable",
+      "D1 database binding is unavailable."
+    );
+  }
+
+  const idempotencyKeyHash = cleanText(idempotency?.idempotency_key_hash);
+  const transactionId = cleanText(transaction?.id);
+
+  if (!idempotencyKeyHash) {
+    return fail(
+      "upload_idempotency_hash_missing",
+      "Idempotency key hash is required."
+    );
+  }
+
+  if (!transactionId) {
+    return fail(
+      "upload_idempotency_transaction_id_missing",
+      "Upload transaction ID is required for idempotency recording."
+    );
+  }
+
+  const id = buildUploadIdempotencyRecordId();
+  const expiresAt = addHoursIso(eventAt, 24);
+
+  await env.DB.prepare(
+    `INSERT INTO upload_idempotency_keys (
+       id,
+       idempotency_key_hash,
+       upload_transaction_id,
+       upload_domain,
+       status,
+       created_at,
+       updated_at,
+       expires_at,
+       replay_count,
+       last_replayed_at,
+       notes
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(
+      id,
+      idempotencyKeyHash,
+      transactionId,
+      "cdas_document",
+      "in_progress",
+      eventAt,
+      eventAt,
+      expiresAt,
+      0,
+      null,
+      "Created by CDAS upload real-write route before controlled R2 write."
+    )
+    .run();
+
+  return pass({
+    id,
+    idempotency_key_hash: idempotencyKeyHash,
+    upload_transaction_id: transactionId,
+    upload_domain: "cdas_document",
+    status: "in_progress",
+    created_at: eventAt,
+    updated_at: eventAt,
+    expires_at: expiresAt,
+  });
+}
+
+async function updateCdasIdempotencyStatus(
+  env,
+  idempotency,
+  status,
+  options = {}
+) {
+  if (!env?.DB?.prepare) {
+    return fail(
+      "upload_idempotency_database_unavailable",
+      "D1 database binding is unavailable."
+    );
+  }
+
+  const idempotencyKeyHash = cleanText(idempotency?.idempotency_key_hash);
+  const eventAt = cleanText(options.eventAt || nowIso());
+
+  if (!idempotencyKeyHash) {
+    return fail(
+      "upload_idempotency_hash_missing",
+      "Idempotency key hash is required."
+    );
+  }
+
+  await env.DB.prepare(
+    `UPDATE upload_idempotency_keys
+     SET status = ?,
+         updated_at = ?,
+         notes = COALESCE(?, notes)
+     WHERE idempotency_key_hash = ?`
+  )
+    .bind(
+      cleanText(status),
+      eventAt,
+      nullableText(options.notes),
+      idempotencyKeyHash
+    )
+    .run();
+
+  return pass({
+    idempotency_key_hash: idempotencyKeyHash,
+    status: cleanText(status),
+    updated_at: eventAt,
+  });
+}
+
+async function createCdasUploadTransaction(
+  request,
+  env,
+  parsed,
+  preview,
+  idempotency
+) {
   const fields = parsed?.value?.fields || {};
   const file = parsed?.value?.file;
   const objectKeys = buildRealWriteObjectKeys(preview.object_key_preview);
@@ -854,6 +1126,8 @@ async function createCdasUploadTransaction(request, env, parsed, preview) {
     adminActor: getAdminActor(request, env),
     userAgent: request.headers.get("user-agent") || null,
     requestId: getRequestId(request),
+    idempotencyKeyHash: idempotency?.idempotency_key_hash || null,
+    idempotencyExpiresAt: addHoursIso(eventAt, 24),
     notes:
       "Created by CDAS upload real-write route. Source object only; document publication, licence creation, download link creation, and email are intentionally not performed by this route.",
   });
@@ -869,7 +1143,7 @@ async function createCdasUploadTransaction(request, env, parsed, preview) {
   });
 }
 
-async function performCdasRealWrite(request, env, parsed, preview) {
+async function performCdasRealWrite(request, env, parsed, preview, idempotency) {
   const bytesResult = await readUploadBytesForWrite(parsed);
 
   if (!bytesResult.ok) {
@@ -880,11 +1154,32 @@ async function performCdasRealWrite(request, env, parsed, preview) {
     request,
     env,
     parsed,
-    preview
+    preview,
+    idempotency
   );
 
   if (!transactionResult.ok) {
     return transactionResult;
+  }
+
+  const idempotencyRecord = await createCdasIdempotencyRecordForTransaction(
+    env,
+    idempotency,
+    transactionResult.value.transaction,
+    transactionResult.value.event_at
+  );
+
+  if (!idempotencyRecord.ok) {
+    return fail(
+      idempotencyRecord.error,
+      idempotencyRecord.message,
+      {
+        transaction_created: true,
+        upload_transaction_id: transactionResult.value.transaction.id,
+        idempotency_details: idempotencyRecord.details || {},
+        recovery_required: false,
+      }
+    );
   }
 
   const fields = parsed?.value?.fields || {};
@@ -914,6 +1209,18 @@ async function performCdasRealWrite(request, env, parsed, preview) {
   });
 
   if (!orchestration.ok) {
+    await updateCdasIdempotencyStatus(
+      env,
+      idempotency,
+      orchestration.details?.recovery_required
+        ? "recovery_required"
+        : "failed_before_r2",
+      {
+        eventAt: transactionResult.value.event_at,
+        notes: orchestration.message || "Upload orchestration failed.",
+      }
+    );
+
     return fail(
       orchestration.error || "upload_real_write_orchestration_failed",
       orchestration.message || "Real-write upload orchestration failed.",
@@ -927,9 +1234,28 @@ async function performCdasRealWrite(request, env, parsed, preview) {
     );
   }
 
+  const idempotencyCompleted = await updateCdasIdempotencyStatus(
+    env,
+    idempotency,
+    orchestration.value?.upload_status === "completed_with_warning"
+      ? "completed_with_warning"
+      : "completed",
+    {
+      eventAt: transactionResult.value.event_at,
+      notes: "CDAS upload real-write completed.",
+    }
+  );
+
   return pass(
     {
       upload_transaction: transaction,
+      idempotency: {
+        idempotency_key_hash: idempotency.idempotency_key_hash,
+        status: idempotencyCompleted.ok
+          ? idempotencyCompleted.value.status
+          : "completion_update_failed",
+        update_recorded: idempotencyCompleted.ok === true,
+      },
       orchestration: orchestration.value,
       object_keys: objectKeys,
       source_sha256: preview.hash_evidence.source_sha256,
@@ -998,6 +1324,69 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
     );
   }
 
+  let idempotency = null;
+
+  if (routeMode.real_write) {
+    const idempotencyResult = await prepareCdasRealWriteIdempotency(
+      request,
+      env,
+      parsed
+    );
+
+    if (!idempotencyResult.ok) {
+      return jsonResponse(
+        {
+          ...buildCdasUploadRouteStatus(request, env),
+          ok: false,
+          accepted: false,
+          error: idempotencyResult.error,
+          message: idempotencyResult.message,
+          details: idempotencyResult.details || {},
+          observed_request: buildObservedRequest(request),
+          validation_stage: "real_write_idempotency_preflight",
+          parsed_upload: buildParsedUploadSummary(parsed),
+          side_effects_confirmed: buildSideEffectsConfirmed(),
+        },
+        idempotencyResult.error === "idempotency_key_missing" ? 400 : 409
+      );
+    }
+
+    idempotency = idempotencyResult.value;
+
+    if (
+      idempotency.replay &&
+      idempotency.replay_action === "return_existing_result"
+    ) {
+      const replayRecorded = await recordCdasIdempotencyReplay(
+        env,
+        idempotency.replay_record,
+        nowIso()
+      );
+
+      return jsonResponse(
+        {
+          ...buildCdasUploadRouteStatus(request, env),
+          ok: true,
+          accepted: true,
+          idempotent_replay: true,
+          message:
+            "This upload request already completed. Existing upload transaction was returned and no new R2 write was attempted.",
+          validation_stage: "real_write_idempotency_replay",
+          parsed_upload: buildParsedUploadSummary(parsed),
+          replay: {
+            action: idempotency.replay_action,
+            idempotency_status: idempotency.replay_decision.idempotency_status,
+            upload_transaction_id:
+              idempotency.replay_decision.upload_transaction_id,
+            replay_recorded: replayRecorded.ok === true,
+          },
+          side_effects_confirmed: buildSideEffectsConfirmed(),
+        },
+        200
+      );
+    }
+  }
+
   const preview = await buildCdasDryRunPreview(env, parsed);
 
   if (!preview.ok) {
@@ -1021,7 +1410,13 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
   }
 
   if (routeMode.real_write) {
-    const realWrite = await performCdasRealWrite(request, env, parsed, preview.value);
+    const realWrite = await performCdasRealWrite(
+      request,
+      env,
+      parsed,
+      preview.value,
+      idempotency
+    );
 
     if (!realWrite.ok) {
       return jsonResponse(
@@ -1066,7 +1461,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
         }),
         warnings: realWrite.warnings || [],
         next_gate:
-          "U3-H should add idempotency replay handling before this route is considered safe for repeated real-world use.",
+          "U3-I should add evidence and recovery validation for the real-write route before release promotion.",
       },
       201
     );
@@ -1085,7 +1480,7 @@ async function handleCdasDocumentUploadSkeleton(request, env) {
       dry_run_preview: preview.value,
       side_effects_confirmed: buildSideEffectsConfirmed(),
       next_gate:
-        "U3-H should add idempotency replay handling before this route is considered safe for repeated real-world use.",
+        "U3-I should add evidence and recovery validation for the real-write route before release promotion.",
     },
     200
   );
@@ -1109,7 +1504,7 @@ export async function handleUploadAdminRequest(request, env) {
 export const uploadAdminRoutePolicy = {
   createsRoutes: true,
   route: "/api/admin/uploads/cdas-document",
-  routeStatus: "real_write_transaction_orchestrator_wiring",
+  routeStatus: "real_write_idempotency_replay_handling",
   adminOnly: true,
   disabledByDefault: true,
   dryRunSupported: true,
@@ -1125,6 +1520,10 @@ export const uploadAdminRoutePolicy = {
   createsUploadTransaction: true,
   writesR2: true,
   writesOnlyThroughOrchestrator: true,
+  requiresIdempotencyForRealWrite: true,
+  idempotencyField: "client_request_id",
+  idempotencyRawKeyStored: false,
+  completedReplayWritesR2: false,
   publishesDocuments: false,
   createsLicences: false,
   createsDownloadLinks: false,
