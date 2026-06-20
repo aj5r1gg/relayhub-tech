@@ -781,3 +781,66 @@ Next gate:
 
     U3-N — CDAS Explicit Activation Gate
 
+
+## 23. U3-N CDAS Explicit Activation Gate
+
+Routes:
+
+    /api/admin/uploads/cdas-document
+    /api/admin/uploads/cdas-document/review
+    /api/admin/uploads/cdas-document/activation-prep
+    /api/admin/uploads/cdas-document/activate
+
+Status:
+
+    CDAS explicit activation gate.
+
+Policy posture:
+
+- admin-only
+- explicit activation is separately gated
+- explicit activation requires CDAS_UPLOAD_EXPLICIT_ACTIVATION_ENABLED=true
+- explicit activation requires prior activation-prep event
+- document must be draft before activation
+- document must be unlisted before activation
+- document must require approval before activation
+- explicit activation changes documents.status from draft to active
+- explicit activation keeps documents.is_listed = 0
+- explicit activation keeps documents.requires_approval = 1
+- explicit activation creates an activation event
+- explicit activation does not publish publicly
+- explicit activation does not make document requestable
+- explicit activation does not create generated PDFs
+- explicit activation does not issue licences
+- explicit activation does not create download links
+- explicit activation does not send email
+- repeated activation returns existing activation evidence where available
+
+Validation gate:
+
+    U3-N explicit activation policy validation failures: 0
+
+Additional evidence required:
+
+- disabled switch blocks explicit activation
+- missing activation-prep event blocks activation
+- document without approved review/prep is blocked
+- non-draft document is blocked unless existing activation replay is detected
+- listed document is blocked
+- document without source_object is blocked
+- document without source_sha256 is blocked
+- documents.status changes from draft to active
+- documents.is_listed remains 0
+- documents.requires_approval remains 1
+- activation event is created
+- no public listing occurs
+- no requestability is created
+- no generated PDF is created
+- no licence row is created
+- no download link row is created
+- no email event is created
+
+Next gate:
+
+    U3-O — CDAS Controlled Listing and Requestability Gate
+
