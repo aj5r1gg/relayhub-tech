@@ -844,3 +844,64 @@ Next gate:
 
     U3-O — CDAS Controlled Listing and Requestability Gate
 
+
+## 24. U3-O CDAS Controlled Listing and Requestability Gate
+
+Routes:
+
+    /api/admin/uploads/cdas-document
+    /api/admin/uploads/cdas-document/review
+    /api/admin/uploads/cdas-document/activation-prep
+    /api/admin/uploads/cdas-document/activate
+    /api/admin/uploads/cdas-document/listing-requestability
+
+Status:
+
+    CDAS controlled listing and requestability gate.
+
+Policy posture:
+
+- admin-only
+- listing/requestability is separately gated
+- listing/requestability requires CDAS_UPLOAD_LISTING_REQUESTABILITY_ENABLED=true
+- document must already be explicitly activated
+- document must be active
+- document must retain requires_approval = 1
+- permitted actions are list_only, enable_requestability, disable_requestability, and unlist
+- list_only may set documents.is_listed = 1
+- enable_requestability may set documents.is_listed = 1 and requestability_status = requestable_with_approval
+- disable_requestability removes requestability but preserves listing state
+- unlist removes both listing and requestability
+- requestability does not mean direct downloadability
+- no generated PDF is created
+- no licence is issued
+- no download link is created
+- no email is sent
+
+Validation gate:
+
+    U3-O controlled listing/requestability policy validation failures: 0
+
+Additional evidence required:
+
+- disabled switch blocks listing/requestability
+- missing explicit activation blocks listing/requestability
+- non-active document is rejected
+- document without source_object is rejected
+- document without source_sha256 is rejected
+- list_only sets is_listed = 1
+- enable_requestability sets requestability_status = requestable_with_approval
+- enable_requestability keeps requires_approval = 1
+- disable_requestability sets requestability_status = not_requestable
+- unlist sets is_listed = 0 and requestability_status = not_requestable
+- listing/requestability event is created
+- no generated PDF is created
+- no licence row is created
+- no download link row is created
+- no email event is created
+- no direct public download is exposed
+
+Next gate:
+
+    U3-P — CDAS Controlled Access Request Intake Gate
+
