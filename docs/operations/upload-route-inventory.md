@@ -663,3 +663,58 @@ Next gate:
 
     U3-L — CDAS Draft Review Action Gate
 
+
+## 21. U3-L CDAS Draft Review Action Gate
+
+Routes:
+
+    /api/admin/uploads/cdas-document
+    /api/admin/uploads/cdas-document/review
+
+Status:
+
+    CDAS draft review action gate.
+
+Policy posture:
+
+- admin-only
+- review actions are explicitly gated
+- review route requires CDAS_UPLOAD_REVIEW_ACTIONS_ENABLED=true
+- reviewable document must be draft
+- reviewable document must be unlisted
+- reviewable document must require approval
+- allowed actions are hold, reject, and approve_for_activation_prep
+- review actions create review events only
+- review actions do not activate documents
+- review actions do not publish documents
+- review actions do not make documents requestable
+- review actions do not generate PDFs
+- review actions do not issue licences
+- review actions do not create download links
+- review actions do not send email
+- approve_for_activation_prep only permits a later explicit activation-prep gate
+
+Validation gate:
+
+    U3-L draft review action policy validation failures: 0
+
+Additional evidence required:
+
+- GET review route reports policy status
+- POST hold records review event
+- POST reject records review event
+- POST approve_for_activation_prep records review event
+- non-draft document is rejected
+- listed document is rejected
+- document not requiring approval is rejected
+- disabled switch blocks review action
+- no document activation occurs
+- no licence row is created
+- no download link row is created
+- no email event is created
+- no public exposure is created
+
+Next gate:
+
+    U3-M — CDAS Activation Preparation Gate
+
