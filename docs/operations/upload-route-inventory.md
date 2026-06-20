@@ -905,3 +905,72 @@ Next gate:
 
     U3-P — CDAS Controlled Access Request Intake Gate
 
+
+## 25. U3-P CDAS Controlled Access Request Intake Gate
+
+Routes:
+
+    /api/admin/uploads/cdas-document
+    /api/admin/uploads/cdas-document/review
+    /api/admin/uploads/cdas-document/activation-prep
+    /api/admin/uploads/cdas-document/activate
+    /api/admin/uploads/cdas-document/listing-requestability
+    /api/admin/uploads/cdas-document/access-request
+
+Status:
+
+    CDAS controlled document access request intake gate.
+
+Policy posture:
+
+- admin-only route for this phase
+- access request intake is separately gated
+- intake requires CDAS_UPLOAD_ACCESS_REQUEST_INTAKE_ENABLED=true
+- intake targets the existing document_access_requests table
+- document must be active
+- document must be listed
+- document must be requestable_with_approval
+- document must retain requires_approval = 1
+- source_object must exist
+- source_sha256 must exist
+- document version must exist
+- licence terms version must exist
+- requester email must be valid
+- document_access_requests row is created with status pending_approval
+- request_review_status is pending_review
+- duplicate pending requests are blocked
+- intake evidence event is created
+- no access is approved
+- no generated PDF is created
+- no licence is issued
+- no download link is created
+- no email is sent
+- no direct public download is exposed
+
+Validation gate:
+
+    U3-P controlled document access request intake policy validation failures: 0
+
+Additional evidence required:
+
+- disabled switch blocks intake
+- non-active document is rejected
+- unlisted document is rejected
+- not_requestable document is rejected
+- document without source_object is rejected
+- document without source_sha256 is rejected
+- document without licence_terms_version is rejected
+- invalid requester email is rejected
+- valid request creates document_access_requests row
+- valid request creates intake event
+- duplicate pending request is blocked
+- no licence row is created
+- no generated PDF is created
+- no download link row is created
+- no email event is created
+- no direct public download is exposed
+
+Next gate:
+
+    U3-Q — CDAS Controlled Access Request Review Gate
+
