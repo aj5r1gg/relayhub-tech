@@ -718,3 +718,66 @@ Next gate:
 
     U3-M — CDAS Activation Preparation Gate
 
+
+## 22. U3-M CDAS Activation Preparation Gate
+
+Routes:
+
+    /api/admin/uploads/cdas-document
+    /api/admin/uploads/cdas-document/review
+    /api/admin/uploads/cdas-document/activation-prep
+
+Status:
+
+    CDAS activation preparation gate.
+
+Policy posture:
+
+- admin-only
+- activation preparation is explicitly gated
+- activation prep route requires CDAS_UPLOAD_ACTIVATION_PREP_ENABLED=true
+- activation preparation requires latest review action approve_for_activation_prep
+- document must be draft
+- document must be unlisted
+- document must require approval
+- source_object must exist
+- source_sha256 must exist
+- activation prep creates an activation preparation event only
+- activation prep does not activate documents
+- activation prep does not publish documents
+- activation prep does not make documents requestable
+- activation prep does not generate PDFs
+- activation prep does not issue licences
+- activation prep does not create download links
+- activation prep does not send email
+- repeated activation prep returns existing prepared event
+
+Validation gate:
+
+    U3-M activation preparation policy validation failures: 0
+
+Additional evidence required:
+
+- GET activation-prep route reports policy status
+- disabled switch blocks activation prep
+- missing review approval blocks activation prep
+- hold review blocks activation prep
+- reject review blocks activation prep
+- approve_for_activation_prep review permits prep
+- non-draft document is rejected
+- listed document is rejected
+- document without source_object is rejected
+- document without source_sha256 is rejected
+- activation prep event is created
+- repeated activation prep does not duplicate preparation
+- no document activation occurs
+- no public listing occurs
+- no generated PDF is created
+- no licence row is created
+- no download link row is created
+- no email event is created
+
+Next gate:
+
+    U3-N — CDAS Explicit Activation Gate
+
