@@ -974,3 +974,70 @@ Next gate:
 
     U3-Q — CDAS Controlled Access Request Review Gate
 
+
+## 26. U3-Q CDAS Controlled Access Request Review Gate
+
+Routes:
+
+    /api/admin/uploads/cdas-document
+    /api/admin/uploads/cdas-document/review
+    /api/admin/uploads/cdas-document/activation-prep
+    /api/admin/uploads/cdas-document/activate
+    /api/admin/uploads/cdas-document/listing-requestability
+    /api/admin/uploads/cdas-document/access-request
+    /api/admin/uploads/cdas-document/access-request/review
+
+Status:
+
+    CDAS controlled access request review gate.
+
+Policy posture:
+
+- admin-only route
+- access request review is separately gated
+- review requires CDAS_UPLOAD_ACCESS_REQUEST_REVIEW_ENABLED=true
+- review targets document_access_requests
+- review evidence is recorded in document_access_request_review_events
+- permitted actions are hold, reject, and approve_for_licence_prep
+- hold keeps the request pending but marks review_hold
+- reject sets the request to denied and records rejection metadata
+- approve_for_licence_prep sets the request to approved_pending_licence
+- approve_for_licence_prep marks request_review_status as approved_for_licence_prep
+- approval is for the next gate only
+- no licence is issued
+- no generated PDF is created
+- no download link is created
+- no email is sent
+- no direct download access is created
+
+Validation gate:
+
+    U3-Q controlled access request review policy validation failures: 0
+
+Additional evidence required:
+
+- disabled switch blocks review
+- invalid action is rejected
+- missing request_id is rejected
+- unknown request_id is rejected
+- already finalised request is rejected
+- hold creates review event and does not issue access
+- reject creates review event and does not issue access
+- approve_for_licence_prep creates review event and does not issue licence
+- approval is blocked if document is no longer active
+- approval is blocked if document is no longer listed
+- approval is blocked if document is no longer requestable_with_approval
+- approval is blocked if document no longer requires approval
+- approval is blocked if document source_object is missing
+- approval is blocked if document source_sha256 is missing
+- approval is blocked if licence_terms_version is missing
+- no generated PDF is created
+- no licence row is created
+- no download link row is created
+- no email event is created
+- no direct public download is exposed
+
+Next gate:
+
+    U3-R — CDAS Licence Preparation Gate
+
