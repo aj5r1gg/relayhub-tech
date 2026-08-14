@@ -63,7 +63,7 @@ function shouldAttemptAudit(env, request, options = {}) {
     return false;
   }
 
-  return Boolean(env?.DB?.prepare && request);
+  return Boolean(env?.RELAYHUB_DB?.prepare && request);
 }
 
 async function safeAudit(env, request, event = {}) {

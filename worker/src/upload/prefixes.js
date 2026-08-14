@@ -284,7 +284,7 @@ export async function getStoragePrefixById(env, prefixId) {
     return null;
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        domain,
@@ -338,7 +338,7 @@ export async function listStoragePrefixes(env, options = {}) {
 
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-  const result = await env.DB.prepare(
+  const result = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        domain,

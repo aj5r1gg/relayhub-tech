@@ -252,7 +252,7 @@ export function buildUploadTransactionRecord(options = {}) {
 }
 
 export async function createUploadTransaction(env, options = {}) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
@@ -267,7 +267,7 @@ export async function createUploadTransaction(env, options = {}) {
 
   const record = recordResult.value;
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO upload_transactions (
        id,
        upload_domain,
@@ -361,14 +361,14 @@ export async function getUploadTransactionById(env, id) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        upload_domain,
@@ -437,7 +437,7 @@ export async function updateUploadTransactionStatus(env, options = {}) {
     return statusResult;
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
@@ -493,7 +493,7 @@ export async function updateUploadTransactionStatus(env, options = {}) {
   const setSql = setColumns.map((column) => `${column} = ?`).join(", ");
   const values = setColumns.map((column) => updates[column]);
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_transactions
      SET ${setSql}
      WHERE id = ?`
@@ -519,7 +519,7 @@ export async function attachUploadTransactionEvidence(env, options = {}) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
@@ -528,7 +528,7 @@ export async function attachUploadTransactionEvidence(env, options = {}) {
 
   const eventAt = cleanText(options.eventAt || nowIso());
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_transactions
      SET
        original_filename = COALESCE(?, original_filename),
@@ -574,14 +574,14 @@ export async function attachUploadTransactionObjectKeys(env, options = {}) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_transactions
      SET
        selected_prefix_id = COALESCE(?, selected_prefix_id),
@@ -615,7 +615,7 @@ export async function failUploadTransaction(env, options = {}) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
@@ -647,7 +647,7 @@ export async function failUploadTransaction(env, options = {}) {
       ? "recovery_required"
       : "failed";
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_transactions
      SET
        upload_status = ?,
@@ -688,7 +688,7 @@ export async function completeUploadTransaction(env, options = {}) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_transaction_database_unavailable",
       "D1 database binding is unavailable."
@@ -699,7 +699,7 @@ export async function completeUploadTransaction(env, options = {}) {
   const hasWarnings = Array.isArray(options.warnings) && options.warnings.length > 0;
   const status = hasWarnings ? "completed_with_warning" : "completed";
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_transactions
      SET
        upload_status = ?,
