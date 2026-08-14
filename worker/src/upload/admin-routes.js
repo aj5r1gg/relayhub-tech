@@ -5,6 +5,32 @@ import { requireUploadObjectKeysAbsent } from "./r2-objects.js";
 import { createUploadTransaction } from "./transactions.js";
 import { orchestrateUploadR2Write } from "./write-orchestrator.js";
 import { getIdempotencyRecordForClientKey } from "./idempotency.js";
+import { uploadAdminRoutePolicy } from "./admin/policy.js";
+import {
+  buildCdasUploadRouteStatus,
+  buildNoSideEffects,
+  buildSideEffectsConfirmed,
+  cdasUploadsDisabledResponse,
+  cleanText,
+  envEnabled,
+  fail,
+  getAdminActor,
+  getUploadRouteMode,
+  getUploadRouteSwitches,
+  methodNotAllowed,
+  nowIso,
+  nullableText,
+  pass,
+  readJsonBody,
+  uploadSystemDisabledResponse,
+} from "./admin/common.js";
+import { handleCdasControlledAccessRequestReview } from "./admin/gates/cdas-access-request-review.js";
+import {
+  VALID_CDAS_DRAFT_REVIEW_ACTIONS,
+  VALID_CDAS_LISTING_REQUESTABILITY_ACTIONS,
+} from "./admin/actions.js";
+
+export { uploadAdminRoutePolicy };
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
@@ -23,22 +49,6 @@ const IDEMPOTENCY_IN_PROGRESS_STATUSES = new Set([
   "in_progress",
 ]);
 
-function cleanText(value) {
-  return String(value ?? "").trim();
-}
-
-function nullableText(value) {
-  const text = cleanText(value);
-  return text || null;
-}
-
-function envEnabled(value) {
-  return cleanText(value).toLowerCase() === "true";
-}
-
-function nowIso() {
-  return new Date().toISOString();
-}
 
 function addHoursIso(dateIso, hours = 24) {
   const base = dateIso ? new Date(dateIso) : new Date();
@@ -46,38 +56,6 @@ function addHoursIso(dateIso, hours = 24) {
   return new Date(base.getTime() + hours * 60 * 60 * 1000).toISOString();
 }
 
-function fail(error, message, details = {}) {
-  return {
-    ok: false,
-    error,
-    message,
-    details,
-    warnings: [],
-  };
-}
-
-function pass(value, warnings = []) {
-  return {
-    ok: true,
-    value,
-    warnings,
-  };
-}
-
-function methodNotAllowed(allowed = ["GET"]) {
-  return jsonResponse(
-    {
-      ok: false,
-      error: "method_not_allowed",
-      message: "Method is not allowed for this upload route.",
-      allowed_methods: allowed,
-    },
-    405,
-    {
-      Allow: allowed.join(", "),
-    }
-  );
-}
 
 function notFound() {
   return jsonResponse(
@@ -133,57 +111,6 @@ function isUploadAdminAuthorized(request, env) {
   return Boolean(token && token === expected);
 }
 
-function getUploadRouteSwitches(env = {}) {
-  return {
-    uploads_enabled: envEnabled(env.UPLOADS_ENABLED),
-    cdas_uploads_enabled: envEnabled(env.CDAS_UPLOADS_ENABLED),
-    upload_route_skeleton_enabled: envEnabled(env.UPLOAD_ROUTE_SKELETON_ENABLED),
-    upload_route_dry_run_enabled: envEnabled(env.UPLOAD_ROUTE_DRY_RUN_ENABLED),
-    upload_route_real_write_enabled: envEnabled(env.UPLOAD_ROUTE_REAL_WRITE_ENABLED),
-  };
-}
-
-function getUploadRouteMode(request) {
-  const url = new URL(request.url);
-
-  const mode = cleanText(url.searchParams.get("mode"));
-
-  const dryRun =
-    mode === "dry-run" ||
-    mode === "dry_run" ||
-    url.searchParams.get("dry_run") === "1" ||
-    url.searchParams.get("dryRun") === "1";
-
-  const realWrite =
-    mode === "real-write" ||
-    mode === "real_write" ||
-    mode === "write" ||
-    mode === "live" ||
-    url.searchParams.get("real_write") === "1" ||
-    url.searchParams.get("realWrite") === "1";
-
-  if (dryRun) {
-    return {
-      mode: "dry-run",
-      dry_run: true,
-      real_write: false,
-    };
-  }
-
-  if (realWrite) {
-    return {
-      mode: "real-write",
-      dry_run: false,
-      real_write: true,
-    };
-  }
-
-  return {
-    mode: mode || "blocked",
-    dry_run: false,
-    real_write: false,
-  };
-}
 
 function getRequestId(request) {
   return (
@@ -194,15 +121,6 @@ function getRequestId(request) {
   );
 }
 
-function getAdminActor(request, env) {
-  return (
-    cleanText(env.UPLOAD_ADMIN_ACTOR) ||
-    cleanText(env.RELAYHUB_ADMIN_ACTOR) ||
-    cleanText(request.headers.get("cf-access-authenticated-user-email")) ||
-    cleanText(request.headers.get("x-admin-actor")) ||
-    "admin"
-  );
-}
 
 function safeSlug(value) {
   return cleanText(value)
@@ -233,50 +151,6 @@ function normalisePrefix(prefix) {
   return cleanPrefix.endsWith("/") ? cleanPrefix : `${cleanPrefix}/`;
 }
 
-function buildNoSideEffects(realWrite = false) {
-  return {
-    parses_multipart: true,
-    validates_prefix: true,
-    previews_object_keys: true,
-    calculates_hash_evidence: true,
-    checks_r2_absence: true,
-    recognises_real_write_intent: true,
-    requires_idempotency_for_real_write: true,
-    creates_upload_transaction: realWrite,
-    writes_r2: realWrite,
-    creates_draft_cdas_document_record: realWrite,
-    publishes_document: false,
-    activates_document: false,
-    makes_document_requestable: false,
-    generates_pdf: false,
-    creates_licence: false,
-    creates_download_link: false,
-    sends_email: false,
-  };
-}
-
-function buildSideEffectsConfirmed(overrides = {}) {
-  return {
-    creates_upload_transaction: false,
-    writes_r2: false,
-    creates_draft_cdas_document_record: false,
-    creates_document_access_request: false,
-    creates_access_request: false,
-    reviews_document_access_request: false,
-    approves_access_request: false,
-    approves_access: false,
-    public_visibility_created: false,
-    publishes_document: false,
-    activates_document: false,
-    makes_document_requestable: false,
-    makes_document_directly_downloadable: false,
-    generates_pdf: false,
-    creates_licence: false,
-    creates_download_link: false,
-    sends_email: false,
-    ...overrides,
-  };
-}
 
 function safeFileSummary(file) {
   if (!file) {
@@ -311,44 +185,6 @@ function buildObservedRequest(request) {
   };
 }
 
-function buildCdasUploadRouteStatus(request, env) {
-  const switches = getUploadRouteSwitches(env);
-  const routeMode = getUploadRouteMode(request);
-
-  return {
-    ok: true,
-    route: "/api/admin/uploads/cdas-document",
-    route_status: "cdas_draft_document_record_creation_gate",
-    upload_domain: "cdas_document",
-    dry_run_requested: routeMode.dry_run,
-    real_write_requested: routeMode.real_write,
-    mode: routeMode.mode,
-    switches,
-    side_effects: buildNoSideEffects(
-      routeMode.real_write && switches.upload_route_real_write_enabled
-    ),
-    requirements_before_real_write: [
-      "UPLOADS_ENABLED=true",
-      "CDAS_UPLOADS_ENABLED=true",
-      "UPLOAD_ROUTE_SKELETON_ENABLED=true",
-      "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
-      "client_request_id",
-      "strict multipart parser",
-      "storage prefix validation",
-      "object key builder",
-      "hash evidence",
-      "R2 no-overwrite check",
-      "idempotency replay check",
-      "upload transaction creation",
-      "R2 write helper",
-      "write orchestrator",
-      "draft CDAS document row creation",
-      "recovery path validation",
-      "audit path validation",
-      "manual release gate approval",
-    ],
-  };
-}
 
 function routeSkeletonDisabledResponse(request, env) {
   const status = buildCdasUploadRouteStatus(request, env);
@@ -380,35 +216,6 @@ function dryRunDisabledResponse(request, env) {
   );
 }
 
-function uploadSystemDisabledResponse(request, env) {
-  const status = buildCdasUploadRouteStatus(request, env);
-
-  return jsonResponse(
-    {
-      ...status,
-      ok: false,
-      error: "uploads_disabled",
-      message:
-        "Upload handling is disabled by policy. No upload action was performed.",
-    },
-    423
-  );
-}
-
-function cdasUploadsDisabledResponse(request, env) {
-  const status = buildCdasUploadRouteStatus(request, env);
-
-  return jsonResponse(
-    {
-      ...status,
-      ok: false,
-      error: "cdas_uploads_disabled",
-      message:
-        "CDAS upload handling is disabled by policy. No upload action was performed.",
-    },
-    423
-  );
-}
 
 function dryRunRequiredResponse(request, env) {
   const status = buildCdasUploadRouteStatus(request, env);
@@ -454,14 +261,14 @@ async function getStoragePrefixForDryRun(env, storagePrefixId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_storage_prefix_database_unavailable",
       "D1 database binding is unavailable, so storage prefix could not be validated."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        domain,
@@ -785,7 +592,7 @@ async function buildDryRunR2AbsenceCheck(env, objectKeyPreview) {
 }
 
 async function getD1TableColumns(env, tableName) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_database_unavailable",
       "D1 database binding is unavailable."
@@ -804,7 +611,7 @@ async function getD1TableColumns(env, tableName) {
     );
   }
 
-  const result = await env.DB.prepare(`PRAGMA table_info(${safeTable})`).all();
+  const result = await env.RELAYHUB_DB.prepare(`PRAGMA table_info(${safeTable})`).all();
   const rows = Array.isArray(result?.results) ? result.results : [];
   const columns = new Set(rows.map((row) => row.name).filter(Boolean));
 
@@ -827,7 +634,7 @@ function buildCdasGeneratedPrefix(fields = {}) {
 }
 
 async function getExistingCdasDocumentByIdOrSlug(env, documentId, slug) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_documents_database_unavailable",
       "D1 database binding is unavailable."
@@ -844,7 +651,7 @@ async function getExistingCdasDocumentByIdOrSlug(env, documentId, slug) {
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT id, slug, title, version, status
      FROM documents
      WHERE id = ? OR slug = ?
@@ -1038,7 +845,7 @@ async function insertCdasDraftDocumentRecord(env, row) {
   const values = insertableEntries.map(([, value]) => value);
   const placeholders = columns.map(() => "?").join(", ");
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO documents (${columns.join(", ")})
      VALUES (${placeholders})`
   )
@@ -1062,14 +869,14 @@ async function markUploadTransactionRecoveryRequiredForDocumentRecordFailure(
 ) {
   const id = cleanText(uploadTransactionId);
 
-  if (!id || !env?.DB?.prepare) {
+  if (!id || !env?.RELAYHUB_DB?.prepare) {
     return pass({
       recorded: false,
       reason: "upload_transaction_not_available",
     });
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_transactions
      SET upload_status = ?,
          recovery_status = ?,
@@ -1154,11 +961,6 @@ async function buildCdasDraftDocumentRecordPreview(env, parsed, preview) {
   });
 }
 
-const VALID_CDAS_DRAFT_REVIEW_ACTIONS = new Set([
-  "hold",
-  "reject",
-  "approve_for_activation_prep",
-]);
 
 function buildCdasUploadReviewEventId() {
   const random =
@@ -1189,19 +991,6 @@ function validateCdasDraftReviewAction(action) {
   return pass(cleanAction);
 }
 
-async function readJsonBody(request) {
-  try {
-    return pass(await request.json());
-  } catch (error) {
-    return fail(
-      "upload_review_json_invalid",
-      "Review request body must be valid JSON.",
-      {
-        error: error?.message || String(error),
-      }
-    );
-  }
-}
 
 async function getCdasDraftDocumentForReview(env, documentId) {
   const id = cleanText(documentId);
@@ -1213,14 +1002,14 @@ async function getCdasDraftDocumentForReview(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_review_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        slug,
@@ -1315,7 +1104,7 @@ function buildCdasReviewOutcome(action) {
 }
 
 async function insertCdasUploadReviewEvent(env, options = {}) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_review_database_unavailable",
       "D1 database binding is unavailable."
@@ -1325,7 +1114,7 @@ async function insertCdasUploadReviewEvent(env, options = {}) {
   const eventAt = cleanText(options.eventAt || nowIso());
   const id = buildCdasUploadReviewEventId();
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO cdas_upload_review_events (
        id,
        document_id,
@@ -1384,14 +1173,14 @@ async function insertCdasUploadReviewEvent(env, options = {}) {
 }
 
 async function touchCdasDraftDocumentAfterReview(env, documentId, eventAt = nowIso()) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_review_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE documents
      SET updated_at = ?
      WHERE id = ?
@@ -1606,14 +1395,14 @@ async function prepareCdasRealWriteIdempotency(request, env, parsed) {
 }
 
 async function recordCdasIdempotencyReplay(env, record, eventAt = nowIso()) {
-  if (!record?.id || !env?.DB?.prepare) {
+  if (!record?.id || !env?.RELAYHUB_DB?.prepare) {
     return pass({
       recorded: false,
       reason: "idempotency_replay_record_not_available",
     });
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_idempotency_keys
      SET replay_count = COALESCE(replay_count, 0) + 1,
          last_replayed_at = ?,
@@ -1636,7 +1425,7 @@ async function createCdasIdempotencyRecordForTransaction(
   transaction,
   eventAt = nowIso()
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_idempotency_database_unavailable",
       "D1 database binding is unavailable."
@@ -1663,7 +1452,7 @@ async function createCdasIdempotencyRecordForTransaction(
   const id = buildUploadIdempotencyRecordId();
   const expiresAt = addHoursIso(eventAt, 24);
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO upload_idempotency_keys (
        id,
        idempotency_key_hash,
@@ -1711,7 +1500,7 @@ async function updateCdasIdempotencyStatus(
   status,
   options = {}
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "upload_idempotency_database_unavailable",
       "D1 database binding is unavailable."
@@ -1728,7 +1517,7 @@ async function updateCdasIdempotencyStatus(
     );
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_idempotency_keys
      SET status = ?,
          updated_at = ?,
@@ -3580,319 +3369,6 @@ async function handleCdasControlledAccessRequestIntake(request, env) {
   );
 }
 
-async function handleCdasControlledAccessRequestReview(request, env) {
-  const switches = getUploadRouteSwitches(env);
-
-  if (request.method === "GET") {
-    return jsonResponse({
-      ok: true,
-      route: "/api/admin/uploads/cdas-document/access-request/review",
-      route_status: "cdas_controlled_access_request_review_gate",
-      upload_domain: "cdas_document",
-      switches,
-      allowed_actions: Array.from(
-        VALID_CDAS_ACCESS_REQUEST_REVIEW_ACTIONS
-      ),
-      policy: {
-        admin_only: true,
-        public_route: false,
-        access_request_review_enabled: envEnabled(
-          env.CDAS_UPLOAD_ACCESS_REQUEST_REVIEW_ENABLED
-        ),
-        target_table: "document_access_requests",
-        event_table: "document_access_request_review_events",
-        may_hold_request: true,
-        may_reject_request: true,
-        may_approve_for_licence_prep: true,
-        approval_state: "approved_pending_licence",
-        approval_review_state: "approved_for_licence_prep",
-        approves_for_next_gate_only: true,
-        creates_licence: false,
-        generates_pdf: false,
-        creates_download_link: false,
-        sends_email: false,
-        direct_downloadable: false,
-      },
-    });
-  }
-
-  if (request.method !== "POST") {
-    return methodNotAllowed(["GET", "POST"]);
-  }
-
-  if (!switches.uploads_enabled) {
-    return uploadSystemDisabledResponse(request, env);
-  }
-
-  if (!switches.cdas_uploads_enabled) {
-    return cdasUploadsDisabledResponse(request, env);
-  }
-
-  if (!envEnabled(env.CDAS_UPLOAD_ACCESS_REQUEST_REVIEW_ENABLED)) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: "access_request_review_disabled",
-        message:
-          "CDAS controlled access request review is disabled by policy. No request review state was changed.",
-        required_switch: "CDAS_UPLOAD_ACCESS_REQUEST_REVIEW_ENABLED=true",
-        side_effects_confirmed: buildSideEffectsConfirmed(),
-      },
-      423
-    );
-  }
-
-  const bodyResult = await readJsonBody(request);
-
-  if (!bodyResult.ok) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: bodyResult.error,
-        message: bodyResult.message,
-        details: bodyResult.details || {},
-        validation_stage: "access_request_review_json_parse",
-        side_effects_confirmed: buildSideEffectsConfirmed(),
-      },
-      400
-    );
-  }
-
-  const body = bodyResult.value || {};
-  const actionResult = validateAccessRequestReviewAction(body.action);
-
-  if (!actionResult.ok) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: actionResult.error,
-        message: actionResult.message,
-        details: actionResult.details || {},
-        validation_stage: "access_request_review_action_validation",
-        side_effects_confirmed: buildSideEffectsConfirmed(),
-      },
-      400
-    );
-  }
-
-  const action = actionResult.value;
-  const requestId = cleanText(body.request_id);
-
-  const requestResult = await getDocumentAccessRequestForControlledReview(
-    env,
-    requestId
-  );
-
-  if (!requestResult.ok) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: requestResult.error,
-        message: requestResult.message,
-        details: requestResult.details || {},
-        validation_stage: "access_request_review_request_validation",
-        side_effects_confirmed: buildSideEffectsConfirmed(),
-      },
-      409
-    );
-  }
-
-  const accessRequest = requestResult.value;
-
-  const documentResult = await getDocumentForAccessRequestReview(
-    env,
-    accessRequest.document_id
-  );
-
-  if (!documentResult.ok) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: documentResult.error,
-        message: documentResult.message,
-        details: documentResult.details || {},
-        validation_stage: "access_request_review_document_lookup",
-        side_effects_confirmed: buildSideEffectsConfirmed(),
-      },
-      409
-    );
-  }
-
-  const document = documentResult.value;
-
-  if (action === "approve_for_licence_prep") {
-    const eligibilityResult =
-      validateDocumentStillEligibleForApproval(document);
-
-    if (!eligibilityResult.ok) {
-      return jsonResponse(
-        {
-          ok: false,
-          accepted: false,
-          error: eligibilityResult.error,
-          message: eligibilityResult.message,
-          details: eligibilityResult.details || {},
-          validation_stage:
-            "access_request_review_approval_eligibility",
-          side_effects_confirmed: buildSideEffectsConfirmed(),
-        },
-        409
-      );
-    }
-  }
-
-  const eventAt = nowIso();
-  const actor = getAdminActor(request, env);
-  const outcome = buildAccessRequestReviewOutcome(
-    action,
-    accessRequest
-  );
-
-  const updateResult = await updateDocumentAccessRequestReviewState(env, {
-    requestId: accessRequest.id,
-    action,
-    outcome,
-    actor,
-    reason: body.reason,
-    note: body.note,
-    eventAt,
-  });
-
-  if (!updateResult.ok) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: updateResult.error,
-        message: updateResult.message,
-        details: updateResult.details || {},
-        validation_stage: "access_request_review_update",
-        side_effects_confirmed: buildSideEffectsConfirmed(),
-      },
-      500
-    );
-  }
-
-  const reviewEvent = await insertDocumentAccessRequestReviewEvent(env, {
-    requestId: accessRequest.id,
-    eventType: outcome.event_type,
-    previousStatus: outcome.previous_status,
-    newStatus: outcome.new_status,
-    actor,
-    reason: body.reason,
-    note: body.note,
-    eventAt,
-    metadata: {
-      gate: "U3-Q",
-      route: "/api/admin/uploads/cdas-document/access-request/review",
-      action,
-      request_review_status: outcome.request_review_status,
-      document_id: accessRequest.document_id,
-      document_version: accessRequest.document_version,
-      requester_email: accessRequest.email_normalised,
-      intake_source: accessRequest.intake_source || null,
-      intake_event_id: accessRequest.intake_event_id || null,
-      document_status: document.status,
-      document_is_listed: Number(document.is_listed ?? 0),
-      document_requestability_status:
-        document.requestability_status || "not_requestable",
-      document_requires_approval: Number(
-        document.requires_approval ?? 1
-      ),
-      licence_created: false,
-      generated_pdf_created: false,
-      download_link_created: false,
-      email_sent: false,
-      direct_download_created: false,
-    },
-  });
-
-  if (!reviewEvent.ok) {
-    return jsonResponse(
-      {
-        ok: false,
-        accepted: false,
-        error: reviewEvent.error,
-        message: reviewEvent.message,
-        details: reviewEvent.details || {},
-        validation_stage: "access_request_review_event_insert",
-        recovery_required: true,
-        recovery_note:
-          "document_access_requests review state was updated but review event insertion failed. Manual review is required.",
-        request_update: updateResult.value,
-        side_effects_confirmed: buildSideEffectsConfirmed({
-          reviews_document_access_request: true,
-          approves_access_request:
-            action === "approve_for_licence_prep",
-        }),
-      },
-      500
-    );
-  }
-
-  return jsonResponse(
-    {
-      ok: true,
-      accepted: true,
-      message: outcome.message,
-      route: "/api/admin/uploads/cdas-document/access-request/review",
-      validation_stage: "cdas_controlled_access_request_review",
-      action,
-      document: {
-        id: document.id,
-        slug: document.slug,
-        title: document.title,
-        version: document.version,
-        status: document.status,
-        is_listed: Number(document.is_listed ?? 0),
-        requestability_status:
-          document.requestability_status || "not_requestable",
-        requires_approval: Number(document.requires_approval ?? 1),
-      },
-      document_access_request: {
-        id: accessRequest.id,
-        document_id: accessRequest.document_id,
-        previous_status: outcome.previous_status,
-        new_status: outcome.new_status,
-        request_review_status: outcome.request_review_status,
-        requester_email: accessRequest.email_normalised,
-        document_version: accessRequest.document_version,
-        access_class: accessRequest.access_class,
-        terms_version: accessRequest.terms_version,
-      },
-      review_update: updateResult.value,
-      review_event: reviewEvent.value,
-      side_effects_confirmed: buildSideEffectsConfirmed({
-        reviews_document_access_request: true,
-        approves_access_request:
-          action === "approve_for_licence_prep",
-        approves_access:
-          action === "approve_for_licence_prep",
-        creates_upload_transaction: false,
-        writes_r2: false,
-        creates_draft_cdas_document_record: false,
-        creates_document_access_request: false,
-      }),
-      prohibited_side_effects: {
-        licence_created: false,
-        generated_pdf_created: false,
-        download_link_created: false,
-        email_sent: false,
-        direct_download_created: false,
-      },
-      next_allowed_gate:
-        action === "approve_for_licence_prep"
-          ? "U3-R — CDAS Licence Preparation Gate"
-          : "U3-Q remains available while the request remains reviewable",
-    },
-    200
-  );
-}
 
 function buildCdasActivationPrepEventId() {
   const random =
@@ -3912,14 +3388,14 @@ async function getLatestActivationPrepReviewEvent(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_prep_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -4003,14 +3479,14 @@ async function getCdasDraftDocumentForActivationPrep(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_prep_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        slug,
@@ -4098,14 +3574,14 @@ async function getCdasDraftDocumentForActivationPrep(env, documentId) {
 }
 
 async function getExistingActivationPrepEvent(env, documentId) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_prep_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -4126,7 +3602,7 @@ async function getExistingActivationPrepEvent(env, documentId) {
 }
 
 async function insertCdasActivationPrepEvent(env, options = {}) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_prep_database_unavailable",
       "D1 database binding is unavailable."
@@ -4136,7 +3612,7 @@ async function insertCdasActivationPrepEvent(env, options = {}) {
   const eventAt = cleanText(options.eventAt || nowIso());
   const id = buildCdasActivationPrepEventId();
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO cdas_activation_prep_events (
        id,
        document_id,
@@ -4213,14 +3689,14 @@ async function touchCdasDraftDocumentAfterActivationPrep(
   documentId,
   eventAt = nowIso()
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_prep_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE documents
      SET updated_at = ?
      WHERE id = ?
@@ -4255,14 +3731,14 @@ async function getLatestActivationPrepEvent(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -4352,14 +3828,14 @@ async function getCdasDraftDocumentForExplicitActivation(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        slug,
@@ -4447,14 +3923,14 @@ async function getCdasDraftDocumentForExplicitActivation(env, documentId) {
 }
 
 async function getExistingCdasActivationEvent(env, documentId) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -4480,7 +3956,7 @@ async function getExistingCdasActivationEvent(env, documentId) {
 }
 
 async function insertCdasActivationEvent(env, options = {}) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_database_unavailable",
       "D1 database binding is unavailable."
@@ -4490,7 +3966,7 @@ async function insertCdasActivationEvent(env, options = {}) {
   const eventAt = cleanText(options.eventAt || nowIso());
   const id = buildCdasActivationEventId();
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO cdas_activation_events (
        id,
        document_id,
@@ -4570,14 +4046,14 @@ async function activateCdasDraftDocumentRecord(
   documentId,
   eventAt = nowIso()
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "activation_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const result = await env.DB.prepare(
+  const result = await env.RELAYHUB_DB.prepare(
     `UPDATE documents
      SET status = 'active',
          updated_at = ?
@@ -4600,12 +4076,6 @@ async function activateCdasDraftDocumentRecord(
   });
 }
 
-const VALID_CDAS_LISTING_REQUESTABILITY_ACTIONS = new Set([
-  "list_only",
-  "enable_requestability",
-  "disable_requestability",
-  "unlist",
-]);
 
 function buildCdasListingRequestabilityEventId() {
   const random =
@@ -4646,14 +4116,14 @@ async function getLatestCdasActivationEvent(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "listing_requestability_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -4739,14 +4209,14 @@ async function getCdasActiveDocumentForListingRequestability(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "listing_requestability_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        slug,
@@ -4879,14 +4349,14 @@ async function updateCdasDocumentListingRequestability(
   outcome,
   eventAt = nowIso()
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "listing_requestability_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE documents
      SET is_listed = ?,
          requestability_status = ?,
@@ -4930,7 +4400,7 @@ async function updateCdasDocumentListingRequestability(
 }
 
 async function insertCdasListingRequestabilityEvent(env, options = {}) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "listing_requestability_database_unavailable",
       "D1 database binding is unavailable."
@@ -4940,7 +4410,7 @@ async function insertCdasListingRequestabilityEvent(env, options = {}) {
   const eventAt = cleanText(options.eventAt || nowIso());
   const id = buildCdasListingRequestabilityEventId();
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO cdas_listing_requestability_events (
        id,
        document_id,
@@ -5100,14 +4570,14 @@ async function getCdasDocumentForControlledAccessRequest(env, documentId) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "access_request_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        slug,
@@ -5234,14 +4704,14 @@ async function getLatestListingRequestabilityEventForAccessRequest(
   env,
   documentId
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "access_request_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -5333,14 +4803,14 @@ async function getExistingPendingDocumentAccessRequest(
   documentId,
   requesterEmail
 ) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "access_request_database_unavailable",
       "D1 database binding is unavailable."
     );
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        document_id,
@@ -5475,7 +4945,7 @@ async function insertControlledDocumentAccessRequest(env, options = {}) {
   const values = insertableEntries.map(([, value]) => value);
   const placeholders = columns.map(() => "?").join(", ");
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO document_access_requests (${columns.join(", ")})
      VALUES (${placeholders})`
   )
@@ -5489,7 +4959,7 @@ async function insertControlledDocumentAccessRequest(env, options = {}) {
 }
 
 async function insertControlledAccessRequestIntakeEvent(env, options = {}) {
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "access_request_database_unavailable",
       "D1 database binding is unavailable."
@@ -5499,7 +4969,7 @@ async function insertControlledAccessRequestIntakeEvent(env, options = {}) {
   const id = options.id || buildCdasAccessRequestIntakeEventId();
   const eventAt = cleanText(options.eventAt || nowIso());
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `INSERT INTO cdas_controlled_access_request_intake_events (
        id,
        access_request_id,
@@ -5577,475 +5047,6 @@ async function insertControlledAccessRequestIntakeEvent(env, options = {}) {
   });
 }
 
-const VALID_CDAS_ACCESS_REQUEST_REVIEW_ACTIONS = new Set([
-  "hold",
-  "reject",
-  "approve_for_licence_prep",
-]);
-
-function buildDocumentAccessRequestReviewEventId() {
-  const random =
-    crypto.randomUUID?.() ||
-    `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
-
-  return `darre_${random.replaceAll("-", "")}`;
-}
-
-function normaliseAccessRequestReviewAction(value) {
-  return cleanText(value).toLowerCase();
-}
-
-function validateAccessRequestReviewAction(action) {
-  const cleanAction = normaliseAccessRequestReviewAction(action);
-
-  if (!VALID_CDAS_ACCESS_REQUEST_REVIEW_ACTIONS.has(cleanAction)) {
-    return fail(
-      "access_request_review_action_invalid",
-      "CDAS access request review action is not recognised.",
-      {
-        allowed_actions: Array.from(
-          VALID_CDAS_ACCESS_REQUEST_REVIEW_ACTIONS
-        ),
-        received_action: cleanAction,
-      }
-    );
-  }
-
-  return pass(cleanAction);
-}
-
-function buildAccessRequestReviewOutcome(action, requestRow) {
-  const previousStatus = cleanText(requestRow.status || "pending_approval");
-
-  if (action === "hold") {
-    return {
-      event_type: "hold",
-      previous_status: previousStatus,
-      new_status: "pending_approval",
-      request_review_status: "review_hold",
-      approved_at: null,
-      approved_by: null,
-      approval_role: null,
-      approval_policy_version: null,
-      denied_at: null,
-      denied_by: null,
-      denial_reason: null,
-      message:
-        "Document access request was placed on review hold. No access was approved, no licence was issued, no PDF was generated, no download link was created, and no email was sent.",
-    };
-  }
-
-  if (action === "reject") {
-    return {
-      event_type: "reject",
-      previous_status: previousStatus,
-      new_status: "denied",
-      request_review_status: "rejected",
-      approved_at: null,
-      approved_by: null,
-      approval_role: null,
-      approval_policy_version: null,
-      denied_at: nowIso(),
-      denied_by: null,
-      denial_reason: null,
-      message:
-        "Document access request was rejected. No licence was issued, no PDF was generated, no download link was created, and no email was sent.",
-    };
-  }
-
-  return {
-    event_type: "approve_for_licence_prep",
-    previous_status: previousStatus,
-    new_status: "approved_pending_licence",
-    request_review_status: "approved_for_licence_prep",
-    approved_at: nowIso(),
-    approved_by: null,
-    approval_role: "cdas_upload_gate",
-    approval_policy_version: "U3-Q",
-    denied_at: null,
-    denied_by: null,
-    denial_reason: null,
-    message:
-      "Document access request was approved for licence preparation only. No licence was issued, no PDF was generated, no download link was created, and no email was sent.",
-  };
-}
-
-async function getDocumentAccessRequestForControlledReview(env, requestId) {
-  const id = cleanText(requestId);
-
-  if (!id) {
-    return fail(
-      "access_request_review_request_id_missing",
-      "Document access request ID is required."
-    );
-  }
-
-  if (!env?.DB?.prepare) {
-    return fail(
-      "access_request_review_database_unavailable",
-      "D1 database binding is unavailable."
-    );
-  }
-
-  const row = await env.DB.prepare(
-    `SELECT
-       id,
-       document_id,
-       document_version,
-       name,
-       email,
-       email_normalised,
-       licence_holder_type,
-       organisation_name,
-       contact_name,
-       contact_email,
-       role_title,
-       recipient_category,
-       status,
-       access_class,
-       requested_at,
-       approved_at,
-       approved_by,
-       approval_role,
-       approval_policy_version,
-       approval_note,
-       denied_at,
-       denied_by,
-       denial_reason,
-       terms_version,
-       risk_score,
-       risk_flags,
-       intake_source,
-       request_review_status,
-       requestability_status_at_intake,
-       intake_event_id
-     FROM document_access_requests
-     WHERE id = ?
-     LIMIT 1`
-  )
-    .bind(id)
-    .first();
-
-  if (!row) {
-    return fail(
-      "access_request_review_request_not_found",
-      "Document access request could not be found.",
-      {
-        request_id: id,
-      }
-    );
-  }
-
-  if (
-    cleanText(row.status) !== "pending_approval" &&
-    cleanText(row.status) !== "approved_pending_licence"
-  ) {
-    return fail(
-      "access_request_review_status_not_reviewable",
-      "Document access request is not in a reviewable state for this gate.",
-      {
-        request_id: row.id,
-        status: row.status,
-        request_review_status: row.request_review_status,
-      }
-    );
-  }
-
-  if (
-    cleanText(row.request_review_status || "pending_review") !==
-      "pending_review" &&
-    cleanText(row.request_review_status || "pending_review") !==
-      "review_hold"
-  ) {
-    return fail(
-      "access_request_review_already_finalised",
-      "Document access request review has already reached a final state.",
-      {
-        request_id: row.id,
-        status: row.status,
-        request_review_status: row.request_review_status,
-      }
-    );
-  }
-
-  return pass(row);
-}
-
-async function getDocumentForAccessRequestReview(env, documentId) {
-  const id = cleanText(documentId);
-
-  if (!id) {
-    return fail(
-      "access_request_review_document_id_missing",
-      "Document ID is required."
-    );
-  }
-
-  if (!env?.DB?.prepare) {
-    return fail(
-      "access_request_review_database_unavailable",
-      "D1 database binding is unavailable."
-    );
-  }
-
-  const row = await env.DB.prepare(
-    `SELECT
-       id,
-       slug,
-       title,
-       version,
-       status,
-       is_listed,
-       requires_approval,
-       requestability_status,
-       source_object,
-       source_sha256,
-       licence_terms_version,
-       classification,
-       access_class
-     FROM documents
-     WHERE id = ?
-     LIMIT 1`
-  )
-    .bind(id)
-    .first();
-
-  if (!row) {
-    return fail(
-      "access_request_review_document_not_found",
-      "Document could not be found for access request review.",
-      {
-        document_id: id,
-      }
-    );
-  }
-
-  return pass(row);
-}
-
-function validateDocumentStillEligibleForApproval(documentRow) {
-  if (documentRow.status !== "active") {
-    return fail(
-      "access_request_review_document_not_active",
-      "Document must remain active before the request can be approved for licence preparation.",
-      {
-        document_id: documentRow.id,
-        status: documentRow.status,
-      }
-    );
-  }
-
-  if (Number(documentRow.is_listed ?? 0) !== 1) {
-    return fail(
-      "access_request_review_document_not_listed",
-      "Document must remain listed before the request can be approved for licence preparation.",
-      {
-        document_id: documentRow.id,
-        is_listed: documentRow.is_listed,
-      }
-    );
-  }
-
-  if (
-    cleanText(documentRow.requestability_status || "not_requestable") !==
-    "requestable_with_approval"
-  ) {
-    return fail(
-      "access_request_review_document_not_requestable",
-      "Document must remain requestable with approval before the request can be approved for licence preparation.",
-      {
-        document_id: documentRow.id,
-        requestability_status:
-          documentRow.requestability_status || "not_requestable",
-      }
-    );
-  }
-
-  if (Number(documentRow.requires_approval ?? 1) !== 1) {
-    return fail(
-      "access_request_review_document_does_not_require_approval",
-      "Document must retain requires_approval = 1 before approval.",
-      {
-        document_id: documentRow.id,
-        requires_approval: documentRow.requires_approval,
-      }
-    );
-  }
-
-  if (!cleanText(documentRow.source_object)) {
-    return fail(
-      "access_request_review_source_object_missing",
-      "Document source object is missing.",
-      {
-        document_id: documentRow.id,
-      }
-    );
-  }
-
-  if (!cleanText(documentRow.source_sha256)) {
-    return fail(
-      "access_request_review_source_sha256_missing",
-      "Document source SHA-256 evidence is missing.",
-      {
-        document_id: documentRow.id,
-      }
-    );
-  }
-
-  if (!cleanText(documentRow.licence_terms_version)) {
-    return fail(
-      "access_request_review_terms_version_missing",
-      "Document licence terms version is missing.",
-      {
-        document_id: documentRow.id,
-      }
-    );
-  }
-
-  return pass(true);
-}
-
-async function updateDocumentAccessRequestReviewState(
-  env,
-  options = {}
-) {
-  if (!env?.DB?.prepare) {
-    return fail(
-      "access_request_review_database_unavailable",
-      "D1 database binding is unavailable."
-    );
-  }
-
-  const eventAt = cleanText(options.eventAt || nowIso());
-  const action = cleanText(options.action);
-  const outcome = options.outcome || {};
-  const actor = nullableText(options.actor);
-  const note = nullableText(options.note);
-  const reason = nullableText(options.reason);
-
-  if (action === "hold") {
-    await env.DB.prepare(
-      `UPDATE document_access_requests
-       SET status = ?,
-           request_review_status = ?,
-           approval_note = ?
-       WHERE id = ?`
-    )
-      .bind(
-        outcome.new_status,
-        outcome.request_review_status,
-        note,
-        options.requestId
-      )
-      .run();
-  } else if (action === "reject") {
-    await env.DB.prepare(
-      `UPDATE document_access_requests
-       SET status = ?,
-           request_review_status = ?,
-           denied_at = ?,
-           denied_by = ?,
-           denial_reason = ?,
-           approval_note = ?
-       WHERE id = ?`
-    )
-      .bind(
-        outcome.new_status,
-        outcome.request_review_status,
-        eventAt,
-        actor,
-        reason || note,
-        note,
-        options.requestId
-      )
-      .run();
-  } else {
-    await env.DB.prepare(
-      `UPDATE document_access_requests
-       SET status = ?,
-           request_review_status = ?,
-           approved_at = ?,
-           approved_by = ?,
-           approval_role = ?,
-           approval_policy_version = ?,
-           approval_note = ?
-       WHERE id = ?`
-    )
-      .bind(
-        outcome.new_status,
-        outcome.request_review_status,
-        eventAt,
-        actor,
-        outcome.approval_role || "cdas_upload_gate",
-        outcome.approval_policy_version || "U3-Q",
-        note,
-        options.requestId
-      )
-      .run();
-  }
-
-  return pass({
-    request_id: options.requestId,
-    action,
-    previous_status: outcome.previous_status,
-    new_status: outcome.new_status,
-    request_review_status: outcome.request_review_status,
-    updated_at: eventAt,
-  });
-}
-
-async function insertDocumentAccessRequestReviewEvent(env, options = {}) {
-  if (!env?.DB?.prepare) {
-    return fail(
-      "access_request_review_database_unavailable",
-      "D1 database binding is unavailable."
-    );
-  }
-
-  const id = options.id || buildDocumentAccessRequestReviewEventId();
-  const eventAt = cleanText(options.eventAt || nowIso());
-
-  await env.DB.prepare(
-    `INSERT INTO document_access_request_review_events (
-       id,
-       request_id,
-       event_type,
-       previous_status,
-       new_status,
-       actor,
-       reason,
-       note,
-       metadata_json,
-       created_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  )
-    .bind(
-      id,
-      options.requestId,
-      options.eventType,
-      options.previousStatus || null,
-      options.newStatus || null,
-      nullableText(options.actor),
-      nullableText(options.reason),
-      nullableText(options.note),
-      JSON.stringify(options.metadata || {}),
-      eventAt
-    )
-    .run();
-
-  return pass({
-    id,
-    request_id: options.requestId,
-    event_type: options.eventType,
-    previous_status: options.previousStatus || null,
-    new_status: options.newStatus || null,
-    actor: nullableText(options.actor),
-    reason: nullableText(options.reason),
-    note: nullableText(options.note),
-    metadata: options.metadata || {},
-    created_at: eventAt,
-  });
-}
 
 export async function handleUploadAdminRequest(request, env) {
   if (!isUploadAdminAuthorized(request, env)) {
@@ -6085,140 +5086,3 @@ export async function handleUploadAdminRequest(request, env) {
 
   return notFound();
 }
-
-export const uploadAdminRoutePolicy = {
-  createsRoutes: true,
-  route: "/api/admin/uploads/cdas-document",
-  routeStatus: "cdas_draft_document_record_creation_gate",
-  adminOnly: true,
-  disabledByDefault: true,
-  dryRunSupported: true,
-  realWriteIntentRecognised: true,
-  realWriteDisabledByDefault: true,
-  realWriteImplemented: true,
-  realWriteRequiresExplicitSwitch: "UPLOAD_ROUTE_REAL_WRITE_ENABLED=true",
-  parsesMultipart: true,
-  validatesPrefix: true,
-  previewsObjectKeys: true,
-  calculatesHashEvidence: true,
-  checksR2Absence: true,
-  createsUploadTransaction: true,
-  writesR2: true,
-  writesOnlyThroughOrchestrator: true,
-  createsDraftCdasDocumentRecord: true,
-  draftDocumentStatus: "draft",
-  draftDocumentIsListed: 0,
-  draftDocumentRequiresApproval: 1,
-  activatesDocuments: true,
-  makesDocumentsRequestable: true,
-  createsAccessRequests: true,
-  createsDocumentAccessRequests: true,
-  reviewsAccessRequests: true,
-  reviewsDocumentAccessRequests: true,
-  approvesAccessRequests: true,
-  approvesDocumentAccessRequestsForLicencePrep: true,
-  approvesAccessRequests: true,
-  generatesPdf: false,
-  requiresIdempotencyForRealWrite: true,
-  idempotencyField: "client_request_id",
-  idempotencyRawKeyStored: false,
-  completedReplayWritesR2: false,
-  publishesDocuments: false,
-  createsLicences: false,
-  createsDownloadLinks: false,
-  sendsEmail: false,
-  exposesAdminVisibilityEvidence: true,
-  adminVisibilitySurface: "cdas_documents_admin",
-  adminVisibilityPath: "/admin/cdas-documents",
-  publicVisibilityCreated: false,
-  publicUrlCreated: false,
-  adminReviewRequiredBeforeActivation: true,
-  createsReviewActionRoute: true,
-  reviewActionRoute: "/api/admin/uploads/cdas-document/review",
-  reviewActionsRequireExplicitSwitch: "CDAS_UPLOAD_REVIEW_ACTIONS_ENABLED=true",
-  validReviewActions: Array.from(VALID_CDAS_DRAFT_REVIEW_ACTIONS),
-  reviewActionsActivateDocuments: false,
-  reviewActionsPublishDocuments: false,
-  reviewActionsGeneratePdf: false,
-  reviewActionsCreateLicences: false,
-  reviewActionsCreateDownloadLinks: false,
-  reviewActionsSendEmail: false,
-  createsActivationPrepRoute: true,
-  activationPrepRoute: "/api/admin/uploads/cdas-document/activation-prep",
-  activationPrepRequiresExplicitSwitch: "CDAS_UPLOAD_ACTIVATION_PREP_ENABLED=true",
-  activationPrepRequiresReviewAction: "approve_for_activation_prep",
-  createsActivationPrepEvent: true,
-  activationPrepActivatesDocuments: false,
-  activationPrepPublishesDocuments: false,
-  activationPrepMakesDocumentsRequestable: false,
-  activationPrepGeneratesPdf: false,
-  activationPrepCreatesLicences: false,
-  activationPrepCreatesDownloadLinks: false,
-  activationPrepSendsEmail: false,
-  createsExplicitActivationRoute: true,
-  explicitActivationRoute: "/api/admin/uploads/cdas-document/activate",
-  explicitActivationRequiresSwitch: "CDAS_UPLOAD_EXPLICIT_ACTIVATION_ENABLED=true",
-  explicitActivationRequiresActivationPrep: true,
-  explicitActivationChangesStatusToActive: true,
-  explicitActivationKeepsDocumentUnlisted: true,
-  explicitActivationKeepsApprovalRequired: true,
-  explicitActivationCreatesLicence: false,
-  explicitActivationCreatesDownloadLink: false,
-  explicitActivationGeneratesPdf: false,
-  explicitActivationSendsEmail: false,
-  createsControlledListingRequestabilityRoute: true,
-  controlledListingRequestabilityRoute:
-    "/api/admin/uploads/cdas-document/listing-requestability",
-  controlledListingRequestabilityRequiresSwitch:
-    "CDAS_UPLOAD_LISTING_REQUESTABILITY_ENABLED=true",
-  validListingRequestabilityActions:
-    Array.from(VALID_CDAS_LISTING_REQUESTABILITY_ACTIONS),
-  controlledListingRequiresExplicitActivation: true,
-  controlledListingCanSetIsListed: true,
-  controlledRequestabilityCanSetRequestableWithApproval: true,
-  controlledRequestabilityKeepsApprovalRequired: true,
-  controlledRequestabilityMakesDirectDownloadable: false,
-  controlledRequestabilityGeneratesPdf: false,
-  controlledRequestabilityCreatesLicence: false,
-  controlledRequestabilityCreatesDownloadLink: false,
-  controlledRequestabilitySendsEmail: false,
-    createsControlledAccessRequestIntakeRoute: true,
-  controlledAccessRequestIntakeRoute:
-    "/api/admin/uploads/cdas-document/access-request",
-  controlledAccessRequestIntakeRequiresSwitch:
-    "CDAS_UPLOAD_ACCESS_REQUEST_INTAKE_ENABLED=true",
-  controlledAccessRequestTargetTable: "document_access_requests",
-  controlledAccessRequestRequiresRequestableWithApproval: true,
-  controlledAccessRequestCreatesPendingRequest: true,
-  controlledAccessRequestStatus: "pending_approval",
-  controlledAccessRequestReviewStatus: "pending_review",
-  controlledAccessRequestApprovesAccess: false,
-  controlledAccessRequestCreatesLicence: false,
-  controlledAccessRequestGeneratesPdf: false,
-  controlledAccessRequestCreatesDownloadLink: false,
-  controlledAccessRequestSendsEmail: false,
-  controlledAccessRequestCreatesDirectDownload: false,
-    createsControlledAccessRequestReviewRoute: true,
-  controlledAccessRequestReviewRoute:
-    "/api/admin/uploads/cdas-document/access-request/review",
-  controlledAccessRequestReviewRequiresSwitch:
-    "CDAS_UPLOAD_ACCESS_REQUEST_REVIEW_ENABLED=true",
-  controlledAccessRequestReviewTargetTable:
-    "document_access_requests",
-  controlledAccessRequestReviewEventTable:
-    "document_access_request_review_events",
-  validAccessRequestReviewActions:
-    Array.from(VALID_CDAS_ACCESS_REQUEST_REVIEW_ACTIONS),
-  controlledAccessRequestReviewMayHold: true,
-  controlledAccessRequestReviewMayReject: true,
-  controlledAccessRequestReviewMayApproveForLicencePrep: true,
-  controlledAccessRequestApprovalStatus:
-    "approved_pending_licence",
-  controlledAccessRequestApprovalReviewStatus:
-    "approved_for_licence_prep",
-  controlledAccessRequestReviewCreatesLicence: false,
-  controlledAccessRequestReviewGeneratesPdf: false,
-  controlledAccessRequestReviewCreatesDownloadLink: false,
-  controlledAccessRequestReviewSendsEmail: false,
-  controlledAccessRequestReviewCreatesDirectDownload: false,
-};

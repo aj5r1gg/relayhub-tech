@@ -223,7 +223,7 @@ export async function getTableColumns(env, tableName) {
     );
   }
 
-  if (!env?.DB?.prepare) {
+  if (!env?.RELAYHUB_DB?.prepare) {
     return fail(
       "audit_database_unavailable",
       "D1 database binding is unavailable."
@@ -231,7 +231,7 @@ export async function getTableColumns(env, tableName) {
   }
 
   try {
-    const result = await env.DB.prepare(`PRAGMA table_info(${table})`).all();
+    const result = await env.RELAYHUB_DB.prepare(`PRAGMA table_info(${table})`).all();
     const columns = (result.results || [])
       .map((row) => cleanText(row.name))
       .filter(Boolean);
@@ -443,7 +443,7 @@ export async function writeUploadAdminAuditEvent(env, request, event = {}) {
   const boundValues = insertColumns.map((column) => values[column]);
 
   try {
-    await env.DB.prepare(
+    await env.RELAYHUB_DB.prepare(
       `INSERT INTO ${ADMIN_AUDIT_TABLE} (${insertColumns.join(", ")})
        VALUES (${placeholders})`
     )

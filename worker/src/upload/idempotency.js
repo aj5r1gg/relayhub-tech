@@ -172,7 +172,7 @@ export async function getIdempotencyRecordByHash(env, idempotencyKeyHash) {
     return null;
   }
 
-  const row = await env.DB.prepare(
+  const row = await env.RELAYHUB_DB.prepare(
     `SELECT
        id,
        idempotency_key_hash,
@@ -302,7 +302,7 @@ export async function recordIdempotencyReplay(env, idempotencyRecordId, options 
 
   const replayedAt = cleanText(options.replayedAt || nowIso());
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_idempotency_keys
      SET
        replay_count = replay_count + 1,
@@ -368,7 +368,7 @@ export async function createIdempotencyRecord(env, options = {}) {
   };
 
   try {
-    await env.DB.prepare(
+    await env.RELAYHUB_DB.prepare(
       `INSERT INTO upload_idempotency_keys (
          id,
          idempotency_key_hash,
@@ -431,7 +431,7 @@ export async function updateIdempotencyStatus(env, options = {}) {
 
   const updatedAt = cleanText(options.updatedAt || nowIso());
 
-  await env.DB.prepare(
+  await env.RELAYHUB_DB.prepare(
     `UPDATE upload_idempotency_keys
      SET
        status = ?,

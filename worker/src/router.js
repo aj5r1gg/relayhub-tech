@@ -51,6 +51,10 @@ import {
   handleCdasAccessInvitationMetadata,
 } from "./cdas/invitation-metadata.js";
 
+import {
+  handleUploadAdminRequest,
+} from "./upload/admin-routes.js";
+
 export async function routeRequest(request, env) {
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
@@ -193,6 +197,16 @@ export async function routeRequest(request, env) {
     );
 
     return handleCdasDocumentDownload(request, env, token);
+  }
+
+  /*
+   * CDAS controlled upload administration.
+   *
+   * The upload subsystem owns authentication, feature switches,
+   * method validation and gate-specific routing.
+   */
+  if (pathname.startsWith("/api/admin/uploads")) {
+    return handleUploadAdminRequest(request, env);
   }
 
   /*
