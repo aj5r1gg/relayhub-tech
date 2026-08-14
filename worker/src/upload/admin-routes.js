@@ -1,46 +1,15 @@
 import { jsonResponse } from "../shared.js";
-import { parseStrictUploadRequest } from "./parse-multipart.js";
-import { byteLength, sha256Hex } from "./hash.js";
-import { requireUploadObjectKeysAbsent } from "./r2-objects.js";
-import { createUploadTransaction } from "./transactions.js";
-import { orchestrateUploadR2Write } from "./write-orchestrator.js";
-import { getIdempotencyRecordForClientKey } from "./idempotency.js";
 import { uploadAdminRoutePolicy } from "./admin/policy.js";
-import {
-  buildCdasUploadRouteStatus,
-  buildNoSideEffects,
-  buildSideEffectsConfirmed,
-  cdasUploadsDisabledResponse,
-  cleanText,
-  envEnabled,
-  fail,
-  getAdminActor,
-  getUploadRouteMode,
-  getUploadRouteSwitches,
-  methodNotAllowed,
-  nowIso,
-  nullableText,
-  pass,
-  readJsonBody,
-  uploadSystemDisabledResponse,
-} from "./admin/common.js";
-import { handleCdasControlledAccessRequestReview } from "./admin/gates/cdas-access-request-review.js";
-import {
-  VALID_CDAS_DRAFT_REVIEW_ACTIONS,
-  VALID_CDAS_LISTING_REQUESTABILITY_ACTIONS,
-} from "./admin/actions.js";
-import {
-  getD1TableColumns,
-  getRequestId,
-} from "./admin/common.js";
-import { handleCdasControlledAccessRequestIntake } from "./admin/gates/cdas-access-request-intake.js";
-import { handleCdasControlledListingRequestability } from "./admin/gates/cdas-listing-requestability.js";
-import { handleCdasExplicitActivation } from "./admin/gates/cdas-explicit-activation.js";
-import { handleCdasActivationPreparation } from "./admin/gates/cdas-activation-preparation.js";
-import { handleCdasDraftReviewAction } from "./admin/gates/cdas-draft-review.js";
 import { handleCdasDocumentUploadSkeleton } from "./admin/gates/cdas-document-upload.js";
+import { handleCdasDraftReviewAction } from "./admin/gates/cdas-draft-review.js";
+import { handleCdasActivationPreparation } from "./admin/gates/cdas-activation-preparation.js";
+import { handleCdasExplicitActivation } from "./admin/gates/cdas-explicit-activation.js";
+import { handleCdasControlledListingRequestability } from "./admin/gates/cdas-listing-requestability.js";
+import { handleCdasControlledAccessRequestIntake } from "./admin/gates/cdas-access-request-intake.js";
+import { handleCdasControlledAccessRequestReview } from "./admin/gates/cdas-access-request-review.js";
 
 export { uploadAdminRoutePolicy };
+
 
 
 
