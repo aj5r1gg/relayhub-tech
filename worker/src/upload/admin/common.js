@@ -243,3 +243,39 @@ export async function readJsonBody(request) {
     );
   }
 }
+
+export function getRequestId(request) {
+  return (
+    cleanText(request.headers.get("x-request-id")) ||
+    cleanText(request.headers.get("cf-ray")) ||
+    cleanText(crypto.randomUUID?.()) ||
+    `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`
+  );
+}
+
+export async function getD1TableColumns(env, tableName) {
+  if (!env?.RELAYHUB_DB?.prepare) {
+    return fail(
+      "upload_database_unavailable",
+      "D1 database binding is unavailable."
+    );
+  }
+
+  const safeTable = cleanText(tableName);
+
+  if (!/^[a-zA-Z0-9_]+$/.test(safeTable)) {
+    return fail(
+      "upload_invalid_table_name",
+      "D1 table name is invalid.",
+      {
+        table_name: safeTable,
+      }
+    );
+  }
+
+  const result = await env.RELAYHUB_DB.prepare(`PRAGMA table_info(${safeTable})`).all();
+  const rows = Array.isArray(result?.results) ? result.results : [];
+  const columns = new Set(rows.map((row) => row.name).filter(Boolean));
+
+  return pass(columns);
+}
