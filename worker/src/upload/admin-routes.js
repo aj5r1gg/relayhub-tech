@@ -8,11 +8,9 @@ import { handleCdasControlledListingRequestability } from "./admin/gates/cdas-li
 import { handleCdasControlledAccessRequestIntake } from "./admin/gates/cdas-access-request-intake.js";
 import { handleCdasControlledAccessRequestReview } from "./admin/gates/cdas-access-request-review.js";
 import { handleCdasLicencePreparation } from "./admin/gates/cdas-licence-preparation.js";
+import { handleCdasExplicitLicenceIssuance } from "./admin/gates/cdas-explicit-licence-issuance.js";
 
 export { uploadAdminRoutePolicy };
-
-
-
 
 function notFound() {
   return jsonResponse(
@@ -69,6 +67,13 @@ export async function handleUploadAdminRequest(request, env) {
 
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
+
+  if (
+    pathname ===
+    "/api/admin/uploads/cdas-document/access-request/licence-issue"
+  ) {
+    return handleCdasExplicitLicenceIssuance(request, env);
+  }
 
   if (
     pathname ===

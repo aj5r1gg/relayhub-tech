@@ -35,7 +35,6 @@ export const uploadAdminRoutePolicy = {
   reviewsDocumentAccessRequests: true,
   approvesAccessRequests: true,
   approvesDocumentAccessRequestsForLicencePrep: true,
-  approvesAccessRequests: true,
   generatesPdf: false,
   requiresIdempotencyForRealWrite: true,
   idempotencyField: "client_request_id",
@@ -100,7 +99,7 @@ export const uploadAdminRoutePolicy = {
   controlledRequestabilityCreatesLicence: false,
   controlledRequestabilityCreatesDownloadLink: false,
   controlledRequestabilitySendsEmail: false,
-    createsControlledAccessRequestIntakeRoute: true,
+  createsControlledAccessRequestIntakeRoute: true,
   controlledAccessRequestIntakeRoute:
     "/api/admin/uploads/cdas-document/access-request",
   controlledAccessRequestIntakeRequiresSwitch:
@@ -116,7 +115,7 @@ export const uploadAdminRoutePolicy = {
   controlledAccessRequestCreatesDownloadLink: false,
   controlledAccessRequestSendsEmail: false,
   controlledAccessRequestCreatesDirectDownload: false,
-    createsControlledAccessRequestReviewRoute: true,
+  createsControlledAccessRequestReviewRoute: true,
   controlledAccessRequestReviewRoute:
     "/api/admin/uploads/cdas-document/access-request/review",
   controlledAccessRequestReviewRequiresSwitch:
