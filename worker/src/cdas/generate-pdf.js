@@ -747,6 +747,277 @@ function buildGenerationResponse({
   });
 }
 
+export async function generatePreparedCdasLicencePdf(
+  env,
+  {
+    licence,
+    document,
+    sourceObject,
+    sourceSha256,
+    generatedObjectKey,
+    generatedFilename,
+    actor = "admin",
+    note = "",
+  },
+) {
+  if (!env?.RELAYHUB_DOWNLOADS) {
+    throw new Error("r2_bucket_unavailable");
+  }
+
+  if (!env?.RELAYHUB_DB?.prepare) {
+    throw new Error("database_unavailable");
+  }
+
+  if (!licence?.id) {
+    throw new Error("licence_missing");
+  }
+
+  if (!document?.id) {
+    throw new Error("document_missing");
+  }
+
+  if (!cleanText(sourceObject)) {
+    throw new Error("source_object_missing");
+  }
+
+  if (!cleanText(sourceSha256)) {
+    throw new Error("source_sha256_missing");
+  }
+
+  if (!cleanText(generatedObjectKey)) {
+    throw new Error("generated_object_key_missing");
+  }
+
+  if (!cleanText(generatedFilename)) {
+    throw new Error("generated_filename_missing");
+  }
+
+  const existingObject =
+    await env.RELAYHUB_DOWNLOADS.head(
+      generatedObjectKey,
+    );
+
+  if (existingObject) {
+    return {
+      ok: false,
+      generated: false,
+      error:
+        "generated_object_key_already_exists",
+      message:
+        "The prepared generated PDF object key already exists. Refusing to overwrite existing evidence.",
+      generated_pdf: {
+        object_key:
+          generatedObjectKey,
+      },
+      controls: {
+        reads_source_from_r2: false,
+        verifies_source_sha256: false,
+        writes_generated_pdf_to_r2: false,
+        updates_licence_generated_pdf_fields: false,
+        overwrites_existing_r2_object: false,
+      },
+    };
+  }
+
+  const sourceKey =
+    normaliseR2Key(sourceObject);
+
+  const sourceObjectResult =
+    await env.RELAYHUB_DOWNLOADS.get(
+      sourceKey,
+    );
+
+  if (!sourceObjectResult) {
+    throw new Error(
+      `source_pdf_not_found:${sourceKey}`,
+    );
+  }
+
+  const sourceBytes =
+    new Uint8Array(
+      await sourceObjectResult.arrayBuffer(),
+    );
+
+  const actualSourceSha256 =
+    await sha256HexFromBytes(sourceBytes);
+
+  if (
+    actualSourceSha256 !==
+    cleanText(sourceSha256)
+  ) {
+    throw new Error(
+      "source_pdf_sha256_mismatch",
+    );
+  }
+
+  const generatedAt =
+    nowIso();
+
+  const generated =
+    await createGeneratedPdfBytes({
+      sourceBytes,
+      licence,
+      document,
+      sourceSha256:
+        actualSourceSha256,
+      generatedAt,
+    });
+
+  const generatedSha256 =
+    await sha256HexFromBytes(
+      generated.bytes,
+    );
+
+  const generatedSizeBytes =
+    generated.bytes.byteLength;
+
+  await putGeneratedPdf(
+    env,
+    generatedObjectKey,
+    generated.bytes,
+    generatedFilename,
+  );
+
+  await updateLicenceGeneratedPdfEvidence(
+    env,
+    {
+      licence,
+      generatedObjectKey,
+      generatedFilename,
+      generatedSha256,
+      generatedSizeBytes,
+      generatedAt,
+    },
+  );
+
+  await recordCdasAuditEvent(
+    env,
+    "generated_pdf_created",
+    {
+      related_type: "licence",
+      related_id: licence.id,
+
+      licence_id:
+        licence.id,
+
+      licence_number:
+        licence.licence_number,
+
+      document_id:
+        licence.document_id,
+
+      document_version:
+        licence.document_version,
+
+      generated_pdf_object_key:
+        generatedObjectKey,
+
+      generated_pdf_sha256:
+        generatedSha256,
+
+      generated_pdf_size_bytes:
+        generatedSizeBytes,
+
+      actor:
+        cleanText(actor || "admin"),
+
+      note:
+        cleanText(note || ""),
+
+      stage:
+        "U3-U",
+
+      creates_download_link:
+        false,
+
+      activates_download_link:
+        false,
+
+      sends_email:
+        false,
+    },
+  );
+
+  return {
+    ok: true,
+    generated: true,
+
+    source: {
+      object_key:
+        sourceKey,
+
+      sha256:
+        actualSourceSha256,
+
+      content_type:
+        sourceObjectResult
+          .httpMetadata
+          ?.contentType ||
+        "application/pdf",
+
+      verified:
+        true,
+    },
+
+    generated_pdf: {
+      object_key:
+        generatedObjectKey,
+
+      filename:
+        generatedFilename,
+
+      sha256:
+        generatedSha256,
+
+      size_bytes:
+        generatedSizeBytes,
+
+      content_type:
+        "application/pdf",
+
+      created_at:
+        generatedAt,
+
+      status:
+        "generated",
+    },
+
+    controls: {
+      reads_source_from_r2:
+        true,
+
+      verifies_source_sha256:
+        true,
+
+      writes_generated_pdf_to_r2:
+        true,
+
+      updates_licence_generated_pdf_fields:
+        true,
+
+      overwrites_existing_r2_object:
+        false,
+
+      creates_download_link:
+        false,
+
+      activates_download_link:
+        false,
+
+      sends_email:
+        false,
+
+      serves_download:
+        false,
+    },
+
+    appended_licence_terms:
+      Boolean(
+        generated.appendedLicenceTerms,
+      ),
+  };
+}
+
 export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
   if (request.method !== "POST") {
     return jsonResponse(
@@ -833,137 +1104,203 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
   });
 
   try {
-    const existingObject = await env.RELAYHUB_DOWNLOADS.head(generatedObjectKey);
+    const result =
+      await generatePreparedCdasLicencePdf(
+        env,
+        {
+          licence,
+          document,
 
-    if (existingObject) {
-      await markGenerationFailed(env, licence.id, "generated_object_key_already_exists");
+          sourceObject:
+            licence.source_object ||
+            document.source_object,
 
+          sourceSha256:
+            licence.source_sha256 ||
+            document.source_sha256,
+
+          generatedObjectKey,
+          generatedFilename,
+
+          actor:
+            body.actor || "admin",
+
+          note:
+            body.note || "",
+        },
+      );
+
+    if (!result.ok) {
       return jsonResponse(
         {
           ok: false,
-          error: "generated_object_key_already_exists",
+          error:
+            result.error,
           message:
-            "The generated PDF object key already exists. Refusing to overwrite existing evidence.",
-          generated_pdf: {
-            object_key: generatedObjectKey,
-          },
+            result.message,
+
+          generated_pdf:
+            result.generated_pdf,
+
           safety: {
-            generated_pdf_created: false,
-            download_link_created: false,
-            download_link_activated: false,
-            email_sent: false,
+            generated_pdf_created:
+              false,
+
+            download_link_created:
+              false,
+
+            download_link_activated:
+              false,
+
+            email_sent:
+              false,
           },
-          controls: {
-            overwrites_existing_r2_object: false,
-            writes_generated_pdf_to_r2: false,
-            creates_download_link: false,
-            activates_download_link: false,
-            sends_email: false,
-          },
+
+          controls:
+            result.controls,
         },
-        409
+        409,
       );
     }
-
-    const source = await loadSourcePdf(env, licence, document);
-    const generatedAt = nowIso();
-
-    const generated = await createGeneratedPdfBytes({
-      sourceBytes: source.bytes,
-      licence,
-      document,
-      sourceSha256: source.actualSha256,
-      generatedAt,
-    });
-
-    const generatedSha256 = await sha256HexFromBytes(generated.bytes);
-    const generatedSizeBytes = generated.bytes.byteLength;
-
-    await putGeneratedPdf(
-      env,
-      generatedObjectKey,
-      generated.bytes,
-      generatedFilename
-    );
-
-    await updateLicenceGeneratedPdfEvidence(env, {
-      licence,
-      generatedObjectKey,
-      generatedFilename,
-      generatedSha256,
-      generatedSizeBytes,
-      generatedAt,
-    });
-
-    await recordCdasAuditEvent(env, "generated_pdf_created", {
-      related_type: "licence",
-      related_id: licence.id,
-      licence_id: licence.id,
-      licence_number: licence.licence_number,
-      document_id: licence.document_id,
-      document_version: licence.document_version,
-      generated_pdf_object_key: generatedObjectKey,
-      generated_pdf_sha256: generatedSha256,
-      generated_pdf_size_bytes: generatedSizeBytes,
-      actor: cleanText(body.actor || "admin"),
-      note: cleanText(body.note || ""),
-      stage: "3X-0L-B",
-      creates_download_link: false,
-      activates_download_link: false,
-      sends_email: false,
-    });
 
     return buildGenerationResponse({
       licence,
       document,
-      generatedObjectKey,
-      generatedFilename,
-      generatedSha256,
-      generatedSizeBytes,
-      generatedAt,
-      source,
-      warnings: eligibility.warnings || [],
-      appendedLicenceTerms: generated.appendedLicenceTerms,
+
+      generatedObjectKey:
+        result.generated_pdf
+          .object_key,
+
+      generatedFilename:
+        result.generated_pdf
+          .filename,
+
+      generatedSha256:
+        result.generated_pdf
+          .sha256,
+
+      generatedSizeBytes:
+        result.generated_pdf
+          .size_bytes,
+
+      generatedAt:
+        result.generated_pdf
+          .created_at,
+
+      source: {
+        sourceKey:
+          result.source.object_key,
+
+        actualSha256:
+          result.source.sha256,
+
+        contentType:
+          result.source.content_type,
+      },
+
+      warnings:
+        eligibility.warnings || [],
+
+      appendedLicenceTerms:
+        result.appended_licence_terms,
     });
   } catch (error) {
-    const message = error?.message || "unknown_pdf_generation_error";
+    const message =
+      error?.message ||
+      "unknown_pdf_generation_error";
 
-    await markGenerationFailed(env, licence.id, message);
+    await markGenerationFailed(
+      env,
+      licence.id,
+      message,
+    );
 
-    await recordCdasAuditEvent(env, "generated_pdf_failed", {
-      related_type: "licence",
-      related_id: licence.id,
-      licence_id: licence.id,
-      licence_number: licence.licence_number,
-      document_id: licence.document_id,
-      document_version: licence.document_version,
-      error: message,
-      actor: cleanText(body.actor || "admin"),
-      note: cleanText(body.note || ""),
-      stage: "3X-0L-B",
-    });
+    await recordCdasAuditEvent(
+      env,
+      "generated_pdf_failed",
+      {
+        related_type:
+          "licence",
+
+        related_id:
+          licence.id,
+
+        licence_id:
+          licence.id,
+
+        licence_number:
+          licence.licence_number,
+
+        document_id:
+          licence.document_id,
+
+        document_version:
+          licence.document_version,
+
+        error:
+          message,
+
+        actor:
+          cleanText(
+            body.actor ||
+            "admin",
+          ),
+
+        note:
+          cleanText(
+            body.note ||
+            "",
+          ),
+
+        stage:
+          "3X-0L-B",
+      },
+    );
 
     return jsonResponse(
       {
         ok: false,
-        error: "pdf_generation_failed",
+
+        error:
+          "pdf_generation_failed",
+
         message,
+
         safety: {
-          generated_pdf_created: false,
-          download_link_created: false,
-          download_link_activated: false,
-          email_sent: false,
+          generated_pdf_created:
+            false,
+
+          download_link_created:
+            false,
+
+          download_link_activated:
+            false,
+
+          email_sent:
+            false,
         },
+
         controls: {
-          writes_generated_pdf_to_r2: false,
-          updates_licence_generated_pdf_fields: true,
-          creates_download_link: false,
-          activates_download_link: false,
-          sends_email: false,
-          serves_download: false,
+          writes_generated_pdf_to_r2:
+            false,
+
+          updates_licence_generated_pdf_fields:
+            true,
+
+          creates_download_link:
+            false,
+
+          activates_download_link:
+            false,
+
+          sends_email:
+            false,
+
+          serves_download:
+            false,
         },
       },
-      500
+      500,
     );
   }
 }

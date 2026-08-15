@@ -732,10 +732,10 @@ function evaluateIssuance({
 
     if (
       document.requestability_status !==
-      "requestable_controlled"
+      "requestable_with_approval"
     ) {
       blockers.push(
-        "document_not_requestable_controlled",
+        "document_not_requestable_with_approval",
       );
     }
 

@@ -176,7 +176,7 @@ async function seedFixture() {
       'CDAS-LICENCE-v0.1',
       1,
       1,
-      'requestable_controlled',
+      'requestable_with_approval',
       '${now}',
       '${now}',
       '${now}',
@@ -298,7 +298,7 @@ async function seedFixture() {
       0,
       'u3-r-validator',
       'approved_for_licence_prep',
-      'requestable_controlled'
+      'requestable_with_approval'
     );
   `);
 
@@ -599,14 +599,14 @@ async function main() {
   assert(
     Array.isArray(disabled.blockers) &&
       disabled.blockers.includes(
-        "document_not_requestable_controlled",
+        "document_not_requestable_with_approval",
       ),
     "U3-R reports requestability blocker",
   );
 
   await d1(`
     UPDATE documents
-    SET requestability_status = 'requestable_controlled'
+    SET requestability_status = 'requestable_with_approval'
     WHERE id = '${fixture.documentId}';
   `);
 

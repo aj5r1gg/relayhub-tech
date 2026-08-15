@@ -237,7 +237,7 @@ async function seedFixture({
       ${sqlText(terms.version)},
       1,
       1,
-      'requestable_controlled',
+      'requestable_with_approval',
       ${sqlText(now)},
       ${sqlText(now)},
       ${sqlText(now)},
@@ -359,7 +359,7 @@ async function seedFixture({
       0,
       'u3-s-validator',
       ${sqlText(requestReviewStatus)},
-      'requestable_controlled'
+      'requestable_with_approval'
     );
   `);
 
@@ -820,7 +820,7 @@ async function validateRequestabilityRevoked() {
 
   assert(
     result.body.blockers?.includes(
-      "document_not_requestable_controlled",
+      "document_not_requestable_with_approval",
     ),
     "U3-S reports requestability blocker",
   );

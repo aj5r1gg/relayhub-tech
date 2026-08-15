@@ -10,6 +10,7 @@ import { handleCdasControlledAccessRequestReview } from "./admin/gates/cdas-acce
 import { handleCdasLicencePreparation } from "./admin/gates/cdas-licence-preparation.js";
 import { handleCdasExplicitLicenceIssuance } from "./admin/gates/cdas-explicit-licence-issuance.js";
 import { handleCdasGeneratedPdfPreparation } from "./admin/gates/cdas-generated-pdf-preparation.js";
+import { handleCdasExplicitPdfGeneration } from "./admin/gates/cdas-explicit-pdf-generation.js";
 
 export { uploadAdminRoutePolicy };
 
@@ -66,6 +67,13 @@ export async function handleUploadAdminRequest(request, env) {
 
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
+
+  if (
+    pathname ===
+    "/api/admin/uploads/cdas-document/access-request/pdf-generation"
+  ) {
+    return handleCdasExplicitPdfGeneration(request, env);
+  }
 
   if (
     pathname ===

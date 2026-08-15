@@ -411,8 +411,8 @@ function evaluatePreparation({
       blockers.push("document_no_longer_requires_approval");
     }
 
-    if (document.requestability_status !== "requestable_controlled") {
-      blockers.push("document_not_requestable_controlled");
+    if (document.requestability_status !== "requestable_with_approval") {
+      blockers.push("document_not_requestable_with_approval");
     }
 
     if (!document.source_object) {
