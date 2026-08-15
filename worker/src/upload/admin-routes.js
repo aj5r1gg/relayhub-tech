@@ -9,6 +9,7 @@ import { handleCdasControlledAccessRequestIntake } from "./admin/gates/cdas-acce
 import { handleCdasControlledAccessRequestReview } from "./admin/gates/cdas-access-request-review.js";
 import { handleCdasLicencePreparation } from "./admin/gates/cdas-licence-preparation.js";
 import { handleCdasExplicitLicenceIssuance } from "./admin/gates/cdas-explicit-licence-issuance.js";
+import { handleCdasGeneratedPdfPreparation } from "./admin/gates/cdas-generated-pdf-preparation.js";
 
 export { uploadAdminRoutePolicy };
 
@@ -34,7 +35,6 @@ function adminAuthFailed() {
   );
 }
 
-
 function isUploadAdminAuthorized(request, env) {
   const expected = env.RELAYHUB_ADMIN_TOKEN;
 
@@ -59,7 +59,6 @@ function isUploadAdminAuthorized(request, env) {
   return Boolean(token && token === expected);
 }
 
-
 export async function handleUploadAdminRequest(request, env) {
   if (!isUploadAdminAuthorized(request, env)) {
     return adminAuthFailed();
@@ -67,6 +66,13 @@ export async function handleUploadAdminRequest(request, env) {
 
   const url = new URL(request.url);
   const pathname = url.pathname.replace(/\/+$/, "") || "/";
+
+  if (
+    pathname ===
+    "/api/admin/uploads/cdas-document/access-request/generated-pdf-preparation"
+  ) {
+    return handleCdasGeneratedPdfPreparation(request, env);
+  }
 
   if (
     pathname ===

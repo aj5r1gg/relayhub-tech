@@ -1,6 +1,10 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { jsonResponse } from "../shared.js";
 import { evaluateCdasLicenceToPdfEligibility } from "./licence-to-pdf-gate.js";
+import {
+  buildCdasGeneratedPdfFilename,
+  buildCdasGeneratedPdfObjectKey,
+} from "./generated-pdf-naming.js";
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -34,23 +38,6 @@ async function readOptionalJson(request) {
   } catch {
     return {};
   }
-}
-
-function slugify(value) {
-  return cleanText(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
-}
-
-function safeFilename(value) {
-  return cleanText(value)
-    .replace(/[^\w.\- ]+/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 120);
 }
 
 function normaliseR2Key(value) {
@@ -149,29 +136,6 @@ function hasCompleteGeneratedPdfEvidence(licence) {
       licence.generated_pdf_sha256 &&
       licence.generated_pdf_size_bytes
   );
-}
-
-function buildGeneratedObjectKey({ licence, document }) {
-  const documentSlug = slugify(document?.slug || document?.id || licence.document_id || "document");
-  const versionSlug = slugify(licence.document_version || document?.version || "version");
-  const licenceSlug = slugify(licence.licence_number || licence.id);
-
-  return [
-    "docs",
-    "generated",
-    "cdas",
-    documentSlug,
-    versionSlug,
-    `${licenceSlug}.pdf`,
-  ].join("/");
-}
-
-function buildGeneratedFilename({ licence, document }) {
-  const title = safeFilename(document?.title || licence.document_id || "RelayHub-Document");
-  const version = safeFilename(licence.document_version || document?.version || "version");
-  const licenceNumber = safeFilename(licence.licence_number || licence.id);
-
-  return `${title}-v${version}-${licenceNumber}.pdf`;
 }
 
 async function getLicence(env, licenceIdOrNumber) {
@@ -858,11 +822,12 @@ export async function generateCdasLicencePdf(request, env, licenceIdOrNumber) {
     );
   }
 
-  const generatedObjectKey = buildGeneratedObjectKey({
+  const generatedObjectKey = buildCdasGeneratedPdfObjectKey({
     licence,
     document,
   });
-  const generatedFilename = buildGeneratedFilename({
+
+  const generatedFilename = buildCdasGeneratedPdfFilename({
     licence,
     document,
   });
