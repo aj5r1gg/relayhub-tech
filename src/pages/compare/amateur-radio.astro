@@ -1,0 +1,602 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "Independent radio infrastructure",
+    text:
+      "Amateur radio can operate without cellular networks, commercial messaging platforms, or ordinary internet connectivity.",
+  },
+  {
+    title: "Wide range of bands and modes",
+    text:
+      "Depending on jurisdiction, qualification, equipment, licence conditions, propagation, and band access, amateur operators may use voice, digital data, repeaters, packet systems, and other modes.",
+  },
+  {
+    title: "Long-established operator culture",
+    text:
+      "Amateur radio has a mature culture of technical experimentation, field operation, emergency communications, repeater operation, propagation knowledge, antenna construction, and self-training.",
+  },
+  {
+    title: "Repeaters and fixed infrastructure",
+    text:
+      "Amateur communities can operate repeaters and other infrastructure under the applicable licensing and coordination arrangements.",
+  },
+  {
+    title: "Technical flexibility",
+    text:
+      "Qualified operators can experiment with radios, antennas, modulation, digital modes, linking, telemetry, and network designs within applicable rules.",
+  },
+  {
+    title: "Works far beyond one device ecosystem",
+    text:
+      "Amateur radio is not tied to a single vendor, firmware project, handset family, operating system, or messaging application.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary purpose",
+    amateur:
+      "A licensed radio service for self-training, technical investigation, experimentation, communication, and related amateur purposes under applicable regulation.",
+    relayhub:
+      "A local-first household and community infrastructure ecosystem intended for ordinary communication, coordination, recovery, and future local services.",
+  },
+  {
+    area: "Who can transmit",
+    amateur:
+      "Transmission requires the qualifications, call sign, licence conditions, frequencies, equipment, and operating privileges required by the relevant jurisdiction.",
+    relayhub:
+      "A RelayHub radio capability may activate only when hardware, software, policy, trust, legal, regional, user, and runtime gates all permit it.",
+  },
+  {
+    area: "User expertise",
+    amateur:
+      "Operators are expected to understand the regulations and technical responsibilities associated with their privileges.",
+    relayhub:
+      "Ordinary users should not need to become radio operators, Linux administrators, or network engineers to use supported everyday functions.",
+  },
+  {
+    area: "Encryption",
+    amateur:
+      "Rules vary by jurisdiction. In Australia, amateur transmissions generally must not be encrypted or scrambled except for specific permitted cases.",
+    relayhub:
+      "Reticulum communication is designed around cryptographic identities and encrypted communication, so amateur-radio use cannot simply be assumed lawful or technically suitable.",
+  },
+  {
+    area: "Identity",
+    amateur:
+      "Stations use regulatory call signs and must follow applicable station-identification rules.",
+    relayhub:
+      "RelayHub uses node, owner, user, peer, recovery, and other cryptographic or product identities governed separately from regulatory radio call signs.",
+  },
+  {
+    area: "Infrastructure",
+    amateur:
+      "Repeaters, packet systems, gateways, linked systems, and other community-operated radio infrastructure may exist under applicable rules.",
+    relayhub:
+      "Infrastructure Nodes are intended to support broader DTN, storage, policy, observability, gateway, bridge, recovery, and local-service responsibilities.",
+  },
+  {
+    area: "Commercial use",
+    amateur:
+      "Amateur-radio operation is subject to service-purpose restrictions. In Australia, ACMA states amateur stations must not be used for financial gain or reward and must not transmit advertising.",
+    relayhub:
+      "RelayHub's wider ecosystem is intended eventually to support ordinary community coordination, services, trade, and marketplace functions where lawful and separately implemented.",
+  },
+  {
+    area: "Transport model",
+    amateur:
+      "Radio spectrum and amateur operating modes are the communications medium.",
+    relayhub:
+      "Radio is only one possible transport class alongside Ethernet, Wi-Fi, IP, serial, sneakernet, and other validated paths.",
+  },
+  {
+    area: "Recovery",
+    amateur:
+      "Recovery depends on the operator's equipment, configuration, backups, knowledge, documentation, and infrastructure arrangements.",
+    relayhub:
+      "Rollback, identity preservation, degraded boot, guided recovery, safe reset, transfer, and recovery access are formal product requirements.",
+  },
+  {
+    area: "Service scope",
+    amateur:
+      "Primarily a radio communications and experimentation service.",
+    relayhub:
+      "Intended eventually to support communication plus knowledge, trust, coordination, trade, assessment, governance, and other local-first community applications.",
+  },
+];
+
+const chooseAmateur = [
+  "You want to learn radio theory and operating practice.",
+  "You are willing to obtain the required qualification and comply with local licence conditions.",
+  "You want access to amateur bands and modes available under your qualification.",
+  "You want to experiment with antennas, propagation, repeaters, packet, digital modes, or long-distance radio.",
+  "You want to participate directly in an established amateur-radio community.",
+];
+
+const chooseRelayHub = [
+  "You want ordinary household users to communicate without becoming licensed amateur operators.",
+  "You need encrypted Reticulum communication where lawful and supported.",
+  "You need Ethernet, Wi-Fi, IP, radio, and other transport classes under one capability-aware architecture.",
+  "You need appliance onboarding, policy governance, roles, observability, updates, rollback, and guided recovery.",
+  "You want infrastructure designed for broader community services rather than amateur-radio purposes alone.",
+];
+
+const coexistence = [
+  {
+    title: "Amateur radio alongside RelayHub",
+    text:
+      "A qualified operator can use amateur radio independently while a household or community uses RelayHub for other local-first infrastructure.",
+  },
+  {
+    title: "Possible transport research",
+    text:
+      "Reticulum can technically operate across constrained radio transports, but that does not establish that a specific Reticulum-over-amateur-radio design is lawful, interoperable, or product-supported.",
+  },
+  {
+    title: "Legal separation matters",
+    text:
+      "RelayHub must never activate amateur-radio transmission merely because compatible hardware is connected. Regional and licence rules must be evaluated separately.",
+  },
+];
+
+const legalBoundaries = [
+  {
+    title: "Qualification",
+    text:
+      "In Australia, an operator must hold an ACMA-recognised amateur qualification or equivalent before operating under the amateur class licence.",
+  },
+  {
+    title: "Frequency and power",
+    text:
+      "Available amateur frequencies and permitted operating privileges depend on qualification level and applicable licence conditions.",
+  },
+  {
+    title: "Identification",
+    text:
+      "Australian amateur operators must use their call sign according to applicable station-identification requirements.",
+  },
+  {
+    title: "Encryption",
+    text:
+      "Australia generally prohibits encrypted or scrambled amateur transmissions except for specified cases. This creates an important boundary for encrypted networking protocols.",
+  },
+  {
+    title: "Repeaters",
+    text:
+      "Australian amateur repeaters and beacons require assigned apparatus licences rather than relying only on the general amateur class licence.",
+  },
+  {
+    title: "Commercial activity",
+    text:
+      "ACMA states amateur stations must not be used for financial gain or reward and must not transmit advertising.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Operators understand failure",
+    text:
+      "Amateur radio culture assumes propagation changes, interference, equipment faults, antenna problems, and limited paths. RelayHub should preserve that realism in its own degraded-state design.",
+  },
+  {
+    title: "Infrastructure diversity matters",
+    text:
+      "Direct links, repeaters, portable stations, fixed stations, and different bands demonstrate why resilient communications should not depend on one topology.",
+  },
+  {
+    title: "Training creates resilience",
+    text:
+      "Technology alone does not produce capable communities. Amateur radio demonstrates the value of operator knowledge, exercises, documentation, and practice.",
+  },
+  {
+    title: "Legal capability is real capability",
+    text:
+      "A technically functional transmitter is not operationally available unless its use is lawful. RelayHub should expose that distinction clearly.",
+  },
+];
+
+const realityChecks = [
+  "Amateur radio is not obsolete because modern digital mesh systems exist.",
+  "RelayHub cannot replace the spectrum access and technical flexibility available to qualified amateur operators.",
+  "Amateur-radio privileges vary by jurisdiction and qualification.",
+  "Technical radio capability does not imply lawful permission to transmit.",
+  "Encrypted Reticulum traffic must not be assumed lawful over amateur frequencies.",
+  "RF transmissions remain observable even when higher-layer data or identities are protected.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Amateur Radio"
+  description="Compare RelayHub with amateur radio: licensed radio experimentation and communications versus local-first household and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs amateur radio</p>
+
+      <h1 class="rh-title">
+        Amateur radio is infrastructure — but under a very different rule set.
+      </h1>
+
+      <p class="rh-subtitle">
+        Amateur radio provides extraordinary technical flexibility and
+        infrastructure independence for qualified operators. RelayHub is designed
+        for a different audience and operating model: appliance-style local-first
+        infrastructure for ordinary households and communities.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The short answer</p>
+
+      <h2 class="rh-section-title">
+        Licensed radio service versus appliance ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        Amateur radio gives qualified operators access to radio spectrum and
+        technical experimentation under defined regulatory conditions.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub instead aims to hide unnecessary technical complexity while
+        coordinating multiple node classes and transports under capability,
+        policy, trust, legal, recovery, and runtime governance.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where amateur radio is strong</p>
+
+      <h2 class="rh-section-title">
+        More than a century of radio knowledge matters.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The critical RelayHub rule</p>
+
+      <h2 class="rh-section-title">
+        Radio hardware does not equal permission to transmit.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub deliberately separates hardware capability from legal permission.
+        A detected radio, an attached antenna, or technically functional firmware
+        must never silently become an active transmitter.
+      </p>
+
+      <div class="rh-card rh-card-dark" style="margin-top: var(--space-10);">
+        <p class="rh-card-text">
+          Hardware capability → software capability → safety → recovery →
+          legal/regional permission → system policy → role policy → user
+          enablement → runtime availability.
+        </p>
+      </div>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-8);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Technically possible</h3>
+          <p class="rh-card-text">
+            The hardware and software may be physically capable of transmitting.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Legally permitted</h3>
+          <p class="rh-card-text">
+            The operator, frequency, power, mode, purpose, region, and licence
+            conditions must permit that transmission.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Product-supported</h3>
+          <p class="rh-card-text">
+            RelayHub must still separately validate the hardware, transport,
+            configuration, recovery behaviour, UX, and operational limits.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Two resilient approaches with very different boundaries.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Amateur radio
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.amateur}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        They serve different users.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose amateur radio when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseAmateur.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Australian legal boundary</p>
+
+      <h2 class="rh-section-title">
+        Amateur operation is governed capability.
+      </h2>
+
+      <p class="rh-section-lead">
+        The details below describe the current Australian position and must not
+        be assumed to apply in other jurisdictions.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {legalBoundaries.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Absolutely — but do not blur the regulatory boundary.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn</p>
+
+      <h2 class="rh-section-title">
+        Resilience also comes from skilled people.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Neither system makes radio physics or regulation disappear.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Australian operating claims are sourced to ACMA.
+      </h2>
+
+      <p class="rh-section-lead">
+        Regulatory information on this page describes the Australian amateur-radio
+        framework only. Operators elsewhere must check the rules that apply in
+        their own jurisdiction.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Amateur class licence</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.acma.gov.au/amateur-class-licence"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Australian Communications and Media Authority
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Operating procedures</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.acma.gov.au/amateur-radio-operating-procedures"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              ACMA amateur operating procedures
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Qualifications</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.acma.gov.au/qualifications-operate-amateur-radio"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              ACMA qualification requirements
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/meshcore">
+          Compare MeshCore
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

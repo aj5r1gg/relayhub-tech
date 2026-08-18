@@ -1,0 +1,542 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "Excellent for low-power sensing",
+    text:
+      "LoRaWAN is designed for low-power end devices that send relatively small amounts of data over long distances.",
+  },
+  {
+    title: "Large device populations",
+    text:
+      "A gateway can receive traffic from many end devices, making LoRaWAN well suited to sensor, metering, telemetry, and infrastructure-monitoring deployments.",
+  },
+  {
+    title: "Gateway diversity",
+    text:
+      "LoRaWAN gateways can use Ethernet, Wi-Fi, cellular, fibre, and other backhaul methods to reach the network server.",
+  },
+  {
+    title: "Standardised ecosystem",
+    text:
+      "LoRaWAN is a defined protocol maintained by the LoRa Alliance and supported by a broad ecosystem of devices, gateways, network servers, and applications.",
+  },
+  {
+    title: "Strong device power profile",
+    text:
+      "The architecture is deliberately optimised for constrained, frequently battery-powered end devices.",
+  },
+  {
+    title: "Private networks are possible",
+    text:
+      "LoRaWAN does not require use of one public provider. Organisations can deploy their own gateways and network-server infrastructure.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary purpose",
+    lorawan:
+      "Low-power wide-area networking for sensors, actuators, telemetry, metering, and other small-data applications.",
+    relayhub:
+      "Local-first household and community infrastructure for communication, DTN, recovery, policy-governed networking, and future community services.",
+  },
+  {
+    area: "Network topology",
+    lorawan:
+      "Normally uses a star-of-stars architecture: end devices transmit to gateways, which forward traffic to a network server.",
+    relayhub:
+      "Uses Reticulum across heterogeneous peers, transports, relays, and infrastructure nodes rather than requiring a LoRaWAN-style central network-server topology.",
+  },
+  {
+    area: "Gateway role",
+    lorawan:
+      "Gateways primarily bridge LoRa radio traffic to the network server using higher-bandwidth backhaul.",
+    relayhub:
+      "Gateway is only one possible policy-governed role. A RelayHub node may instead operate locally, relay traffic, store delayed messages, bridge transports, or avoid gateway behaviour entirely.",
+  },
+  {
+    area: "Backhaul dependency",
+    lorawan:
+      "Normal gateway operation depends on reaching the configured network server over backhaul.",
+    relayhub:
+      "Internet or WAN connectivity may improve reach but is not intended to be mandatory for supported local operation.",
+  },
+  {
+    area: "End-device model",
+    lorawan:
+      "End devices are commonly constrained sensors or actuators designed to send small payloads with low power consumption.",
+    relayhub:
+      "Node classes range from constrained Radio Micro nodes to household appliances and full infrastructure-class Linux systems.",
+  },
+  {
+    area: "Human communication",
+    lorawan:
+      "Not primarily designed as a general-purpose human messaging or community communications system.",
+    relayhub:
+      "Communication between people is a core use case, although actual supported client paths remain validation-gated.",
+  },
+  {
+    area: "Store-and-forward",
+    lorawan:
+      "Network servers and applications can queue and process messages, but disruption-tolerant peer infrastructure is not its defining architecture.",
+    relayhub:
+      "DTN and store-and-forward behaviour under intermittent connectivity are explicit architectural requirements.",
+  },
+  {
+    area: "Infrastructure ownership",
+    lorawan:
+      "Can be public, commercial, community-operated, or fully private depending on deployment.",
+    relayhub:
+      "Meaningful local infrastructure ownership by households and communities is a core product principle.",
+  },
+  {
+    area: "Recovery model",
+    lorawan:
+      "Recovery is determined by the specific gateway, network-server, application, device, and deployment stack.",
+    relayhub:
+      "Rollback, identity preservation, degraded boot, guided recovery, offline recovery, reset, and transfer are formal product responsibilities.",
+  },
+  {
+    area: "Service scope",
+    lorawan:
+      "Primarily an IoT networking protocol and ecosystem.",
+    relayhub:
+      "Intended as a broader platform for communication, knowledge, trust, coordination, trade, assessment, governance, and other local-first services.",
+  },
+];
+
+const chooseLoRaWAN = [
+  "You are deploying sensors, meters, trackers, or actuators.",
+  "Devices need long battery life and transmit small amounts of data.",
+  "You want many constrained end devices to report through one or more gateways.",
+  "You already operate or can reach a suitable LoRaWAN network server.",
+  "A standardised IoT ecosystem is more important than peer-to-peer human communication.",
+];
+
+const chooseRelayHub = [
+  "Your primary problem is resilient human or community communication rather than telemetry.",
+  "You want useful local operation even when WAN backhaul is unavailable.",
+  "You need multiple transport classes rather than a LoRaWAN-specific radio architecture.",
+  "You need persistent household or community nodes with DTN, policy, trust, observability, and recovery.",
+  "You want infrastructure that can host broader local applications and services.",
+];
+
+const coexistence = [
+  {
+    title: "Sensors + community infrastructure",
+    text:
+      "A community could use LoRaWAN for water, weather, energy, agriculture, or infrastructure telemetry while using RelayHub for communication and local services.",
+  },
+  {
+    title: "Shared physical sites",
+    text:
+      "A community infrastructure location could potentially host both LoRaWAN and RelayHub equipment while keeping their protocols, trust models, and failure domains separate.",
+  },
+  {
+    title: "No assumed protocol bridge",
+    text:
+      "RelayHub should not claim direct LoRaWAN integration merely because both systems can use LoRa radios. Any integration would need explicit protocol, security, policy, resource, and recovery design.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Constrained endpoints deserve simple protocols",
+    text:
+      "LoRaWAN demonstrates the value of pushing complexity away from tiny battery-powered devices when that fits the use case.",
+  },
+  {
+    title: "Gateways can be simple",
+    text:
+      "A gateway does not need to own application logic. Clear separation between radio forwarding, network control, and application processing can improve architecture.",
+  },
+  {
+    title: "Scale changes design",
+    text:
+      "Networks designed for thousands of small devices require very different traffic, scheduling, power, and airtime assumptions from human messaging systems.",
+  },
+  {
+    title: "Private deployment matters",
+    text:
+      "The ability to operate private LoRaWAN infrastructure reinforces RelayHub's own preference for avoiding unnecessary provider lock-in.",
+  },
+];
+
+const realityChecks = [
+  "LoRaWAN is not a mesh in its normal architecture.",
+  "LoRaWAN and LoRa are not the same thing; LoRaWAN is a protocol built on LoRa modulation.",
+  "A LoRaWAN gateway is not equivalent to a RelayHub Infrastructure Node.",
+  "Private LoRaWAN deployments can reduce dependence on public network providers, but the network-server role still remains part of the architecture.",
+  "Long range depends on radio conditions, antenna placement, terrain, interference, data rate, regional rules, and installation quality.",
+  "Using the same radio technology does not imply protocol interoperability.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs LoRaWAN"
+  description="Compare RelayHub and LoRaWAN: low-power wide-area IoT networking versus broader local-first household and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs LoRaWAN</p>
+
+      <h1 class="rh-title">
+        Same radio family. Very different network.
+      </h1>
+
+      <p class="rh-subtitle">
+        LoRaWAN is exceptionally useful for low-power sensors and telemetry.
+        RelayHub is being designed for a different problem: resilient household
+        and community infrastructure across multiple transports and changing
+        connectivity conditions.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The short answer</p>
+
+      <h2 class="rh-section-title">
+        LoRaWAN is primarily an IoT network architecture.
+      </h2>
+
+      <p class="rh-section-lead">
+        A typical LoRaWAN network consists of low-power end devices, one or more
+        gateways, a network server, application servers, and where applicable a
+        join server.
+      </p>
+
+      <p class="rh-section-lead">
+        End devices transmit LoRa radio messages that may be heard by multiple
+        gateways. Those gateways forward the traffic over higher-bandwidth
+        backhaul to the network server, which manages the network and routes the
+        traffic onward.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where LoRaWAN is strong</p>
+
+      <h2 class="rh-section-title">
+        It solves the sensor-network problem extremely well.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The architectural distinction</p>
+
+      <h2 class="rh-section-title">
+        LoRaWAN gateways feed a network. RelayHub nodes participate in an ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        In normal LoRaWAN architecture, gateways receive radio messages and
+        forward them to a network server. RelayHub does not define every stronger
+        node as a gateway and does not make WAN backhaul a prerequisite for core
+        local operation.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">LoRaWAN end device</h3>
+          <p class="rh-card-text">
+            Usually a constrained sensor or actuator designed for low-power,
+            low-data-rate communication.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">LoRaWAN gateway</h3>
+          <p class="rh-card-text">
+            Receives LoRa frames and forwards them over IP or another backhaul to
+            the network server.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayHub node</h3>
+          <p class="rh-card-text">
+            May be a radio relay, household appliance, DTN node, bridge, gateway,
+            or broader infrastructure system according to hardware and policy.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        IoT telemetry and resilient community networking optimise for different things.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                LoRaWAN
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.lorawan}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Start with the traffic you actually need to carry.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose LoRaWAN when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseLoRaWAN.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Very naturally.
+      </h2>
+
+      <p class="rh-section-lead">
+        Telemetry and community communication are different workloads. There is
+        little reason a resilient community should be forced to choose only one.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn</p>
+
+      <h2 class="rh-section-title">
+        Constrained networks reward clear responsibility.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        LoRa does not imply mesh.
+      </h2>
+
+      <p class="rh-section-lead">
+        LoRa is the radio modulation technology. LoRaWAN defines a networking
+        protocol and architecture on top of it. Meshtastic, MeshCore, LoRaWAN,
+        and a future RelayHub LoRa transport can therefore use related radio
+        hardware while behaving very differently.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        LoRaWAN architecture is sourced from current project documentation.
+      </h2>
+
+      <p class="rh-section-lead">
+        Current documentation describes LoRaWAN as a star-of-stars network in
+        which end devices communicate by LoRa with gateways, while gateways use
+        higher-bandwidth backhaul to reach the network server.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">LoRaWAN architecture</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.thethingsnetwork.org/docs/lorawan/architecture/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              The Things Network — LoRaWAN Architecture
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">LoRaWAN gateways</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.thethingsnetwork.org/docs/gateways/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              The Things Network — Gateways
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/meshcore">
+          Compare MeshCore
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/meshtastic">
+          Compare Meshtastic
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

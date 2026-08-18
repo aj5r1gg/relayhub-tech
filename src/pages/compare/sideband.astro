@@ -1,0 +1,525 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "Rich Reticulum client",
+    text:
+      "Sideband provides a graphical user-facing environment for LXMF messaging and LXST voice over Reticulum.",
+  },
+  {
+    title: "Multiple communication types",
+    text:
+      "Current Sideband functionality includes text, image and file transfers, audio messages, real-time voice calls, telemetry, and location sharing.",
+  },
+  {
+    title: "Transport flexibility",
+    text:
+      "Because Sideband uses Reticulum, it can communicate over supported Reticulum transports such as LoRa, packet radio, Wi-Fi, I2P, and other configured interfaces.",
+  },
+  {
+    title: "Offline-aware operation",
+    text:
+      "Sideband can operate without relying on a conventional central messaging service and supports locally stored maps, delayed messaging behaviour, and even QR-carried LXMF messages.",
+  },
+  {
+    title: "Extensible tooling",
+    text:
+      "Its plugin model supports custom telemetry, commands, services, monitoring, and remote-control use cases.",
+  },
+  {
+    title: "Existing interoperability",
+    text:
+      "Sideband is designed to interoperate with other LXMF clients such as Nomad Network and MeshChatX.",
+  },
+];
+
+const differences = [
+  {
+    area: "What it is",
+    sideband:
+      "A graphical Reticulum/LXMF/LXST client and extensible communication application.",
+    relayhub:
+      "A broader ecosystem of appliances, infrastructure nodes, policy, recovery, hardware classes, and future community services built around Reticulum.",
+  },
+  {
+    area: "Primary responsibility",
+    sideband:
+      "User-facing messaging, voice, telemetry, mapping, file transfer, remote commands, and related Reticulum interaction.",
+    relayhub:
+      "Deployment, onboarding, node management, capability governance, recovery, updates, local infrastructure, and hosting of communication and other services.",
+  },
+  {
+    area: "Relationship to Reticulum",
+    sideband:
+      "Runs directly on Reticulum and uses LXMF and LXST for user-facing communication functions.",
+    relayhub:
+      "Uses Reticulum as core infrastructure while adding appliance and ecosystem layers above it.",
+  },
+  {
+    area: "Primary device model",
+    sideband:
+      "Runs on user-facing computing platforms such as Android, Linux, macOS, and Windows.",
+    relayhub:
+      "Defines persistent product hardware classes including Radio Micro, Nano Linux, Home, Strong Home, Infrastructure, and Mini PC nodes.",
+  },
+  {
+    area: "Messaging",
+    sideband:
+      "Already provides mature user-facing LXMF messaging.",
+    relayhub:
+      "Home Node v1 is not required to include a full standalone messaging UI; it may rely on a validated compatible client such as Sideband.",
+  },
+  {
+    area: "Voice",
+    sideband:
+      "Supports voice through LXST and encoded audio messaging.",
+    relayhub:
+      "Voice capability must be separately implemented, validated, hardware-supported, policy-permitted, and exposed appropriately.",
+  },
+  {
+    area: "Node administration",
+    sideband:
+      "Provides configuration and Reticulum-related controls appropriate to its application role.",
+    relayhub:
+      "Targets appliance-level ownership, pairing, role management, updates, support export, rollback, reset, recovery, and transfer.",
+  },
+  {
+    area: "Policy architecture",
+    sideband:
+      "Uses its own application settings, identity, transport configuration, permissions, and plugin behaviour.",
+    relayhub:
+      "Separates hardware capability, software capability, policy permission, trust permission, legal permission, user enablement, and runtime availability.",
+  },
+  {
+    area: "Recovery",
+    sideband:
+      "Application and identity recovery follow Sideband and Reticulum's own operational model.",
+    relayhub:
+      "Recovery is a formal system responsibility including rollback, degraded boot, identity preservation, guided recovery, reset, transfer, and offline recovery.",
+  },
+  {
+    area: "Broader services",
+    sideband:
+      "Focused on communication, telemetry, situational awareness, remote control, and related Reticulum functions.",
+    relayhub:
+      "Intended eventually to support wider local-first services for knowledge, trust, trade, assessment, governance, coordination, and community operation.",
+  },
+];
+
+const chooseSideband = [
+  "You already understand Reticulum and want a mature graphical client.",
+  "Your main need is LXMF messaging, files, voice, telemetry, or mapping.",
+  "You want direct control over Reticulum interfaces and client behaviour.",
+  "You do not need a dedicated household infrastructure appliance.",
+  "Sideband already gives you the communication experience you need.",
+];
+
+const chooseRelayHub = [
+  "You want persistent infrastructure that exists independently of a particular user device.",
+  "You want non-technical users to avoid direct Reticulum configuration.",
+  "You need browser-first onboarding, QR pairing, household roles, local management, and plain-language state.",
+  "You require update rollback, guided recovery, identity lifecycle, and support tooling.",
+  "You want hardware-specific capability governance across different node classes.",
+  "You want a platform broader than messaging and telemetry alone.",
+];
+
+const relationship = [
+  {
+    title: "Sideband as the client",
+    text:
+      "RelayHub does not need to reimplement a mature LXMF client merely to claim ownership of the messaging layer. Sideband may provide the user-facing communication experience while a RelayHub node provides persistent local infrastructure.",
+  },
+  {
+    title: "Relay Home as infrastructure",
+    text:
+      "A Relay Home node can potentially provide locally managed Reticulum infrastructure, onboarding, recovery, and household governance while Sideband runs on the user's device.",
+  },
+  {
+    title: "Validate the integration",
+    text:
+      "Any supported RelayHub–Sideband workflow still needs compatibility, onboarding, identity, recovery, UX, and version validation before being described as product-supported.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Do not duplicate mature functionality",
+    text:
+      "Sideband already solves difficult user-facing Reticulum problems. RelayHub should reuse or interoperate with that work where practical rather than rebuilding everything.",
+  },
+  {
+    title: "One interface can expose many transports",
+    text:
+      "Sideband demonstrates how users can interact with a common communication model without needing to think constantly about whether the underlying path is LoRa, packet radio, Wi-Fi, I2P, or another Reticulum interface.",
+  },
+  {
+    title: "Offline UX can still be rich",
+    text:
+      "Local maps, QR-carried messages, telemetry, file transfer, and delayed delivery demonstrate that offline-first software need not mean primitive software.",
+  },
+  {
+    title: "Extensibility has real value",
+    text:
+      "Sideband's telemetry, command, and service plugin model shows the value of exposing extension points without forcing all functionality into the core application.",
+  },
+];
+
+const realityChecks = [
+  "Sideband already provides capabilities RelayHub should not claim to have invented.",
+  "Sideband is a user-facing application, not a replacement for RelayHub's proposed appliance and infrastructure lifecycle.",
+  "Using Reticulum does not automatically guarantee anonymity under every threat model.",
+  "Encrypted communication does not hide all metadata, radio emissions, device compromise, or physical seizure risk.",
+  "A RelayHub node running Reticulum does not automatically make Sideband pairing or integration product-supported.",
+  "RelayHub must earn any additional complexity by making deployment, recovery, governance, and ordinary-user operation materially easier.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Sideband"
+  description="Compare RelayHub and Sideband: a mature Reticulum messaging, voice, telemetry, and mapping client versus broader local-first household and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Sideband</p>
+
+      <h1 class="rh-title">
+        Sideband may already be the messaging app RelayHub needs.
+      </h1>
+
+      <p class="rh-subtitle">
+        Sideband is a mature graphical Reticulum client for messaging, voice,
+        telemetry, mapping, files, and extensible remote interaction. RelayHub
+        does not need to compete with that merely to justify its existence.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare roles
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The short answer</p>
+
+      <h2 class="rh-section-title">
+        Sideband is an application. RelayHub is intended to be the surrounding infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Sideband uses Reticulum, LXMF, and LXST to provide the user-facing
+        communication experience directly on supported computing devices.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub instead focuses on making persistent Reticulum infrastructure
+        behave like an appliance: setup, ownership, pairing, policy, status,
+        updates, recovery, hardware governance, and future community services.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Sideband is strong</p>
+
+      <h2 class="rh-section-title">
+        It already provides a substantial Reticulum user experience.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The architectural relationship</p>
+
+      <h2 class="rh-section-title">
+        Client and appliance can be different products.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub's Home Node v1 product boundary already allows communication to
+        be provided through a compatible client rather than requiring the local
+        management UI to become another full messaging application.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Sideband</h3>
+          <p class="rh-card-text">
+            User-facing Reticulum communication: messages, voice, telemetry,
+            files, maps, remote commands, and related functions.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Home</h3>
+          <p class="rh-card-text">
+            Household infrastructure: local setup, ownership, pairing, node
+            health, updates, recovery, roles, and persistent Reticulum services.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Reticulum</h3>
+          <p class="rh-card-text">
+            The networking substrate beneath both layers, providing identities,
+            routing, transport abstraction, and resilient communication paths.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Different layers of the same wider ecosystem.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Sideband
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.sideband}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Sometimes Sideband alone is enough.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Use Sideband directly when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseSideband.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">A natural relationship</p>
+
+      <h2 class="rh-section-title">
+        Sideband could remain the client while RelayHub handles the appliance.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {relationship.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn</p>
+
+      <h2 class="rh-section-title">
+        The surrounding infrastructure should not make the client experience worse.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Shared foundations do not erase different responsibilities.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Sideband capabilities are sourced from the current project material.
+      </h2>
+
+      <p class="rh-section-lead">
+        Current Sideband documentation describes an extensible LXMF messaging and
+        LXST telephony client for Android, Linux, macOS, and Windows, with file
+        transfers, image and audio messages, voice calls, telemetry, mapping,
+        plugins, remote commands, QR-carried LXMF messages, and support for
+        Reticulum transports including LoRa, packet radio, Wi-Fi, and I2P.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Sideband</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://github.com/markqvist/Sideband"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Sideband project
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">LXMF</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://github.com/markqvist/LXMF"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              LXMF messaging protocol
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/reticulum">
+          Reticulum ecosystem
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

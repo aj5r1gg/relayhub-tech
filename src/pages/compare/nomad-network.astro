@@ -1,0 +1,530 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "Reticulum-native messaging",
+    text:
+      "Nomad Network is built on LXMF and Reticulum and provides resilient encrypted messaging across the communication media Reticulum supports.",
+  },
+  {
+    title: "Distributed delayed delivery",
+    text:
+      "Nomad Network can use distributed message stores so messages remain available for users who are offline and synchronise later.",
+  },
+  {
+    title: "Pages and files",
+    text:
+      "Connectable Nomad Network nodes can host pages and files that other users can browse over Reticulum.",
+  },
+  {
+    title: "Text-based browser",
+    text:
+      "Nomad Network includes a bandwidth-efficient text interface for navigating nodes, pages, files, conversations, and network content.",
+  },
+  {
+    title: "Very broad transport reach",
+    text:
+      "Because it uses Reticulum, Nomad Network can operate over packet radio, LoRa, Wi-Fi, serial links, IP networks, and other configured Reticulum interfaces.",
+  },
+  {
+    title: "Can run as infrastructure",
+    text:
+      "Nomad Network can run without its user interface in daemon mode, allowing messaging and node services to operate persistently.",
+  },
+];
+
+const differences = [
+  {
+    area: "What it is",
+    nomad:
+      "A Reticulum/LXMF application providing messaging, distributed message storage, pages, files, and text-based network interaction.",
+    relayhub:
+      "A broader appliance and infrastructure ecosystem built around Reticulum, hardware classes, policy, recovery, validation, and future community applications.",
+  },
+  {
+    area: "Primary responsibility",
+    nomad:
+      "Communication and information exchange directly over Reticulum.",
+    relayhub:
+      "Deploying, governing, recovering, updating, and operating persistent local infrastructure that may host or support communication applications.",
+  },
+  {
+    area: "User interface",
+    nomad:
+      "Primarily terminal-oriented with a text user interface designed for efficient operation across constrained links.",
+    relayhub:
+      "Targets browser-first appliance UX for non-technical household users, with technical interfaces hidden unless explicitly needed.",
+  },
+  {
+    area: "Messaging",
+    nomad:
+      "Provides LXMF conversations, attachments, delayed delivery, and distributed message storage.",
+    relayhub:
+      "Does not need to duplicate a full messaging client if compatible Reticulum applications already provide the required experience.",
+  },
+  {
+    area: "Hosted content",
+    nomad:
+      "Nodes can host pages and files that other users can browse through the network.",
+    relayhub:
+      "Future community services may include local knowledge, boards, files, directories, markets, assessments, and governance under policy and lifecycle controls.",
+  },
+  {
+    area: "Infrastructure mode",
+    nomad:
+      "Can run persistently as a daemon and provide node, messaging, and content services.",
+    relayhub:
+      "Defines explicit Infrastructure and Mini PC classes with broader responsibilities for DTN, storage, observability, bridges, gateways, recovery, and service hosting where validated.",
+  },
+  {
+    area: "Hardware governance",
+    nomad:
+      "Runs on systems capable of supporting Python, Reticulum, LXMF, and the Nomad Network application.",
+    relayhub:
+      "Defines hardware capability ceilings and prevents roles from activating merely because software can technically run.",
+  },
+  {
+    area: "Policy architecture",
+    nomad:
+      "Uses Reticulum and Nomad Network configuration to determine interfaces, node behaviour, identity, and services.",
+    relayhub:
+      "Separates hardware capability, software capability, policy permission, trust permission, legal permission, user enablement, and runtime availability.",
+  },
+  {
+    area: "Recovery",
+    nomad:
+      "Recovery follows the host operating system, Reticulum identity, configuration, and application backup practices.",
+    relayhub:
+      "Rollback, identity preservation, degraded boot, guided recovery, offline recovery, reset, and ownership transfer are formal product responsibilities.",
+  },
+  {
+    area: "Target audience",
+    nomad:
+      "Well suited to technically capable users comfortable with terminal-oriented software and Reticulum configuration.",
+    relayhub:
+      "Targets ordinary household users who should not need to understand Linux, Reticulum internals, routing, radio configuration, or system administration.",
+  },
+];
+
+const chooseNomad = [
+  "You already understand Reticulum and prefer terminal-oriented tools.",
+  "You need LXMF messaging and distributed delayed delivery.",
+  "You want to host lightweight pages or files directly over Reticulum.",
+  "You want a low-bandwidth text interface that works well on constrained links.",
+  "You want to run a persistent Reticulum application without deploying a broader appliance ecosystem.",
+];
+
+const chooseRelayHub = [
+  "You need infrastructure that non-technical household users can operate.",
+  "You want browser-first onboarding, QR pairing, ownership, household roles, and plain-language status.",
+  "You need rollback, guided recovery, update governance, support export, and hardware validation.",
+  "You want multiple node classes with explicitly different responsibilities.",
+  "You need policy-governed community infrastructure broader than messaging and hosted pages.",
+  "You want applications such as Nomad Network to fit into a managed appliance environment rather than becoming the appliance-management layer themselves.",
+];
+
+const relationship = [
+  {
+    title: "Nomad Network as an application",
+    text:
+      "Nomad Network can remain responsible for LXMF messaging, distributed message storage, and Reticulum-hosted content while RelayHub handles appliance lifecycle and infrastructure governance.",
+  },
+  {
+    title: "Relay Infrastructure as the host",
+    text:
+      "A stronger RelayHub node could potentially host Nomad Network or compatible services where resource limits, security, policy, recovery, and interoperability have been validated.",
+  },
+  {
+    title: "Do not assume support",
+    text:
+      "The fact that Nomad Network can technically run on Linux does not make it a product-supported RelayHub service. Integration requires explicit validation.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Low bandwidth deserves intentional UX",
+    text:
+      "Nomad Network's text-oriented interface demonstrates that resilient systems should remain usable even when bandwidth is extremely limited.",
+  },
+  {
+    title: "Information matters as much as chat",
+    text:
+      "Pages and files show that resilient communication infrastructure should support durable knowledge exchange, not just conversations.",
+  },
+  {
+    title: "Offline users are normal",
+    text:
+      "Distributed message storage reinforces RelayHub's own DTN principle that users and routes may be unavailable for long periods without the system treating this as exceptional.",
+  },
+  {
+    title: "Services can run headless",
+    text:
+      "Daemon operation demonstrates a useful separation between persistent network services and user-facing interfaces.",
+  },
+];
+
+const realityChecks = [
+  "Nomad Network already implements communication and information-sharing capabilities RelayHub should not duplicate without reason.",
+  "Nomad Network is currently described by its own project as beta software.",
+  "The project states that it has not been externally security audited.",
+  "Encryption and decentralised routing do not eliminate metadata exposure, endpoint compromise, RF observability, or physical seizure risk.",
+  "Running Nomad Network on a RelayHub-compatible Linux system does not automatically make it supported.",
+  "RelayHub must add measurable appliance, recovery, governance, and usability value rather than merely packaging existing software.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Nomad Network"
+  description="Compare RelayHub and Nomad Network: Reticulum-native messaging, pages, files, and distributed message storage versus broader appliance and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Nomad Network</p>
+
+      <h1 class="rh-title">
+        Nomad Network already looks a lot like resilient community software.
+      </h1>
+
+      <p class="rh-subtitle">
+        Nomad Network combines LXMF messaging, delayed delivery, pages, files,
+        node services, and a bandwidth-efficient text interface over Reticulum.
+        RelayHub's job is not to pretend those capabilities do not already exist.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare roles
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The short answer</p>
+
+      <h2 class="rh-section-title">
+        Nomad Network is closer to an application platform than a simple chat client.
+      </h2>
+
+      <p class="rh-section-lead">
+        Nomad Network provides messaging, delayed delivery, hosted pages and files,
+        and interactive node services directly over Reticulum.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub operates at a broader layer: hardware classes, persistent
+        appliances, ownership, onboarding, policy, recovery, updates, validation,
+        observability, and a future family of community applications.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Nomad Network is strong</p>
+
+      <h2 class="rh-section-title">
+        Messaging is only part of what it already provides.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The architectural relationship</p>
+
+      <h2 class="rh-section-title">
+        Nomad Network could be a service running inside broader infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should treat mature Reticulum applications as potential ecosystem
+        components rather than automatically rebuilding their functionality.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Nomad Network</h3>
+          <p class="rh-card-text">
+            Messaging, delayed delivery, pages, files, distributed stores, and
+            text-based network interaction.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Infrastructure</h3>
+          <p class="rh-card-text">
+            Persistent appliance infrastructure for storage, DTN, service hosting,
+            observability, recovery, transport governance, and operator-managed
+            roles where validated.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Reticulum</h3>
+          <p class="rh-card-text">
+            The communications substrate providing identity, routing, transport
+            abstraction, path discovery, and resilient network communication.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Existing application infrastructure versus managed appliance infrastructure.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Nomad Network
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.nomad}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Technical users may already have what they need.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Use Nomad Network directly when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseNomad.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">A natural ecosystem role</p>
+
+      <h2 class="rh-section-title">
+        Host the application instead of rebuilding it.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {relationship.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn</p>
+
+      <h2 class="rh-section-title">
+        Resilient communities need more than synchronous chat.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Mature functionality still has support boundaries.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Nomad Network capabilities are sourced from the current project.
+      </h2>
+
+      <p class="rh-section-lead">
+        Current project documentation describes Nomad Network as a Reticulum and
+        LXMF application supporting encrypted messaging, distributed storage for
+        offline users, hosted pages and files, a built-in text browser, node-side
+        generated pages, page caching, daemon operation, and communication over
+        Reticulum-supported media including LoRa, packet radio, Wi-Fi, serial, and
+        IP networks.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Nomad Network</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://github.com/markqvist/NomadNet"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Nomad Network project
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Reticulum</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://reticulum.network/manual/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Reticulum documentation
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/sideband">
+          Compare Sideband
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/reticulum">
+          Reticulum ecosystem
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

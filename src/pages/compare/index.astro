@@ -12,6 +12,33 @@ const comparisons = [
     href: "/compare/meshtastic",
   },
   {
+    name: "MeshCore",
+    category: "LoRa mesh communication",
+    description:
+      "A decentralised LoRa communications ecosystem with companion nodes, repeaters, standalone devices, and increasingly capable mesh infrastructure tooling.",
+    distinction:
+      "MeshCore is focused on LoRa mesh communication and radio infrastructure. RelayHub extends into persistent household appliances, multiple transport classes, recovery, policy governance, and broader community infrastructure.",
+    href: "/compare/meshcore",
+  },
+  {
+    name: "LoRaWAN",
+    category: "Low-power wide-area IoT",
+    description:
+      "A standardised low-power wide-area networking architecture for sensors, meters, trackers, actuators, and other constrained devices using LoRa radio and gateway-to-server infrastructure.",
+    distinction:
+      "LoRaWAN is primarily designed for IoT telemetry through gateways and network servers. RelayHub is intended for resilient human and community infrastructure across multiple transport classes.",
+    href: "/compare/lorawan",
+  },
+  {
+    name: "Amateur Radio",
+    category: "Licensed radio communication",
+    description:
+      "A long-established radio service supporting communication, experimentation, repeaters, digital modes, field operation, and technical learning under jurisdiction-specific rules.",
+    distinction:
+      "Amateur radio gives qualified operators substantial radio capability. RelayHub targets appliance-style infrastructure for ordinary users and treats legal radio permission as a separate runtime gate.",
+    href: "/compare/amateur-radio",
+  },
+  {
     name: "Reticulum ecosystem",
     category: "Resilient networking and applications",
     description:
@@ -19,6 +46,24 @@ const comparisons = [
     distinction:
       "RelayHub uses Reticulum rather than competing with it. RelayHub adds an appliance, policy, recovery, validation, and community infrastructure layer around the communications substrate.",
     href: "/compare/reticulum",
+  },
+  {
+    name: "Sideband",
+    category: "Reticulum messaging and telephony",
+    description:
+      "A graphical Reticulum client for LXMF messaging, LXST voice, files, telemetry, mapping, remote interaction, and communication across multiple Reticulum transports.",
+    distinction:
+      "Sideband already provides much of the user-facing Reticulum communication experience. RelayHub focuses on the surrounding appliance, infrastructure, policy, recovery, and household-management layer.",
+    href: "/compare/sideband",
+  },
+  {
+    name: "Nomad Network",
+    category: "Reticulum messaging and information services",
+    description:
+      "A Reticulum and LXMF application providing messaging, delayed delivery, hosted pages and files, distributed message storage, and low-bandwidth text-based network interaction.",
+    distinction:
+      "Nomad Network already provides resilient application services over Reticulum. RelayHub is intended to provide the managed appliance and infrastructure environment in which such services may operate.",
+    href: "/compare/nomad-network",
   },
   {
     name: "Cellular push-to-talk",
@@ -67,7 +112,7 @@ const principles = [
   {
     title: "Different categories matter",
     text:
-      "A LoRa mesh, satellite communicator, mobile application, cellular radio, and household infrastructure node are not equivalent products merely because they can all carry messages.",
+      "A LoRa mesh, IoT network, satellite communicator, mobile application, cellular radio, amateur-radio system, Reticulum application, and household infrastructure node are not equivalent products merely because they can all carry data or messages.",
   },
   {
     title: "Current capability only",
@@ -84,7 +129,7 @@ const principles = [
 
 <BaseLayout
   title="Compare RelayHub"
-  description="Compare RelayHub with Meshtastic, Reticulum applications, cellular push-to-talk, satellite communicators, Briar, and conventional internet platforms."
+  description="Compare RelayHub with Meshtastic, MeshCore, LoRaWAN, amateur radio, Reticulum, Sideband, Nomad Network, cellular push-to-talk, satellite communicators, Briar, and conventional internet platforms."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
@@ -232,10 +277,12 @@ const principles = [
       </h2>
 
       <p class="rh-section-lead">
-        Meshtastic may be the right tool for a portable LoRa mesh. Satellite may
-        be the right tool beyond terrestrial coverage. Cellular push-to-talk may
-        be ideal while carrier infrastructure is available. Existing Reticulum
-        applications may already solve the needs of technical users.
+        Meshtastic or MeshCore may be right for a LoRa mesh. LoRaWAN may be the
+        right choice for low-power telemetry and sensors. Amateur radio may be
+        right for qualified operators who need broader radio capabilities.
+        Satellite may be right beyond terrestrial coverage. Cellular push-to-talk
+        may be ideal while carrier infrastructure is available. Sideband or Nomad
+        Network may already solve the communication needs of Reticulum users.
       </p>
 
       <p class="rh-section-lead">

@@ -1,0 +1,533 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "Purpose-built LoRa mesh",
+    text:
+      "MeshCore is designed specifically for resilient off-grid communication over LoRa, with multi-hop routing and dedicated repeater roles.",
+  },
+  {
+    title: "Companion and standalone devices",
+    text:
+      "MeshCore supports both phone-connected companion nodes and standalone devices such as T-Deck-class hardware that can operate without a phone.",
+  },
+  {
+    title: "Dedicated repeaters",
+    text:
+      "Repeater nodes can be deployed in useful elevated locations to extend network reach and improve mesh coverage.",
+  },
+  {
+    title: "Cross-platform applications",
+    text:
+      "MeshCore provides companion applications across Android, iOS, desktop, and web environments, with Bluetooth, serial, and supported Wi-Fi connectivity.",
+  },
+  {
+    title: "Accessible provisioning",
+    text:
+      "The MeshCore Configurator provides a guided browser-based path for selecting hardware, choosing a role, installing firmware, and performing basic setup.",
+  },
+  {
+    title: "Growing infrastructure tooling",
+    text:
+      "Current MeshOS releases include repeater management, room-server support, path and signal information, and broader infrastructure-oriented controls.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary purpose",
+    meshcore:
+      "A LoRa mesh communications ecosystem designed around messaging, repeaters, companion radios, and standalone radio devices.",
+    relayhub:
+      "A broader local-first ecosystem of radio, household, and infrastructure appliances intended to support communication and future community services.",
+  },
+  {
+    area: "Core networking model",
+    meshcore:
+      "LoRa mesh networking with dedicated companion, repeater, standalone, and server-oriented roles.",
+    relayhub:
+      "Reticulum-based networking across heterogeneous transport classes, with LoRa being one possible radio transport rather than the entire networking model.",
+  },
+  {
+    area: "Radio relationship",
+    meshcore:
+      "LoRa radio is foundational to the primary mesh architecture.",
+    relayhub:
+      "Radio is one capability domain among Ethernet, Wi-Fi, IP, serial, LoRa, and other validated transports.",
+  },
+  {
+    area: "Hardware roles",
+    meshcore:
+      "Uses distinct radio-oriented roles such as companion, repeater, standalone, and room-server devices.",
+    relayhub:
+      "Uses explicit product hardware classes including Radio Micro, Nano Linux, Home, Strong Home, Infrastructure, and Mini PC nodes, each with different capability ceilings.",
+  },
+  {
+    area: "Household appliance",
+    meshcore:
+      "Companion and standalone devices provide user-facing communication experiences, but MeshCore is not primarily defined as a household infrastructure appliance platform.",
+    relayhub:
+      "Relay Home is explicitly intended to be a household appliance with QR onboarding, local management, role control, updates, recovery, and plain-language state.",
+  },
+  {
+    area: "Infrastructure node",
+    meshcore:
+      "Repeaters and room servers provide important mesh infrastructure functions.",
+    relayhub:
+      "Infrastructure Nodes may eventually provide DTN queues, bridge, gateway, observability, local services, policy enforcement, and broader community infrastructure where validated.",
+  },
+  {
+    area: "Policy architecture",
+    meshcore:
+      "Uses its own device roles, configuration, encryption, repeater, channel, and radio settings.",
+    relayhub:
+      "Separates hardware capability, software capability, policy permission, runtime availability, trust permission, legal permission, and user enablement.",
+  },
+  {
+    area: "Recovery model",
+    meshcore:
+      "Firmware installation, configuration, device management, and recovery follow the MeshCore device ecosystem.",
+    relayhub:
+      "Recovery is a system-level requirement covering rollback, identity preservation, degraded boot, guided recovery, factory reset, transfer, and offline recovery.",
+  },
+  {
+    area: "Operating system layer",
+    meshcore:
+      "Primarily firmware- and application-oriented across supported embedded radio devices and client platforms.",
+    relayhub:
+      "RelayOS is intended as a reproducible NixOS-based appliance platform for Linux-capable node classes, while smaller Radio Micro nodes remain appropriately constrained.",
+  },
+  {
+    area: "Services beyond messaging",
+    meshcore:
+      "Focuses primarily on communication, location, telemetry, radio infrastructure, and related mesh functions.",
+    relayhub:
+      "Is intended eventually to support local community services for communication, knowledge, trust, coordination, trade, assessment, governance, and other applications.",
+  },
+];
+
+const chooseMeshCore = [
+  "Your main requirement is off-grid LoRa communication.",
+  "You want dedicated companion radios, repeaters, or standalone handheld devices.",
+  "You want to build a regional LoRa mesh with elevated repeaters.",
+  "You want an established radio-focused ecosystem with browser-based provisioning and cross-platform apps.",
+  "MeshCore already solves your communication problem without requiring broader household infrastructure.",
+];
+
+const chooseRelayHub = [
+  "You want persistent household infrastructure as well as radio nodes.",
+  "You need multiple transport classes rather than a LoRa-first network.",
+  "You want capability activation governed by hardware, policy, trust, legal state, user enablement, and runtime conditions.",
+  "You need rollback, guided recovery, identity lifecycle, local observability, and appliance management.",
+  "You want infrastructure nodes capable of broader DTN, gateway, bridge, storage, and future community-service responsibilities.",
+  "You want a platform broader than communication alone.",
+];
+
+const coexistence = [
+  {
+    title: "Independent operation",
+    text:
+      "A community could use MeshCore for dedicated LoRa messaging while operating RelayHub nodes for household infrastructure and other communication paths.",
+  },
+  {
+    title: "Possible future integration",
+    text:
+      "A future bridge may be technically possible, but RelayHub should not claim MeshCore interoperability until protocol behaviour, trust boundaries, resource use, failure behaviour, and security have been validated.",
+  },
+  {
+    title: "Avoid forced convergence",
+    text:
+      "MeshCore does not need to become a RelayHub transport simply because both systems value resilient communication. Independent systems can themselves provide useful diversity.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Roles can simplify deployment",
+    text:
+      "MeshCore's companion, repeater, and standalone roles provide users with an understandable mental model for what a device is expected to do.",
+  },
+  {
+    title: "Provisioning matters",
+    text:
+      "Browser-based firmware installation and guided configuration demonstrate how radio infrastructure can be made substantially more approachable.",
+  },
+  {
+    title: "Radio infrastructure needs management",
+    text:
+      "Repeater status, neighbours, signal information, configuration, and remote management show that resilient radio networks need operational tooling as well as messaging.",
+  },
+  {
+    title: "Standalone operation matters",
+    text:
+      "Devices that can communicate without depending on a smartphone reinforce RelayHub's own principle that important infrastructure should not depend on one user's phone.",
+  },
+];
+
+const realityChecks = [
+  "MeshCore is a serious and increasingly capable LoRa communications ecosystem, not merely a hobby radio firmware.",
+  "A MeshCore repeater is not equivalent to a RelayHub Infrastructure Node; their responsibilities and software architectures differ.",
+  "RelayHub does not currently have MeshCore's mature LoRa mesh ecosystem.",
+  "LoRa range depends strongly on terrain, antenna installation, radio settings, interference, placement, regional rules, and line of sight.",
+  "Encryption does not make radio transmissions invisible to RF observation.",
+  "Any future direct interoperability between RelayHub and MeshCore must be implemented and validated before being advertised.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs MeshCore"
+  description="Compare RelayHub and MeshCore: dedicated LoRa mesh communication and repeaters versus broader local-first household and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs MeshCore</p>
+
+      <h1 class="rh-title">
+        MeshCore is building serious LoRa infrastructure.
+      </h1>
+
+      <p class="rh-subtitle">
+        MeshCore combines companion radios, repeaters, standalone devices,
+        cross-platform applications, and increasingly capable infrastructure
+        tooling around a LoRa mesh. RelayHub starts with a broader household and
+        community infrastructure problem.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The short answer</p>
+
+      <h2 class="rh-section-title">
+        LoRa mesh infrastructure versus multi-transport community infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        MeshCore is designed around resilient off-grid LoRa communication,
+        including companion devices, dedicated repeaters, standalone handhelds,
+        applications, and supporting mesh infrastructure.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub is being designed around heterogeneous hardware classes and
+        multiple possible transports. A Radio Micro Node may eventually provide
+        LoRa transport, while Relay Home and Relay Infrastructure serve
+        fundamentally different appliance and infrastructure roles.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where MeshCore is strong</p>
+
+      <h2 class="rh-section-title">
+        It has moved well beyond basic peer-to-peer radios.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The architectural distinction</p>
+
+      <h2 class="rh-section-title">
+        A repeater network is not the same thing as a household infrastructure platform.
+      </h2>
+
+      <p class="rh-section-lead">
+        MeshCore's repeaters are genuine infrastructure for its LoRa network.
+        RelayHub's Infrastructure Node, however, is intended to carry a much wider
+        set of responsibilities beyond forwarding radio traffic.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">MeshCore repeater</h3>
+          <p class="rh-card-text">
+            Extends and strengthens the MeshCore LoRa network, particularly when
+            deployed at useful elevated locations.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Radio</h3>
+          <p class="rh-card-text">
+            A constrained radio-focused RelayHub class intended for validated
+            radio transport and field relay roles.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Infrastructure</h3>
+          <p class="rh-card-text">
+            A stronger Linux-class node intended for broader DTN, storage,
+            observability, gateway, bridge, policy, and community-service roles
+            where separately validated.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Similar resilience goals, different system ceilings.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                MeshCore
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.meshcore}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Choose the narrower solution when the narrower solution is enough.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose MeshCore when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseMeshCore.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Yes — and independence may itself be useful.
+      </h2>
+
+      <p class="rh-section-lead">
+        Resilience does not require every communication technology to be merged
+        into one network.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn from MeshCore</p>
+
+      <h2 class="rh-section-title">
+        Good infrastructure should be approachable.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Similar language does not make the systems equivalent.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        MeshCore capabilities are sourced from current project material.
+      </h2>
+
+      <p class="rh-section-lead">
+        Current MeshCore material describes a LoRa-based decentralised mesh with
+        companion nodes, repeaters, standalone devices, cross-platform clients,
+        encrypted messaging, guided provisioning, repeater management, and
+        room-server support.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">MeshCore</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://meshcore.co.uk/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              MeshCore official site
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">MeshOS</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://meshcore.co.uk/meshos.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              MeshOS documentation
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/meshtastic">
+          Compare Meshtastic
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
