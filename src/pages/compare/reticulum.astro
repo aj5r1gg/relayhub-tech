@@ -1,0 +1,484 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const existingTools = [
+  {
+    title: "Sideband",
+    text:
+      "A graphical Reticulum client for messaging and other LXMF/LXST functions. It targets users who want a richer interface rather than working directly with command-line Reticulum utilities.",
+  },
+  {
+    title: "Nomad Network",
+    text:
+      "A user-facing LXMF client that supports encrypted messaging, including delayed delivery for offline users, file sharing, and pages.",
+  },
+  {
+    title: "MeshChatX",
+    text:
+      "One of several applications listed by the Reticulum project that provide user-facing communication experiences on top of the Reticulum stack.",
+  },
+  {
+    title: "RNS Page Node",
+    text:
+      "A lightweight way to serve pages and files to compatible Nomad Network clients over Reticulum.",
+  },
+];
+
+const differences = [
+  {
+    area: "What it is",
+    reticulum:
+      "A complete cryptography-based networking stack for building local and wide-area resilient networks.",
+    relayhub:
+      "An ecosystem and appliance platform built around Reticulum, RelayOS, hardware classes, policy, recovery, validation, and community services.",
+  },
+  {
+    area: "Primary responsibility",
+    reticulum:
+      "Networking, routing, addressing, cryptographic identity, transport, path discovery, and application communication.",
+    relayhub:
+      "Turning resilient networking into usable household and community infrastructure with onboarding, roles, policy, recovery, updates, observability, and applications.",
+  },
+  {
+    area: "Transport model",
+    reticulum:
+      "Medium-agnostic. Reticulum can operate over many different underlying interfaces and carriers.",
+    relayhub:
+      "Uses that medium-agnostic foundation but adds policy and hardware-class rules governing which transports may actually activate on each node.",
+  },
+  {
+    area: "Applications",
+    reticulum:
+      "Already supports an ecosystem of applications including Sideband, Nomad Network, MeshChatX, RNS Page Node, Retipedia, file tools, telephony tools, and others.",
+    relayhub:
+      "Should reuse compatible protocols and applications where appropriate while adding appliance and broader community-service layers rather than duplicating functionality without reason.",
+  },
+  {
+    area: "User experience",
+    reticulum:
+      "Can be installed and configured directly by technical users or used through existing applications.",
+    relayhub:
+      "Targets ordinary users who should not need to understand Linux, NixOS, Reticulum configuration, routing, radio engineering, or service administration.",
+  },
+  {
+    area: "Hardware governance",
+    reticulum:
+      "Runs across a wide variety of hardware and does not impose RelayHub's product-class hierarchy.",
+    relayhub:
+      "Defines explicit Radio Micro, Nano Linux, Home, Strong Home, Infrastructure, Mini PC, Developer, and Factory/Test classes.",
+  },
+  {
+    area: "Recovery",
+    reticulum:
+      "Provides the networking stack; operating-system and appliance recovery are outside its core responsibility.",
+    relayhub:
+      "Makes rollback, identity preservation, guided recovery, safe reset, degraded boot behaviour, and recovery access formal product requirements.",
+  },
+  {
+    area: "Product validation",
+    reticulum:
+      "Maintains its own software maturity and protocol implementation.",
+    relayhub:
+      "Adds hardware compatibility, usability, recovery, security, documentation, manufacturing, and release validation before a node or feature becomes product-supported.",
+  },
+];
+
+const useReticulumDirectly = [
+  "You are comfortable configuring Reticulum yourself.",
+  "You want to build your own application or network architecture.",
+  "Sideband, Nomad Network, MeshChatX, or another existing application already solves your problem.",
+  "You want direct access to Reticulum interfaces, utilities, configuration, and networking behaviour.",
+  "You do not need RelayHub's appliance, household, recovery, or governance layers.",
+];
+
+const useRelayHub = [
+  "You want Reticulum infrastructure without expecting ordinary users to administer Reticulum directly.",
+  "You need repeatable hardware profiles and reproducible RelayOS builds.",
+  "You need local QR onboarding, user roles, local management, and plain-language state.",
+  "You require explicit capability and policy governance.",
+  "You require rollback and guided recovery as product behaviour.",
+  "You want a platform for broader household and community services beyond networking alone.",
+];
+
+const relayhubMustEarnItsPlace = [
+  {
+    title: "Do not wrap for the sake of wrapping",
+    text:
+      "RelayHub should not build another messaging client merely because it can. If Sideband or another Reticulum application already provides the required capability, compatibility may be more valuable than duplication.",
+  },
+  {
+    title: "Reuse protocols",
+    text:
+      "RelayHub should prefer established Reticulum protocols such as LXMF where they fit the requirement instead of inventing incompatible equivalents.",
+  },
+  {
+    title: "Add product value",
+    text:
+      "RelayHub-specific layers should justify themselves through usability, recovery, policy governance, reproducibility, validation, integration, or community infrastructure.",
+  },
+  {
+    title: "Preserve interoperability",
+    text:
+      "RelayHub should remain a participant in the wider Reticulum ecosystem rather than becoming a closed island built on top of it.",
+  },
+];
+
+const realityChecks = [
+  "RelayHub did not invent resilient networking.",
+  "Reticulum already provides the communications substrate RelayHub depends upon.",
+  "Existing Reticulum applications already provide substantial user-facing functionality.",
+  "RelayHub must not claim exclusive ownership of capabilities provided by Reticulum or its application ecosystem.",
+  "A RelayHub node that runs Reticulum is not automatically product-supported.",
+  "RelayHub only earns its additional complexity if it makes deployment, operation, recovery, and community use materially easier or safer.",
+];
+---
+
+<BaseLayout
+  title="RelayHub and the Reticulum Ecosystem"
+  description="Understand how RelayHub relates to Reticulum, Sideband, Nomad Network, MeshChatX, and the wider Reticulum application ecosystem."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub and Reticulum</p>
+
+      <h1 class="rh-title">
+        This is not actually a competition.
+      </h1>
+
+      <p class="rh-subtitle">
+        Reticulum is the communications substrate RelayHub is built around.
+        Sideband, Nomad Network, MeshChatX, and other Reticulum applications
+        already provide substantial resilient communication capability. RelayHub
+        exists to solve a different layer of the problem.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#relationship">
+          Understand the relationship
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="relationship">
+    <div class="rh-container">
+      <p class="rh-kicker">The relationship</p>
+
+      <h2 class="rh-section-title">
+        Reticulum provides networking. RelayHub builds an appliance ecosystem around it.
+      </h2>
+
+      <p class="rh-section-lead">
+        Reticulum is a cryptography-based networking stack designed for local and
+        wide-area networks that can continue operating under difficult conditions,
+        including low bandwidth and high latency.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub uses Reticulum as core infrastructure. RelayOS is intended to add
+        repeatable system configuration, hardware-aware capability management,
+        policy enforcement, onboarding, local APIs, observability, updates,
+        rollback, recovery, and application hosting.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What already exists</p>
+
+      <h2 class="rh-section-title">
+        Reticulum already has a real application ecosystem.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should never pretend that resilient messaging or information
+        sharing begins with RelayHub. Existing Reticulum software already
+        demonstrates what the underlying stack can support.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {existingTools.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Where RelayHub adds a layer</p>
+
+      <h2 class="rh-section-title">
+        The goal is appliance-level operation.
+      </h2>
+
+      <p class="rh-section-lead">
+        Installing a networking stack and delivering a household appliance are
+        different engineering problems. RelayHub targets the second problem while
+        relying on Reticulum for the first.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Onboarding</h3>
+          <p class="rh-card-text">
+            Plug in the node, discover it locally, scan a QR code, establish
+            ownership, configure recovery, and reach a usable dashboard.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Capability governance</h3>
+          <p class="rh-card-text">
+            Hardware capability, software capability, policy permission, trust,
+            legal permission, user enablement, and runtime availability remain
+            separate gates.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Recovery</h3>
+          <p class="rh-card-text">
+            Updates, rollback, identity preservation, degraded boot, guided
+            recovery, reset, transfer, and support are treated as product
+            responsibilities.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Different layers, different responsibilities.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should build on Reticulum rather than obscure what Reticulum
+        already provides.
+      </p>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Reticulum
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.reticulum}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Sometimes the answer is simply: use Reticulum directly.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Use Reticulum directly when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {useReticulumDirectly.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {useRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">A critical design rule</p>
+
+      <h2 class="rh-section-title">
+        RelayHub must earn its place above Reticulum.
+      </h2>
+
+      <p class="rh-section-lead">
+        Adding another layer is only justified if that layer makes the system
+        materially easier to deploy, understand, govern, validate, recover, or
+        extend.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {relayhubMustEarnItsPlace.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        RelayHub does not get credit for Reticulum's work.
+      </h2>
+
+      <p class="rh-section-lead">
+        The boundary should remain explicit in engineering, documentation, and
+        marketing.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Current Reticulum capabilities are sourced from the project itself.
+      </h2>
+
+      <p class="rh-section-lead">
+        Reticulum currently describes itself as a cryptography-based networking
+        stack for local and wide-area networks and documents an active application
+        ecosystem including Sideband, Nomad Network, MeshChatX, RNS Page Node,
+        Retipedia, telephony tools, file tools, and other applications.
+      </p>
+
+      <div class="rh-card" style="margin-top: var(--space-10);">
+        <p class="rh-card-text">
+          <strong>Primary source: </strong>
+          <a
+            href="https://reticulum.network/manual/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="text-decoration: underline;"
+          >
+            Reticulum Network Stack documentation
+          </a>
+        </p>
+
+        <p class="rh-card-text" style="margin-top: var(--space-3);">
+          <strong>Programs using Reticulum: </strong>
+          <a
+            href="https://reticulum.network/manual/software.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="text-decoration: underline;"
+          >
+            Reticulum application ecosystem
+          </a>
+        </p>
+
+        <p class="rh-card-text" style="margin-top: var(--space-3);">
+          <strong>Last substantive review: </strong> 18 August 2026
+        </p>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/relayos">
+          Learn about RelayOS
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

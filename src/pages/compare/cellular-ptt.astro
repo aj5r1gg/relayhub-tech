@@ -1,0 +1,491 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const examples = [
+  {
+    name: "Echo Radios",
+    model: "Cellular push-to-talk",
+    text:
+      "Echo Radios describes its service as nationwide push-to-talk communication using cellular technology and access to multiple carrier networks. Its wide-area operation therefore depends on available cellular infrastructure.",
+  },
+  {
+    name: "Poclink POC-1 Ultra",
+    model: "Hybrid cellular + analog radio",
+    text:
+      "Poclink describes the POC-1 Ultra as a dual-system device: 4G LTE/PoC for wide-area communication and a separate analog radio mode for direct nearby communication when cellular service is unavailable.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary purpose",
+    cellular:
+      "Simple push-to-talk voice communication across wide geographic areas using carrier infrastructure, with some products adding direct-radio fallback.",
+    relayhub:
+      "Persistent local-first household and community infrastructure across multiple possible communication paths.",
+  },
+  {
+    area: "Wide-area reach",
+    cellular:
+      "Provided primarily through existing cellular networks and service infrastructure.",
+    relayhub:
+      "Depends on the validated transports, reachable peers, gateways, relays, and network topology actually available.",
+  },
+  {
+    area: "Operation without cellular service",
+    cellular:
+      "Pure cellular PTT requires cellular connectivity. Hybrid products such as the Poclink POC-1 Ultra provide a separate analog direct-radio mode.",
+    relayhub:
+      "Designed to continue useful local operation through non-cellular paths where suitable validated transports exist.",
+  },
+  {
+    area: "User experience",
+    cellular:
+      "Purpose-built handheld PTT can be extremely simple: select the intended group and press to talk.",
+    relayhub:
+      "Targets appliance-like setup and management across a broader set of communication and infrastructure functions.",
+  },
+  {
+    area: "Infrastructure ownership",
+    cellular:
+      "Wide-area service depends substantially on carrier and vendor-operated infrastructure.",
+    relayhub:
+      "Local nodes, identities, configuration, recovery, and supported community infrastructure are intended to remain under household or community control.",
+  },
+  {
+    area: "Transport diversity",
+    cellular:
+      "Typically cellular-centric. Some hybrid products include an additional independent radio mode.",
+    relayhub:
+      "Multiple transport classes are part of the architecture, subject to hardware capability, policy, validation, trust, legal permission, and runtime availability.",
+  },
+  {
+    area: "Store-and-forward",
+    cellular:
+      "Not the defining architecture of ordinary PTT operation.",
+    relayhub:
+      "Delayed delivery and DTN/store-and-forward behaviour are explicit architectural concerns.",
+  },
+  {
+    area: "Services beyond voice",
+    cellular:
+      "Primarily communications products, although individual vendors may add GPS, applications, alerts, groups, and other functions.",
+    relayhub:
+      "Intended eventually to support broader local community services in addition to communication.",
+  },
+];
+
+const chooseCellular = [
+  "Your main requirement is simple push-to-talk voice.",
+  "Carrier coverage is generally available where you operate.",
+  "Users should be able to pick up a handheld and communicate with minimal configuration.",
+  "Wide geographic separation matters more than ownership of the underlying carrier infrastructure.",
+  "A commercial appliance and managed service are preferable to operating local network infrastructure.",
+];
+
+const chooseRelayHub = [
+  "You need useful operation when internet or cellular infrastructure is unavailable.",
+  "You want households or communities to own and operate persistent local nodes.",
+  "You need multiple transport possibilities rather than a cellular-first architecture.",
+  "You need delayed/store-and-forward communication under intermittent connectivity.",
+  "You require explicit trust, role, capability, policy, recovery, and validation models.",
+  "You want infrastructure that can support future local community services beyond voice.",
+];
+
+const vendorClaims = [
+  {
+    title: "Coverage claims",
+    text:
+      "Claims such as nationwide, global, or effectively unlimited range describe operation through available carrier infrastructure. They should not be interpreted as infrastructure-independent radio range.",
+  },
+  {
+    title: "Privacy claims",
+    text:
+      "Vendor statements about encryption, anonymity, interception resistance, or tracking should be treated as vendor claims unless independently documented and validated.",
+  },
+  {
+    title: "Outage claims",
+    text:
+      "A cellular PTT device may perform differently from an ordinary phone because of network access, radio design, provisioning, or multi-carrier arrangements. That does not mean cellular infrastructure itself becomes unnecessary.",
+  },
+  {
+    title: "Analog fallback",
+    text:
+      "A hybrid product with analog radio fallback should be evaluated separately for frequency, power, licensing, region, antenna, terrain, interoperability, and lawful operation.",
+  },
+];
+
+const complementaryUses = [
+  {
+    title: "Routine wide-area voice",
+    text:
+      "Cellular PTT can be an excellent everyday voice path while carrier infrastructure is healthy.",
+  },
+  {
+    title: "Local resilience",
+    text:
+      "RelayHub can target locally controlled communication and services that remain useful when external infrastructure is unavailable.",
+  },
+  {
+    title: "Independent fallback",
+    text:
+      "A hybrid PTT device with direct radio may provide another independent local path, subject to its technical and legal limits.",
+  },
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Cellular Push-to-Talk"
+  description="Compare RelayHub with cellular push-to-talk systems such as Echo Radios and Poclink, including carrier dependence, off-grid fallback, local ownership, and resilience."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs cellular PTT</p>
+
+      <h1 class="rh-title">
+        Wide-area reach and infrastructure independence are different things.
+      </h1>
+
+      <p class="rh-subtitle">
+        Cellular push-to-talk radios can make group voice communication extremely
+        simple across large distances. RelayHub is being designed around a different
+        requirement: locally controlled infrastructure that can retain useful
+        capability when external connectivity changes or disappears.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What is cellular PTT?</p>
+
+      <h2 class="rh-section-title">
+        Push-to-talk voice carried over cellular infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Push-to-talk over cellular can provide the familiar one-button experience
+        of a radio while carrying voice through cellular networks instead of relying
+        solely on direct radio range.
+      </p>
+
+      <p class="rh-section-lead">
+        That can provide enormous practical coverage where carrier infrastructure
+        is available. It also means that wide-area operation and independent local
+        radio operation are not the same capability.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Current examples</p>
+
+      <h2 class="rh-section-title">
+        Echo Radio and Poclink illustrate two related models.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {examples.map((item) => (
+          <article class="rh-card">
+            <p class="rh-kicker">{item.model}</p>
+            <h3 class="rh-card-title">{item.name}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        Reach is not the same as sovereignty.
+      </h2>
+
+      <p class="rh-section-lead">
+        Cellular PTT can provide excellent geographic reach because substantial
+        infrastructure already exists. RelayHub's concern is what remains available
+        when households and communities cannot or do not want to rely entirely on
+        that external infrastructure.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Carrier-assisted reach</h3>
+          <p class="rh-card-text">
+            Cellular PTT can connect users across cities, regions, or countries
+            where suitable cellular service and vendor support are available.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Local-first operation</h3>
+          <p class="rh-card-text">
+            RelayHub is intended to preserve local capability without requiring a
+            functioning wide-area carrier path.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Hybrid options</h3>
+          <p class="rh-card-text">
+            Products such as the Poclink POC-1 Ultra show that cellular PTT and
+            direct local radio can coexist in one commercial device.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Similar user experience, different dependency model.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Cellular PTT
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.cellular}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Choose by operating conditions.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose cellular PTT when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseCellular.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Reading vendor claims carefully</p>
+
+      <h2 class="rh-section-title">
+        Marketing language and architecture are not the same thing.
+      </h2>
+
+      <p class="rh-section-lead">
+        Cellular PTT vendors may make strong claims about coverage, privacy,
+        encryption, outage performance, and range. RelayHub should describe those
+        accurately as vendor claims unless independently validated.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {vendorClaims.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Complementary use</p>
+
+      <h2 class="rh-section-title">
+        Resilience may mean keeping several useful paths.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is not strengthened by refusing infrastructure that already works.
+        Carrier-assisted PTT, local-first infrastructure, and independent radio
+        fallback can address different failure conditions.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {complementaryUses.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Current product claims are sourced to the vendors.
+      </h2>
+
+      <p class="rh-section-lead">
+        Echo Radios currently describes its wide-area push-to-talk service as using
+        cellular technology and multiple carrier networks. Poclink describes the
+        POC-1 Ultra as containing separate LTE/PoC and analog radio systems. These
+        are vendor descriptions, not RelayHub validation claims.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Echo Radios</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://echoradios.com/pages/faqs"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Echo Radios FAQ
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Verified architecture point: wide-area PTT uses cellular infrastructure
+            and multiple carrier networks.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Poclink POC-1 Ultra</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://poclink.com/products/poclink-global-coverage-off-grid-dual-mode-ski-walkie-talkie-gps-tracking-poc-1-ultra"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Poclink POC-1 Ultra
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Verified architecture point: separate 4G LTE/PoC and analog direct-radio
+            communication modes.
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          How RelayHub works
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

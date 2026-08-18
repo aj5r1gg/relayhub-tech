@@ -1,0 +1,258 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const comparisons = [
+  {
+    name: "Meshtastic",
+    category: "LoRa mesh communication",
+    description:
+      "Low-power, off-grid LoRa mesh communication for portable devices, messaging, telemetry, and location.",
+    distinction:
+      "Meshtastic is strongly focused on LoRa mesh communication. RelayHub is intended as broader household and community infrastructure in which radio is one possible transport.",
+    href: "/compare/meshtastic",
+  },
+  {
+    name: "Reticulum ecosystem",
+    category: "Resilient networking and applications",
+    description:
+      "Reticulum and applications such as Sideband, Nomad Network, and other compatible tools already provide resilient communication capabilities.",
+    distinction:
+      "RelayHub uses Reticulum rather than competing with it. RelayHub adds an appliance, policy, recovery, validation, and community infrastructure layer around the communications substrate.",
+    href: "/compare/reticulum",
+  },
+  {
+    name: "Cellular push-to-talk",
+    category: "Carrier-assisted communication",
+    description:
+      "Products such as Echo Radio and Poclink provide simple push-to-talk communication, commonly using cellular infrastructure and, in some products, additional direct-radio capability.",
+    distinction:
+      "Cellular PTT can provide extremely simple wide-area voice. RelayHub is designed around locally controlled infrastructure that can remain useful when external connectivity is unavailable or unsuitable.",
+    href: "/compare/cellular-ptt",
+  },
+  {
+    name: "Satellite communicators",
+    category: "Remote-area communication",
+    description:
+      "Satellite communicators provide messaging and other supported services beyond terrestrial cellular coverage.",
+    distinction:
+      "Satellite solves a failure domain that local terrestrial infrastructure cannot. RelayHub and satellite communication are potentially complementary rather than substitutes.",
+    href: "/compare/satellite",
+  },
+  {
+    name: "Briar",
+    category: "Peer-to-peer messaging",
+    description:
+      "A decentralised messaging application designed to communicate without relying on central messaging servers and to support nearby offline communication.",
+    distinction:
+      "Briar focuses primarily on resilient communication between user devices. RelayHub is intended to provide persistent household and community infrastructure beyond a single application.",
+    href: "/compare/briar",
+  },
+  {
+    name: "Conventional internet platforms",
+    category: "Cloud and centralised services",
+    description:
+      "Mainstream messaging, coordination, marketplace, knowledge, and community platforms generally provide excellent usability while their required infrastructure remains reachable.",
+    distinction:
+      "RelayHub is not intended to replace the internet. It is intended to reduce total dependence on centralised, continuously reachable services for useful local operation.",
+    href: "/compare/conventional-platforms",
+  },
+];
+
+const principles = [
+  {
+    title: "No fake winners",
+    text:
+      "A technology that is better for a particular job should be described as better for that job. RelayHub does not need to win every comparison.",
+  },
+  {
+    title: "Different categories matter",
+    text:
+      "A LoRa mesh, satellite communicator, mobile application, cellular radio, and household infrastructure node are not equivalent products merely because they can all carry messages.",
+  },
+  {
+    title: "Current capability only",
+    text:
+      "Planned RelayHub capability must not be presented as product-supported capability until implementation and validation gates have been passed.",
+  },
+  {
+    title: "Complement before replace",
+    text:
+      "RelayHub should coexist with useful infrastructure and technologies wherever practical instead of demanding that users abandon systems that already work.",
+  },
+];
+---
+
+<BaseLayout
+  title="Compare RelayHub"
+  description="Compare RelayHub with Meshtastic, Reticulum applications, cellular push-to-talk, satellite communicators, Briar, and conventional internet platforms."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">Compare RelayHub</p>
+
+      <h1 class="rh-title">
+        Different tools solve different problems.
+      </h1>
+
+      <p class="rh-subtitle">
+        RelayHub is not another radio, another messaging app, or an attempt to
+        replace every communications technology. Compare what each approach is
+        actually designed to do, where it works well, and where its dependencies
+        and limits differ.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#technologies">
+          Explore comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          How RelayHub works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="technologies">
+    <div class="rh-container">
+      <p class="rh-kicker">Technology comparisons</p>
+
+      <h2 class="rh-section-title">
+        Start with the problem, not the product.
+      </h2>
+
+      <p class="rh-section-lead">
+        These technologies overlap in places, but they are not interchangeable.
+        The useful question is not which one wins. It is which architecture fits
+        the people, environment, failure conditions, and operational requirements.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {comparisons.map((item) => (
+          <article class="rh-card">
+            <p class="rh-kicker">{item.category}</p>
+
+            <h3 class="rh-card-title">{item.name}</h3>
+
+            <p class="rh-card-text">
+              {item.description}
+            </p>
+
+            <p class="rh-card-text" style="margin-top: var(--space-5);">
+              <strong>Key distinction:</strong> {item.distinction}
+            </p>
+
+            <div class="rh-actions" style="margin-top: var(--space-6);">
+              <a class="rh-button rh-button-secondary" href={item.href}>
+                Compare
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The central distinction</p>
+
+      <h2 class="rh-section-title">
+        RelayHub is infrastructure, not just a communications device.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub is being designed as an ecosystem of interoperable node classes
+        for households, field use, and community infrastructure. Reticulum provides
+        the communications substrate. RelayOS adds appliance behaviour, capability
+        awareness, policy, recovery, observability, updates, and local management.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Multiple hardware classes</h3>
+          <p class="rh-card-text">
+            Small radio nodes, household appliances, stronger home nodes, and
+            infrastructure nodes have different capability ceilings and roles.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Multiple operating conditions</h3>
+          <p class="rh-card-text">
+            Local-only, internet-assisted, offline, radio-assisted, degraded,
+            household, field, and community infrastructure operation are treated
+            as normal operating conditions rather than one universal mode.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Recovery is part of the product</h3>
+          <p class="rh-card-text">
+            Rollback, identity preservation, degraded boot behaviour, offline
+            recovery, safe reset, and understandable recovery access are
+            architectural requirements rather than afterthoughts.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">How we compare</p>
+
+      <h2 class="rh-section-title">
+        Comparisons should be useful, not marketing theatre.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should be judged by the same standards it applies to other
+        technologies. Claims should be specific, testable, current, and honest
+        about limitations.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {principles.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">A complementary ecosystem</p>
+
+      <h2 class="rh-section-title">
+        Resilience comes from useful options.
+      </h2>
+
+      <p class="rh-section-lead">
+        Meshtastic may be the right tool for a portable LoRa mesh. Satellite may
+        be the right tool beyond terrestrial coverage. Cellular push-to-talk may
+        be ideal while carrier infrastructure is available. Existing Reticulum
+        applications may already solve the needs of technical users.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub's role is to provide understandable, locally controlled,
+        recoverable infrastructure across changing conditions — not to pretend
+        every other technology should disappear.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/early-access">
+          Register interest
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/faq">
+          Read the FAQ
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

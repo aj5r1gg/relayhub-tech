@@ -1,0 +1,465 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "No central messaging server",
+    text:
+      "Briar synchronises messages directly between users' devices rather than relying on a central messaging server.",
+  },
+  {
+    title: "Offline communication",
+    text:
+      "When internet connectivity is unavailable, Briar can synchronise through nearby Bluetooth or Wi-Fi connections and supports offline data transfer using removable media.",
+  },
+  {
+    title: "Internet communication through Tor",
+    text:
+      "When internet connectivity is available, Briar can use the Tor network for communication between contacts.",
+  },
+  {
+    title: "More than private messages",
+    text:
+      "Briar includes private messaging, groups, forums and blogs rather than limiting the application to one-to-one chat.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary architecture",
+    briar:
+      "A decentralised application in which user devices store and synchronise data directly with trusted contacts.",
+    relayhub:
+      "An ecosystem of persistent radio, household and infrastructure nodes using Reticulum as the communications substrate.",
+  },
+  {
+    area: "Primary node",
+    briar:
+      "The user's device is normally the principal participant in the system.",
+    relayhub:
+      "Household, radio and infrastructure nodes have identities, capability ceilings, roles and operational responsibilities independent of a user's phone.",
+  },
+  {
+    area: "Offline transport",
+    briar:
+      "Nearby Bluetooth and Wi-Fi can synchronise data directly between contacts. Removable media can also carry data.",
+    relayhub:
+      "May use multiple validated Reticulum transports, including local IP and radio paths, according to hardware, policy, trust, legal and runtime conditions.",
+  },
+  {
+    area: "Internet transport",
+    briar:
+      "Uses Tor when communicating over the internet.",
+    relayhub:
+      "Internet connectivity is one possible transport environment rather than a mandatory or singular communications path.",
+  },
+  {
+    area: "Delayed delivery",
+    briar:
+      "Messages can be retained and synchronised later; Briar Mailbox can help deliver messages when contacts are not online simultaneously.",
+    relayhub:
+      "DTN and store-and-forward operation are explicit infrastructure concerns across persistent nodes and intermittent paths.",
+  },
+  {
+    area: "Persistent infrastructure",
+    briar:
+      "Briar Mailbox can provide an always-on delivery aid, but Briar remains primarily an application and contact-synchronisation system.",
+    relayhub:
+      "Persistent household and community nodes are foundational parts of the architecture.",
+  },
+  {
+    area: "Hardware classes",
+    briar:
+      "Does not use RelayHub's hierarchy of product hardware classes and capability ceilings.",
+    relayhub:
+      "Explicitly distinguishes Radio Micro, Nano Linux, Home, Strong Home, Infrastructure and Mini PC node classes.",
+  },
+  {
+    area: "Recovery model",
+    briar:
+      "Application and device recovery follow Briar's own software and device model.",
+    relayhub:
+      "Recovery includes operating-system rollback, identity preservation, degraded boot, guided recovery, factory reset and ownership transfer.",
+  },
+  {
+    area: "Service scope",
+    briar:
+      "Primarily provides resilient communication and publishing functions.",
+    relayhub:
+      "Is intended as infrastructure for communication plus broader local community services, subject to implementation and validation.",
+  },
+];
+
+const chooseBriar = [
+  "Your main requirement is resilient messaging between people.",
+  "Your users already carry compatible devices and you do not want to deploy separate infrastructure appliances.",
+  "Nearby Bluetooth or Wi-Fi communication is useful during internet outages.",
+  "You value Briar's decentralised contact model and Tor-based internet communication.",
+  "Briar's existing messaging, groups, forums and blogs already solve your problem.",
+];
+
+const chooseRelayHub = [
+  "You want infrastructure that exists independently of any one user's phone.",
+  "You need persistent household or community nodes.",
+  "You want radio-capable and infrastructure-class hardware alongside user-facing applications.",
+  "You need policy-governed activation of different transports and capabilities.",
+  "You require appliance onboarding, observability, updates, rollback and guided recovery.",
+  "You want a platform intended eventually to host broader local community services.",
+];
+
+const lessons = [
+  {
+    title: "Offline must be real",
+    text:
+      "Briar demonstrates that offline operation should be a genuine operating mode rather than an error screen shown when the internet disappears.",
+  },
+  {
+    title: "Central servers are not mandatory",
+    text:
+      "Useful communication can be designed around direct synchronisation and local state rather than assuming every interaction must pass through a central service.",
+  },
+  {
+    title: "Delay is normal",
+    text:
+      "Users and devices will not always be connected simultaneously. Systems designed for disruption should treat delayed synchronisation as ordinary behaviour.",
+  },
+  {
+    title: "Threat models matter",
+    text:
+      "Briar explicitly documents the surveillance and censorship threats it is designed to resist. RelayHub should likewise state its threat boundaries instead of using vague security language.",
+  },
+];
+
+const realityChecks = [
+  "Briar already provides capabilities RelayHub should not pretend to have invented.",
+  "Briar's offline Bluetooth and Wi-Fi range is inherently local and environment-dependent.",
+  "Briar synchronises with trusted contacts, not arbitrary nearby strangers merely because they run Briar.",
+  "Tor improves particular privacy properties but does not make a device, user or communication magically anonymous under every threat model.",
+  "RelayHub's persistent-node architecture does not automatically make it more secure than Briar.",
+  "RelayHub should learn from Briar's mature decentralised design rather than duplicate functionality without a clear reason.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Briar"
+  description="Compare RelayHub and Briar: decentralised offline-capable peer-to-peer messaging versus persistent local-first household and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Briar</p>
+
+      <h1 class="rh-title">
+        Resilient communication does not always need another box.
+      </h1>
+
+      <p class="rh-subtitle">
+        Briar demonstrates how much resilient communication can happen directly
+        between user devices. RelayHub approaches the problem differently by
+        adding persistent household, radio and community infrastructure.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What Briar is</p>
+
+      <h2 class="rh-section-title">
+        Decentralised communication between user devices.
+      </h2>
+
+      <p class="rh-section-lead">
+        Briar does not rely on a central messaging server. Data is synchronised
+        directly between users' devices.
+      </p>
+
+      <p class="rh-section-lead">
+        When internet connectivity is unavailable, Briar can communicate locally
+        through Bluetooth or Wi-Fi and can transfer data using removable media.
+        When internet connectivity is available, it can communicate through Tor.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Briar is strong</p>
+
+      <h2 class="rh-section-title">
+        It already solves several hard resilience problems.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        User-device resilience versus persistent infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Briar primarily makes the devices people already carry more resilient.
+        RelayHub is intended to add infrastructure that remains present even when
+        individual users and their phones come and go.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Briar</h3>
+          <p class="rh-card-text">
+            The user's device stores state and communicates directly with trusted
+            contacts through available connection methods.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Home</h3>
+          <p class="rh-card-text">
+            A persistent household node intended to remain available as local
+            communications and service infrastructure.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Infrastructure</h3>
+          <p class="rh-card-text">
+            Stronger community-operated nodes intended for larger DTN queues,
+            bridge, gateway, observability and infrastructure roles where
+            validated and permitted.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Similar resilience goals, very different system boundaries.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Briar
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.briar}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        You may not need infrastructure at all.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose Briar when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseBriar.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn from Briar</p>
+
+      <h2 class="rh-section-title">
+        Good resilience ideas should be learned from, not dismissed.
+      </h2>
+
+      <p class="rh-section-lead">
+        Briar has spent years addressing communication under surveillance,
+        censorship and connectivity failure. RelayHub should learn from that work
+        while remaining clear about its different architecture and threat model.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Decentralised does not mean invulnerable.
+      </h2>
+
+      <p class="rh-section-lead">
+        Both systems have threat boundaries, physical dependencies and failure
+        conditions. Neither should be marketed with absolute privacy, anonymity,
+        delivery or availability guarantees.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Briar capabilities are sourced from the project itself.
+      </h2>
+
+      <p class="rh-section-lead">
+        Briar documents direct device-to-device synchronisation, Bluetooth and
+        Wi-Fi operation during internet outages, removable-media transfer,
+        Tor-based internet communication, Briar Mailbox, private messaging,
+        forums and blogs.
+      </p>
+
+      <div class="rh-card" style="margin-top: var(--space-10);">
+        <p class="rh-card-text">
+          <strong>Primary source:</strong>
+          <a
+            href="https://briarproject.org/how-it-works/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="text-decoration: underline;"
+          >
+            Briar — How it works
+          </a>
+        </p>
+
+        <p class="rh-card-text" style="margin-top: var(--space-3);">
+          <strong>Last substantive review:</strong> 18 August 2026
+        </p>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/security">
+          Security model
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

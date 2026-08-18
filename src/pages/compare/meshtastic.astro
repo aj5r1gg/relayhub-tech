@@ -1,0 +1,464 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const strengths = [
+  {
+    title: "Low-power LoRa mesh",
+    text:
+      "Meshtastic is specifically designed around affordable, low-power LoRa devices for off-grid peer-to-peer communication.",
+  },
+  {
+    title: "No cell tower required",
+    text:
+      "The core mesh can operate without cellular infrastructure or internet connectivity.",
+  },
+  {
+    title: "Established ecosystem",
+    text:
+      "Meshtastic already has supported hardware, mobile applications, a web client, developer tooling, and a large contributor community.",
+  },
+  {
+    title: "Portable field use",
+    text:
+      "Small battery-powered radio devices make Meshtastic well suited to hiking, field teams, telemetry, location sharing, and portable off-grid communication.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary architecture",
+    meshtastic:
+      "A decentralised mesh network centred on low-power LoRa devices and associated clients.",
+    relayhub:
+      "A broader ecosystem of radio, household, and infrastructure nodes using Reticulum as the communications substrate.",
+  },
+  {
+    area: "Radio relationship",
+    meshtastic:
+      "LoRa is fundamental to the core mesh architecture.",
+    relayhub:
+      "Radio is one possible transport capability. Ethernet, Wi-Fi, IP, radio, and other validated paths may coexist.",
+  },
+  {
+    area: "Hardware model",
+    meshtastic:
+      "A broad ecosystem of supported Meshtastic devices with configurable node roles and clients.",
+    relayhub:
+      "Explicit hardware classes with different capability ceilings: Radio Micro, Nano Linux, Home, Strong Home, Infrastructure, and Mini PC.",
+  },
+  {
+    area: "Household appliance layer",
+    meshtastic:
+      "Provides clients and device configuration, but is not primarily designed as a general household infrastructure appliance platform.",
+    relayhub:
+      "Relay Home is specifically intended to provide QR onboarding, local web management, roles, updates, recovery, and plain-language operational state.",
+  },
+  {
+    area: "Policy model",
+    meshtastic:
+      "Uses its own configuration, role, channel, security, and module model.",
+    relayhub:
+      "Separates hardware capability, software capability, policy permission, trust permission, legal permission, user enablement, and runtime availability.",
+  },
+  {
+    area: "Recovery",
+    meshtastic:
+      "Device recovery and firmware management exist within the Meshtastic device ecosystem.",
+    relayhub:
+      "Recovery is a system-level product requirement covering identity preservation, rollback, degraded boot, guided recovery, reset, and ownership transfer.",
+  },
+  {
+    area: "Services beyond communication",
+    meshtastic:
+      "Primarily a communications and telemetry ecosystem.",
+    relayhub:
+      "Intended eventually to support local community services for knowledge, trust, coordination, trade, governance, assessment, and other applications.",
+  },
+];
+
+const chooseMeshtastic = [
+  "You mainly want low-power LoRa messaging.",
+  "You want small, portable, battery-powered devices.",
+  "Your use case is hiking, field communication, telemetry, tracking, or a community LoRa mesh.",
+  "You want an established open-source ecosystem that already has mature hardware and client options.",
+  "Meshtastic already solves the problem you actually have.",
+];
+
+const chooseRelayHub = [
+  "You want persistent household or community infrastructure rather than only portable radio nodes.",
+  "You want different hardware classes to perform different jobs.",
+  "You want the system to use more than one possible transport type.",
+  "You need explicit capability, policy, trust, legal, and runtime governance.",
+  "You want appliance-style onboarding, local management, updates, rollback, and guided recovery.",
+  "You eventually want local community services beyond communication alone.",
+];
+
+const coexistence = [
+  {
+    title: "Use both independently",
+    text:
+      "A household or field team could use Meshtastic for portable LoRa communication while using RelayHub infrastructure for other local communication and community services.",
+  },
+  {
+    title: "Do not assume compatibility",
+    text:
+      "Two useful systems are not automatically interoperable. Any direct RelayHub–Meshtastic bridge would need an explicit architecture, trust boundary, security model, resource policy, and validation.",
+  },
+  {
+    title: "Integrate only where useful",
+    text:
+      "RelayHub should not add a Meshtastic integration merely because it is technically possible. Integration should solve a real operational problem without weakening recovery, security, or reproducibility.",
+  },
+];
+
+const realityChecks = [
+  "Meshtastic is not obsolete because RelayHub exists.",
+  "RelayHub does not currently replace Meshtastic's mature low-power LoRa ecosystem.",
+  "A Radio Micro Node is not automatically equivalent to a Meshtastic node.",
+  "LoRa range varies with terrain, antenna, frequency, power, interference, installation, and regulatory limits.",
+  "Neither system should be described as guaranteeing message delivery.",
+  "Any future direct interoperability must be implemented and validated before it is advertised.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Meshtastic"
+  description="Compare RelayHub and Meshtastic: low-power LoRa mesh communication versus broader local-first household and community infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Meshtastic</p>
+
+      <h1 class="rh-title">
+        Meshtastic is very good at what it is designed to do.
+      </h1>
+
+      <p class="rh-subtitle">
+        Meshtastic is an established open-source, off-grid LoRa mesh ecosystem.
+        RelayHub is not trying to turn that into a weakness. The two projects begin
+        with different architectural questions and may be useful in different
+        circumstances.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The short answer</p>
+
+      <h2 class="rh-section-title">
+        LoRa mesh versus broader local infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Meshtastic is primarily designed to let affordable, low-power devices
+        communicate through a decentralised LoRa mesh without requiring cell
+        towers or internet connectivity.
+      </p>
+
+      <p class="rh-section-lead">
+        RelayHub is being designed as a wider infrastructure ecosystem in which
+        radio is one possible transport and different node classes provide
+        household, field, relay, gateway, delayed-delivery, recovery, and future
+        community-service capabilities.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Meshtastic is strong</p>
+
+      <h2 class="rh-section-title">
+        There are good reasons people use it.
+      </h2>
+
+      <p class="rh-section-lead">
+        A useful comparison starts by acknowledging the problem the other
+        technology already solves well.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The central distinction</p>
+
+      <h2 class="rh-section-title">
+        RelayHub starts one architectural layer higher.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub does not begin by assuming that every useful node is the same
+        type of radio device. It begins with hardware classes, capability ceilings,
+        policy, roles, operational modes, and runtime conditions.
+      </p>
+
+      <div class="rh-card rh-card-dark" style="margin-top: var(--space-10);">
+        <p class="rh-card-text">
+          Hardware class → capability ceiling → policy evaluation → role
+          enablement → operational mode → runtime activation.
+        </p>
+      </div>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-8);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Radio</h3>
+          <p class="rh-card-text">
+            Small radio-focused nodes for field relay and transport roles where
+            hardware, software, regional rules, policy, and validation allow.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Home</h3>
+          <p class="rh-card-text">
+            A household appliance target with local setup, QR onboarding,
+            browser management, status, updates, and recovery.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Infrastructure</h3>
+          <p class="rh-card-text">
+            Stronger operator-managed nodes for larger DTN queues, bridge,
+            gateway, observability, and community infrastructure roles where
+            separately validated.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Similar goals do not mean identical systems.
+      </h2>
+
+      <p class="rh-section-lead">
+        Both projects value infrastructure independence and resilient
+        communication, but their scope and operating models differ substantially.
+      </p>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Meshtastic
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.meshtastic}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Choose by requirement, not allegiance.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose Meshtastic when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseMeshtastic.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Possibly — but coexistence and integration are different things.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub does not need every useful technology to become a RelayHub
+        transport. Sometimes the simplest and most resilient answer is to operate
+        two useful systems independently.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        No fake advantages.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub's comparison standard applies to RelayHub as much as it applies
+        to Meshtastic.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Comparison claims should be traceable.
+      </h2>
+
+      <p class="rh-section-lead">
+        Meshtastic information on this page is based on current public
+        Meshtastic project documentation. Third-party capabilities should be
+        reviewed periodically as the project evolves.
+      </p>
+
+      <div class="rh-card" style="margin-top: var(--space-10);">
+        <p class="rh-card-text">
+          <strong>Primary source:</strong>
+          <a
+            href="https://meshtastic.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="text-decoration: underline;"
+          >
+            Meshtastic official website
+          </a>
+        </p>
+
+        <p class="rh-card-text" style="margin-top: var(--space-3);">
+          <strong>Last substantive review:</strong> 18 August 2026
+        </p>
+      </div>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          How RelayHub works
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

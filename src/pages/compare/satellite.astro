@@ -1,0 +1,472 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const examples = [
+  {
+    name: "Garmin inReach",
+    model: "Two-way satellite communication",
+    text:
+      "Garmin inReach supports two-way messaging beyond cellular coverage and interactive SOS through Garmin Response when used with an active satellite subscription.",
+  },
+  {
+    name: "SPOT X",
+    model: "Two-way satellite messenger",
+    text:
+      "SPOT X supports two-way satellite messaging, SOS, tracking, check-in, and standalone operation beyond reliable cellular coverage, subject to service and sky visibility.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary purpose",
+    satellite:
+      "Maintain contact beyond terrestrial cellular coverage, often for remote travel, field work, tracking, and emergency communication.",
+    relayhub:
+      "Provide locally controlled household and community infrastructure across local, radio, IP, delayed-delivery, and other validated paths.",
+  },
+  {
+    area: "Geographic reach",
+    satellite:
+      "Can operate far beyond local terrestrial infrastructure where the satellite service has coverage and the device has suitable sky visibility.",
+    relayhub:
+      "Reach depends on the actual local network, transports, peers, relays, gateways, and routes available.",
+  },
+  {
+    area: "Infrastructure ownership",
+    satellite:
+      "Depends on satellite constellations, service providers, subscription systems, and associated backend infrastructure.",
+    relayhub:
+      "Local nodes, identities, policy, recovery, and local services are intended to remain under household or community control.",
+  },
+  {
+    area: "Works beyond cell coverage",
+    satellite:
+      "Yes, this is a defining capability of the category.",
+    relayhub:
+      "Yes where non-cellular validated transports and reachable routes exist, but RelayHub does not claim satellite-like global reach by default.",
+  },
+  {
+    area: "Emergency/SOS service",
+    satellite:
+      "Many satellite communicators provide a dedicated SOS workflow tied to professional coordination services.",
+    relayhub:
+      "RelayHub must not claim equivalent emergency-service coverage unless a separately validated service exists.",
+  },
+  {
+    area: "Local peer-to-peer infrastructure",
+    satellite:
+      "Not the primary architecture. Satellite communicators are mainly endpoint devices using external satellite infrastructure.",
+    relayhub:
+      "Persistent local and community infrastructure is a core architectural goal.",
+  },
+  {
+    area: "Store-and-forward",
+    satellite:
+      "Message delivery can be delayed by satellite visibility and service conditions, but DTN-style community routing is not the defining architecture.",
+    relayhub:
+      "DTN/store-and-forward is an explicit architectural concern for intermittent connectivity.",
+  },
+  {
+    area: "Services beyond communication",
+    satellite:
+      "Typically focused on messaging, SOS, location, tracking, and related remote-safety functions.",
+    relayhub:
+      "Intended to support broader community services such as knowledge, trust, coordination, assessment, trade, and governance.",
+  },
+];
+
+const chooseSatellite = [
+  "You work or travel far beyond cellular coverage.",
+  "You need to reach people outside any surviving local network.",
+  "You need a commercial satellite messaging service.",
+  "You require a supported satellite SOS workflow.",
+  "You want a compact device designed specifically for remote-area communication.",
+];
+
+const chooseRelayHub = [
+  "Your main need is household or community-scale local infrastructure.",
+  "You want locally operated nodes and services under community control.",
+  "You want different hardware classes to perform different roles.",
+  "You need local-first operation, delayed delivery, policy, trust, recovery, and validation.",
+  "You want services beyond messaging and emergency contact.",
+];
+
+const complement = [
+  {
+    title: "Local communications",
+    text:
+      "RelayHub can handle local household or community communication and services where suitable local paths exist.",
+  },
+  {
+    title: "Beyond the local network",
+    text:
+      "A satellite communicator can provide a path to people and services far outside the local RelayHub network.",
+  },
+  {
+    title: "Different failure domains",
+    text:
+      "A local network and a satellite service depend on different infrastructure. Using both can reduce reliance on any one communication path.",
+  },
+];
+
+const realityChecks = [
+  "RelayHub does not replace satellite coverage.",
+  "Satellite communicators do not replace local community infrastructure.",
+  "Satellite messaging can be affected by sky visibility, terrain, device orientation, service availability, subscription state, and network conditions.",
+  "Satellite SOS should not be treated as identical to ordinary messaging.",
+  "RelayHub must not imply access to emergency-response services unless those services are separately implemented and validated.",
+  "The strongest resilience architecture may combine local infrastructure with an independent satellite path.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Satellite Communicators"
+  description="Compare RelayHub with satellite communicators such as Garmin inReach and SPOT X, including remote-area reach, SOS, local infrastructure, ownership, and resilience."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs satellite communicators</p>
+
+      <h1 class="rh-title">
+        Satellite solves a problem local infrastructure cannot.
+      </h1>
+
+      <p class="rh-subtitle">
+        Satellite communicators can maintain contact far beyond terrestrial
+        cellular coverage. RelayHub should not pretend that locally operated
+        terrestrial infrastructure can replace that capability.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What satellite communicators do well</p>
+
+      <h2 class="rh-section-title">
+        Communication beyond ordinary terrestrial coverage.
+      </h2>
+
+      <p class="rh-section-lead">
+        Satellite communicators are built for places where cellular and local
+        terrestrial networks are absent, unreliable, or simply too far away.
+      </p>
+
+      <p class="rh-section-lead">
+        Their value is not that they are infrastructure-independent. Their value
+        is that they depend on a different infrastructure layer: satellite
+        constellations and associated service networks.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Current examples</p>
+
+      <h2 class="rh-section-title">
+        Garmin inReach and SPOT X illustrate the category.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {examples.map((item) => (
+          <article class="rh-card">
+            <p class="rh-kicker">{item.model}</p>
+            <h3 class="rh-card-title">{item.name}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        Local resilience and remote reach are complementary.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub focuses on locally controlled infrastructure for households and
+        communities. Satellite communication focuses on reaching beyond the local
+        terrestrial environment.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Local-first</h3>
+          <p class="rh-card-text">
+            RelayHub aims to preserve useful local operation even when wider
+            internet or cellular paths disappear.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Beyond terrestrial coverage</h3>
+          <p class="rh-card-text">
+            Satellite systems provide another route when there is no usable local
+            carrier or terrestrial network path.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Independent paths</h3>
+          <p class="rh-card-text">
+            Combining local infrastructure with satellite communication can
+            provide stronger resilience than expecting either system to solve
+            every problem.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Different reach, different dependency model.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Satellite communicator
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.satellite}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Choose by failure domain.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose satellite when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseSatellite.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The stronger architecture</p>
+
+      <h2 class="rh-section-title">
+        The answer may be both.
+      </h2>
+
+      <p class="rh-section-lead">
+        Local-first community infrastructure and satellite messaging solve
+        different communication problems and fail in different ways.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {complement.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Satellite is powerful, not magical.
+      </h2>
+
+      <p class="rh-section-lead">
+        Remote reach still depends on hardware, satellite visibility, service
+        infrastructure, subscriptions, backend systems, and operating conditions.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Current satellite claims are sourced to the manufacturers.
+      </h2>
+
+      <p class="rh-section-lead">
+        Garmin currently documents two-way inReach messaging beyond cellular
+        coverage and interactive SOS through Garmin Response with an active
+        satellite subscription. SPOT currently documents SPOT X two-way satellite
+        messaging, SOS, tracking, and standalone use beyond reliable cellular
+        coverage.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Garmin inReach</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.garmin.com/en-AU/inreach-professional/two-way-messaging/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Garmin inReach two-way messaging
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Verified architecture point: two-way messaging can operate beyond
+            cellular coverage through the inReach satellite service.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">SPOT X</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://www.findmespot.com/en-au/products-services/spot-x"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              SPOT X
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Verified architecture point: two-way satellite messaging and SOS
+            beyond reliable cellular coverage, subject to active service.
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          How RelayHub works
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,512 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const examples = [
+  {
+    name: "Signal",
+    category: "Private internet messaging",
+    text:
+      "Signal provides end-to-end encrypted messaging and calling over internet connections such as Wi-Fi or mobile data. Its servers can queue encrypted messages for devices that are temporarily offline.",
+  },
+  {
+    name: "Telegram",
+    category: "Cloud messaging",
+    text:
+      "Telegram's normal cloud chats are stored on Telegram infrastructure so users can access them across devices. Secret Chats use a separate end-to-end encrypted device-specific model.",
+  },
+  {
+    name: "Discord",
+    category: "Online community communication",
+    text:
+      "Discord provides internet-based text, voice, video, channels, and community spaces through its hosted platform.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary operating model",
+    internet:
+      "Applications connect users through internet-accessible service infrastructure operated by the provider.",
+    relayhub:
+      "Local-first infrastructure is intended to preserve useful household and community operation even when wider internet services are unavailable.",
+  },
+  {
+    area: "Internet dependency",
+    internet:
+      "Normal operation generally requires a working internet path to the relevant service.",
+    relayhub:
+      "Internet may enhance operation but is not intended to be a hidden requirement for core local setup, status, recovery, and supported local communication.",
+  },
+  {
+    area: "Local operation during WAN failure",
+    internet:
+      "Functionality is normally substantially reduced or unavailable when the service cannot be reached.",
+    relayhub:
+      "A loss of wider connectivity should result in LOCAL_ONLY or another understandable degraded state where useful local capability remains.",
+  },
+  {
+    area: "Infrastructure ownership",
+    internet:
+      "Users operate endpoint devices while service infrastructure is primarily operated by external organisations.",
+    relayhub:
+      "Households and communities are intended to operate meaningful portions of their own local infrastructure.",
+  },
+  {
+    area: "Ease of use",
+    internet:
+      "Often excellent. Mainstream platforms benefit from mature applications, polished onboarding, global infrastructure, and large user bases.",
+    relayhub:
+      "Targets similarly understandable appliance behaviour, but must prove that usability through validation rather than assuming it.",
+  },
+  {
+    area: "Privacy",
+    internet:
+      "Varies significantly by platform. Central-service dependency does not by itself determine whether message content is end-to-end encrypted.",
+    relayhub:
+      "Privacy claims must distinguish encryption, metadata exposure, trust, RF observability, physical risk, and anonymity rather than using one blanket claim.",
+  },
+  {
+    area: "Delayed delivery",
+    internet:
+      "Providers often queue or store messages while recipients are temporarily offline.",
+    relayhub:
+      "DTN/store-and-forward is designed for broader intermittent connectivity where entire network paths may disappear and later reappear.",
+  },
+  {
+    area: "Community services",
+    internet:
+      "Hosted platforms already provide highly capable messaging, groups, forums, files, events, marketplaces, knowledge systems, and many other services.",
+    relayhub:
+      "Aims eventually to provide selected local-first community services that remain useful without continuous dependence on central hosted infrastructure.",
+  },
+];
+
+const chooseInternet = [
+  "Reliable internet access is normally available.",
+  "The platform already solves your communication or community problem well.",
+  "Global reach, mature apps, polished UX, and a large existing user base are more important than local infrastructure ownership.",
+  "You do not need useful local operation during internet outages.",
+  "You prefer a managed service to operating local infrastructure.",
+];
+
+const chooseRelayHub = [
+  "Local operation must remain useful when internet access disappears.",
+  "You want households or communities to operate meaningful infrastructure themselves.",
+  "You need multiple transport possibilities, including non-internet paths where validated.",
+  "You need store-and-forward behaviour designed for intermittent networks.",
+  "You require explicit recovery, rollback, capability, trust, policy, and hardware-class governance.",
+  "You want future community services that can continue locally without a cloud dependency.",
+];
+
+const lessons = [
+  {
+    title: "Usability matters",
+    text:
+      "Mainstream platforms succeed partly because users can install an app and communicate immediately. RelayHub must approach that level of usability despite a much more complicated underlying environment.",
+  },
+  {
+    title: "Infrastructure can be extremely valuable",
+    text:
+      "Cloud and carrier infrastructure provide enormous reach, reliability, convenience, storage, synchronisation, and operational capacity. RelayHub should use internet connectivity where it adds value rather than rejecting it ideologically.",
+  },
+  {
+    title: "Encryption and architecture are separate questions",
+    text:
+      "Signal is a good example: it relies on internet-accessible service infrastructure while still providing strong end-to-end encryption for message content.",
+  },
+  {
+    title: "Failure should not be binary",
+    text:
+      "RelayHub's advantage should not be that it never fails. It should be that loss of one external service or transport does not unnecessarily destroy all local capability.",
+  },
+];
+
+const realityChecks = [
+  "RelayHub is not intended to replace the internet.",
+  "A centralised or hosted platform is not automatically insecure.",
+  "A local-first platform is not automatically private or anonymous.",
+  "Mainstream platforms currently have vastly more mature applications, infrastructure, operational experience, and user adoption than RelayHub.",
+  "Internet services can be the best communication path while they are available.",
+  "RelayHub only adds value if useful local capability survives when those remote dependencies are absent.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Conventional Internet Platforms"
+  description="Compare RelayHub with conventional internet platforms such as Signal, Telegram, and Discord: cloud reach and mature usability versus local-first operation and community-owned infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs internet platforms</p>
+
+      <h1 class="rh-title">
+        The internet is useful. Dependence is the issue.
+      </h1>
+
+      <p class="rh-subtitle">
+        Signal, Telegram, Discord, and other internet platforms can provide
+        extraordinary communication and community capabilities. RelayHub is not
+        being built because the internet is bad. It is being built because useful
+        local capability should not disappear merely because the internet does.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">The ordinary model</p>
+
+      <h2 class="rh-section-title">
+        Your device connects to infrastructure somewhere else.
+      </h2>
+
+      <p class="rh-section-lead">
+        Most modern communication platforms give users an extremely simple
+        experience because difficult infrastructure problems are handled remotely.
+        Users install an application, create or access an account, and communicate
+        through provider-operated systems.
+      </p>
+
+      <p class="rh-section-lead">
+        That architecture can be highly effective. It also means that local users
+        usually depend on a functioning path to external infrastructure for normal
+        operation.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Different internet models</p>
+
+      <h2 class="rh-section-title">
+        “Internet platform” does not mean one security model.
+      </h2>
+
+      <p class="rh-section-lead">
+        Signal, Telegram, and Discord illustrate why dependency architecture,
+        privacy, encryption, and service design should not be collapsed into one
+        simplistic category.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {examples.map((item) => (
+          <article class="rh-card">
+            <p class="rh-kicker">{item.category}</p>
+            <h3 class="rh-card-title">{item.name}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The central distinction</p>
+
+      <h2 class="rh-section-title">
+        Local-first does not mean internet-hostile.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should use internet connectivity when it improves communication,
+        reach, synchronisation, updates, or access to services. The architectural
+        rule is simply that remote capability should not silently replace local
+        capability where local operation is supposed to exist.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Internet available</h3>
+          <p class="rh-card-text">
+            Use validated internet-assisted paths where they improve reach or
+            performance and policy permits them.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Internet unavailable</h3>
+          <p class="rh-card-text">
+            Preserve local setup, dashboard, recovery, status, and supported local
+            communication instead of treating the entire node as failed.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Internet restored</h3>
+          <p class="rh-card-text">
+            Resume wider paths and synchronisation safely without making the
+            temporary outage a catastrophic system event.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Remote service dependency versus local capability.
+      </h2>
+
+      <div
+        style="
+          margin-top: var(--space-10);
+          overflow-x: auto;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-2xl);
+          background: var(--rh-white);
+        "
+      >
+        <table
+          style="
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            text-align: left;
+          "
+        >
+          <thead>
+            <tr>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Area
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                Conventional internet platform
+              </th>
+              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                RelayHub
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {differences.map((item) => (
+              <tr>
+                <th
+                  scope="row"
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    vertical-align: top;
+                  "
+                >
+                  {item.area}
+                </th>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.internet}
+                </td>
+
+                <td
+                  style="
+                    padding: var(--space-5);
+                    border-bottom: 1px solid var(--color-border);
+                    color: var(--color-text-muted);
+                    line-height: 1.7;
+                    vertical-align: top;
+                  "
+                >
+                  {item.relayhub}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Keep using what works.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Use conventional platforms when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseInternet.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub should learn</p>
+
+      <h2 class="rh-section-title">
+        Mainstream platforms solve difficult problems extremely well.
+      </h2>
+
+      <p class="rh-section-lead">
+        RelayHub should not confuse resilience with rejecting decades of useful
+        product and infrastructure lessons.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Local-first is a resilience property, not a moral judgement.
+      </h2>
+
+      <p class="rh-section-lead">
+        Central infrastructure can provide outstanding reliability, security,
+        usability, and reach. RelayHub's purpose is to preserve additional useful
+        capability when those systems cannot be reached.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Platform behaviour is sourced to current provider documentation.
+      </h2>
+
+      <p class="rh-section-lead">
+        The examples on this page illustrate different internet-service models.
+        They should not be interpreted as having equivalent privacy, security,
+        storage, or trust architectures.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Signal</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://support.signal.org/hc/en-us/articles/360008216551-Installing-Signal"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Signal Support
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Current documentation describes Signal-to-Signal communication as
+            end-to-end encrypted and carried over an internet connection.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Telegram</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://telegram.org/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Telegram Privacy Policy
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Telegram documents cloud storage for normal Cloud Chats and a separate
+            end-to-end encrypted Secret Chat model.
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Discord</h3>
+
+          <p class="rh-card-text">
+            <a
+              href="https://support.discord.com/hc/en-us/articles/360045138571-Beginner-s-Guide-to-Discord"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Discord Beginner's Guide
+            </a>
+          </p>
+
+          <p class="rh-card-text" style="margin-top: var(--space-3);">
+            Discord documents a hosted communication platform providing text,
+            voice, video, channels, and community spaces.
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>18 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/how-it-works">
+          How RelayHub works
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
