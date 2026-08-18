@@ -5,6 +5,7 @@ const comparisons = [
   {
     name: "Meshtastic",
     category: "LoRa mesh communication",
+    family: "radio",
     description:
       "Low-power, off-grid LoRa mesh communication for portable devices, messaging, telemetry, and location.",
     distinction:
@@ -14,6 +15,7 @@ const comparisons = [
   {
     name: "MeshCore",
     category: "LoRa mesh communication",
+    family: "radio",
     description:
       "A decentralised LoRa communications ecosystem with companion nodes, repeaters, standalone devices, and increasingly capable mesh infrastructure tooling.",
     distinction:
@@ -23,6 +25,7 @@ const comparisons = [
   {
     name: "LoRaWAN",
     category: "Low-power wide-area IoT",
+    family: "radio",
     description:
       "A standardised low-power wide-area networking architecture for sensors, meters, trackers, actuators, and other constrained devices using LoRa radio and gateway-to-server infrastructure.",
     distinction:
@@ -32,6 +35,7 @@ const comparisons = [
   {
     name: "Amateur Radio",
     category: "Licensed radio communication",
+    family: "radio",
     description:
       "A long-established radio service supporting communication, experimentation, repeaters, digital modes, field operation, and technical learning under jurisdiction-specific rules.",
     distinction:
@@ -41,6 +45,7 @@ const comparisons = [
   {
     name: "Reticulum ecosystem",
     category: "Resilient networking and applications",
+    family: "reticulum",
     description:
       "Reticulum and applications such as Sideband, Nomad Network, and other compatible tools already provide resilient communication capabilities.",
     distinction:
@@ -50,6 +55,7 @@ const comparisons = [
   {
     name: "Sideband",
     category: "Reticulum messaging and telephony",
+    family: "reticulum",
     description:
       "A graphical Reticulum client for LXMF messaging, LXST voice, files, telemetry, mapping, remote interaction, and communication across multiple Reticulum transports.",
     distinction:
@@ -59,6 +65,7 @@ const comparisons = [
   {
     name: "Nomad Network",
     category: "Reticulum messaging and information services",
+    family: "reticulum",
     description:
       "A Reticulum and LXMF application providing messaging, delayed delivery, hosted pages and files, distributed message storage, and low-bandwidth text-based network interaction.",
     distinction:
@@ -68,6 +75,7 @@ const comparisons = [
   {
     name: "Cellular push-to-talk",
     category: "Carrier-assisted communication",
+    family: "external",
     description:
       "Products such as Echo Radio and Poclink provide simple push-to-talk communication, commonly using cellular infrastructure and, in some products, additional direct-radio capability.",
     distinction:
@@ -77,6 +85,7 @@ const comparisons = [
   {
     name: "Satellite communicators",
     category: "Remote-area communication",
+    family: "external",
     description:
       "Satellite communicators provide messaging and other supported services beyond terrestrial cellular coverage.",
     distinction:
@@ -86,6 +95,7 @@ const comparisons = [
   {
     name: "Briar",
     category: "Peer-to-peer messaging",
+    family: "applications",
     description:
       "A decentralised messaging application designed to communicate without relying on central messaging servers and to support nearby offline communication.",
     distinction:
@@ -95,11 +105,47 @@ const comparisons = [
   {
     name: "Conventional internet platforms",
     category: "Cloud and centralised services",
+    family: "applications",
     description:
       "Mainstream messaging, coordination, marketplace, knowledge, and community platforms generally provide excellent usability while their required infrastructure remains reachable.",
     distinction:
       "RelayHub is not intended to replace the internet. It is intended to reduce total dependence on centralised, continuously reachable services for useful local operation.",
     href: "/compare/conventional-platforms",
+  },
+];
+
+const families = [
+  {
+    id: "radio",
+    kicker: "Radio & LoRa",
+    title: "Radio systems and low-power networks",
+    description:
+      "These comparisons look at systems where radio is central to the architecture — from portable LoRa meshes and IoT networks to licensed amateur-radio infrastructure.",
+    grid: "rh-grid-2",
+  },
+  {
+    id: "reticulum",
+    kicker: "Reticulum ecosystem",
+    title: "The technologies RelayHub is built alongside",
+    description:
+      "These are especially important comparisons because RelayHub uses Reticulum rather than replacing it. Existing Reticulum applications may provide capabilities that RelayHub should integrate with instead of rebuilding.",
+    grid: "rh-grid-3",
+  },
+  {
+    id: "external",
+    kicker: "External infrastructure",
+    title: "Wide-area services beyond local infrastructure",
+    description:
+      "Carrier and satellite systems can provide reach that locally operated infrastructure cannot reproduce. The important question is where those services complement RelayHub and where dependency on external infrastructure matters.",
+    grid: "rh-grid-2",
+  },
+  {
+    id: "applications",
+    kicker: "Applications & internet platforms",
+    title: "Software services and conventional online platforms",
+    description:
+      "These comparisons separate the application experience from the infrastructure underneath it, including decentralised messaging and the centralised internet services people already use every day.",
+    grid: "rh-grid-2",
   },
 ];
 
@@ -125,6 +171,9 @@ const principles = [
       "RelayHub should coexist with useful infrastructure and technologies wherever practical instead of demanding that users abandon systems that already work.",
   },
 ];
+
+const getFamilyComparisons = (family) =>
+  comparisons.filter((item) => item.family === family);
 ---
 
 <BaseLayout
@@ -172,31 +221,80 @@ const principles = [
         the people, environment, failure conditions, and operational requirements.
       </p>
 
-      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
-        {comparisons.map((item) => (
-          <article class="rh-card">
-            <p class="rh-kicker">{item.category}</p>
-
-            <h3 class="rh-card-title">{item.name}</h3>
-
-            <p class="rh-card-text">
-              {item.description}
-            </p>
-
-            <p class="rh-card-text" style="margin-top: var(--space-5);">
-              <strong>Key distinction:</strong> {item.distinction}
-            </p>
-
-            <div class="rh-actions" style="margin-top: var(--space-6);">
-              <a class="rh-button rh-button-secondary" href={item.href}>
-                Compare
-              </a>
-            </div>
-          </article>
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {families.map((family) => (
+          <a
+            class="rh-card"
+            href={`#${family.id}`}
+            style="text-decoration: none;"
+          >
+            <p class="rh-kicker">{family.kicker}</p>
+            <h3 class="rh-card-title">{family.title}</h3>
+            <p class="rh-card-text">{family.description}</p>
+          </a>
         ))}
       </div>
     </div>
   </section>
+
+  {families.map((family, index) => {
+    const items = getFamilyComparisons(family.id);
+
+    return (
+      <section
+        class={`rh-section ${index % 2 === 0 ? "rh-bg-soft" : ""}`}
+        id={family.id}
+      >
+        <div class="rh-container">
+          <p class="rh-kicker">{family.kicker}</p>
+
+          <h2 class="rh-section-title">
+            {family.title}
+          </h2>
+
+          <p class="rh-section-lead">
+            {family.description}
+          </p>
+
+          <div
+            class={`rh-grid ${family.grid}`}
+            style="margin-top: var(--space-10);"
+          >
+            {items.map((item) => (
+              <article class="rh-card">
+                <p class="rh-kicker">{item.category}</p>
+
+                <h3 class="rh-card-title">{item.name}</h3>
+
+                <p class="rh-card-text">
+                  {item.description}
+                </p>
+
+                <p
+                  class="rh-card-text"
+                  style="margin-top: var(--space-5);"
+                >
+                  <strong>Key distinction:</strong> {item.distinction}
+                </p>
+
+                <div
+                  class="rh-actions"
+                  style="margin-top: var(--space-6);"
+                >
+                  <a
+                    class="rh-button rh-button-secondary"
+                    href={item.href}
+                  >
+                    Compare
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  })}
 
   <section class="rh-section rh-dark">
     <div class="rh-container">
@@ -216,6 +314,7 @@ const principles = [
       <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
         <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Multiple hardware classes</h3>
+
           <p class="rh-card-text">
             Small radio nodes, household appliances, stronger home nodes, and
             infrastructure nodes have different capability ceilings and roles.
@@ -224,6 +323,7 @@ const principles = [
 
         <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Multiple operating conditions</h3>
+
           <p class="rh-card-text">
             Local-only, internet-assisted, offline, radio-assisted, degraded,
             household, field, and community infrastructure operation are treated
@@ -233,6 +333,7 @@ const principles = [
 
         <article class="rh-card rh-card-dark">
           <h3 class="rh-card-title">Recovery is part of the product</h3>
+
           <p class="rh-card-text">
             Rollback, identity preservation, degraded boot behaviour, offline
             recovery, safe reset, and understandable recovery access are
