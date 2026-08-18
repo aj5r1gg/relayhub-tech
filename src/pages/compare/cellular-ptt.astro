@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
 
 const examples = [
   {
@@ -74,6 +75,12 @@ const differences = [
       "Intended eventually to support broader local community services in addition to communication.",
   },
 ];
+
+const comparisonRows = differences.map((item) => ({
+  area: item.area,
+  left: item.cellular,
+  right: item.relayhub,
+}));
 
 const chooseCellular = [
   "Your main requirement is simple push-to-talk voice.",
@@ -258,79 +265,10 @@ const complementaryUses = [
         Similar user experience, different dependency model.
       </h2>
 
-      <div
-        style="
-          margin-top: var(--space-10);
-          overflow-x: auto;
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-2xl);
-          background: var(--rh-white);
-        "
-      >
-        <table
-          style="
-            width: 100%;
-            min-width: 760px;
-            border-collapse: collapse;
-            text-align: left;
-          "
-        >
-          <thead>
-            <tr>
-              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
-                Area
-              </th>
-              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
-                Cellular PTT
-              </th>
-              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
-                RelayHub
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {differences.map((item) => (
-              <tr>
-                <th
-                  scope="row"
-                  style="
-                    padding: var(--space-5);
-                    border-bottom: 1px solid var(--color-border);
-                    vertical-align: top;
-                  "
-                >
-                  {item.area}
-                </th>
-
-                <td
-                  style="
-                    padding: var(--space-5);
-                    border-bottom: 1px solid var(--color-border);
-                    color: var(--color-text-muted);
-                    line-height: 1.7;
-                    vertical-align: top;
-                  "
-                >
-                  {item.cellular}
-                </td>
-
-                <td
-                  style="
-                    padding: var(--space-5);
-                    border-bottom: 1px solid var(--color-border);
-                    color: var(--color-text-muted);
-                    line-height: 1.7;
-                    vertical-align: top;
-                  "
-                >
-                  {item.relayhub}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ComparisonTable
+        leftHeading="Cellular PTT"
+        rows={comparisonRows}
+      />
     </div>
   </section>
 

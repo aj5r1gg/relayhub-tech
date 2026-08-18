@@ -1,7 +1,30 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const comparisons = [
+type ComparisonFamily =
+  | "radio"
+  | "reticulum"
+  | "external"
+  | "applications";
+
+interface ComparisonItem {
+  name: string;
+  category: string;
+  family: ComparisonFamily;
+  description: string;
+  distinction: string;
+  href: string;
+}
+
+interface ComparisonFamilyDefinition {
+  id: ComparisonFamily;
+  kicker: string;
+  title: string;
+  description: string;
+  grid: string;
+}
+
+const comparisons: ComparisonItem[] = [
   {
     name: "Meshtastic",
     category: "LoRa mesh communication",
@@ -114,7 +137,7 @@ const comparisons = [
   },
 ];
 
-const families = [
+const families: ComparisonFamilyDefinition[] = [
   {
     id: "radio",
     kicker: "Radio & LoRa",
@@ -172,7 +195,7 @@ const principles = [
   },
 ];
 
-const getFamilyComparisons = (family) =>
+const getFamilyComparisons = (family: ComparisonFamily) =>
   comparisons.filter((item) => item.family === family);
 ---
 

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
 
 const strengths = [
   {
@@ -75,6 +76,12 @@ const differences = [
       "Intended eventually to support local community services for knowledge, trust, coordination, trade, governance, assessment, and other applications.",
   },
 ];
+
+const comparisonRows = differences.map((item) => ({
+  area: item.area,
+  left: item.meshtastic,
+  right: item.relayhub,
+}));
 
 const chooseMeshtastic = [
   "You mainly want low-power LoRa messaging.",
@@ -262,79 +269,10 @@ const realityChecks = [
         communication, but their scope and operating models differ substantially.
       </p>
 
-      <div
-        style="
-          margin-top: var(--space-10);
-          overflow-x: auto;
-          border: 1px solid var(--color-border);
-          border-radius: var(--radius-2xl);
-          background: var(--rh-white);
-        "
-      >
-        <table
-          style="
-            width: 100%;
-            min-width: 760px;
-            border-collapse: collapse;
-            text-align: left;
-          "
-        >
-          <thead>
-            <tr>
-              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
-                Area
-              </th>
-              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
-                Meshtastic
-              </th>
-              <th style="padding: var(--space-5); border-bottom: 1px solid var(--color-border);">
-                RelayHub
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {differences.map((item) => (
-              <tr>
-                <th
-                  scope="row"
-                  style="
-                    padding: var(--space-5);
-                    border-bottom: 1px solid var(--color-border);
-                    vertical-align: top;
-                  "
-                >
-                  {item.area}
-                </th>
-
-                <td
-                  style="
-                    padding: var(--space-5);
-                    border-bottom: 1px solid var(--color-border);
-                    color: var(--color-text-muted);
-                    line-height: 1.7;
-                    vertical-align: top;
-                  "
-                >
-                  {item.meshtastic}
-                </td>
-
-                <td
-                  style="
-                    padding: var(--space-5);
-                    border-bottom: 1px solid var(--color-border);
-                    color: var(--color-text-muted);
-                    line-height: 1.7;
-                    vertical-align: top;
-                  "
-                >
-                  {item.relayhub}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ComparisonTable
+        leftHeading="Meshtastic"
+        rows={comparisonRows}
+      />
     </div>
   </section>
 
