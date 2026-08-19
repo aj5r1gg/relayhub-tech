@@ -517,7 +517,6 @@ async function insertAccessRequest({
   ipHash,
   termsAccepted,
   risk,
-  intakeEvaluation,
   verificationTokenHash,
   verificationExpiresAt,
   invitation,
@@ -733,20 +732,6 @@ async function safelySendVerificationEmail({
       result,
       recorded,
     };
-    
-    await recordCdasEmailEvent(env, {
-      relatedType: "access_request",
-      relatedId: requestId,
-      emailType: "verification_email",
-      recipientEmail: emailNormalised,
-      subject: `Verify your email for ${document.title}`,
-      emailResult: emailDelivery.result,
-      metadata: {
-        document_id: document.id,
-        document_version: document.version,
-        request_status: status,
-      },
-    });
   }
 }
 
@@ -980,7 +965,6 @@ export async function handleDocumentAccessRequest(request, env) {
     ipHash,
     termsAccepted,
     risk,
-    intakeEvaluation,
     verificationTokenHash,
     verificationExpiresAt,
     invitation,
@@ -994,6 +978,20 @@ export async function handleDocumentAccessRequest(request, env) {
     verificationUrl,
     recipientEmail: emailNormalised,
     document,
+  });
+
+  await recordCdasEmailEvent(env, {
+    relatedType: "access_request",
+    relatedId: requestId,
+    emailType: "verification_email",
+    recipientEmail: emailNormalised,
+    subject: `Verify your email for ${document.title}`,
+    emailResult: emailDelivery.result,
+    metadata: {
+      document_id: document.id,
+      document_version: document.version,
+      request_status: status,
+    },
   });
 
   const responsePayload = {
