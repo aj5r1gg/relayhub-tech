@@ -247,6 +247,7 @@ const structuredData = {
     <!-- Structured data -->
 
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify(structuredData)}
     />
@@ -266,6 +267,7 @@ const structuredData = {
     <!-- Cloudflare Web Analytics -->
 
     <script
+      is:inline
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
       data-cf-beacon='{"token":"902ca9303a2f43a89b7cb493e3c570ce"}'
@@ -274,6 +276,7 @@ const structuredData = {
     <!-- Cloudflare Turnstile -->
 
     <script
+      is:inline
       src="https://challenges.cloudflare.com/turnstile/v0/api.js"
       async
       defer
