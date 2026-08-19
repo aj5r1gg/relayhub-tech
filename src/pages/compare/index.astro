@@ -136,6 +136,26 @@ const comparisons: ComparisonItem[] = [
     href: "/compare/session",
   },
   {
+    name: "SimpleX",
+    category: "Identifier-minimising private messaging",
+    family: "applications",
+    description:
+      "A decentralised private messenger that avoids global user identifiers, uses pairwise anonymous message queues, stores user data locally, and supports configurable or self-hosted relay infrastructure.",
+    distinction:
+      "SimpleX minimises identity and metadata exposure within a private relay-based messaging network. RelayHub instead focuses on locally operated communications infrastructure across heterogeneous Reticulum transports.",
+    href: "/compare/simplex",
+  },
+  {
+    name: "Element",
+    category: "Federated Matrix communications",
+    family: "applications",
+    description:
+      "A Matrix-based secure communications and collaboration platform supporting self-hosted infrastructure, federation, end-to-end encryption, and isolated deployments.",
+    distinction:
+      "Element decentralises communications through independently operated Matrix homeservers. RelayHub decentralises the underlying communication paths across local, IP, radio, and other validated transports.",
+    href: "/compare/element",
+  },
+  {
     name: "Briar",
     category: "Peer-to-peer messaging",
     family: "applications",
@@ -187,7 +207,7 @@ const families: ComparisonFamilyDefinition[] = [
     kicker: "Applications & internet platforms",
     title: "Software services and conventional online platforms",
     description:
-      "These comparisons separate applications from the infrastructure underneath them, including private internet messaging, decentralised messaging, peer-to-peer communication and the conventional online platforms people already use every day.",
+      "These comparisons separate applications from the infrastructure underneath them, including private internet messaging, decentralised relay networks, federated communications, peer-to-peer messaging and the conventional online platforms people already use every day.",
     grid: "rh-grid-2",
   },
 ];
@@ -221,7 +241,7 @@ const getFamilyComparisons = (family: ComparisonFamily) =>
 
 <BaseLayout
   title="Compare RelayHub"
-  description="Compare RelayHub with Meshtastic, MeshCore, LoRaWAN, amateur radio, Reticulum, Sideband, Nomad Network, cellular push-to-talk, satellite communicators, Signal, Session, Briar, and conventional internet platforms."
+  description="Compare RelayHub with Meshtastic, MeshCore, LoRaWAN, amateur radio, Reticulum, Sideband, Nomad Network, cellular push-to-talk, satellite communicators, Signal, Session, SimpleX, Element, Briar, and conventional internet platforms."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">

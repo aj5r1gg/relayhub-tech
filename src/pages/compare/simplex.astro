@@ -1,0 +1,493 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
+
+const strengths = [
+  {
+    title: "No global user identifiers",
+    text:
+      "SimpleX does not assign users phone numbers, usernames, public keys, random IDs or other global profile identifiers for message delivery.",
+  },
+  {
+    title: "Pairwise connection addresses",
+    text:
+      "Communication uses separate anonymous queue addresses for individual connections rather than one reusable global address shared across all contacts.",
+  },
+  {
+    title: "Local-first user data",
+    text:
+      "Profiles, contacts and message history are stored on user devices rather than being maintained as user accounts on relay servers.",
+  },
+  {
+    title: "Temporary relay storage",
+    text:
+      "Relay servers hold end-to-end encrypted messages only while recipients are offline and remove them after delivery or expiry.",
+  },
+  {
+    title: "Relay choice and self-hosting",
+    text:
+      "Users can choose which SimpleX relay servers they use and can operate their own SMP servers instead of depending on one mandatory provider.",
+  },
+  {
+    title: "Strong metadata-minimisation goals",
+    text:
+      "The architecture deliberately reduces the ability of relay operators to correlate user profiles, contacts and communication relationships.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary architecture",
+    simplex:
+      "A decentralised messaging network using anonymous unidirectional queues and relay servers without global user identifiers.",
+    relayhub:
+      "An ecosystem of persistent radio, household and infrastructure nodes using Reticulum across heterogeneous communications transports.",
+  },
+  {
+    area: "Primary purpose",
+    simplex:
+      "Private messaging and related communication with strong emphasis on identity and metadata minimisation.",
+    relayhub:
+      "Local-first communications infrastructure intended to support communication and broader community services.",
+  },
+  {
+    area: "Identity",
+    simplex:
+      "Does not require a global user identifier for routing messages. Local profiles exist only on the user's device.",
+    relayhub:
+      "Uses Reticulum and RelayHub identities governed through node ownership, trust, recovery and product lifecycle controls.",
+  },
+  {
+    area: "Connection model",
+    simplex:
+      "Uses pairwise anonymous message queues and invitation links or addresses to establish communication.",
+    relayhub:
+      "Uses Reticulum destinations and paths across whatever transports are available and permitted.",
+  },
+  {
+    area: "Message routing",
+    simplex:
+      "Messages are relayed through SimpleX SMP infrastructure selected by users and contacts.",
+    relayhub:
+      "Messages may traverse local, radio, IP and other validated Reticulum transports without requiring one specific relay-network architecture.",
+  },
+  {
+    area: "Message storage",
+    simplex:
+      "Message history remains on user devices; relay servers temporarily retain encrypted undelivered messages.",
+    relayhub:
+      "DTN and store-and-forward behaviour are intended to operate across persistent household and infrastructure nodes according to policy and capability.",
+  },
+  {
+    area: "Internet dependency",
+    simplex:
+      "Normal SimpleX operation depends on Internet connectivity to reach SMP relay infrastructure.",
+    relayhub:
+      "Internet connectivity may be one path but is not intended to be mandatory for supported local or radio-assisted operation.",
+  },
+  {
+    area: "Transport diversity",
+    simplex:
+      "The SimpleX application network runs over Internet connectivity between clients and relay infrastructure.",
+    relayhub:
+      "Reticulum can operate across multiple separately validated media such as Ethernet, Wi-Fi, local IP, serial and radio transports.",
+  },
+  {
+    area: "Persistent infrastructure",
+    simplex:
+      "Relay infrastructure may be operated by SimpleX providers, third parties or users themselves.",
+    relayhub:
+      "Households and communities are intended to own and operate persistent communications nodes as a normal part of the architecture.",
+  },
+  {
+    area: "Recovery model",
+    simplex:
+      "Profiles and communication state are local to devices and must be backed up or transferred according to SimpleX's application lifecycle.",
+    relayhub:
+      "Recovery includes operating-system rollback, identity preservation, degraded boot, offline recovery, guided reset and ownership transfer.",
+  },
+  {
+    area: "Service scope",
+    simplex:
+      "Primarily a private messaging platform and relay network.",
+    relayhub:
+      "Infrastructure intended eventually to support communication plus wider local community services, subject to implementation and validation.",
+  },
+];
+
+const comparisonRows = differences.map((item) => ({
+  area: item.area,
+  left: item.simplex,
+  right: item.relayhub,
+}));
+
+const chooseSimpleX = [
+  "Your primary requirement is private internet messaging.",
+  "You want to avoid global user identifiers such as phone numbers or usernames.",
+  "You value pairwise connection addresses and strong metadata-minimisation architecture.",
+  "You want the option to select or self-host messaging relay infrastructure.",
+  "You do not need communications to continue when Internet connectivity is unavailable.",
+  "SimpleX already solves your privacy and messaging requirements.",
+];
+
+const chooseRelayHub = [
+  "Communication must remain useful without conventional Internet connectivity.",
+  "You need radio-assisted, local or other non-Internet communication paths.",
+  "You want persistent household or community infrastructure rather than only user-device applications.",
+  "You need heterogeneous node classes with different capability ceilings.",
+  "You require transport and role activation to be governed by policy, trust, legal state, user enablement and runtime availability.",
+  "You want infrastructure intended to support broader local services beyond private messaging.",
+];
+
+const coexistence = [
+  {
+    title: "SimpleX for private Internet messaging",
+    text:
+      "SimpleX can remain an excellent private messenger whenever users can reach its relay network. RelayHub does not need to replace it.",
+  },
+  {
+    title: "RelayHub for independent paths",
+    text:
+      "RelayHub addresses the separate problem of communications infrastructure that can continue across local or radio paths when Internet relay access is unavailable.",
+  },
+  {
+    title: "Self-hosting is not the same architecture",
+    text:
+      "Running your own SimpleX relay improves infrastructure control, but it still remains part of the SimpleX relay model rather than becoming a Reticulum transport network.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Global identifiers are optional",
+    text:
+      "SimpleX demonstrates that useful messaging does not inherently require every user to carry one globally addressable identity.",
+  },
+  {
+    title: "Metadata should be minimised structurally",
+    text:
+      "Privacy should not depend only on policy promises. Architecture can reduce what infrastructure is technically able to learn.",
+  },
+  {
+    title: "Local data ownership matters",
+    text:
+      "Keeping profiles, contacts and message history primarily on user devices reinforces RelayHub's own local-first approach.",
+  },
+  {
+    title: "Infrastructure choice improves sovereignty",
+    text:
+      "Allowing users to choose or self-host relay servers demonstrates the value of avoiding mandatory dependence on one provider.",
+  },
+];
+
+const realityChecks = [
+  "SimpleX has unusually strong metadata-minimisation goals, but no communication system should be described as universally anonymous.",
+  "No global user identifiers does not prevent users from revealing their identity through conversation content, behaviour or external channels.",
+  "SimpleX relay infrastructure still requires Internet connectivity for normal operation.",
+  "Self-hosting relay servers does not eliminate endpoint compromise, traffic analysis or physical seizure risk.",
+  "RelayHub's alternative transport options do not automatically make it more private than SimpleX.",
+  "RelayHub and Reticulum must be evaluated against their own implementation, threat model and validation evidence.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs SimpleX"
+  description="Compare RelayHub and SimpleX: identifier-minimising private messaging over decentralised relays versus transport-diverse local-first household and community communications infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs SimpleX</p>
+
+      <h1 class="rh-title">
+        SimpleX removes the global user ID. RelayHub removes dependence on one transport.
+      </h1>
+
+      <p class="rh-subtitle">
+        SimpleX takes an unusually strong approach to messaging privacy by avoiding
+        global user identifiers and minimising what relay infrastructure can learn.
+        RelayHub tackles a different layer: communications infrastructure that can
+        move across local, radio, IP and other validated Reticulum transports.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What SimpleX is</p>
+
+      <h2 class="rh-section-title">
+        Private messaging without global user identifiers.
+      </h2>
+
+      <p class="rh-section-lead">
+        SimpleX uses anonymous message queues rather than assigning each user a
+        globally routable account identifier. Profiles, contacts and message
+        history remain primarily on user devices.
+      </p>
+
+      <p class="rh-section-lead">
+        End-to-end encrypted messages move through configurable relay servers,
+        which temporarily hold messages when recipients are offline.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where SimpleX is strong</p>
+
+      <h2 class="rh-section-title">
+        Its privacy model starts with reducing what the network can identify.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        Private relay network versus transport-diverse communications infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        SimpleX redesigns the messaging network to minimise user identification
+        and metadata exposure. RelayHub instead aims to provide persistent local
+        communications infrastructure across very different underlying transports.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">SimpleX client</h3>
+          <p class="rh-card-text">
+            Stores local user state and manages private contacts, queues,
+            messages and application features.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">SimpleX relay</h3>
+          <p class="rh-card-text">
+            Passes encrypted messages using anonymous queues without maintaining
+            ordinary user accounts or contact graphs.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayHub</h3>
+          <p class="rh-card-text">
+            Provides locally operated radio, household and infrastructure nodes
+            intended to communicate across whichever validated Reticulum paths
+            are available.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Similar sovereignty goals, different network boundaries.
+      </h2>
+
+      <ComparisonTable
+        leftHeading="SimpleX"
+        rows={comparisonRows}
+      />
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        SimpleX may already solve the private-messaging problem.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose SimpleX when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseSimpleX.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Yes. They solve different layers of sovereignty.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn from SimpleX</p>
+
+      <h2 class="rh-section-title">
+        Privacy improves when infrastructure knows less by design.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Metadata minimisation is powerful, not magical.
+      </h2>
+
+      <p class="rh-section-lead">
+        SimpleX makes unusually strong architectural choices around identifiers
+        and relay knowledge, but privacy still depends on endpoints, user behaviour,
+        network conditions and the applicable threat model.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        SimpleX capabilities are sourced from current SimpleX documentation.
+      </h2>
+
+      <p class="rh-section-lead">
+        SimpleX documents messaging without global user identifiers, pairwise
+        anonymous queue addresses, local device storage, temporary encrypted relay
+        storage, configurable relay selection and self-hosted SMP servers.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">SimpleX messaging</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://simplex.chat/messaging/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              SimpleX — Messaging architecture
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Privacy model</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://simplex.chat/privacy/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              SimpleX — Privacy policy and architecture
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Self-hosted relay</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://simplex.chat/docs/server.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              SimpleX — Hosting an SMP server
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>19 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/session">
+          Compare Session
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/signal">
+          Compare Signal
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,498 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
+
+const strengths = [
+  {
+    title: "Open Matrix foundation",
+    text:
+      "Element is built on Matrix, an open standard for decentralised real-time communication rather than a proprietary single-provider messaging protocol.",
+  },
+  {
+    title: "Self-hosted infrastructure",
+    text:
+      "Organisations can operate their own Matrix and Element infrastructure, retaining greater control over data, administration and deployment.",
+  },
+  {
+    title: "Federation",
+    text:
+      "Independent Matrix homeservers can communicate through federation, allowing organisations to retain their own infrastructure while participating in wider communication environments.",
+  },
+  {
+    title: "End-to-end encryption",
+    text:
+      "Element supports end-to-end encrypted conversations so participating devices, rather than intermediate servers, hold the information required to decrypt protected message content.",
+  },
+  {
+    title: "Air-gapped deployments",
+    text:
+      "Element provides commercial deployment options for networks intentionally isolated from the public internet.",
+  },
+  {
+    title: "Serious organisational tooling",
+    text:
+      "Element supports messaging, rooms, voice and video, administration, device verification, access controls and collaboration features intended for substantial organisational deployments.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary architecture",
+    element:
+      "A Matrix client and communications platform built around clients, homeservers and optional federation between independently operated servers.",
+    relayhub:
+      "An ecosystem of persistent radio, household and infrastructure nodes using Reticulum across heterogeneous communications transports.",
+  },
+  {
+    area: "Primary purpose",
+    element:
+      "Secure real-time messaging, collaboration, calling and organisational communication using Matrix.",
+    relayhub:
+      "Local-first communications infrastructure intended to support communication and broader community services under changing connectivity conditions.",
+  },
+  {
+    area: "Network substrate",
+    element:
+      "Matrix clients synchronise through homeservers, while federated homeservers exchange room events using Matrix server-to-server protocols.",
+    relayhub:
+      "Reticulum provides the communications substrate and can operate across separately validated physical and network transports.",
+  },
+  {
+    area: "Infrastructure ownership",
+    element:
+      "Can use public, managed, private, self-hosted or commercially supported organisational Matrix infrastructure.",
+    relayhub:
+      "Household and community ownership of persistent communications nodes is a foundational product principle.",
+  },
+  {
+    area: "Federation",
+    element:
+      "Independent Matrix homeservers can federate and replicate room state between participating servers.",
+    relayhub:
+      "Reticulum routes communication across paths and transports rather than depending on a federated application-server model.",
+  },
+  {
+    area: "Offline and isolated deployment",
+    element:
+      "Element offers air-gapped deployments that can operate within isolated private networks when the required local server infrastructure is present.",
+    relayhub:
+      "Local-only, offline, radio-assisted and degraded operation are intended to be ordinary modes across independently operated nodes and transports.",
+  },
+  {
+    area: "Low-bandwidth and unusual links",
+    element:
+      "Element offers deployment options intended for low-bandwidth, satellite and mesh-connected environments, particularly in specialist organisational deployments.",
+    relayhub:
+      "Transport heterogeneity is part of the Reticulum networking model itself, with individual interfaces activated according to hardware, policy, legal and runtime conditions.",
+  },
+  {
+    area: "Store and synchronise",
+    element:
+      "Homeservers persist communication history and synchronise room events between clients and federated servers.",
+    relayhub:
+      "DTN and store-and-forward operation are explicit infrastructure concerns intended for intermittent paths and nodes that may be unavailable for extended periods.",
+  },
+  {
+    area: "Hardware model",
+    element:
+      "Primarily defines software clients and server infrastructure rather than a hierarchy of dedicated communications appliance classes.",
+    relayhub:
+      "Explicitly distinguishes Radio Micro, Nano Linux, Home, Strong Home, Infrastructure and Mini PC node classes with different capability ceilings.",
+  },
+  {
+    area: "Recovery model",
+    element:
+      "Recovery depends on the deployed Element, Matrix, server, identity, encryption-key and operational architecture.",
+    relayhub:
+      "Recovery includes rollback, identity preservation, degraded boot, offline recovery, guided reset and ownership transfer as formal product requirements.",
+  },
+  {
+    area: "Service scope",
+    element:
+      "A sophisticated communications and collaboration platform built around the Matrix ecosystem.",
+    relayhub:
+      "Infrastructure intended eventually to support communication plus broader local community services, subject to implementation and validation.",
+  },
+];
+
+const comparisonRows = differences.map((item) => ({
+  area: item.area,
+  left: item.element,
+  right: item.relayhub,
+}));
+
+const chooseElement = [
+  "You need mature secure messaging and collaboration for an organisation or community.",
+  "You want an open protocol rather than dependence on one proprietary messaging network.",
+  "You want to operate your own communications servers.",
+  "Federation between independently managed organisations is important.",
+  "You require mature rooms, collaboration, administration, voice or video capabilities.",
+  "A server-based Matrix architecture fits your connectivity environment.",
+];
+
+const chooseRelayHub = [
+  "Your communication paths may be intermittent, extremely constrained or unavailable for long periods.",
+  "You want radio and non-IP transport classes to participate directly in the networking architecture.",
+  "You need household and field appliances rather than primarily server and client software.",
+  "You need DTN and store-and-forward operation designed around disruption rather than conventional server synchronisation.",
+  "You require capabilities to activate according to hardware, policy, trust, legal state, user enablement and runtime availability.",
+  "You want infrastructure intended eventually to support services beyond communications and collaboration.",
+];
+
+const coexistence = [
+  {
+    title: "Element for collaboration",
+    text:
+      "Element may be the better application when users need mature rooms, organisational collaboration, federation, voice, video and Matrix interoperability.",
+  },
+  {
+    title: "RelayHub for underlying resilience",
+    text:
+      "RelayHub addresses a lower infrastructure layer where communication may need to cross radio, local IP or other heterogeneous paths under intermittent conditions.",
+  },
+  {
+    title: "Integration requires proof",
+    text:
+      "Running Matrix or Element services on stronger RelayHub hardware may be technically conceivable, but it should not be advertised as supported until resource use, networking, security, recovery and degraded behaviour are validated.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Open protocols enable ecosystems",
+    text:
+      "Matrix demonstrates the strategic value of interoperability and avoiding dependence on one client, one server implementation or one service provider.",
+  },
+  {
+    title: "Self-hosting can still be usable",
+    text:
+      "Element shows that sovereign infrastructure does not have to imply crude or administrator-only user experiences.",
+  },
+  {
+    title: "Federation is powerful",
+    text:
+      "Independent organisations can retain control of their own infrastructure while still communicating across organisational boundaries.",
+  },
+  {
+    title: "Offline does not always mean peer-to-peer",
+    text:
+      "Element's air-gapped deployments show that isolated communications environments can still use substantial local server infrastructure when that model suits the deployment.",
+  },
+];
+
+const realityChecks = [
+  "Element is significantly closer to sovereign communications infrastructure than a conventional centralised messenger.",
+  "Self-hosting does not remove the need to secure, update, monitor, back up and recover the deployed server infrastructure.",
+  "Matrix federation is not the same architecture as Reticulum routing across heterogeneous transports.",
+  "Air-gapped Element operation still requires the required Matrix and Element infrastructure to exist inside the isolated environment.",
+  "Support for satellite or mesh-connected environments does not mean arbitrary radio hardware automatically becomes a native Matrix transport.",
+  "RelayHub should not claim superiority over Element simply because it operates at a different networking layer.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Element"
+  description="Compare RelayHub and Element: self-hostable federated Matrix communications versus transport-diverse local-first household and community infrastructure built around Reticulum."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Element</p>
+
+      <h1 class="rh-title">
+        Element decentralises the servers. RelayHub decentralises the paths.
+      </h1>
+
+      <p class="rh-subtitle">
+        Element and Matrix already provide serious sovereign communications
+        infrastructure through open protocols, self-hosting and federation.
+        RelayHub approaches resilience from another layer: persistent local nodes
+        communicating across heterogeneous Reticulum transports.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What Element is</p>
+
+      <h2 class="rh-section-title">
+        Sovereign communications built on an open federated protocol.
+      </h2>
+
+      <p class="rh-section-lead">
+        Element is a secure messaging and collaboration platform built on Matrix.
+        Matrix clients communicate through homeservers, and independently managed
+        homeservers can federate with one another.
+      </p>
+
+      <p class="rh-section-lead">
+        This means Element can be deployed very differently from a conventional
+        centralised messenger: organisations can operate their own infrastructure,
+        isolate it from the public internet or federate it with other trusted
+        environments.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Element is strong</p>
+
+      <h2 class="rh-section-title">
+        This is already serious sovereign communications infrastructure.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        Federated homeservers and heterogeneous transport networks solve different problems.
+      </h2>
+
+      <p class="rh-section-lead">
+        Matrix decentralises communication across independently operated servers.
+        Reticulum decentralises networking across available paths and transport
+        media. Both can support sovereign deployments, but their fundamental
+        networking models are different.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Element client</h3>
+          <p class="rh-card-text">
+            Provides messaging, rooms, collaboration, calling and user-facing
+            Matrix communication.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Matrix homeserver</h3>
+          <p class="rh-card-text">
+            Stores account and room state, synchronises clients and can federate
+            with other homeservers.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayHub node</h3>
+          <p class="rh-card-text">
+            Participates in a Reticulum environment using whatever validated
+            local, IP, radio or other transports its capabilities and policies permit.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Both pursue sovereignty, but at different layers.
+      </h2>
+
+      <ComparisonTable
+        leftHeading="Element / Matrix"
+        rows={comparisonRows}
+      />
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Element may already be the better collaboration platform.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose Element when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseElement.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Very plausibly — but integration must be earned.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn from Element</p>
+
+      <h2 class="rh-section-title">
+        Sovereignty and interoperability can reinforce each other.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Element is not simply another cloud messenger.
+      </h2>
+
+      <p class="rh-section-lead">
+        Matrix and Element already support substantial decentralisation,
+        self-hosting and isolated deployments. RelayHub should distinguish itself
+        on actual architectural boundaries rather than understating what Matrix
+        can already do.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Element and Matrix capabilities are sourced from their current documentation.
+      </h2>
+
+      <p class="rh-section-lead">
+        Current documentation describes Element as a Matrix-based secure
+        communications platform supporting end-to-end encryption, federation,
+        self-hosting and air-gapped deployments. Matrix defines a decentralised
+        architecture in which clients synchronise through homeservers and
+        homeservers can exchange room events through federation.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Element features</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://element.io/features"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Element — Features
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Air-gapped deployments</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://element.io/air-gapped"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Element — Air-gapped communications
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Matrix architecture</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://spec.matrix.org/latest/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Matrix Specification
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>19 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/simplex">
+          Compare SimpleX
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/session">
+          Compare Session
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
