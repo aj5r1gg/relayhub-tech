@@ -5,15 +5,12 @@
 import { jsonResponse } from "../../../shared.js";
 
 import {
-  buildCdasUploadRouteStatus,
-  buildNoSideEffects,
   buildSideEffectsConfirmed,
   cdasUploadsDisabledResponse,
   cleanText,
   envEnabled,
   fail,
   getAdminActor,
-  getUploadRouteMode,
   getUploadRouteSwitches,
   methodNotAllowed,
   nowIso,

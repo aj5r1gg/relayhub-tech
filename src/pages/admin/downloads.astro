@@ -496,15 +496,6 @@ import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
       return (failures / requests) * 100;
     };
 
-    const getSuccessRate = (summary) => {
-      const requests = Number(summary.requests || 0);
-      const downloads = Number(summary.downloads || 0);
-
-      if (!requests) return 0;
-
-      return (downloads / requests) * 100;
-    };
-
     const buildAlerts = (data, documents, registryRecords) => {
       const summary = data.summary || {};
       const alerts = [];
@@ -633,7 +624,6 @@ import AdminTokenPanel from "../../components/AdminTokenPanel.astro";
         ? filenameOnly(documents[0].document)
         : "None yet";
 
-      const successRate = getSuccessRate(summary);
       const failureRate = getFailureRate(summary);
 
       output.innerHTML = `

@@ -10,14 +10,6 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function cleanText(value) {
-  return String(value ?? "").trim();
-}
-
-function isObject(value) {
-  return Boolean(value && typeof value === "object" && !Array.isArray(value));
-}
-
 function randomHex(bytes = 8) {
   const buffer = new Uint8Array(bytes);
   crypto.getRandomValues(buffer);

@@ -131,7 +131,6 @@ async function recordReissueDownloadEvent({
   const ipHash = ip ? await sha256HexFromText(ip) : null;
   const licence = eligibility.licence || {};
   const document = eligibility.document || {};
-  const generatedPdf = eligibility.generated_pdf_object || {};
   const termsVersion =
     cleanText(licence.licence_terms_version) ||
     cleanText(oldLink?.licence_terms_version) ||

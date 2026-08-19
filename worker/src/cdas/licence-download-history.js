@@ -20,10 +20,6 @@ function safeJsonParse(value, fallback = null) {
   }
 }
 
-function bool(value) {
-  return Boolean(value);
-}
-
 async function getLicence(env, licenceIdOrNumber) {
   const ref = cleanText(licenceIdOrNumber);
 

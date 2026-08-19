@@ -105,7 +105,7 @@ function classifyOperationsStatus({ health, email, workflow, integrity, queryFai
   return "healthy";
 }
 
-export async function handleCdasOperationsJson(request, env) {
+export async function handleCdasOperationsJson(_request, env) {
   const db = getDb(env);
 
   if (!db) {

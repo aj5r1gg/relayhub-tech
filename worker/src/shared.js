@@ -67,7 +67,7 @@ export async function hashText(value) {
     .join("");
 }
 
-export function redirect(url, path) {
+export function redirect(_url, path) {
   return new Response(null, {
     status: 303,
     headers: {

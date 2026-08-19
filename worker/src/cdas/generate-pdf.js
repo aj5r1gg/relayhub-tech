@@ -507,37 +507,6 @@ function addIssuedLicenceAppendix(pdfDoc, fonts, licence) {
   return true;
 }
 
-async function loadSourcePdf(env, licence, document) {
-  const sourceKey = normaliseR2Key(
-    licence.source_object || document?.source_object || ""
-  );
-
-  if (!sourceKey) {
-    throw new Error("missing_source_object_key");
-  }
-
-  const object = await env.RELAYHUB_DOWNLOADS.get(sourceKey);
-
-  if (!object) {
-    throw new Error(`source_pdf_not_found:${sourceKey}`);
-  }
-
-  const bytes = new Uint8Array(await object.arrayBuffer());
-  const actualSha256 = await sha256HexFromBytes(bytes);
-  const expectedSha256 = cleanText(licence.source_sha256 || document?.source_sha256);
-
-  if (expectedSha256 && actualSha256 !== expectedSha256) {
-    throw new Error("source_pdf_sha256_mismatch");
-  }
-
-  return {
-    sourceKey,
-    bytes,
-    actualSha256,
-    contentType: object.httpMetadata?.contentType || "application/pdf",
-  };
-}
-
 async function createGeneratedPdfBytes({
   sourceBytes,
   licence,

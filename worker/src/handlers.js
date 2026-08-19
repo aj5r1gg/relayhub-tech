@@ -10,7 +10,6 @@ import {
   DOWNLOAD_ALLOWED_EXTENSIONS,
   DIRECT_DOWNLOAD_BLOCKED_PREFIXES,
   DOCUMENT_CATALOGUE_KEY,
-  DOWNLOAD_AUDIT_PREFIX,
   CDAS_VERIFICATION_TTL_SECONDS,
   CDAS_DOWNLOAD_TTL_SECONDS,
   CDAS_GENERATED_PREFIX,
@@ -440,7 +439,7 @@ async function handleCdasRequestAccess(request, env, url) {
   }
 }
 
-async function handleCdasVerify(request, env, url) {
+async function handleCdasVerify(_request, env, url) {
   try {
     const requestId = cleanField(url.searchParams.get("requestId"), 120);
     const token = cleanField(url.searchParams.get("token"), 500);
@@ -732,7 +731,7 @@ async function handleCdasDownload(request, env, url) {
   }
 }
 
-async function handleCdasLicenceVerify(request, env, url) {
+async function handleCdasLicenceVerify(_request, env, url) {
   try {
     const licenceNumber = cleanField(url.searchParams.get("licenceNumber") || url.searchParams.get("licence"), 120);
 
@@ -1032,7 +1031,7 @@ async function handleCdasAdminDownloads(request, env, url) {
   return jsonResponse({ ok: true, downloads: rows.results || [] });
 }
 
-async function handleCdasAdminLicenceTerms(request, env, url) {
+async function handleCdasAdminLicenceTerms(request, env, _url) {
   const auth = requireAdmin(request, env);
   if (auth) return auth;
 
@@ -1064,7 +1063,7 @@ async function handleCdasAdminAudit(request, env, url) {
   return jsonResponse({ ok: true, auditEvents: rows.results || [] });
 }
 
-async function issueCdasLicenceAndDownloadLink(env, accessRequest, document) {
+async function issueCdasLicenceAndDownloadLink(env, accessRequest, _document) {
   const issuedAt = new Date().toISOString();
   const licenceNumber = await nextCdasLicenceNumber(env);
   const licenceId = randomId("lic");
@@ -1743,7 +1742,6 @@ async function handleDownload(request, env, url) {
 }
 
 async function handleFreeDownloadPost(request, env, url) {
-  const started = Date.now();
   const body = await readFormOrJson(request);
 
   if (!body.ok) {
