@@ -3,56 +3,138 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
+const SITE_NAME = "RelayHub";
+const DEFAULT_SITE =
+  "https://www.relayhub.tech";
+
+const ORGANIZATION_ID =
+  `${DEFAULT_SITE}/#organization`;
+
+const WEBSITE_ID =
+  `${DEFAULT_SITE}/#website`;
+
+const ORGANIZATION_LOGO =
+  `${DEFAULT_SITE}/android-chrome-512x512.png`;
+
+const DEFAULT_IMAGE =
+  `${DEFAULT_SITE}/og-image.svg`;
+
 const {
   title = "RelayHub",
-  description = "Local-first infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity.",
-  image = "https://www.relayhub.tech/og-image.svg",
+  description =
+    "Local-first infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity.",
+  image = DEFAULT_IMAGE,
   noindex = false,
+  canonicalPath = Astro.url.pathname,
+  pageType = "website",
+  publishedTime = null,
+  modifiedTime = null,
 } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, "https://www.relayhub.tech").toString();
+const site =
+  Astro.site || new URL(DEFAULT_SITE);
 
-const pageTitle = title.includes("RelayHub")
-  ? title
-  : `${title} | RelayHub`;
+const canonical =
+  new URL(canonicalPath, site).toString();
+
+const resolvedImage =
+  new URL(image, site).toString();
+
+const pageTitle =
+  title.includes("RelayHub")
+    ? title
+    : `${title} | RelayHub`;
+
+const pathname =
+  Astro.url.pathname;
+
+const automaticallyNoindex =
+  pathname.startsWith("/admin/") ||
+  pathname === "/access/" ||
+  pathname.startsWith("/document-access/") ||
+  pathname.startsWith("/document-download/") ||
+  pathname === "/download-requested/";
+
+const effectiveNoindex =
+  Boolean(noindex || automaticallyNoindex);
+
+const robotsContent =
+  effectiveNoindex
+    ? "noindex,nofollow"
+    : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
+
+const ogType =
+  pageType === "article"
+    ? "article"
+    : "website";
+
+const webPageType =
+  pageType === "article"
+    ? "Article"
+    : "WebPage";
+
+const structuredDataGraph = [
+  {
+    "@type": "Organization",
+    "@id": ORGANIZATION_ID,
+    name: SITE_NAME,
+    url: `${DEFAULT_SITE}/`,
+    logo: {
+      "@type": "ImageObject",
+      url: ORGANIZATION_LOGO,
+    },
+    description:
+      "RelayHub provides local-first infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity.",
+    email: "hello@relayhub.tech",
+  },
+  {
+    "@type": "WebSite",
+    "@id": WEBSITE_ID,
+    url: `${DEFAULT_SITE}/`,
+    name: SITE_NAME,
+    description:
+      "Local-first infrastructure for resilient communities.",
+    publisher: {
+      "@id": ORGANIZATION_ID,
+    },
+  },
+  {
+    "@type": webPageType,
+    "@id": `${canonical}#webpage`,
+    url: canonical,
+    name: pageTitle,
+    headline:
+      pageType === "article"
+        ? pageTitle
+        : undefined,
+    description,
+    image: resolvedImage,
+    isPartOf: {
+      "@id": WEBSITE_ID,
+    },
+    about: {
+      "@id": ORGANIZATION_ID,
+    },
+    publisher:
+      pageType === "article"
+        ? {
+            "@id": ORGANIZATION_ID,
+          }
+        : undefined,
+    datePublished:
+      pageType === "article"
+        ? publishedTime
+        : undefined,
+    dateModified:
+      pageType === "article"
+        ? modifiedTime || publishedTime
+        : undefined,
+  },
+];
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://www.relayhub.tech/#organization",
-      name: "RelayHub",
-      url: "https://www.relayhub.tech/",
-      logo: image,
-      description:
-        "RelayHub provides local-first infrastructure for communication, trust, knowledge, trade, coordination, governance, and cultural continuity.",
-      email: "hello@relayhub.tech",
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://www.relayhub.tech/#website",
-      url: "https://www.relayhub.tech/",
-      name: "RelayHub",
-      description: "Local-first infrastructure for resilient communities.",
-      publisher: {
-        "@id": "https://www.relayhub.tech/#organization",
-      },
-    },
-    {
-      "@type": "WebPage",
-      "@id": `${canonical}#webpage`,
-      url: canonical,
-      name: pageTitle,
-      description,
-      isPartOf: {
-        "@id": "https://www.relayhub.tech/#website",
-      },
-      about: {
-        "@id": "https://www.relayhub.tech/#organization",
-      },
-    },
-  ],
+  "@graph": structuredDataGraph,
 };
 ---
 
@@ -73,27 +155,31 @@ const structuredData = {
       content={description}
     />
 
+    <meta
+      name="robots"
+      content={robotsContent}
+    />
+
     <link
       rel="canonical"
       href={canonical}
     />
 
-    {
-      noindex && (
-        <meta
-          name="robots"
-          content="noindex,nofollow"
-        />
-      )
-    }
+    <link
+      rel="sitemap"
+      href="/sitemap-index.xml"
+    />
 
-    <!-- OpenGraph -->
+    <!-- Open Graph -->
 
-    <meta property="og:type" content="website" />
+    <meta
+      property="og:type"
+      content={ogType}
+    />
 
     <meta
       property="og:site_name"
-      content="RelayHub"
+      content={SITE_NAME}
     />
 
     <meta
@@ -113,10 +199,30 @@ const structuredData = {
 
     <meta
       property="og:image"
-      content={image}
+      content={resolvedImage}
     />
 
-    <!-- Twitter -->
+    {
+      pageType === "article" &&
+      publishedTime && (
+        <meta
+          property="article:published_time"
+          content={publishedTime}
+        />
+      )
+    }
+
+    {
+      pageType === "article" &&
+      (modifiedTime || publishedTime) && (
+        <meta
+          property="article:modified_time"
+          content={modifiedTime || publishedTime}
+        />
+      )
+    }
+
+    <!-- Social cards -->
 
     <meta
       name="twitter:card"
@@ -135,7 +241,7 @@ const structuredData = {
 
     <meta
       name="twitter:image"
-      content={image}
+      content={resolvedImage}
     />
 
     <!-- Structured data -->
@@ -158,26 +264,80 @@ const structuredData = {
     />
 
     <!-- Cloudflare Web Analytics -->
+
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
       data-cf-beacon='{"token":"902ca9303a2f43a89b7cb493e3c570ce"}'
     ></script>
-    <!-- End Cloudflare Web Analytics -->
+
+    <!-- Cloudflare Turnstile -->
+
     <script
       src="https://challenges.cloudflare.com/turnstile/v0/api.js"
       async
       defer
     ></script>
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Icons -->
+
+    <link
+      rel="icon"
+      href="/favicon.ico"
+      sizes="any"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon-16.png"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon-32.png"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href="/favicon-48.png"
+    />
+
+    <link
+      rel="icon"
+      href="/favicon.svg"
+      type="image/svg+xml"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/android-chrome-192x192.png"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/android-chrome-512x512.png"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-touch-icon.png"
+    />
+
+    <link
+      rel="manifest"
+      href="/site.webmanifest"
+    />
   </head>
 
   <body>
