@@ -116,6 +116,26 @@ const comparisons: ComparisonItem[] = [
     href: "/compare/satellite",
   },
   {
+    name: "Signal",
+    category: "Private internet messaging",
+    family: "applications",
+    description:
+      "A mature end-to-end encrypted messaging and calling application designed to make private communication straightforward for ordinary users.",
+    distinction:
+      "Signal provides excellent private communication over conventional internet connectivity. RelayHub addresses the underlying infrastructure problem, including local, radio-assisted and other validated paths when internet-dependent applications cannot reach their normal services.",
+    href: "/compare/signal",
+  },
+  {
+    name: "Session",
+    category: "Decentralised private messaging",
+    family: "applications",
+    description:
+      "A decentralised encrypted messenger using cryptographic Account IDs, onion-routed messaging and distributed message storage across the Session Network.",
+    distinction:
+      "Session decentralises messaging infrastructure across its own network. RelayHub instead aims to provide locally operated communications infrastructure across heterogeneous Reticulum transports.",
+    href: "/compare/session",
+  },
+  {
     name: "Briar",
     category: "Peer-to-peer messaging",
     family: "applications",
@@ -167,7 +187,7 @@ const families: ComparisonFamilyDefinition[] = [
     kicker: "Applications & internet platforms",
     title: "Software services and conventional online platforms",
     description:
-      "These comparisons separate the application experience from the infrastructure underneath it, including decentralised messaging and the centralised internet services people already use every day.",
+      "These comparisons separate applications from the infrastructure underneath them, including private internet messaging, decentralised messaging, peer-to-peer communication and the conventional online platforms people already use every day.",
     grid: "rh-grid-2",
   },
 ];
@@ -201,7 +221,7 @@ const getFamilyComparisons = (family: ComparisonFamily) =>
 
 <BaseLayout
   title="Compare RelayHub"
-  description="Compare RelayHub with Meshtastic, MeshCore, LoRaWAN, amateur radio, Reticulum, Sideband, Nomad Network, cellular push-to-talk, satellite communicators, Briar, and conventional internet platforms."
+  description="Compare RelayHub with Meshtastic, MeshCore, LoRaWAN, amateur radio, Reticulum, Sideband, Nomad Network, cellular push-to-talk, satellite communicators, Signal, Session, Briar, and conventional internet platforms."
 >
   <section class="rh-hero">
     <div class="rh-container rh-hero-inner">
@@ -407,6 +427,9 @@ const getFamilyComparisons = (family: ComparisonFamily) =>
         Satellite may be right beyond terrestrial coverage. Cellular push-to-talk
         may be ideal while carrier infrastructure is available. Sideband or Nomad
         Network may already solve the communication needs of Reticulum users.
+        Signal may be ideal for mature private internet messaging, while Session
+        offers a decentralised messaging architecture without phone-number
+        registration.
       </p>
 
       <p class="rh-section-lead">

@@ -1,0 +1,496 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
+
+const strengths = [
+  {
+    title: "No phone number or email required",
+    text:
+      "Session accounts are based on locally generated cryptographic identity rather than requiring a mobile number or email address for account creation.",
+  },
+  {
+    title: "Onion-routed messaging",
+    text:
+      "Session routes messaging requests through multiple nodes so the node storing or receiving a message does not also learn the sender's originating IP address.",
+  },
+  {
+    title: "Decentralised message storage",
+    text:
+      "Messages are replicated across groups of Session Nodes called swarms so delivery does not depend on one central messaging server.",
+  },
+  {
+    title: "Pseudonymous account identity",
+    text:
+      "Session Account IDs are derived from cryptographic keys and do not inherently require linkage to a real-world identity.",
+  },
+  {
+    title: "Cross-platform application",
+    text:
+      "Session provides applications across Android, iOS, Windows, macOS and Linux.",
+  },
+  {
+    title: "Modern messaging features",
+    text:
+      "Session provides encrypted messaging, groups, attachments, disappearing messages, reactions, voice messages and optional voice and video calling.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary architecture",
+    session:
+      "A decentralised encrypted messaging system using the Session Network for message routing, storage and delivery.",
+    relayhub:
+      "An ecosystem of persistent radio, household and infrastructure nodes using Reticulum across heterogeneous communications transports.",
+  },
+  {
+    area: "Primary purpose",
+    session:
+      "Private messaging and related communication with strong emphasis on metadata minimisation and pseudonymous identity.",
+    relayhub:
+      "Local-first communications infrastructure intended to support communication and broader community services.",
+  },
+  {
+    area: "Identity",
+    session:
+      "Uses cryptographic Account IDs generated without requiring a phone number or email address.",
+    relayhub:
+      "Uses Reticulum and RelayHub identities governed through node ownership, trust, recovery and product lifecycle controls.",
+  },
+  {
+    area: "Message routing",
+    session:
+      "Uses onion requests through the Session Network before messages reach the recipient's Session Node swarm.",
+    relayhub:
+      "Uses Reticulum routing across whatever transports and paths are actually available and permitted.",
+  },
+  {
+    area: "Message storage",
+    session:
+      "Messages are stored redundantly by Session Nodes within the recipient's swarm for later retrieval.",
+    relayhub:
+      "DTN and store-and-forward behaviour are intended to operate across persistent local and infrastructure nodes according to policy and capability.",
+  },
+  {
+    area: "Internet dependency",
+    session:
+      "Normal Session messaging requires connectivity to the Session Network over IP networking.",
+    relayhub:
+      "Internet connectivity may be one available path but is not intended to be mandatory for supported local or radio-assisted operation.",
+  },
+  {
+    area: "Transport diversity",
+    session:
+      "The Session application communicates with the Session Network over internet connectivity rather than treating arbitrary physical communications media as interchangeable transports.",
+    relayhub:
+      "Reticulum can operate across multiple separately validated media such as local IP, Ethernet, Wi-Fi, serial and radio transports.",
+  },
+  {
+    area: "Voice and video calls",
+    session:
+      "Current voice and video calls are optional beta features using end-to-end encrypted peer-to-peer WebRTC rather than Session's onion-routed messaging path.",
+    relayhub:
+      "Voice or video capabilities must be separately implemented, supported by the relevant hardware and transport, permitted by policy and validated before being advertised.",
+  },
+  {
+    area: "Persistent infrastructure",
+    session:
+      "Depends on the distributed Session Node network for onion routing, message storage and delivery.",
+    relayhub:
+      "Households and communities are intended to own and operate persistent nodes themselves.",
+  },
+  {
+    area: "Recovery model",
+    session:
+      "Account and device recovery follow Session's cryptographic account and device-management model.",
+    relayhub:
+      "Recovery includes operating-system rollback, identity preservation, degraded boot, offline recovery, guided reset and ownership transfer.",
+  },
+  {
+    area: "Service scope",
+    session:
+      "Primarily a private communications application and supporting decentralised network.",
+    relayhub:
+      "Infrastructure intended eventually to support communication plus wider local community services, subject to implementation and validation.",
+  },
+];
+
+const comparisonRows = differences.map((item) => ({
+  area: item.area,
+  left: item.session,
+  right: item.relayhub,
+}));
+
+const chooseSession = [
+  "Your primary requirement is private internet messaging.",
+  "You do not want account creation tied to a phone number or email address.",
+  "You value onion-routed messaging and decentralised message storage.",
+  "You want an established cross-platform application rather than deploying household infrastructure.",
+  "Connectivity to the Session Network is available and acceptable for your use case.",
+  "Session already solves your privacy and messaging requirements.",
+];
+
+const chooseRelayHub = [
+  "Communication must remain possible when normal internet connectivity is unavailable.",
+  "You need local, radio-assisted or other non-internet communications paths.",
+  "You want persistent household or community infrastructure under local ownership.",
+  "You need heterogeneous hardware classes with explicit capability ceilings.",
+  "You require transport, role and service activation to be governed by policy, legal state, trust, user enablement and runtime availability.",
+  "You want infrastructure intended to support broader local services beyond private messaging.",
+];
+
+const coexistence = [
+  {
+    title: "Session for private internet messaging",
+    text:
+      "Session can remain a useful private messenger whenever users can reach the Session Network. RelayHub does not need to replace an application that already solves that problem well.",
+  },
+  {
+    title: "RelayHub for independent connectivity",
+    text:
+      "RelayHub addresses the different problem of communications paths that may remain useful without access to the Session Network or ordinary internet infrastructure.",
+  },
+  {
+    title: "Different decentralisation models",
+    text:
+      "Session decentralises its application infrastructure across Session Nodes. RelayHub instead aims to let households and communities operate their own communications infrastructure across heterogeneous transports.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Do not require unnecessary identity data",
+    text:
+      "Session demonstrates the value of allowing communication identities to exist without automatically binding them to telephone numbers or email addresses.",
+  },
+  {
+    title: "Metadata deserves architectural attention",
+    text:
+      "Protecting message content is not the whole privacy problem. Routing information, IP exposure, timing and service-side knowledge all require explicit design decisions.",
+  },
+  {
+    title: "Delayed delivery should be designed in",
+    text:
+      "Session's swarm storage model reinforces the importance of treating asynchronous retrieval and temporarily offline recipients as normal conditions.",
+  },
+  {
+    title: "State privacy trade-offs clearly",
+    text:
+      "Session explicitly documents that its current call implementation has different privacy properties from onion-routed messages. RelayHub should be equally precise whenever features have different threat boundaries.",
+  },
+];
+
+const realityChecks = [
+  "Session is decentralised, but it still depends on the Session Network for normal messaging.",
+  "Pseudonymous Account IDs do not guarantee real-world anonymity if users reveal identifying information through behaviour or other channels.",
+  "Onion routing improves particular metadata-resistance properties but does not eliminate endpoint compromise, traffic analysis or physical seizure risk.",
+  "Current Session calls do not use the same onion-routed path as messages and expose IP information to the call peer and supporting STUN/TURN infrastructure.",
+  "RelayHub's locally operated infrastructure does not automatically make it more private than Session.",
+  "Reticulum and RelayHub must be evaluated against their own threat model rather than inheriting privacy guarantees from unrelated systems.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Session"
+  description="Compare RelayHub and Session: decentralised onion-routed private messaging versus transport-diverse local-first household and community communications infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Session</p>
+
+      <h1 class="rh-title">
+        Session decentralises the messenger. RelayHub decentralises the infrastructure.
+      </h1>
+
+      <p class="rh-subtitle">
+        Session removes phone-number registration, onion-routes messages and
+        distributes message storage across its own network. RelayHub starts one
+        layer lower: locally operated communications infrastructure that can use
+        different validated transports instead of depending on one application
+        network.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What Session is</p>
+
+      <h2 class="rh-section-title">
+        Private messaging without phone-number identity or a central message server.
+      </h2>
+
+      <p class="rh-section-lead">
+        Session is an end-to-end encrypted messaging application built on the
+        decentralised Session Network. Accounts use cryptographic Account IDs
+        rather than requiring a phone number or email address.
+      </p>
+
+      <p class="rh-section-lead">
+        Messages are sent through onion requests and stored redundantly across
+        Session Node swarms. This is a substantially different architecture from
+        conventional centralised messaging services.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Session is strong</p>
+
+      <h2 class="rh-section-title">
+        It tackles both identity exposure and messaging metadata.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        Decentralised application network versus transport-diverse local infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Session replaces a central messaging backend with a distributed network
+        specialised for Session. RelayHub instead aims to operate communications
+        infrastructure across different physical and network transports.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Session client</h3>
+          <p class="rh-card-text">
+            Provides private messaging, identity, groups, attachments and
+            optional calling for Session users.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Session Network</h3>
+          <p class="rh-card-text">
+            Provides onion-request routing, distributed message storage and
+            delivery through Session Nodes and swarms.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">RelayHub</h3>
+          <p class="rh-card-text">
+            Provides locally operated radio, household and infrastructure nodes
+            intended to communicate across whichever validated Reticulum paths
+            are available.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Similar decentralisation goals, different dependency boundaries.
+      </h2>
+
+      <ComparisonTable
+        leftHeading="Session"
+        rows={comparisonRows}
+      />
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        Session may already solve the private-messaging problem.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose Session when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseSession.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Yes. Decentralisation does not need one universal architecture.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn from Session</p>
+
+      <h2 class="rh-section-title">
+        Privacy architecture must go beyond encrypting message content.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Decentralised does not mean dependency-free or anonymous by magic.
+      </h2>
+
+      <p class="rh-section-lead">
+        Session provides meaningful privacy properties, but those properties
+        differ by feature and threat model. RelayHub should apply the same
+        discipline to its own claims.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Session capabilities are sourced from current Session documentation.
+      </h2>
+
+      <p class="rh-section-lead">
+        Session documents cryptographic Account IDs without phone-number or email
+        registration, onion-routed messaging, Session Node swarms for replicated
+        message storage, cross-platform clients, and peer-to-peer beta voice and
+        video calling with different network-privacy properties from messaging.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Session Messenger</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://docs.getsession.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Session documentation
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Message routing</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://docs.getsession.org/session-network/session-protocol/onion-requests-and-message-routing"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Onion requests and message routing
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Calls and privacy</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://getsession.org/faq"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Session FAQ
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>19 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/signal">
+          Compare Signal
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/briar">
+          Compare Briar
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

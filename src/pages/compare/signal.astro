@@ -1,0 +1,465 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ComparisonTable from "../../components/ComparisonTable.astro";
+
+const strengths = [
+  {
+    title: "End-to-end encryption by default",
+    text:
+      "Signal-to-Signal messages and calls are always end-to-end encrypted rather than requiring users to enable a separate private mode.",
+  },
+  {
+    title: "Excellent everyday usability",
+    text:
+      "Signal provides familiar private messaging, voice and video calls, group conversations, media and file sharing through mainstream mobile and desktop applications.",
+  },
+  {
+    title: "Reduced service knowledge",
+    text:
+      "Signal is designed to minimise the sensitive information available to the service while keeping message content inaccessible to the service through end-to-end encryption.",
+  },
+  {
+    title: "Improved phone-number privacy",
+    text:
+      "Signal usernames allow people to initiate contact without sharing a phone number, and users can restrict whether others can discover them through their number.",
+  },
+];
+
+const differences = [
+  {
+    area: "Primary architecture",
+    signal:
+      "A private messaging and calling application using Signal's service infrastructure to connect Signal users over internet connectivity.",
+    relayhub:
+      "An ecosystem of persistent radio, household and infrastructure nodes using Reticulum as the communications substrate.",
+  },
+  {
+    area: "Primary purpose",
+    signal:
+      "Private person-to-person and group messaging, voice calls, video calls and related communication features.",
+    relayhub:
+      "Local-first communications infrastructure intended to support communication and broader community services across heterogeneous node classes.",
+  },
+  {
+    area: "Connectivity model",
+    signal:
+      "Signal-to-Signal communication uses an internet connection such as Wi-Fi or mobile data.",
+    relayhub:
+      "May operate over multiple separately validated Reticulum transports, including local IP, radio and internet-assisted paths according to capability and policy.",
+  },
+  {
+    area: "Internet outage",
+    signal:
+      "Without usable internet connectivity, normal Signal messaging and calling cannot use nearby devices as an independent local transport network.",
+    relayhub:
+      "Offline and degraded operation are explicit architectural requirements, with local and radio paths intended to remain useful where suitable transports are available.",
+  },
+  {
+    area: "Identity",
+    signal:
+      "Registration still requires a phone number. Optional usernames can then be used to initiate contact without sharing that number.",
+    relayhub:
+      "Node identity is intended to be independent of telephone numbering and governed through RelayHub's own identity, trust and ownership lifecycle.",
+  },
+  {
+    area: "Persistent infrastructure",
+    signal:
+      "Users primarily interact through Signal applications backed by Signal's communications service infrastructure.",
+    relayhub:
+      "Persistent household and community-operated nodes are foundational parts of the architecture.",
+  },
+  {
+    area: "Transport diversity",
+    signal:
+      "Uses internet connectivity beneath the application rather than exposing arbitrary communications media as application transports.",
+    relayhub:
+      "Reticulum is intended to allow different validated communications media to participate beneath the same broader networking layer.",
+  },
+  {
+    area: "Hardware classes",
+    signal:
+      "Runs as user-facing software on supported phones and linked desktop systems rather than defining dedicated communications appliance classes.",
+    relayhub:
+      "Explicitly distinguishes Radio Micro, Nano Linux, Home, Strong Home, Infrastructure and Mini PC node classes with different capability ceilings.",
+  },
+  {
+    area: "Recovery model",
+    signal:
+      "Account, device linking, transfer, backup and recovery follow Signal's application and identity lifecycle.",
+    relayhub:
+      "Recovery includes operating-system rollback, identity preservation, degraded boot, guided recovery, factory reset and ownership transfer.",
+  },
+  {
+    area: "Service scope",
+    signal:
+      "A mature communications application focused on private messaging and calling.",
+    relayhub:
+      "Infrastructure intended eventually to support communication plus broader local community services, subject to implementation and validation.",
+  },
+];
+
+const comparisonRows = differences.map((item) => ({
+  area: item.area,
+  left: item.signal,
+  right: item.relayhub,
+}));
+
+const chooseSignal = [
+  "Your users have reliable internet connectivity.",
+  "Your primary requirement is private messaging, voice calls and video calls.",
+  "You want an established application that ordinary users can install and understand immediately.",
+  "You do not need to deploy or operate independent communications infrastructure.",
+  "Signal's phone-number registration model and service dependencies are acceptable for your use case.",
+  "Signal already solves your communication problem without requiring another network.",
+];
+
+const chooseRelayHub = [
+  "Communication must remain possible when conventional internet connectivity is unavailable.",
+  "You want persistent household or community communications infrastructure.",
+  "You need radio-capable nodes or multiple communications media rather than an internet-only application path.",
+  "You need store-and-forward and disruption-tolerant behaviour across infrastructure nodes.",
+  "You require capability activation to be governed by hardware, policy, trust, legal state, user enablement and runtime conditions.",
+  "You want infrastructure intended eventually to support services beyond messaging and calling.",
+];
+
+const coexistence = [
+  {
+    title: "Use Signal when the internet works",
+    text:
+      "A RelayHub community does not need to abandon Signal. Signal can remain an excellent everyday private messenger whenever conventional internet connectivity is available.",
+  },
+  {
+    title: "Use RelayHub for independent paths",
+    text:
+      "RelayHub can address a different problem: maintaining useful local communications infrastructure when internet-dependent applications cannot reach their normal services.",
+  },
+  {
+    title: "Do not manufacture integration",
+    text:
+      "RelayHub should not claim Signal interoperability unless a specific integration exists, is permitted, has a clear security boundary and has been independently validated.",
+  },
+];
+
+const lessons = [
+  {
+    title: "Security should disappear into the experience",
+    text:
+      "Signal demonstrates that strong end-to-end encryption can be the ordinary operating mode rather than an advanced option exposed only to technical users.",
+  },
+  {
+    title: "Usability determines adoption",
+    text:
+      "A secure communications system is far more useful when ordinary people can install it, understand it and communicate without learning networking concepts.",
+  },
+  {
+    title: "Minimise retained information",
+    text:
+      "Signal's efforts to reduce the sensitive information available to its service reinforce RelayHub's minimum-exposure and data-minimisation principles.",
+  },
+  {
+    title: "Identity changes need careful UX",
+    text:
+      "Signal's phone-number privacy controls, usernames, safety numbers and contact verification demonstrate how much care is required around usable communications identity.",
+  },
+];
+
+const realityChecks = [
+  "Signal is an exceptionally capable private messenger; RelayHub should not imply otherwise merely because their architectures differ.",
+  "End-to-end encryption protects communication content between endpoints but does not make endpoint compromise, device seizure, phishing or social engineering disappear.",
+  "Signal usernames improve phone-number privacy, but a phone number is still required to register a Signal account.",
+  "Signal requires usable internet connectivity for normal Signal-to-Signal communication.",
+  "RelayHub's ability to use alternative transports does not automatically make RelayHub communications more private or secure than Signal.",
+  "Reticulum provides important networking properties, but RelayHub must separately validate its applications, node security, identity lifecycle, transports and operational controls.",
+];
+---
+
+<BaseLayout
+  title="RelayHub vs Signal"
+  description="Compare RelayHub and Signal: mature end-to-end encrypted internet messaging versus transport-diverse local-first household and community communications infrastructure."
+>
+  <section class="rh-hero">
+    <div class="rh-container rh-hero-inner">
+      <p class="rh-eyebrow">RelayHub vs Signal</p>
+
+      <h1 class="rh-title">
+        Signal protects the conversation. RelayHub is building another way to carry it.
+      </h1>
+
+      <p class="rh-subtitle">
+        Signal is one of the strongest examples of private communication made
+        usable for ordinary people. RelayHub addresses a different problem:
+        communications infrastructure that can continue across local, radio and
+        other validated paths when conventional internet connectivity is not
+        enough.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="#comparison">
+          Compare approaches
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare">
+          All comparisons
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">What Signal is</p>
+
+      <h2 class="rh-section-title">
+        Private communication made remarkably ordinary.
+      </h2>
+
+      <p class="rh-section-lead">
+        Signal is a private messaging and calling application. Signal-to-Signal
+        conversations are end-to-end encrypted by default and the application
+        provides messaging, voice and video communication through familiar
+        mobile and desktop experiences.
+      </p>
+
+      <p class="rh-section-lead">
+        Signal uses internet connectivity such as Wi-Fi or mobile data. Its
+        architecture therefore solves a different problem from RelayHub's goal
+        of maintaining useful communications across heterogeneous local,
+        internet-assisted and radio transports.
+      </p>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Where Signal is strong</p>
+
+      <h2 class="rh-section-title">
+        Privacy does not have to require technical expertise.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {strengths.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">The key distinction</p>
+
+      <h2 class="rh-section-title">
+        Secure application versus independent communications infrastructure.
+      </h2>
+
+      <p class="rh-section-lead">
+        Signal is an application people use over existing internet
+        infrastructure. RelayHub is intended to provide communications
+        infrastructure beneath applications and to make more than one transport
+        environment available.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Signal</h3>
+          <p class="rh-card-text">
+            A mature private communications application providing encrypted
+            messaging and calling over internet connectivity.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Home</h3>
+          <p class="rh-card-text">
+            A persistent household appliance intended to provide local
+            communications and service infrastructure independently of any one
+            user's phone.
+          </p>
+        </article>
+
+        <article class="rh-card rh-card-dark">
+          <h3 class="rh-card-title">Relay Infrastructure</h3>
+          <p class="rh-card-text">
+            A stronger node intended for DTN, bridge, gateway, observability and
+            community infrastructure roles where separately validated and
+            permitted.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section" id="comparison">
+    <div class="rh-container">
+      <p class="rh-kicker">Architecture comparison</p>
+
+      <h2 class="rh-section-title">
+        Both care about resilient private communication, but at different layers.
+      </h2>
+
+      <ComparisonTable
+        leftHeading="Signal"
+        rows={comparisonRows}
+      />
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">Which should I use?</p>
+
+      <h2 class="rh-section-title">
+        If Signal already solves the problem, use Signal.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Choose Signal when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseSignal.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Consider RelayHub when…</h3>
+
+          <ul class="rh-card-text" style="padding-left: var(--space-5);">
+            {chooseRelayHub.map((item) => (
+              <li style="margin-top: var(--space-3);">{item}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Can they coexist?</p>
+
+      <h2 class="rh-section-title">
+        Absolutely. They solve different layers of the problem.
+      </h2>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {coexistence.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-bg-soft">
+    <div class="rh-container">
+      <p class="rh-kicker">What RelayHub can learn from Signal</p>
+
+      <h2 class="rh-section-title">
+        The strongest security feature is the one ordinary people actually use.
+      </h2>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        {lessons.map((item) => (
+          <article class="rh-card">
+            <h3 class="rh-card-title">{item.title}</h3>
+            <p class="rh-card-text">{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section rh-dark">
+    <div class="rh-container">
+      <p class="rh-kicker">Reality check</p>
+
+      <h2 class="rh-section-title">
+        Different infrastructure does not automatically mean better security.
+      </h2>
+
+      <p class="rh-section-lead">
+        Signal has a mature security architecture and years of operational
+        experience. RelayHub should make only the privacy and security claims
+        that its own implementation and validation evidence can support.
+      </p>
+
+      <div class="rh-grid rh-grid-3" style="margin-top: var(--space-10);">
+        {realityChecks.map((item) => (
+          <article class="rh-card rh-card-dark">
+            <p class="rh-card-text">{item}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="rh-section">
+    <div class="rh-container">
+      <p class="rh-kicker">Source and review</p>
+
+      <h2 class="rh-section-title">
+        Signal capabilities are sourced from Signal itself.
+      </h2>
+
+      <p class="rh-section-lead">
+        Signal documents always-on end-to-end encryption for Signal
+        conversations, internet-based Signal-to-Signal communication,
+        phone-number registration, optional usernames and configurable
+        phone-number privacy.
+      </p>
+
+      <div class="rh-grid rh-grid-2" style="margin-top: var(--space-10);">
+        <article class="rh-card">
+          <h3 class="rh-card-title">Privacy and encryption</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://support.signal.org/hc/en-us/articles/360007320391-Is-it-private-Can-I-trust-it"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Signal — Is it private? Can I trust it?
+            </a>
+          </p>
+        </article>
+
+        <article class="rh-card">
+          <h3 class="rh-card-title">Phone-number privacy and usernames</h3>
+          <p class="rh-card-text">
+            <a
+              href="https://support.signal.org/hc/en-us/articles/6712070553754-Phone-Number-Privacy-and-Usernames"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="text-decoration: underline;"
+            >
+              Signal — Phone Number Privacy and Usernames
+            </a>
+          </p>
+        </article>
+      </div>
+
+      <p class="rh-section-lead">
+        Last substantive review: <strong>19 August 2026</strong>.
+      </p>
+
+      <div class="rh-actions">
+        <a class="rh-button rh-button-primary" href="/compare">
+          More comparisons
+        </a>
+
+        <a class="rh-button rh-button-secondary" href="/compare/briar">
+          Compare Briar
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
