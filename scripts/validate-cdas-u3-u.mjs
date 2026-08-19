@@ -1112,6 +1112,7 @@ function createControlledDisclosureReleasePolicy(
       licence_terms_id,
       licence_terms_version,
       licence_terms_status,
+      request_intake_policy_id,
 
       listed_publicly,
       request_button_enabled,
@@ -1147,6 +1148,7 @@ function createControlledDisclosureReleasePolicy(
       'lt_cdas_v0_1',
       ${sqlQuote(LICENCE_TERMS_VERSION)},
       'active',
+      'rip_cdas_standard_v1',
 
       1,
       1,
